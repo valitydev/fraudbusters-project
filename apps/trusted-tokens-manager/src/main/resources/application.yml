@@ -1,0 +1,93 @@
+server:
+  port: ${server.port}
+
+management:
+  server:
+    port: ${management.port}
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+spring:
+  application:
+    name: '@project.name@'
+  output:
+    ansi:
+      enabled: always
+  kafka:
+    bootstrap-servers: kenny-kafka1.bst1.rbkmoney.net:9092
+    client-id: trusted-tokens-manager
+    streams:
+      properties:
+        retries: 300
+        retry.backoff.ms: 1000
+        num.stream.threads: 7
+        default.api.timeout.ms: 300000
+        clean.timeout.sec: 20
+    consumer:
+      group-id: trusted-tokens-group-1
+      enable-auto-commit: false
+      auto-offset-reset: earliest
+      properties:
+        max.poll.interval.ms: 60000
+        session.timeout.ms: 60000
+        throttling.timeout.ms: 1000
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.postgresql.Driver
+    url: ${db.url}
+    username: ${db.user}
+    password: ${db.password}
+    hikari:
+      idle-timeout: 30000
+      maximum-pool-size: 30
+  flyway:
+    table: schema_version
+    schemas: ttm
+
+info:
+  version: '@project.version@'
+  stage: dev
+
+kafka:
+  topics:
+    payment:
+      id: payment_event
+      dest: filtered_payment
+      consume:
+        enabled: false
+        max-poll-records: 50
+        concurrency: 1
+    withdrawal:
+      id: withdrawal
+      dest: filtered_withdrawal
+      consume:
+        enabled: false
+        max-poll-records: 50
+        concurrency: 1
+  ssl:
+    enabled: false
+
+retry-policy:
+  maxAttempts: 10
+
+trusted.tokens:
+  keep-card-tokens-data-years: 3
+
+testcontainers:
+  postgresql:
+    tag: "17"
+  kafka:
+    tag: '6.2.0'
