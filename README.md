@@ -141,6 +141,7 @@ Compose сохраняет legacy-версии внешних Kafka, Riak, Click
 Порядок подключения GitHub, проверки публикации и переключения окружений:
 [Migration runbook](docs/migration/README.md).
 Проверенные сценарии и оставшиеся внешние шаги: [Validation report](docs/migration/validation.md).
+Повторная сверка исходников и проверки без Compose: [Compatibility audit](docs/migration/compatibility-audit.md).
 
 ## Общие правила для агентов
 

@@ -1,0 +1,571 @@
+{
+  "head": "006acdfe1cd44cb2f601a7f7cd3b09edbddc0d81",
+  "includes_worktree_changes": true,
+  "modules": [
+    {
+      "name": "fraudbusters",
+      "sha": "a94b43d373663b019fa1900fb5362eac87b8a1f0",
+      "counts": {
+        "identical": 336
+      },
+      "differences": []
+    },
+    {
+      "name": "fraudbusters-api",
+      "sha": "31c437aa6459b314f4e119933292e70066179a28",
+      "counts": {
+        "identical": 62
+      },
+      "differences": []
+    },
+    {
+      "name": "fraudbusters-management",
+      "sha": "a47c29142dd56d97f87815ccce6a4d100726f924",
+      "counts": {
+        "missing": 1,
+        "identical": 319
+      },
+      "differences": [
+        {
+          "source": ".DS_Store",
+          "destination": "apps/fraudbusters-management/.DS_Store",
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "name": "fraudbusters-mg-connector",
+      "sha": "ca99e318cfa0abd44ad46ba2fd633430aaba881f",
+      "counts": {
+        "identical": 84
+      },
+      "differences": []
+    },
+    {
+      "name": "fraudbusters-notificator",
+      "sha": "91c9e8935da5dba38d0a3e61b60b349846c4e35e",
+      "counts": {
+        "identical": 109,
+        "gitlink_pinned": 1
+      },
+      "differences": []
+    },
+    {
+      "name": "fraudbusters-warehouse",
+      "sha": "fb8becad6194ffd7a7fe089059580761f2b24895",
+      "counts": {
+        "identical": 26
+      },
+      "differences": []
+    },
+    {
+      "name": "trusted-tokens-manager",
+      "sha": "c13e6c2551717f735874600c4a2e9c9586f4f588",
+      "counts": {
+        "identical": 69,
+        "modified": 2
+      },
+      "differences": [
+        {
+          "source": "src/main/java/dev/vality/trusted/tokens/dao/impl/TemplateDaoImpl.java",
+          "destination": "apps/trusted-tokens-manager/src/main/java/dev/vality/trusted/tokens/dao/impl/TemplateDaoImpl.java",
+          "status": "modified"
+        },
+        {
+          "source": "src/main/java/dev/vality/trusted/tokens/dao/impl/TokenDaoImpl.java",
+          "destination": "apps/trusted-tokens-manager/src/main/java/dev/vality/trusted/tokens/dao/impl/TokenDaoImpl.java",
+          "status": "modified"
+        }
+      ]
+    },
+    {
+      "name": "wb-list-manager",
+      "sha": "e09c4ab0b298e20acad50ead538db0f751497dc3",
+      "counts": {
+        "identical": 49
+      },
+      "differences": []
+    },
+    {
+      "name": "fraudbusters-ui",
+      "sha": "6cfc6d979f0e4ae0da5d4c05f3899987421cbd7d",
+      "counts": {
+        "identical": 824,
+        "modified": 8,
+        "missing": 1
+      },
+      "differences": [
+        {
+          "source": ".gitignore",
+          "destination": "apps/fraudbusters-ui/.gitignore",
+          "status": "modified"
+        },
+        {
+          "source": "Dockerfile",
+          "destination": "apps/fraudbusters-ui/Dockerfile",
+          "status": "modified"
+        },
+        {
+          "source": "angular.json",
+          "destination": "apps/fraudbusters-ui/angular.json",
+          "status": "modified"
+        },
+        {
+          "source": "fraudbusters-management.json",
+          "destination": "apps/fraudbusters-ui/fraudbusters-management.json",
+          "status": "missing"
+        },
+        {
+          "source": "src/app/app.component.spec.ts",
+          "destination": "apps/fraudbusters-ui/src/app/app.component.spec.ts",
+          "status": "modified"
+        },
+        {
+          "source": "src/app/sections/load/fraud-uploader/fraud-uploader.component.spec.ts",
+          "destination": "apps/fraudbusters-ui/src/app/sections/load/fraud-uploader/fraud-uploader.component.spec.ts",
+          "status": "modified"
+        },
+        {
+          "source": "src/app/shared/components/create-notification/services/notification.service.ts",
+          "destination": "apps/fraudbusters-ui/src/app/shared/components/create-notification/services/notification.service.ts",
+          "status": "modified"
+        },
+        {
+          "source": "src/test.ts",
+          "destination": "apps/fraudbusters-ui/src/test.ts",
+          "status": "modified"
+        },
+        {
+          "source": "tools/swagger-codegen.ts",
+          "destination": "apps/fraudbusters-ui/tools/swagger-codegen.ts",
+          "status": "modified"
+        }
+      ]
+    },
+    {
+      "name": "fraudbusters-proto",
+      "sha": "b64531dbb28e970c09147661685dafa582c55b95",
+      "counts": {
+        "identical": 11,
+        "modified": 1
+      },
+      "differences": [
+        {
+          "source": "pom.xml",
+          "destination": "packages/protocols/fraudbusters-proto/pom.xml",
+          "status": "modified"
+        }
+      ]
+    },
+    {
+      "name": "fraudbusters-notificator-proto",
+      "sha": "f47785386a329fe026d239882bfa0a58a95ee8d3",
+      "counts": {
+        "identical": 13,
+        "modified": 1
+      },
+      "differences": [
+        {
+          "source": "pom.xml",
+          "destination": "packages/protocols/fraudbusters-notificator-proto/pom.xml",
+          "status": "modified"
+        }
+      ]
+    },
+    {
+      "name": "fraud-data-crawler-proto",
+      "sha": "131458223a17650471161411e2d838ba639ea222",
+      "counts": {
+        "identical": 12,
+        "modified": 1
+      },
+      "differences": [
+        {
+          "source": "pom.xml",
+          "destination": "packages/protocols/fraud-data-crawler-proto/pom.xml",
+          "status": "modified"
+        }
+      ]
+    },
+    {
+      "name": "fraudbusters-warehouse-proto",
+      "sha": "ad5d5bbf43e65a6b4174d0bb11f52b26f12ab611",
+      "counts": {
+        "identical": 12,
+        "modified": 1
+      },
+      "differences": [
+        {
+          "source": "pom.xml",
+          "destination": "packages/protocols/fraudbusters-warehouse-proto/pom.xml",
+          "status": "modified"
+        }
+      ]
+    },
+    {
+      "name": "trusted-tokens-proto",
+      "sha": "b9adadf5b8a36bf9774145ecdd6824722e0eef7e",
+      "counts": {
+        "identical": 7,
+        "modified": 1
+      },
+      "differences": [
+        {
+          "source": "pom.xml",
+          "destination": "packages/protocols/trusted-tokens-proto/pom.xml",
+          "status": "modified"
+        }
+      ]
+    },
+    {
+      "name": "wb-list-proto",
+      "sha": "d0256f0ff0909e7cf63635ae62b46d1a089ba2e6",
+      "counts": {
+        "identical": 12,
+        "modified": 1
+      },
+      "differences": [
+        {
+          "source": "pom.xml",
+          "destination": "packages/protocols/wb-list-proto/pom.xml",
+          "status": "modified"
+        }
+      ]
+    },
+    {
+      "name": "swag-fraudbusters",
+      "sha": "7d5622c148482f122c2dcab04886bd994ded563c",
+      "counts": {
+        "identical": 59,
+        "modified": 1
+      },
+      "differences": [
+        {
+          "source": "pom.xml",
+          "destination": "packages/protocols/swag-fraudbusters/pom.xml",
+          "status": "modified"
+        }
+      ]
+    },
+    {
+      "name": "swag-fraudbusters-management",
+      "sha": "e326aa8604ae145035f1d9c3905bde83dce829ea",
+      "counts": {
+        "identical": 164,
+        "modified": 1
+      },
+      "differences": [
+        {
+          "source": "pom.xml",
+          "destination": "packages/protocols/swag-fraudbusters-management/pom.xml",
+          "status": "modified"
+        }
+      ]
+    },
+    {
+      "name": "fraudo",
+      "sha": "47a8aec48cc345bbc71ec7c7a57ee6ada87b5c17",
+      "counts": {
+        "identical": 137,
+        "modified": 2,
+        "moved_identical": 9
+      },
+      "differences": [
+        {
+          "source": "Makefile",
+          "destination": "packages/libs/fraudo/Makefile",
+          "status": "modified"
+        },
+        {
+          "source": "README.md",
+          "destination": "packages/libs/fraudo/README.md",
+          "status": "modified"
+        },
+        {
+          "source": "content/docs/examples.md",
+          "destination": "docs/fraudo/content/docs/examples.md",
+          "status": "moved_identical"
+        },
+        {
+          "source": "content/docs/img/syntax.svg",
+          "destination": "docs/fraudo/content/docs/img/syntax.svg",
+          "status": "moved_identical"
+        },
+        {
+          "source": "content/docs/operations.md",
+          "destination": "docs/fraudo/content/docs/operations.md",
+          "status": "moved_identical"
+        },
+        {
+          "source": "content/docs/syntax.md",
+          "destination": "docs/fraudo/content/docs/syntax.md",
+          "status": "moved_identical"
+        },
+        {
+          "source": "content/index.md",
+          "destination": "docs/fraudo/content/index.md",
+          "status": "moved_identical"
+        },
+        {
+          "source": "logo.jpg",
+          "destination": "docs/fraudo/logo.jpg",
+          "status": "moved_identical"
+        },
+        {
+          "source": "mkdocs.yml",
+          "destination": "docs/fraudo/mkdocs.yml",
+          "status": "moved_identical"
+        },
+        {
+          "source": "requirements.txt",
+          "destination": "docs/fraudo/requirements.txt",
+          "status": "moved_identical"
+        },
+        {
+          "source": "syntax.png",
+          "destination": "docs/fraudo/syntax.png",
+          "status": "moved_identical"
+        }
+      ]
+    },
+    {
+      "name": "fraudbusters-compose",
+      "sha": "47baca719cac5b90aafca762e4f38bf3691aff81",
+      "counts": {
+        "identical": 39,
+        "modified": 2,
+        "moved_modified": 6,
+        "moved_identical": 13
+      },
+      "differences": [
+        {
+          "source": "clickhouse/docker-entrypoint-initdb.d/init-db.sh",
+          "destination": "infra/clickhouse/docker-entrypoint-initdb.d/init-db.sh",
+          "status": "modified"
+        },
+        {
+          "source": "docker-compose-arm.yml",
+          "destination": "infra/compose.arm.yaml",
+          "status": "moved_modified"
+        },
+        {
+          "source": "docker-compose.yml",
+          "destination": "infra/compose.yaml",
+          "status": "moved_modified"
+        },
+        {
+          "source": "e2e-test/Dockerfile",
+          "destination": "tests/e2e/Dockerfile",
+          "status": "moved_modified"
+        },
+        {
+          "source": "e2e-test/config.js",
+          "destination": "tests/e2e/config.js",
+          "status": "moved_identical"
+        },
+        {
+          "source": "e2e-test/package-lock.json",
+          "destination": "tests/e2e/package-lock.json",
+          "status": "moved_identical"
+        },
+        {
+          "source": "e2e-test/package.json",
+          "destination": "tests/e2e/package.json",
+          "status": "moved_identical"
+        },
+        {
+          "source": "e2e-test/test/001_templates.js",
+          "destination": "tests/e2e/test/001_templates.js",
+          "status": "moved_identical"
+        },
+        {
+          "source": "e2e-test/test/002_aggregates.js",
+          "destination": "tests/e2e/test/002_aggregates.js",
+          "status": "moved_modified"
+        },
+        {
+          "source": "e2e-test/test/003_columbus.js",
+          "destination": "tests/e2e/test/003_columbus.js",
+          "status": "moved_identical"
+        },
+        {
+          "source": "e2e-test/test/004_trusted_tokens.js",
+          "destination": "tests/e2e/test/004_trusted_tokens.js",
+          "status": "moved_identical"
+        },
+        {
+          "source": "e2e-test/test/005_white_black_lists.js",
+          "destination": "tests/e2e/test/005_white_black_lists.js",
+          "status": "moved_identical"
+        },
+        {
+          "source": "e2e-test/test/factory/payment_factory.js",
+          "destination": "tests/e2e/test/factory/payment_factory.js",
+          "status": "moved_modified"
+        },
+        {
+          "source": "e2e-test/test/service/inspector_service.js",
+          "destination": "tests/e2e/test/service/inspector_service.js",
+          "status": "moved_identical"
+        },
+        {
+          "source": "e2e-test/test/service/list_group_service.js",
+          "destination": "tests/e2e/test/service/list_group_service.js",
+          "status": "moved_identical"
+        },
+        {
+          "source": "e2e-test/test/service/payment_service.js",
+          "destination": "tests/e2e/test/service/payment_service.js",
+          "status": "moved_identical"
+        },
+        {
+          "source": "e2e-test/test/service/reference_service.js",
+          "destination": "tests/e2e/test/service/reference_service.js",
+          "status": "moved_identical"
+        },
+        {
+          "source": "e2e-test/test/service/template_service.js",
+          "destination": "tests/e2e/test/service/template_service.js",
+          "status": "moved_modified"
+        },
+        {
+          "source": "e2e-test/test/service/wb_list_service.js",
+          "destination": "tests/e2e/test/service/wb_list_service.js",
+          "status": "moved_identical"
+        },
+        {
+          "source": "e2e-test/tsconfig.json",
+          "destination": "tests/e2e/tsconfig.json",
+          "status": "moved_identical"
+        },
+        {
+          "source": "fraudbusters-ui/authConfig.json",
+          "destination": "infra/fraudbusters-ui/authConfig.json",
+          "status": "modified"
+        }
+      ]
+    },
+    {
+      "name": "fraudbusters-docs",
+      "sha": "5bf0acabc70e66053b589c2053b85624ceb3caab",
+      "counts": {
+        "identical": 33,
+        "modified": 1
+      },
+      "differences": [
+        {
+          "source": "requirements.txt",
+          "destination": "docs/requirements.txt",
+          "status": "modified"
+        }
+      ]
+    }
+  ],
+  "added_files": [
+    "apps/fraudbusters-ui/.dockerignore",
+    "apps/fraudbusters-ui/src/app/shared/components/create-notification/create-notification.component.spec.ts",
+    "apps/trusted-tokens-manager/src/test/java/dev/vality/trusted/tokens/dao/DaoPersistenceTest.java",
+    "docs/migration/README.md",
+    "docs/migration/compatibility-audit.md",
+    "docs/migration/compatibility-checks.json",
+    "docs/migration/source-parity.json",
+    "docs/migration/sources.json",
+    "docs/migration/validation.md",
+    "infra/clickhouse/docker-entrypoint-initdb.d/ensure-current-schema.sql",
+    "tests/e2e/wait-and-test.js"
+  ],
+  "maven_metadata": [
+    {
+      "name": "fraudbusters",
+      "coordinates_parent_dependencies_equal": true,
+      "existing_properties_equal": true
+    },
+    {
+      "name": "fraudbusters-api",
+      "coordinates_parent_dependencies_equal": true,
+      "existing_properties_equal": true
+    },
+    {
+      "name": "fraudbusters-management",
+      "coordinates_parent_dependencies_equal": true,
+      "existing_properties_equal": true
+    },
+    {
+      "name": "fraudbusters-mg-connector",
+      "coordinates_parent_dependencies_equal": true,
+      "existing_properties_equal": true
+    },
+    {
+      "name": "fraudbusters-notificator",
+      "coordinates_parent_dependencies_equal": true,
+      "existing_properties_equal": true
+    },
+    {
+      "name": "fraudbusters-warehouse",
+      "coordinates_parent_dependencies_equal": true,
+      "existing_properties_equal": true
+    },
+    {
+      "name": "trusted-tokens-manager",
+      "coordinates_parent_dependencies_equal": true,
+      "existing_properties_equal": true
+    },
+    {
+      "name": "wb-list-manager",
+      "coordinates_parent_dependencies_equal": true,
+      "existing_properties_equal": true
+    },
+    {
+      "name": "fraudbusters-proto",
+      "coordinates_parent_dependencies_equal": true,
+      "existing_properties_equal": true
+    },
+    {
+      "name": "fraudbusters-notificator-proto",
+      "coordinates_parent_dependencies_equal": true,
+      "existing_properties_equal": true
+    },
+    {
+      "name": "fraud-data-crawler-proto",
+      "coordinates_parent_dependencies_equal": true,
+      "existing_properties_equal": true
+    },
+    {
+      "name": "fraudbusters-warehouse-proto",
+      "coordinates_parent_dependencies_equal": true,
+      "existing_properties_equal": true
+    },
+    {
+      "name": "trusted-tokens-proto",
+      "coordinates_parent_dependencies_equal": true,
+      "existing_properties_equal": true
+    },
+    {
+      "name": "wb-list-proto",
+      "coordinates_parent_dependencies_equal": true,
+      "existing_properties_equal": true
+    },
+    {
+      "name": "swag-fraudbusters",
+      "coordinates_parent_dependencies_equal": true,
+      "existing_properties_equal": true
+    },
+    {
+      "name": "swag-fraudbusters-management",
+      "coordinates_parent_dependencies_equal": true,
+      "existing_properties_equal": true
+    },
+    {
+      "name": "fraudo",
+      "coordinates_parent_dependencies_equal": true,
+      "existing_properties_equal": true
+    }
+  ],
+  "protected_source_counts": {
+    "backend_runtime_resources": 10,
+    "database_migrations": 32,
+    "contract_sources": 202,
+    "fraudo_runtime_sources": 58
+  },
+  "protected_source_differences": []
+}

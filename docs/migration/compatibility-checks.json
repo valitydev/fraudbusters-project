@@ -1,0 +1,1210 @@
+{
+  "baseline": "docs/migration/sources.json",
+  "compose_started": false,
+  "java": [
+    {
+      "module": "apps/fraudbusters",
+      "exit_code": 0,
+      "tests": 201,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "suite": "dev.vality.fraudbusters.DispatchTemplateTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.EndToEndIntegrationTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.FraudPaymentTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.LoadDataIntegrationTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.PreLoadTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.RuleCheckingServiceIntegrationTest",
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.config.Boot4ConfigurationTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.config.ExternalServiceMockOverrideTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.converter.CardTokenNormalizationTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.converter.CascadingTemplateEmulationToCascadingTemplateDtoConverterTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.converter.CheckedResultModelToCheckResultConverterTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.converter.FilterConverterTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.converter.IntegerToYearsOffsetConverterTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.converter.ResultStatusConverterTest",
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.converter.TrustConditionToConditionConverterTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.fraud.PaymentContextParserImplTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.fraud.aggragator.SumAggregatorImplTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.fraud.finder.InGreyListFinderImplTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.fraud.finder.PaymentInListFinderImplTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.fraud.localstorage.LocalResultStorageRepositoryTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.fraud.payment.ManyEmailsPerCardRuleTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.fraud.payment.resolver.CustomerTypeResolverImplTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.fraud.resolver.CountryResolverImplTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.listener.GroupListenerTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.listener.GroupReferenceListenerTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.pool.HistoricalPoolImplTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.repository.FraudPaymentRepositoryTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.repository.FraudResultRepositoryTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.repository.HistoricalChargebackDataTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.repository.PaymentRepositoryTest",
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.repository.clickhouse.impl.HistoricalFraudPaymentDataTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.repository.clickhouse.impl.HistoricalFraudResultDataTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.repository.clickhouse.impl.HistoricalPaymentDataTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.repository.clickhouse.impl.HistoricalRefundDataTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.repository.clickhouse.util.FilterUtilTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.resource.payment.handler.FraudInspectorHandlerTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.resource.payment.handler.HistoricalDataHandlerTest",
+          "tests": 19,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.resource.payment.handler.InspectorHandlerTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.resource.payment.handler.PaymentServiceHandlerTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.serde.FraudResultJsonCompatibilityTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.service.HistoricalDataServiceImplTest",
+          "tests": 15,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.service.RuleCheckingServiceImplTest",
+          "tests": 11,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.service.ShopManagementServiceTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.service.TimeBoundaryServiceImplTest",
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.stream.TemplateVisitorImplTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.stream.impl.RuleCheckingApplierImplTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.util.ConditionTemplateFactoryTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.util.HistoricalTransactionCheckFactoryTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.util.ReferenceKeyGeneratorTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.util.TimestampUtilTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "module": "apps/fraudbusters-api",
+      "exit_code": 0,
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "suite": "dev.vality.fraudbusters.api.converter.BankCardToInternalDtoConverterTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.api.converter.CachToInternalDtoConverterTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.api.converter.CustomerToInternalDtoConverterTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.api.converter.ErrorToInternalDtoConverterTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.api.converter.FraudPaymentsRequestToFraudPaymentsConverterTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.api.converter.MerchantToInternalDtoConverterTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.api.converter.PaymentInspectRequestToContextConverterTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.api.converter.PaymentResourceToPaymentToolConverterTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.api.converter.PaymentsChangesRequestToPaymentsConverterTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.api.converter.ProviderToInternalDtoConverterTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.api.converter.RefundsRequestToRefundsConverterTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.api.converter.WithdrawalsRequestToWithdrawalsConverterTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.api.resource.ResourceTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "module": "apps/fraudbusters-management",
+      "exit_code": 0,
+      "tests": 140,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "suite": "dev.vality.fraudbusters.management.ExceptionApplicationTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.converter.EventToAuditLogConverterTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.converter.payment.RowToWbListRecordsConverterTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.converter.payment.TestCheckedDataSetModelToCheckedDataSetApiConverterTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.converter.payment.TestHistoricalDataSetCheckResultToTestCheckedDataSetModelConverter",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.dao.audit.CommandAuditDaoImplTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.dao.group.GroupReferenceDaoImplTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.dao.group.PaymentGroupDaoTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.dao.payment.DefaultPaymentReferenceDaoImplTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.dao.payment.PaymentGroupReferenceDaoImplTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.dao.payment.PaymentTemplateDaoTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.dao.payment.ReferenceDaoImplTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.dao.payment.candidate.WbListCandidateBatchDaoImplTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.dao.payment.candidate.WbListCandidateDaoImplTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.dao.payment.dataset.TestDataSetCheckingResultDaoImpl",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.dao.payment.wblist.WbListDaoImplTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.kafka.DeleteFromListTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.kafka.InsertInListTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.kafka.TemplateApplicationTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.kafka.WbListApplicationTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.kafka.WbListCandidateTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.listener.InitiatingEntityEventSinkListenerTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.listener.WbListCandidateListenerTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.resource.AuditResourceTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.resource.PaymentEmulateResourceTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.resource.analytics.AnalyticsResourceTest",
+          "tests": 16,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.resource.notificator.NotificationResourceTest",
+          "tests": 26,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.resource.payment.PaymentDataSetsResourceTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.resource.payment.PaymentHistoricalDataResourceTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.resource.payment.PaymentListCandidateResourceTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.resource.payment.PaymentListLoadDataResourceTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.resource.payment.PaymentLoadDataResourceTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.service.ClickhouseTimeSplitServiceTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.service.GreyRottenRuleCleanerServiceTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.service.WbListCandidateBatchServiceImplTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.service.WbListCandidateServiceImplTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.service.clickhouse.AnalyticsQueryTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.service.payment.PaymentsDataSetServiceTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.utils.CountInfoApiUtilsTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.management.utils.CsvFraudPaymentParserTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "module": "apps/fraudbusters-mg-connector",
+      "exit_code": 0,
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "suites": [
+        {
+          "suite": "dev.vality.fraudbusters.mg.connector.FraudbustersMgConnectorApplicationTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.mg.connector.IntegrationTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 1
+        },
+        {
+          "suite": "dev.vality.fraudbusters.mg.connector.converter.FistfulResourceToDomainResourceConverterTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.mg.connector.mapper.impl.WithdrawalMapperTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "module": "apps/fraudbusters-notificator",
+      "exit_code": 0,
+      "tests": 48,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "suite": "dev.vality.fraudbusters.notificator.ScheduledIntegrationTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.notificator.dao.ChannelDaoImplTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.notificator.dao.NotificationDaoTest",
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.notificator.processor.NotificationProcessorImplTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.notificator.resource.ChannelHandlerTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.notificator.resource.NotificationHandlerTest",
+          "tests": 11,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.notificator.resource.NotificationTemplateHandlerTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.notificator.resource.ReportResourceImplTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.notificator.service.QueryParamsPreparationServiceTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.notificator.service.QueryServiceTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.notificator.service.TelegramNotificationIntegrationTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.notificator.service.TelegramSenderServiceTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.notificator.service.WarehouseQueryServiceImplTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.notificator.service.filter.ChangeQueryResultFilterTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "module": "apps/fraudbusters-warehouse",
+      "exit_code": 0,
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "suite": "dev.vality.fraudbusters.warehouse.repository.QueryRepositoryTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.warehouse.service.impl.QueryServiceImplTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudbusters.warehouse.servlet.handler.QueryHandlerTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "module": "apps/trusted-tokens-manager",
+      "exit_code": 0,
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "suite": "dev.vality.trusted.tokens.calculator.YearsCountCalcTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.trusted.tokens.calculator.YearsSumCalcTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.trusted.tokens.dao.DaoPersistenceTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.trusted.tokens.handler.HandlerTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.trusted.tokens.listener.ListenerTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.trusted.tokens.updater.CardTokensTransactionInfoDataUpdaterTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "module": "apps/wb-list-manager",
+      "exit_code": 0,
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "suite": "dev.vality.wb.list.manager.ListRepositoryTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.wb.list.manager.WbListManagerApplicationTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.wb.list.manager.WbListSafetyApplicationTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.wb.list.manager.handler.WbListServiceHandlerTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "module": "packages/libs/fraudo",
+      "exit_code": 0,
+      "tests": 53,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": [
+        {
+          "suite": "dev.vality.fraudo.CountTest",
+          "tests": 8,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudo.CustomTest",
+          "tests": 24,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudo.IsTrustedTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudo.ListTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudo.RealTimerTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudo.SumTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "dev.vality.fraudo.payment.resolver.PaymentTimeWindowResolverTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "protocols": [
+    {
+      "module": "packages/protocols/fraudbusters-proto",
+      "profile": "",
+      "exit_code": 0
+    },
+    {
+      "module": "packages/protocols/fraudbusters-notificator-proto",
+      "profile": "",
+      "exit_code": 0
+    },
+    {
+      "module": "packages/protocols/fraud-data-crawler-proto",
+      "profile": "",
+      "exit_code": 0
+    },
+    {
+      "module": "packages/protocols/fraudbusters-warehouse-proto",
+      "profile": "",
+      "exit_code": 0
+    },
+    {
+      "module": "packages/protocols/trusted-tokens-proto",
+      "profile": "",
+      "exit_code": 0
+    },
+    {
+      "module": "packages/protocols/wb-list-proto",
+      "profile": "",
+      "exit_code": 0
+    },
+    {
+      "module": "packages/protocols/swag-fraudbusters",
+      "profile": "server",
+      "exit_code": 0
+    },
+    {
+      "module": "packages/protocols/swag-fraudbusters",
+      "profile": "client",
+      "exit_code": 0
+    },
+    {
+      "module": "packages/protocols/swag-fraudbusters-management",
+      "profile": "server",
+      "exit_code": 0
+    },
+    {
+      "module": "packages/protocols/swag-fraudbusters-management",
+      "profile": "client",
+      "exit_code": 0
+    }
+  ],
+  "ui": [
+    {
+      "check": "ui-install",
+      "exit_code": 0
+    },
+    {
+      "check": "openapi-install",
+      "exit_code": 0
+    },
+    {
+      "check": "openapi-validate",
+      "exit_code": 0
+    },
+    {
+      "check": "ui-codegen",
+      "exit_code": 0
+    },
+    {
+      "check": "ui-check",
+      "exit_code": 0
+    },
+    {
+      "check": "ui-test",
+      "exit_code": 0
+    },
+    {
+      "check": "ui-build",
+      "exit_code": 0
+    }
+  ],
+  "ui_unit_tests": 10,
+  "ui_notification_http_regressions": 2,
+  "ui_spec_typecheck_and_lint": "passed",
+  "ci_script_tests": 19,
+  "image_contexts": [
+    {
+      "app": "fraudbusters",
+      "exit_code": 0
+    },
+    {
+      "app": "fraudbusters-api",
+      "exit_code": 0
+    },
+    {
+      "app": "fraudbusters-management",
+      "exit_code": 0
+    },
+    {
+      "app": "fraudbusters-mg-connector",
+      "exit_code": 0
+    },
+    {
+      "app": "fraudbusters-notificator",
+      "exit_code": 0
+    },
+    {
+      "app": "fraudbusters-warehouse",
+      "exit_code": 0
+    },
+    {
+      "app": "trusted-tokens-manager",
+      "exit_code": 0
+    },
+    {
+      "app": "wb-list-manager",
+      "exit_code": 0
+    }
+  ],
+  "environment": {
+    "java_apps_and_fraudo": "25.0.1",
+    "java_protocols": "21.0.2",
+    "node_ui": "23.7.0",
+    "thrift": "0.20.0"
+  },
+  "compose_config_apps_e2e_and_arm": "passed"
+}
