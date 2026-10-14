@@ -1,0 +1,5 @@
+/postgres/
+/clickhouse/data/
+/.idea/
+/clickhouse/log/
+/tmp/

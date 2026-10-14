@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <root level="warn">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+    <logger name="dev.vality" level="ALL"/>
+    <logger name="dev.vality.woody" level="INFO"/>
+    <logger name="org.springframework.jdbc.core" level="ALL"/>
+</configuration>

@@ -1,0 +1,11 @@
+---
+version: '2'
+services:
+   zookeeper:
+     image: watershine/cp-zookeeper:6.1.0-arm64
+
+   broker:
+     image: watershine/cp-enterprise-kafka:6.1.0-arm64
+
+   clickhouse:
+     image: lunalabsltd/clickhouse-server:20.6.7.4-arm
