@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>dev.vality.fraudbusters</groupId>
+    <artifactId>fraudbusters-project</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>packages/libs/fraudo</module>
+        <module>packages/protocols/fraud-data-crawler-proto</module>
+        <module>packages/protocols/fraudbusters-notificator-proto</module>
+        <module>packages/protocols/fraudbusters-proto</module>
+        <module>packages/protocols/fraudbusters-warehouse-proto</module>
+        <module>packages/protocols/swag-fraudbusters</module>
+        <module>packages/protocols/swag-fraudbusters-management</module>
+        <module>packages/protocols/trusted-tokens-proto</module>
+        <module>packages/protocols/wb-list-proto</module>
+        <module>apps/fraudbusters</module>
+        <module>apps/fraudbusters-api</module>
+        <module>apps/fraudbusters-management</module>
+        <module>apps/fraudbusters-mg-connector</module>
+        <module>apps/fraudbusters-notificator</module>
+        <module>apps/fraudbusters-warehouse</module>
+        <module>apps/trusted-tokens-manager</module>
+        <module>apps/wb-list-manager</module>
+    </modules>
+</project>

@@ -18,6 +18,8 @@
     <description>Generates jar artifact containing compiled thrift classes based on generated thrift IDL files</description>
 
     <properties>
+        <!-- Local verification does not allocate a published release number. -->
+        <commit.number>0</commit.number>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>SNAPSHOT</revision>
     </properties>

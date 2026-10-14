@@ -1,4 +1,5 @@
 import * as del from 'del';
+import { existsSync } from 'fs';
 import * as path from 'path';
 import * as shell from 'shelljs';
 
@@ -10,6 +11,10 @@ type Schemes = { [name: string]: string };
 
 async function replaceModuleWithProvidersNg10(outputDirPath: string) {
     const modulePath = `${outputDirPath}/api.module.ts`;
+    // Model-only generation does not produce an Angular module.
+    if (!existsSync(modulePath)) {
+        return;
+    }
     return new Promise((resolve, reject) => {
         try {
             const result = shell.sed('-i', /ModuleWithProviders\s/, `ModuleWithProviders<ApiModule> `, modulePath);
@@ -46,7 +51,7 @@ async function swaggerCodegenAngularCli({
             await del([outputDirPath]);
             swaggerLog(`${outputDirPath} deleted`);
 
-            const cmd = `java -jar ${cliPath} generate -Dmodels -l typescript-angular --additional-properties ngVersion=7 -i ${inputPath} -o ${outputDirPath}`;
+            const cmd = `java -jar ${cliPath} generate -Dmodels -l typescript-angular --additional-properties ngVersion=7 --type-mappings Error=ModelError -i ${inputPath} -o ${outputDirPath}`;
             // angular 10 requires change "ModuleWithProviders" with "ModuleWithProviders<ApiModule>"
             // swagger-codegen has a fix in v2.4.17 but it breaks our backward compatibility
             swaggerLog(`> ${cmd}`);

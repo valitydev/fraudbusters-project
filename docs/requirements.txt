@@ -3,4 +3,4 @@ mkdocs-material>=7.3.6
 mkdocs-material-extensions>=1.0
 pygments>=2.10
 mkdocs-autolinks-plugin>=0.4.0
-mkdocs-gitbook>=
+mkdocs-gitbook

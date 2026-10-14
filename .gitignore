@@ -30,3 +30,12 @@
 *.patch
 .env
 .env.local
+**/dependency-reduced-pom.xml
+**/.flattened-pom.xml
+**/_build/
+**/coverage/
+docs/site/
+docs/fraudo/site/
+infra/tmp/
+infra/clickhouse/data/
+infra/clickhouse/log/

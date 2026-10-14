@@ -46,3 +46,4 @@ src/app/api/**/swagger-codegen
 
 /fraudbusters-ui.iml
 /.angular/
+/fraudbusters-management.json

@@ -1,0 +1,338 @@
+{
+  "repository": "fraudbusters-project",
+  "captured_at": "2026-10-14T10:49:28.986473+00:00",
+  "sources": [
+    {
+      "name": "fraudbusters",
+      "repository": "git@github.com:valitydev/fraudbusters.git",
+      "ref": "refs/heads/master",
+      "sha": "a94b43d373663b019fa1900fb5362eac87b8a1f0",
+      "tree": "9d8d9da780aae471cecb928753d88b059b64bbae",
+      "path": "apps/fraudbusters",
+      "build": {
+        "java": "25",
+        "parent": "dev.vality:service-parent-pom:4.0.1",
+        "command": "mvn -f apps/fraudbusters/pom.xml verify"
+      },
+      "channels": {
+        "images": [
+          "ghcr.io/valitydev/fraudbusters"
+        ]
+      }
+    },
+    {
+      "name": "fraudbusters-api",
+      "repository": "git@github.com:valitydev/fraudbusters-api.git",
+      "ref": "refs/heads/master",
+      "sha": "31c437aa6459b314f4e119933292e70066179a28",
+      "tree": "1685db949de7a1bd1426bdb6808dc5c53cededc2",
+      "path": "apps/fraudbusters-api",
+      "build": {
+        "java": "25",
+        "parent": "dev.vality:service-parent-pom:4.0.1",
+        "command": "mvn -f apps/fraudbusters-api/pom.xml verify"
+      },
+      "channels": {
+        "images": [
+          "ghcr.io/valitydev/fraudbusters-api"
+        ]
+      }
+    },
+    {
+      "name": "fraudbusters-management",
+      "repository": "git@github.com:valitydev/fraudbusters-management.git",
+      "ref": "refs/heads/master",
+      "sha": "a47c29142dd56d97f87815ccce6a4d100726f924",
+      "tree": "b0ae422f1918b04048ac16c0f7b5cb4a8aaa4511",
+      "path": "apps/fraudbusters-management",
+      "build": {
+        "java": "25",
+        "parent": "dev.vality:service-parent-pom:4.0.1",
+        "command": "mvn -f apps/fraudbusters-management/pom.xml verify"
+      },
+      "channels": {
+        "images": [
+          "ghcr.io/valitydev/fraudbusters-management"
+        ]
+      }
+    },
+    {
+      "name": "fraudbusters-mg-connector",
+      "repository": "git@github.com:valitydev/fraudbusters-mg-connector.git",
+      "ref": "refs/heads/master",
+      "sha": "ca99e318cfa0abd44ad46ba2fd633430aaba881f",
+      "tree": "c91090ca2c6f675e06ee872b12ffbeaaedf75f59",
+      "path": "apps/fraudbusters-mg-connector",
+      "build": {
+        "java": "25",
+        "parent": "dev.vality:service-parent-pom:4.0.1",
+        "command": "mvn -f apps/fraudbusters-mg-connector/pom.xml verify"
+      },
+      "channels": {
+        "images": [
+          "ghcr.io/valitydev/fraudbusters-mg-connector"
+        ]
+      }
+    },
+    {
+      "name": "fraudbusters-notificator",
+      "repository": "git@github.com:valitydev/fraudbusters-notificator.git",
+      "ref": "refs/heads/master",
+      "sha": "91c9e8935da5dba38d0a3e61b60b349846c4e35e",
+      "tree": "0bd5d69ffa76bef0cf6b2f622201cebb5dd8f659",
+      "path": "apps/fraudbusters-notificator",
+      "build": {
+        "java": "25",
+        "parent": "dev.vality:service-parent-pom:4.0.1",
+        "command": "mvn -f apps/fraudbusters-notificator/pom.xml verify"
+      },
+      "channels": {
+        "images": [
+          "ghcr.io/valitydev/fraudbusters-notificator"
+        ]
+      }
+    },
+    {
+      "name": "fraudbusters-warehouse",
+      "repository": "git@github.com:valitydev/fraudbusters-warehouse.git",
+      "ref": "refs/heads/master",
+      "sha": "fb8becad6194ffd7a7fe089059580761f2b24895",
+      "tree": "8b5df95dc5d2a110c3612f409be3428db2bd5092",
+      "path": "apps/fraudbusters-warehouse",
+      "build": {
+        "java": "25",
+        "parent": "dev.vality:service-parent-pom:4.0.1",
+        "command": "mvn -f apps/fraudbusters-warehouse/pom.xml verify"
+      },
+      "channels": {
+        "images": [
+          "ghcr.io/valitydev/fraudbusters-warehouse"
+        ]
+      }
+    },
+    {
+      "name": "trusted-tokens-manager",
+      "repository": "git@github.com:valitydev/trusted-tokens-manager.git",
+      "ref": "refs/heads/master",
+      "sha": "c13e6c2551717f735874600c4a2e9c9586f4f588",
+      "tree": "8389e9a3c32320a8db876cb9579e716bc7eba81f",
+      "path": "apps/trusted-tokens-manager",
+      "build": {
+        "java": "25",
+        "parent": "dev.vality:service-parent-pom:4.0.1",
+        "command": "mvn -f apps/trusted-tokens-manager/pom.xml verify"
+      },
+      "channels": {
+        "images": [
+          "ghcr.io/valitydev/trusted-tokens-manager"
+        ]
+      }
+    },
+    {
+      "name": "wb-list-manager",
+      "repository": "git@github.com:valitydev/wb-list-manager.git",
+      "ref": "refs/heads/master",
+      "sha": "e09c4ab0b298e20acad50ead538db0f751497dc3",
+      "tree": "e50f4cf5c56cd733e878ea4842d14c557111aeb0",
+      "path": "apps/wb-list-manager",
+      "build": {
+        "java": "25",
+        "parent": "dev.vality:service-parent-pom:4.0.1",
+        "command": "mvn -f apps/wb-list-manager/pom.xml verify"
+      },
+      "channels": {
+        "images": [
+          "ghcr.io/valitydev/wb-list-manager"
+        ]
+      }
+    },
+    {
+      "name": "fraudbusters-ui",
+      "repository": "git@github.com:valitydev/fraudbusters-ui.git",
+      "ref": "refs/heads/master",
+      "sha": "6cfc6d979f0e4ae0da5d4c05f3899987421cbd7d",
+      "tree": "92ee8c53a438a78f3ef92e964b8bcf190de4df74",
+      "path": "apps/fraudbusters-ui",
+      "channels": {
+        "images": [
+          "ghcr.io/valitydev/fraudbusters-ui"
+        ]
+      }
+    },
+    {
+      "name": "fraudbusters-proto",
+      "repository": "git@github.com:valitydev/fraudbusters-proto.git",
+      "ref": "refs/heads/master",
+      "sha": "b64531dbb28e970c09147661685dafa582c55b95",
+      "tree": "2791cc5378020a13482e3e19027e9a30e5bcc8d4",
+      "path": "packages/protocols/fraudbusters-proto",
+      "build": {
+        "java": "17",
+        "parent": "dev.vality:library-parent-pom:3.1.0",
+        "command": "mvn -f packages/protocols/fraudbusters-proto/pom.xml verify"
+      },
+      "channels": {
+        "java": "maven-central",
+        "erlang": "compile-only"
+      }
+    },
+    {
+      "name": "fraudbusters-notificator-proto",
+      "repository": "git@github.com:valitydev/fraudbusters-notificator-proto.git",
+      "ref": "refs/heads/master",
+      "sha": "f47785386a329fe026d239882bfa0a58a95ee8d3",
+      "tree": "1621e8d95ce4bdd6e184b6cffb760be8aa3aa77c",
+      "path": "packages/protocols/fraudbusters-notificator-proto",
+      "build": {
+        "java": "17",
+        "parent": "dev.vality:library-parent-pom:2.0.2",
+        "command": "mvn -f packages/protocols/fraudbusters-notificator-proto/pom.xml verify"
+      },
+      "channels": {
+        "java": "maven-central",
+        "erlang": "compile-only"
+      }
+    },
+    {
+      "name": "fraud-data-crawler-proto",
+      "repository": "git@github.com:valitydev/fraud-data-crawler-proto.git",
+      "ref": "refs/heads/master",
+      "sha": "131458223a17650471161411e2d838ba639ea222",
+      "tree": "feb372611641147fc48a9bcccb3ab06df3ba4b50",
+      "path": "packages/protocols/fraud-data-crawler-proto",
+      "build": {
+        "java": "17",
+        "parent": "dev.vality:library-parent-pom:1.0.2",
+        "command": "mvn -f packages/protocols/fraud-data-crawler-proto/pom.xml verify"
+      },
+      "channels": {
+        "java": "maven-central",
+        "erlang": null
+      }
+    },
+    {
+      "name": "fraudbusters-warehouse-proto",
+      "repository": "git@github.com:valitydev/fraudbusters-warehouse-proto.git",
+      "ref": "refs/heads/master",
+      "sha": "ad5d5bbf43e65a6b4174d0bb11f52b26f12ab611",
+      "tree": "9f9d8e634cb7d6fbf9a29d9d1fa7b7d877e07be4",
+      "path": "packages/protocols/fraudbusters-warehouse-proto",
+      "build": {
+        "java": "17",
+        "parent": "dev.vality:library-parent-pom:1.0.2",
+        "command": "mvn -f packages/protocols/fraudbusters-warehouse-proto/pom.xml verify"
+      },
+      "channels": {
+        "java": "maven-central",
+        "erlang": null
+      }
+    },
+    {
+      "name": "trusted-tokens-proto",
+      "repository": "git@github.com:valitydev/trusted-tokens-proto.git",
+      "ref": "refs/heads/master",
+      "sha": "b9adadf5b8a36bf9774145ecdd6824722e0eef7e",
+      "tree": "d0966f17a9b324b52f839bf58500625bbbfe58c0",
+      "path": "packages/protocols/trusted-tokens-proto",
+      "build": {
+        "java": "17",
+        "parent": "dev.vality:library-parent-pom:1.0.0",
+        "command": "mvn -f packages/protocols/trusted-tokens-proto/pom.xml verify"
+      },
+      "channels": {
+        "java": "maven-central",
+        "erlang": null
+      }
+    },
+    {
+      "name": "wb-list-proto",
+      "repository": "git@github.com:valitydev/wb-list-proto.git",
+      "ref": "refs/heads/master",
+      "sha": "d0256f0ff0909e7cf63635ae62b46d1a089ba2e6",
+      "tree": "4d9aa6dd0b57a8c6af0b4e1774ce29f4e0c05b6e",
+      "path": "packages/protocols/wb-list-proto",
+      "build": {
+        "java": "17",
+        "parent": "dev.vality:library-parent-pom:1.0.2",
+        "command": "mvn -f packages/protocols/wb-list-proto/pom.xml verify"
+      },
+      "channels": {
+        "java": "maven-central",
+        "erlang": null
+      }
+    },
+    {
+      "name": "swag-fraudbusters",
+      "repository": "git@github.com:valitydev/swag-fraudbusters.git",
+      "ref": "refs/heads/master",
+      "sha": "7d5622c148482f122c2dcab04886bd994ded563c",
+      "tree": "579cb2650d26ac08656d6c300f508f25c4507194",
+      "path": "packages/protocols/swag-fraudbusters",
+      "build": {
+        "java": "21",
+        "parent": "dev.vality:library-parent-pom:3.0.4",
+        "command": "mvn -f packages/protocols/swag-fraudbusters/pom.xml verify"
+      },
+      "channels": {
+        "java": "maven-central",
+        "erlang": null
+      }
+    },
+    {
+      "name": "swag-fraudbusters-management",
+      "repository": "git@github.com:valitydev/swag-fraudbusters-management.git",
+      "ref": "refs/heads/master",
+      "sha": "e326aa8604ae145035f1d9c3905bde83dce829ea",
+      "tree": "3ecf416b868e3fadc2cf758fadd47ba7688cd575",
+      "path": "packages/protocols/swag-fraudbusters-management",
+      "build": {
+        "java": "21",
+        "parent": "dev.vality:library-parent-pom:3.0.4",
+        "command": "mvn -f packages/protocols/swag-fraudbusters-management/pom.xml verify"
+      },
+      "channels": {
+        "java": "maven-central",
+        "erlang": null
+      }
+    },
+    {
+      "name": "fraudo",
+      "repository": "git@github.com:valitydev/fraudo.git",
+      "ref": "refs/heads/master",
+      "sha": "47a8aec48cc345bbc71ec7c7a57ee6ada87b5c17",
+      "tree": "95ffc11a83f387183bf66ed30ba67ab0e8751c04",
+      "path": "packages/libs/fraudo",
+      "build": {
+        "java": "17",
+        "parent": "dev.vality:library-parent-pom:3.1.0",
+        "command": "mvn -f packages/libs/fraudo/pom.xml verify"
+      },
+      "channels": {
+        "java": "maven-central",
+        "erlang": null
+      }
+    },
+    {
+      "name": "fraudbusters-compose",
+      "repository": "git@github.com:valitydev/fraudbusters-compose.git",
+      "ref": "refs/heads/master",
+      "sha": "47baca719cac5b90aafca762e4f38bf3691aff81",
+      "tree": "f1add96f5359ec1bbd8eeac4882a24a6a8630330",
+      "path": "infra",
+      "channels": {
+        "documentation": "github-pages"
+      }
+    },
+    {
+      "name": "fraudbusters-docs",
+      "repository": "git@github.com:valitydev/fraudbusters-docs.git",
+      "ref": "refs/heads/master",
+      "sha": "5bf0acabc70e66053b589c2053b85624ceb3caab",
+      "tree": "6fe96e9c1eef5a14339269f34d4d1724d54a764a",
+      "path": "docs",
+      "channels": {
+        "documentation": "github-pages"
+      }
+    }
+  ]
+}

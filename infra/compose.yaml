@@ -1,0 +1,563 @@
+# Local application images are prepared with scripts/build-local-images.sh.
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.0.1
+    hostname: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+    - zookeeper:/var/lib/zookeeper/data
+    - zookeeper:/var/lib/zookeeper/log
+    profiles:
+    - core
+    - apps
+    - e2e
+  broker:
+    image: confluentinc/cp-enterprise-kafka:5.0.1
+    hostname: broker
+    depends_on:
+    - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://broker:29092,PLAINTEXT://broker:9092
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:9092
+      CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper:2181
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      CONFLUENT_METRICS_ENABLE: 'true'
+      CONFLUENT_SUPPORT_CUSTOMER_ID: anonymous
+    ports:
+    - 9092:9092
+    - 29092:29092
+    volumes:
+    - broker:/var/lib/kafka/data
+    profiles:
+    - core
+    - apps
+    - e2e
+  kafka-setup:
+    image: confluentinc/cp-kafka:5.1.1
+    hostname: kafka-setup
+    depends_on:
+    - broker
+    command: bash -c 'echo Waiting for Kafka to be ready... && cub kafka-ready -b
+      broker:9092 1 60 && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      --partitions 1 --replication-factor 1 --topic wb-list-command  && kafka-topics
+      --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor
+      1 --topic wb-list-event-sink && kafka-topics --create --if-not-exists --zookeeper
+      zookeeper:2181 --partitions 1 --replication-factor 1 --topic result  && kafka-topics
+      --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor
+      1 --topic fraud_payment && kafka-topics --create --if-not-exists --zookeeper
+      zookeeper:2181 --partitions 1 --replication-factor 1 --topic payment_event &&
+      kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions
+      1 --replication-factor 1 --topic filtered_payment && kafka-topics --create --if-not-exists
+      --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic refund_event
+      && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions
+      1 --replication-factor 1 --topic chargeback_event && kafka-topics --create --if-not-exists
+      --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic withdrawal
+      && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions
+      1 --replication-factor 1 --topic filtered_withdrawal && kafka-topics --create
+      --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor
+      1 --topic unknown_initiating_entity && kafka-topics --create --if-not-exists
+      --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1  --config cleanup.policy=compact
+      --topic template && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      --partitions 1 --replication-factor 1  --config cleanup.policy=compact --topic
+      template_reference && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      --partitions 1 --replication-factor 1  --config cleanup.policy=compact --topic
+      group_list && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      --partitions 1 --replication-factor 1  --config cleanup.policy=compact --topic
+      group_reference && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      --partitions 1 --replication-factor 1 --topic wb-list-candidate && kafka-topics
+      --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor
+      1 --topic mg-event && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      --partitions 1 --replication-factor 1 --topic mg-withdrawal && kafka-topics
+      --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor
+      1 --topic payment && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      --partitions 1 --replication-factor 1 --topic refund && kafka-topics --create
+      --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor
+      1 --topic chargeback && echo Waiting 60 seconds for Connect to be ready... &&
+      sleep 60'
+    profiles:
+    - core
+    - apps
+    - e2e
+  riak:
+    image: basho/riak-kv
+    hostname: riak
+    ports:
+    - 8087:8087
+    - 8098:8098
+    environment:
+    - CLUSTER_NAME=riakts
+    - WAIT_FOR_ERLANG=500
+    - TZ=Europe/Moscow
+    labels:
+    - com.basho.riak.cluster.name=riakts
+    volumes:
+    - /tmp/docker/riak/data:/etc/riak/schemas
+    profiles:
+    - core
+    - apps
+    - e2e
+  clickhouse:
+    image: yandex/clickhouse-server:20.6.7.4
+    hostname: clickhouse
+    environment:
+      CLICKHOUSE_USER: user
+      CLICKHOUSE_PASSWORD: password
+    ports:
+    - 9000:9000
+    - 8123:8123
+    volumes:
+    - clickhouse-data:/var/lib/clickhouse
+    - ./clickhouse/log:/var/log
+    - ./clickhouse/docker-entrypoint-initdb.d/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    profiles:
+    - core
+    - apps
+    - e2e
+  grafana:
+    image: grafana/grafana:5.1.0
+    hostname: grafana
+    ports:
+    - 3000:3000
+    environment:
+      GF_INSTALL_PLUGINS: grafana-piechart-panel,vertamedia-clickhouse-datasource
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+    - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+    - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    profiles:
+    - core
+    - apps
+    - e2e
+  columbus:
+    image: ghcr.io/valitydev/columbus:sha-13b6ac4
+    hostname: columbus
+    mem_limit: 1024m
+    mem_reservation: 256M
+    entrypoint: java -Xmx1024m -jar /opt/columbus/columbus.jar
+    environment:
+      logging.config: tmp/logback-test.xml
+    ports:
+    - 8990:8022
+    volumes:
+    - ./log-java:/opt/columbus/tmp
+    profiles:
+    - core
+    - apps
+    - e2e
+  wblist:
+    image: ghcr.io/valitydev/wb-list-manager:${IMAGE_TAG:-local}
+    hostname: wblist
+    mem_limit: 1024m
+    mem_reservation: 128M
+    environment:
+      kafka.bootstrap-servers: broker:9092
+      riak.address: riak
+      riak.port: 8087
+      management.metrics.export.statsd.enabled: 'false'
+      logging.level.com.rbkmoney.woody: ERROR
+      kafka.wblist.topic.command: wb-list-command
+      kafka.wblist.topic.event.sink: wb-list-event-sink
+      JAVA_OPTS: -Xmx768m
+      spring.datasource.url: jdbc:postgresql://postgres-wblist:5432/wb_list
+      spring.datasource.username: postgres
+      spring.datasource.password: postgres
+      spring.kafka.bootstrap-servers: broker:9092
+      spring.kafka.streams.properties.num.stream.threads: '1'
+    depends_on:
+    - riak
+    - broker
+    - postgres-wblist
+    ports:
+    - 8991:8022
+    profiles:
+    - apps
+    - e2e
+    build:
+      context: ../apps/wb-list-manager/target
+      dockerfile: Dockerfile
+  trusted-tokens-manager:
+    image: ghcr.io/valitydev/trusted-tokens-manager:${IMAGE_TAG:-local}
+    hostname: trusted-tokens-manager
+    mem_limit: 1024m
+    mem_reservation: 128M
+    environment:
+      kafka.bootstrap-servers: broker:9092
+      kafka.client-id: trusted-tokens-manager
+      kafka.topics.payment.id: payment_event
+      kafka.topics.payment.consume.enabled: 'true'
+      kafka.topics.withdrawal.consume.enabled: 'true'
+      kafka.topics.withdrawal.id: withdrawal
+      kafka.num-stream-threads: 1
+      riak-config.address: riak
+      riak-config.port: 8087
+      management.metrics.export.statsd.enabled: 'false'
+      logging.config: tmp/logback-test.xml
+      JAVA_OPTS: -Xmx768m
+      spring.datasource.url: jdbc:postgresql://postgres-trusted-tokens:5432/trusted_tokens
+      spring.datasource.username: postgres
+      spring.datasource.password: postgres
+      spring.kafka.bootstrap-servers: broker:9092
+      spring.kafka.streams.properties.num.stream.threads: '1'
+    depends_on:
+    - riak
+    - broker
+    - postgres-trusted-tokens
+    ports:
+    - 8992:8022
+    volumes:
+    - ./log-java:/opt/trusted-tokens-manager/tmp
+    profiles:
+    - apps
+    - e2e
+    build:
+      context: ../apps/trusted-tokens-manager/target
+      dockerfile: Dockerfile
+  fraudbusters-api:
+    image: ghcr.io/valitydev/fraudbusters-api:${IMAGE_TAG:-local}
+    hostname: fraudbusters-api
+    mem_limit: 1024m
+    mem_reservation: 128M
+    environment:
+      management.security.enabled: 'false'
+      logging.config: tmp/logback-test.xml
+      fraudbusters.service.payment.url: http://fraudbusters:8022/fraud_payment/v1/
+      fraudbusters.service.payment.networkTimeout: 30000
+      fraudbusters.service.inspector.url: http://fraudbusters:8022/fraud_inspector/v1
+      fraudbusters.service.inspector.networkTimeout: 30000
+      server.port: '8080'
+      JAVA_OPTS: -Xmx768m
+      auth.enabled: 'false'
+      spring.autoconfigure.exclude: org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration
+    depends_on:
+    - fraudbusters
+    ports:
+    - 9999:8080
+    volumes:
+    - ./log-java:/opt/fraudbusters-api/tmp
+    profiles:
+    - apps
+    - e2e
+    build:
+      context: ../apps/fraudbusters-api/target
+      dockerfile: Dockerfile
+  fraudbusters:
+    image: ghcr.io/valitydev/fraudbusters:${IMAGE_TAG:-local}
+    hostname: fraudbusters
+    mem_limit: 1024m
+    mem_reservation: 128M
+    environment:
+      management.security.enabled: 'false'
+      kafka.ssl.enable: 'false'
+      spring.kafka.bootstrap-servers: broker:9092
+      geo.ip.service.url: http://columbus:8022/repo
+      wb.list.service.url: http://wblist:8022/wb_list/v1
+      clickhouse.db.url: jdbc:clickhouse://clickhouse:8123/default
+      logging.config: tmp/logback-test.xml
+      card-token-pool.filePath: card-tokens
+      clickhouse.db.user: user
+      clickhouse.db.password: password
+      fraud.management.url: http://fb-management:8080/fb-management/v1
+      result.full.check.enabled: 'false'
+      spring.profiles.active: full-prod
+      load.isTrusted.enabled: 'false'
+      trusted.tokens.url: http://trusted-tokens-manager:8022/trusted/tokens
+      trusted.tokens.timeout: 30000
+      dgraph.service.enabled: 'false'
+      kafka.topic.group-list: group_list
+      kafka.topic.group-reference: group_reference
+      kafka.listen.result.concurrency: 7
+      kafka.max.poll.records: 1
+      kafka.max.backoff.interval: 1000
+      JAVA_OPTS: -Xmx768m
+    depends_on:
+    - clickhouse
+    - broker
+    - columbus
+    - wblist
+    - kafka-setup
+    - trusted-tokens-manager
+    ports:
+    - 8999:8022
+    - 8111:8089
+    volumes:
+    - ./log-java:/opt/fraudbusters/tmp
+    - ./card-tokens:/opt/fraudbusters/card-tokens
+    profiles:
+    - apps
+    - e2e
+    build:
+      context: ../apps/fraudbusters/target
+      dockerfile: Dockerfile
+  postgres-fb:
+    hostname: postgres-fb
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fraudbusters
+      PGDATA: /data/postgres
+    ports:
+    - 6432:5432
+    volumes:
+    - postgres-fb:/data/postgres
+    restart: unless-stopped
+    profiles:
+    - core
+    - apps
+    - e2e
+  fb-management:
+    image: ghcr.io/valitydev/fraudbusters-management:${IMAGE_TAG:-local}
+    hostname: fb-management
+    mem_limit: 1024m
+    mem_reservation: 128M
+    environment:
+      kafka.bootstrap-servers: broker:9092
+      kafka.topic.wblist.command: wb-list-command
+      kafka.topic.wblist.event.sink: wb-list-event-sink
+      kafka.topic.fraudbusters.payment.template: template
+      kafka.topic.fraudbusters.payment.reference: template_reference
+      kafka.topic.fraudbusters.payment.group.list: group_list
+      kafka.topic.fraudbusters.payment.group.reference: group_reference
+      spring.datasource.url: jdbc:postgresql://postgres-fb:5432/fraudbusters
+      logging.config: ./tmp/logback-test.xml
+      management.metrics.binders.jvm.enabled: 'false'
+      service.payment.url: http://fraudbusters:8022/fraud_payment/v1/
+      service.payment.networkTimeout: 60000
+      service.historical.url: http://fraudbusters:8022/historical_data/v1/
+      service.historical.networkTimeout: 60000
+      service.notification.url: http://fb-notificator:8022/notification/v1
+      service.notification-channel.url: http://fb-notificator:8022/notification-channel/v1
+      service.notification-template.url: http://fb-notificator:8022/notification-template/v1
+      spring.profiles.active: debug
+      keycloak.enabled: 'false'
+      keycloak.realm: fraudbusters-realm
+      keycloak.resource: fraudbusters-app
+      keycloak.auth-server-url: http://keycloak:8080/auth
+      cors.allowed-origins: '*'
+      JAVA_OPTS: -Xmx768m
+      spring.kafka.bootstrap-servers: broker:9092
+      service.warehouse.url: http://fb-warehouse:8022/query/v1/
+    ports:
+    - 8085:8080
+    depends_on:
+    - fraudbusters
+    - broker
+    - wblist
+    - postgres-fb
+    - kafka-setup
+    - fb-notificator
+    volumes:
+    - ./log-java:/opt/fraudbusters-management/tmp
+    profiles:
+    - apps
+    - e2e
+    build:
+      context: ../apps/fraudbusters-management/target
+      dockerfile: Dockerfile
+  fb-notificator:
+    image: ghcr.io/valitydev/fraudbusters-notificator:${IMAGE_TAG:-local}
+    hostname: fb-notificator
+    mem_limit: 1024m
+    mem_reservation: 128M
+    environment:
+      spring.datasource.url: jdbc:postgresql://postgres-notificator:5432/fb_notificator
+      logging.config: ./tmp/logback-test.xml
+      management.metrics.binders.jvm.enabled: 'false'
+      warehouse.url: http://fb-warehouse:8022/query/v1/
+      spring.profiles.active: debug
+      JAVA_OPTS: -Xmx768m
+    ports:
+    - 8086:8022
+    depends_on:
+    - postgres-notificator
+    - fb-warehouse
+    volumes:
+    - ./log-java:/opt/fraudbusters-notificator/tmp
+    profiles:
+    - apps
+    - e2e
+    build:
+      context: ../apps/fraudbusters-notificator/target
+      dockerfile: Dockerfile
+  postgres-notificator:
+    hostname: postgres-notificator
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fb_notificator
+      PGDATA: /data/postgres
+    ports:
+    - 6435:5432
+    volumes:
+    - postgres-notificator:/data/postgres
+    restart: unless-stopped
+    profiles:
+    - core
+    - apps
+    - e2e
+  fb-warehouse:
+    image: ghcr.io/valitydev/fraudbusters-warehouse:${IMAGE_TAG:-local}
+    hostname: fb-warehouse
+    mem_limit: 1024m
+    mem_reservation: 128M
+    environment:
+      clickhouse.db.url: jdbc:clickhouse://clickhouse:8123/default
+      clickhouse.db.user: user
+      clickhouse.db.password: password
+      logging.config: ./tmp/logback-test.xml
+      management.metrics.binders.jvm.enabled: 'false'
+      spring.profiles.active: debug
+      JAVA_OPTS: -Xmx768m
+    ports:
+    - 8088:8080
+    depends_on:
+    - clickhouse
+    volumes:
+    - ./log-java:/opt/fraudbusters-warehouse/tmp
+    profiles:
+    - apps
+    - e2e
+    build:
+      context: ../apps/fraudbusters-warehouse/target
+      dockerfile: Dockerfile
+  fraudbusters-ui:
+    image: ghcr.io/valitydev/fraudbusters-ui:${IMAGE_TAG:-local}
+    hostname: fraudbusters-ui
+    environment: {}
+    ports:
+    - 8989:8080
+    depends_on:
+    - fb-management
+    volumes:
+    - ./fraudbusters-ui/nginx.conf:/etc/nginx/conf.d/default.conf
+    - ./fraudbusters-ui/appConfig.json:/usr/share/nginx/html/assets/appConfig.json
+    - ./fraudbusters-ui/authConfig.json:/usr/share/nginx/html/assets/authConfig.json
+    profiles:
+    - apps
+    - e2e
+    build:
+      context: ../apps/fraudbusters-ui
+      dockerfile: Dockerfile
+  keycloak:
+    image: docker.io/wizzn/keycloak:14
+    hostname: keycloak
+    ports:
+    - 8080:8080
+    - 8443:8443
+    environment:
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_IMPORT: /tmp/realm-export.json
+    volumes:
+    - ./keycloak/themes/fraudbusters:/opt/jboss/keycloak/themes/fraudbusters
+    - ./keycloak/realm-export.json:/tmp/realm-export.json:ro
+    profiles:
+    - core
+    - apps
+    - e2e
+  e2e-test:
+    build:
+      context: ../tests/e2e
+    image: e2e-test
+    command:
+    - node
+    - wait-and-test.js
+    environment:
+      FB_MNGMT_URL: http://fb-management:8080
+      FB_API_URL: http://fraudbusters-api:8080
+    depends_on:
+    - fb-management
+    - fraudbusters
+    - fraudbusters-api
+    profiles:
+    - e2e
+  postgres-wblist:
+    image: postgres:17
+    hostname: postgres-wblist
+    profiles:
+    - core
+    - apps
+    - e2e
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: wb_list
+    ports:
+    - 6436:5432
+    volumes:
+    - postgres-wblist:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U postgres -d wb_list
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  postgres-trusted-tokens:
+    image: postgres:17
+    hostname: postgres-trusted-tokens
+    profiles:
+    - core
+    - apps
+    - e2e
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: trusted_tokens
+    ports:
+    - 6437:5432
+    volumes:
+    - postgres-trusted-tokens:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U postgres -d trusted_tokens
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  fraudbusters-mg-connector:
+    hostname: fraudbusters-mg-connector
+    image: ghcr.io/valitydev/fraudbusters-mg-connector:${IMAGE_TAG:-local}
+    build:
+      context: ../apps/fraudbusters-mg-connector/target
+      dockerfile: Dockerfile
+    profiles:
+    - apps
+    - e2e
+    environment:
+      spring.kafka.bootstrap-servers: broker:9092
+      spring.kafka.streams.properties.num.stream.threads: '1'
+      fb.stream.invoiceEnabled: 'false'
+      fb.stream.withdrawalEnabled: 'false'
+      service.invoicing.url: ${INVOICING_URL:-http://hellgate:8022/v1/processing/invoicing}
+      service.withdrawal.url: ${WITHDRAWAL_URL:-http://hellgate:8022/v1/processing/invoicing}
+      service.dominant.url: ${DOMINANT_URL:-http://dominant:8022/v1/test}
+      service.destination.url: ${DESTINATION_URL:-http://hellgate:8022/v1/processing/invoicing}
+    depends_on:
+    - broker
+    - kafka-setup
+    ports:
+    - 8993:8022
+networks:
+  default:
+    driver: bridge
+volumes:
+  mi2: {}
+  postgres-wblist: {}
+  postgres-trusted-tokens: {}
+  postgres-fb: {}
+  postgres-notificator: {}
+  zookeeper: {}
+  broker: {}
+  clickhouse-data: {}
+name: fraudbusters-project

@@ -1,0 +1,19 @@
+{
+  "name": "fraudbusters-project",
+  "private": true,
+  "scripts": {
+    "openapi:install": "npm ci --prefix packages/protocols/swag-fraudbusters && npm ci --prefix packages/protocols/swag-fraudbusters-management",
+    "openapi:validate": "npm run validate --prefix packages/protocols/swag-fraudbusters && npm run validate --prefix packages/protocols/swag-fraudbusters-management",
+    "openapi:build": "npm run build --prefix packages/protocols/swag-fraudbusters && npm run build --prefix packages/protocols/swag-fraudbusters-management",
+    "ui:install": "npm ci --prefix apps/fraudbusters-ui",
+    "ui:codegen": "scripts/sync-openapi-to-ui.sh && npm run codegen --prefix apps/fraudbusters-ui",
+    "ui:check": "npm run ci:check --prefix apps/fraudbusters-ui",
+    "ui:test": "npm run test --prefix apps/fraudbusters-ui -- --watch=false --browsers=ChromeHeadless",
+    "ui:build": "npm run ui:codegen && npm run build --prefix apps/fraudbusters-ui",
+    "check": "npm run openapi:validate && npm run ui:check",
+    "build": "npm run ui:build",
+    "test": "npm run ui:test",
+    "test:ci": "python3 -m unittest discover -s tests/ci -v",
+    "e2e": "scripts/run-e2e.sh"
+  }
+}

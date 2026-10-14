@@ -1,0 +1,151 @@
+[
+  {
+    "name": "fraudbusters",
+    "path": "apps/fraudbusters",
+    "kind": "service",
+    "java": "25"
+  },
+  {
+    "name": "fraudbusters-api",
+    "path": "apps/fraudbusters-api",
+    "kind": "service",
+    "java": "25"
+  },
+  {
+    "name": "fraudbusters-management",
+    "path": "apps/fraudbusters-management",
+    "kind": "service",
+    "java": "25"
+  },
+  {
+    "name": "fraudbusters-mg-connector",
+    "path": "apps/fraudbusters-mg-connector",
+    "kind": "service",
+    "java": "25"
+  },
+  {
+    "name": "fraudbusters-notificator",
+    "path": "apps/fraudbusters-notificator",
+    "kind": "service",
+    "java": "25"
+  },
+  {
+    "name": "fraudbusters-warehouse",
+    "path": "apps/fraudbusters-warehouse",
+    "kind": "service",
+    "java": "25"
+  },
+  {
+    "name": "trusted-tokens-manager",
+    "path": "apps/trusted-tokens-manager",
+    "kind": "service",
+    "java": "25"
+  },
+  {
+    "name": "wb-list-manager",
+    "path": "apps/wb-list-manager",
+    "kind": "service",
+    "java": "25"
+  },
+  {
+    "name": "fraudbusters-ui",
+    "path": "apps/fraudbusters-ui",
+    "kind": "ui",
+    "node": "23"
+  },
+  {
+    "name": "fraudbusters-proto",
+    "path": "packages/protocols/fraudbusters-proto",
+    "kind": "thrift",
+    "java": "17",
+    "thrift": "0.19.0",
+    "erlang": true,
+    "publish": "maven-central"
+  },
+  {
+    "name": "fraudbusters-notificator-proto",
+    "path": "packages/protocols/fraudbusters-notificator-proto",
+    "kind": "thrift",
+    "java": "17",
+    "thrift": "0.19.0",
+    "erlang": true,
+    "publish": "maven-central"
+  },
+  {
+    "name": "fraud-data-crawler-proto",
+    "path": "packages/protocols/fraud-data-crawler-proto",
+    "kind": "thrift",
+    "java": "17",
+    "thrift": "0.19.0",
+    "erlang": false,
+    "publish": "maven-central"
+  },
+  {
+    "name": "fraudbusters-warehouse-proto",
+    "path": "packages/protocols/fraudbusters-warehouse-proto",
+    "kind": "thrift",
+    "java": "17",
+    "thrift": "0.19.0",
+    "erlang": false,
+    "publish": "maven-central"
+  },
+  {
+    "name": "trusted-tokens-proto",
+    "path": "packages/protocols/trusted-tokens-proto",
+    "kind": "thrift",
+    "java": "17",
+    "thrift": "0.19.0",
+    "erlang": false,
+    "publish": "maven-central"
+  },
+  {
+    "name": "wb-list-proto",
+    "path": "packages/protocols/wb-list-proto",
+    "kind": "thrift",
+    "java": "17",
+    "thrift": "0.19.0",
+    "erlang": false,
+    "publish": "maven-central"
+  },
+  {
+    "name": "swag-fraudbusters",
+    "path": "packages/protocols/swag-fraudbusters",
+    "kind": "openapi",
+    "java": "21",
+    "node": "16",
+    "profiles": [
+      "server",
+      "client"
+    ],
+    "publish": "maven-central"
+  },
+  {
+    "name": "swag-fraudbusters-management",
+    "path": "packages/protocols/swag-fraudbusters-management",
+    "kind": "openapi",
+    "java": "21",
+    "node": "16",
+    "profiles": [
+      "server",
+      "client"
+    ],
+    "publish": "maven-central"
+  },
+  {
+    "name": "fraudo",
+    "path": "packages/libs/fraudo",
+    "kind": "library",
+    "java": "17",
+    "publish": "maven-central"
+  },
+  {
+    "name": "fraudbusters-compose",
+    "path": "infra",
+    "kind": "compose"
+  },
+  {
+    "name": "fraudbusters-docs",
+    "path": "docs",
+    "kind": "docs"
+  }
+]

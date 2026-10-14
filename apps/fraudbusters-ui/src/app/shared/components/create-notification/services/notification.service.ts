@@ -14,7 +14,7 @@ import { progress } from '../../../operators';
 export class NotificationService {
     static defaultParams = {
         name: '',
-        type: '',
+        type: null as number | null,
         subject: '',
         period: '',
         frequency: '',

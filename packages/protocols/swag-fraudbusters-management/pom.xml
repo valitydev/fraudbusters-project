@@ -136,6 +136,7 @@
     <profiles>
         <profile>
             <id>server</id>
+            <activation><activeByDefault>true</activeByDefault></activation>
             <properties>
                 <artifact.name>swag-fraudbusters-management-server</artifact.name>
             </properties>
@@ -152,7 +153,8 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <inputSpec>dist/openapi.yaml</inputSpec>
+                                    <inputSpec>${project.basedir}/dist/openapi.yaml</inputSpec>
+                                    <output>${project.build.directory}/generated-sources/${artifact.name}</output>
                                     <generatorName>spring</generatorName>
                                     <generateModels>true</generateModels>
                                     <generateApis>true</generateApis>
@@ -201,7 +203,8 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <inputSpec>dist/openapi.yaml</inputSpec>
+                                    <inputSpec>${project.basedir}/dist/openapi.yaml</inputSpec>
+                                    <output>${project.build.directory}/generated-sources/${artifact.name}</output>
                                     <generatorName>java</generatorName>
                                     <configOptions>
                                         <dateLibrary>java8</dateLibrary>
@@ -221,4 +224,36 @@
             </build>
         </profile>
     </profiles>
+    <build>
+        <outputDirectory>${project.build.directory}/classes-${artifact.name}</outputDirectory>
+        <plugins>
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>1.15.1</version>
+                <configuration>
+                    <installDirectory>${project.build.directory}/frontend</installDirectory>
+                    <workingDirectory>${project.basedir}</workingDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>install-contract-node</id><phase>initialize</phase>
+                        <goals><goal>install-node-and-npm</goal></goals>
+                        <configuration><nodeVersion>v16.20.2</nodeVersion></configuration>
+                    </execution>
+                    <execution>
+                        <id>install-contract-dependencies</id><phase>initialize</phase>
+                        <goals><goal>npm</goal></goals>
+                        <configuration><arguments>ci --ignore-scripts</arguments></configuration>
+                    </execution>
+                    <execution>
+                        <id>bundle-contract</id><phase>initialize</phase>
+                        <goals><goal>npm</goal></goals>
+                        <configuration><arguments>run build</arguments></configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
