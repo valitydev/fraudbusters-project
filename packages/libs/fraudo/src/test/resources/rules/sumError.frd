@@ -1,0 +1,2 @@
+rule: sumError("fingerprint", 1444) > 523.12
+-> decline;

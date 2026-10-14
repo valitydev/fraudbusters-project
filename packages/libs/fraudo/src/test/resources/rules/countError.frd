@@ -1,0 +1,2 @@
+rule: countError("fingerprint", 1444) > 5
+-> decline;

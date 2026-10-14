@@ -1,0 +1,50 @@
+docs_dir: "content"
+site_name: "Fraudo|docs"
+#repo_url: https://github.com/valitydev/fraudo
+#edit_uri: ""
+theme:
+  name: gitbook
+  highlightjs: true
+  icon:
+    logo: material/alpha-e-box
+  favicon: assets/favicon.ico
+  language: ru
+  features:
+    - toc.integrate
+  palette:
+    primary: teal
+    accent: teal
+
+extra:
+  analytics:
+    provider: google
+    property: !ENV GOOGLE_ANALYTICS_KEY
+  nav:
+    sort_order: reverse
+strict: false
+
+plugins:
+  - autolinks
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.snippets
+  - smarty
+  - admonition
+  - def_list
+  - footnotes
+  - codehilite
+  - attr_list
+  - md_in_html
+  - meta
+  - toc:
+      permalink: true
+
+nav:
+  - О языке: "index.md"
+  - Синтаксис:
+      - Синтаксис: "docs/syntax.md"
+      - Операции: "docs/operations.md"
+      - Примеры: "docs/examples.md"

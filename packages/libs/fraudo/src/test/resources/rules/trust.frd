@@ -1,0 +1,2 @@
+rule: rand(2) < 3
+-> trust;

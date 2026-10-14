@@ -1,0 +1,12 @@
+name: Maven Build Artifact
+
+on:
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    uses: valitydev/java-workflow/.github/workflows/maven-library-build.yml@v4
+    with:
+      java-version: 17
