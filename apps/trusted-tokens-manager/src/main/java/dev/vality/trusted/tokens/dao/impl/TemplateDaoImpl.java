@@ -2,7 +2,6 @@ package dev.vality.trusted.tokens.dao.impl;
 
 import tools.jackson.databind.json.JsonMapper;
 import dev.vality.dao.impl.AbstractGenericDao;
-import dev.vality.mapper.RecordRowMapper;
 import dev.vality.trusted.tokens.ConditionTemplate;
 import dev.vality.trusted.tokens.dao.TemplateDao;
 import dev.vality.trusted.tokens.domain.tables.records.TemplateDataRecord;
@@ -28,13 +27,15 @@ public class TemplateDaoImpl extends AbstractGenericDao implements TemplateDao {
     public TemplateDaoImpl(DataSource dataSource, JsonMapper objectMapper) {
         super(dataSource);
         this.objectMapper = objectMapper;
-        listRecordRowMapper = new RecordRowMapper<>(TEMPLATE_DATA, Row.class);
+        listRecordRowMapper = (resultSet, rowNumber) -> new Row(
+                resultSet.getString("template_name"), resultSet.getString("template_condition"));
     }
 
     @Override
     public void create(Row row) {
         Query query = getDslContext().insertInto(TEMPLATE_DATA)
-                .set(getDslContext().newRecord(TEMPLATE_DATA, row))
+                .set(TEMPLATE_DATA.TEMPLATE_NAME, row.getKey())
+                .set(TEMPLATE_DATA.TEMPLATE_CONDITION, row.getValue())
                 .onConflict(TEMPLATE_DATA.TEMPLATE_NAME)
                 .doUpdate().set(Map.of(TEMPLATE_DATA.TEMPLATE_CONDITION, row.getValue()));
         execute(query);

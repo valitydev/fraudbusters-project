@@ -2,7 +2,6 @@ package dev.vality.trusted.tokens.dao.impl;
 
 import tools.jackson.databind.json.JsonMapper;
 import dev.vality.dao.impl.AbstractGenericDao;
-import dev.vality.mapper.RecordRowMapper;
 import dev.vality.trusted.tokens.dao.TokenDao;
 import dev.vality.trusted.tokens.domain.tables.records.TokenDataRecord;
 import dev.vality.trusted.tokens.model.CardTokenData;
@@ -28,13 +27,15 @@ public class TokenDaoImpl extends AbstractGenericDao implements TokenDao {
     public TokenDaoImpl(DataSource dataSource, JsonMapper objectMapper) {
         super(dataSource);
         this.objectMapper = objectMapper;
-        listRecordRowMapper = new RecordRowMapper<>(TOKEN_DATA, Row.class);
+        listRecordRowMapper = (resultSet, rowNumber) -> new Row(
+                resultSet.getString("token"), resultSet.getString("data"));
     }
 
     @Override
     public void create(Row row) {
         Query query = getDslContext().insertInto(TOKEN_DATA)
-                .set(getDslContext().newRecord(TOKEN_DATA, row))
+                .set(TOKEN_DATA.TOKEN, row.getKey())
+                .set(TOKEN_DATA.DATA, row.getValue())
                 .onConflict(TOKEN_DATA.TOKEN)
                 .doUpdate().set(Map.of(TOKEN_DATA.DATA, row.getValue()));
         execute(query);
