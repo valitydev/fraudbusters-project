@@ -1,12 +1,12 @@
+const { randomUUID } = require('crypto');
 const CARD_TOKEN = "aggr_test_token";
 const IP = "192.1.1.1";
 const EMAIL = "test_unique@vality.dev";
-const paymentId = Math.floor(Math.random() * 999);
 
 module.exports.create =
     function (id, ip, email, fingerprint, cardToken, partyId, shopId, amount, currency) {
         return {
-            id: id || paymentId,
+            id: id || randomUUID(),
             customer: {
                 name: "Test Test",
                 device: {
@@ -48,7 +48,7 @@ module.exports.create =
             },
             payerType: "payment_resource",
             tokenMobileProvider: null,
-            createdAt: Math.floor(Date.now() / 1000),
+            createdAt: new Date().toISOString(),
             description: "Test product"
         };
     }

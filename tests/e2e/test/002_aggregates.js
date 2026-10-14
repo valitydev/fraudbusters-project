@@ -38,7 +38,8 @@ function generateFingerprint() {
     return AGGR_FINGERPRINT + Math.floor(Math.random() * 999);
 }
 
-const status = "processed";
+// Aggregates include final payment states; processed is still intermediate.
+const status = "captured";
 describe('Test for check aggregates', function () {
     this.timeout(testTimeout);
 

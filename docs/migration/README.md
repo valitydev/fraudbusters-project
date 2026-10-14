@@ -1,5 +1,7 @@
 # Migration runbook
 
+Local results: [validation report](validation.md).
+
 ## Source baseline
 
 `sources.json` records the remote master SHA and source tree for each of the 20

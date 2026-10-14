@@ -26,7 +26,7 @@ module.exports.create = function (done, checkResponse, template, id) {
                 done(err);
             }
             should.not.exist(err);
-            should.not.exist(res.body.errors)
+            should.equal((res.body.errors || []).length, 0)
             checkResponse(res);
             done()
         });

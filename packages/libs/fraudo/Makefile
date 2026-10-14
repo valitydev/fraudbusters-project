@@ -1,5 +1,5 @@
 FORMAT := png svg
-SOURCEDIR := $(CURDIR)/content
+SOURCEDIR := $(abspath $(CURDIR)/../../../docs/fraudo/content)
 STYLE := plantuml-toolset/super-serious-style.isvg
 
 all: plantuml-toolset

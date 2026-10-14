@@ -1,6 +1,9 @@
 import importlib.util
 from pathlib import Path
 import unittest
+import json
+import subprocess
+import tempfile
 from unittest.mock import patch
 import urllib.error
 
@@ -28,3 +31,37 @@ class PublicationTests(unittest.TestCase):
         with patch.object(publication.urllib.request, "urlopen", side_effect=urllib.error.URLError("offline")):
             with self.assertRaises(urllib.error.URLError):
                 publication.artifact_exists("https://registry.invalid")
+
+    def test_unrelated_commits_do_not_allocate_a_new_release(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            def git(*args):
+                return subprocess.check_output(["git", *args], cwd=root, text=True).strip()
+            def commit(message):
+                git("add", ".")
+                git("commit", "-qm", message)
+                return git("rev-parse", "HEAD")
+            git("init", "-q")
+            git("config", "user.name", "Test")
+            git("config", "user.email", "test@example.invalid")
+            (root / "README.md").write_text("source")
+            source = commit("source")
+            path = "packages/protocols/example"
+            (root / path).mkdir(parents=True)
+            (root / path / "contract.thrift").write_text("initial")
+            commit("Import example master at " + source)
+            (root / "docs/migration").mkdir(parents=True)
+            (root / "docs/migration/sources.json").write_text(json.dumps({"sources": [{"name": "example", "sha": source, "path": path}]}))
+            commit("manifest")
+            module = {"path": path}
+            with patch.object(publication, "ROOT", root):
+                initial = publication.release_identity(module)
+                (root / "README.md").write_text("unrelated service changes")
+                commit("unrelated")
+                self.assertEqual(publication.release_identity(module), initial)
+                (root / path / "contract.thrift").write_text("new contract")
+                changed = commit("contract change")
+                self.assertEqual(publication.release_identity(module), (initial[0] + 1, f"1.{initial[0] + 1}-{changed[:7]}"))
+                (root / "README.md").write_text("another unrelated change")
+                commit("unrelated again")
+                self.assertEqual(publication.release_identity(module)[1], f"1.{initial[0] + 1}-{changed[:7]}")

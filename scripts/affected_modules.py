@@ -69,7 +69,7 @@ def select(paths, mode="changed"):
         "java_apps": sorted(images),
         "publish": [m for m in modules if m["path"] in publish],
         "openapi": sorted(openapi),
-        "erlang": [m["path"] for m in modules if m["path"] in selected and m.get("erlang")],
+        "erlang": [m for m in modules if m["path"] in selected and m.get("erlang")],
         "ui_changed": ui,
         "infra_changed": infra,
         "docs_changed": docs,

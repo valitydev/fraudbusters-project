@@ -1,6 +1,6 @@
 {
     "realm": "fraudbusters-realm",
-    "auth-server-url": "http://keycloak:8080/auth",
+    "auth-server-url": "http://localhost:8080/auth",
     "resource": "fraudbusters-app",
     "public-client": true
 }

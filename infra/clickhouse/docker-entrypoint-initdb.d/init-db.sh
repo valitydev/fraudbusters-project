@@ -541,3 +541,6 @@ clickhouse client -n -u ${CLICKHOUSE_USER} --password ${CLICKHOUSE_PASSWORD} <<-
     ('2019-12-05', 1587761208, 1587759200000, 'group_1', '2035728', 'email', '4bef59146f8e4640ab34915f84ddac8b', 5000, 'RUB', 'failed', '666', '1DkratTHbpg.1', '204.26.61.110', '666', '3125', 'bank_card', '477bba133c182267fe5f086924abdc5db71f77bfc27f01f2843f2cdc69d89f05', 'VISA', '123', '1', 'RUS', 'Error', '1111vbtt');
 
 EOSQL
+
+# Match the current application schema after the legacy local seed tables.
+clickhouse client -n -u "$CLICKHOUSE_USER" --password "$CLICKHOUSE_PASSWORD" < /docker-entrypoint-initdb.d/zz-current-schema.sql

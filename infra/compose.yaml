@@ -117,6 +117,7 @@ services:
     - clickhouse-data:/var/lib/clickhouse
     - ./clickhouse/log:/var/log
     - ./clickhouse/docker-entrypoint-initdb.d/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    - ./clickhouse/docker-entrypoint-initdb.d/ensure-current-schema.sql:/docker-entrypoint-initdb.d/zz-current-schema.sql:ro
     profiles:
     - core
     - apps
@@ -172,6 +173,9 @@ services:
       spring.datasource.password: postgres
       spring.kafka.bootstrap-servers: broker:9092
       spring.kafka.streams.properties.num.stream.threads: '1'
+      OTEL_TRACES_EXPORTER: none
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
     depends_on:
     - riak
     - broker
@@ -207,6 +211,9 @@ services:
       spring.datasource.password: postgres
       spring.kafka.bootstrap-servers: broker:9092
       spring.kafka.streams.properties.num.stream.threads: '1'
+      OTEL_TRACES_EXPORTER: none
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
     depends_on:
     - riak
     - broker
@@ -236,7 +243,10 @@ services:
       server.port: '8080'
       JAVA_OPTS: -Xmx768m
       auth.enabled: 'false'
-      spring.autoconfigure.exclude: org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration
+      spring.autoconfigure.exclude: org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration,org.springframework.boot.security.autoconfigure.web.servlet.ServletWebSecurityAutoConfiguration,org.springframework.boot.security.autoconfigure.actuate.web.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerAutoConfiguration,org.springframework.boot.security.oauth2.server.resource.autoconfigure.web.OAuth2ResourceServerWebSecurityAutoConfiguration
+      OTEL_TRACES_EXPORTER: none
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
     depends_on:
     - fraudbusters
     ports:
@@ -278,6 +288,9 @@ services:
       kafka.max.poll.records: 1
       kafka.max.backoff.interval: 1000
       JAVA_OPTS: -Xmx768m
+      OTEL_TRACES_EXPORTER: none
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
     depends_on:
     - clickhouse
     - broker
@@ -339,6 +352,7 @@ services:
       service.notification-template.url: http://fb-notificator:8022/notification-template/v1
       spring.profiles.active: debug
       keycloak.enabled: 'false'
+      spring.autoconfigure.exclude: org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration,org.springframework.boot.security.autoconfigure.web.servlet.ServletWebSecurityAutoConfiguration,org.springframework.boot.security.autoconfigure.actuate.web.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerAutoConfiguration,org.springframework.boot.security.oauth2.server.resource.autoconfigure.web.OAuth2ResourceServerWebSecurityAutoConfiguration
       keycloak.realm: fraudbusters-realm
       keycloak.resource: fraudbusters-app
       keycloak.auth-server-url: http://keycloak:8080/auth
@@ -346,6 +360,9 @@ services:
       JAVA_OPTS: -Xmx768m
       spring.kafka.bootstrap-servers: broker:9092
       service.warehouse.url: http://fb-warehouse:8022/query/v1/
+      OTEL_TRACES_EXPORTER: none
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
     ports:
     - 8085:8080
     depends_on:
@@ -375,6 +392,10 @@ services:
       warehouse.url: http://fb-warehouse:8022/query/v1/
       spring.profiles.active: debug
       JAVA_OPTS: -Xmx768m
+      spring.main.lazy-initialization: 'true'
+      OTEL_TRACES_EXPORTER: none
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
     ports:
     - 8086:8022
     depends_on:
@@ -418,8 +439,11 @@ services:
       management.metrics.binders.jvm.enabled: 'false'
       spring.profiles.active: debug
       JAVA_OPTS: -Xmx768m
+      OTEL_TRACES_EXPORTER: none
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
     ports:
-    - 8088:8080
+    - 8088:8022
     depends_on:
     - clickhouse
     volumes:
@@ -543,6 +567,9 @@ services:
       service.withdrawal.url: ${WITHDRAWAL_URL:-http://hellgate:8022/v1/processing/invoicing}
       service.dominant.url: ${DOMINANT_URL:-http://dominant:8022/v1/test}
       service.destination.url: ${DESTINATION_URL:-http://hellgate:8022/v1/processing/invoicing}
+      OTEL_TRACES_EXPORTER: none
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
     depends_on:
     - broker
     - kafka-setup
