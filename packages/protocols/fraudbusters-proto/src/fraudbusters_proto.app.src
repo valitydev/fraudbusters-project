@@ -1,0 +1,11 @@
+{application, fraudbusters_proto, [
+    {description, "Fraudbusters thrift protocol"},
+    {vsn, "0.1.0"},
+    {registered, []},
+    {applications, [
+        kernel,
+        stdlib,
+        damsel
+    ]},
+    {env, []}
+]}.
