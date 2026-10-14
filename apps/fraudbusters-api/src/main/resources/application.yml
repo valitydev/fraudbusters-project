@@ -1,0 +1,52 @@
+server:
+  port: ${server.port}
+
+management:
+  server:
+    port: ${management.port}
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      access: unrestricted
+    prometheus:
+      access: unrestricted
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: false
+
+spring:
+  application:
+    name: '@project.name@'
+  output:
+    ansi:
+      enabled: always
+  security:
+    oauth2:
+      resourceserver:
+        url: https://auth.domain
+        jwt:
+          realm: internal
+          issuer-uri: >
+            ${spring.security.oauth2.resourceserver.url}/auth/realms/
+            ${spring.security.oauth2.resourceserver.jwt.realm}
+info:
+  version: '@project.version@'
+  stage: dev
+
+fraudbusters:
+  service:
+    payment:
+      url: http://localhost:8022
+      networkTimeout: 10000
+    inspector:
+      url: http://localhost:8022
+      networkTimeout: 10000
+    user.inspector:
+      url: http://localhost:8022
+      networkTimeout: 10000
