@@ -1,0 +1,17 @@
+name: Erlang build
+
+on:
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  build:
+    uses: valitydev/erlang-workflows/.github/workflows/erlang-simple-build.yml@v1
+    with:
+      otp-version: 24
+      rebar-version: 3
+      use-thrift: true
+      thrift-version: 0.14.2.3
+      run-eunit: false
+      run-common-test: false
