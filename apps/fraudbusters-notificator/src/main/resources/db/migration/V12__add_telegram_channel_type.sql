@@ -1,0 +1,1 @@
+ALTER TYPE fb_notificator.channel_type ADD VALUE 'telegram';

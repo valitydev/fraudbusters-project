@@ -1,0 +1,81 @@
+server:
+  port: '${server.port}'
+management:
+  security:
+    flag: false
+  server:
+    port: '${management.port}'
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+---
+spring:
+  application:
+    name: ${project.name}
+  output:
+    ansi:
+      enabled: always
+  flyway:
+    baseline-on-migrate: true
+    table: flyway_schema_history
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.postgresql.Driver
+    url: ${db.url}
+    username: ${db.user}
+    password: ${db.password}
+---
+info:
+  version: '@project.version@'
+  stage: dev
+mail:
+  host: mr1.linode.rbkmoney.net
+  port: 25
+  username: ""
+  password: ""
+  from: no-reply@rbkmoney.com
+  protocol: smtp
+  factory: javax.net.ssl.SSLSocketFactory
+  retry:
+    max:
+      attempts: 3
+    backoff:
+      period: 1000
+  smtp:
+    auth: true
+    timeout: 30000
+    from-address: "NotificationService@rbkmoney.com"
+    ssl:
+      enable: false
+    starttls:
+      enable: true
+---
+fixedDelay:
+  in:
+    milliseconds: "600000"
+---
+warehouse:
+  url: http://localhost:8022/change_it
+  networkTimeout: 10000
+---
+testcontainers:
+  postgresql:
+    tag: '11.4'
+
+telegram:
+  bot:
+    username: "YourBotUsername"
+    token: "YourBotUsername"
+
+vault:
+  uri: https://vault.empayre.com:443
+  token: "xxx"
