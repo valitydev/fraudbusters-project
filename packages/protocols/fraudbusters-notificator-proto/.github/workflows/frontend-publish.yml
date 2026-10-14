@@ -1,0 +1,24 @@
+name: 'Frontend: Publish'
+
+on:
+  push:
+    branches: ['master', 'main']
+
+jobs:
+  configured:
+    uses: valitydev/action-frontend/.github/workflows/configured.yml@v0.1
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    needs: configured
+    if: needs.configured.outputs.exists == 'true'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: valitydev/action-frontend/setup@v0.1
+      - uses: valitydev/action-setup-thrift@v1.0.1
+      - run: npm i # protocols don't always update the package-lock.json, so installing from package.json
+      - name: Build
+        run: npm run codegen
+      - uses: valitydev/action-frontend/publish@v0.1
+        with:
+          npm-token: ${{ secrets.NPM_TOKEN }}
