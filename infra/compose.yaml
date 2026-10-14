@@ -7,17 +7,26 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     volumes:
-    - zookeeper:/var/lib/zookeeper/data
-    - zookeeper:/var/lib/zookeeper/log
+    - zookeeper-data:/var/lib/zookeeper/data
+    - zookeeper-log:/var/lib/zookeeper/log
     profiles:
     - core
     - apps
     - e2e
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - cub zk-ready localhost 2181 10
+      interval: 5s
+      timeout: 15s
+      retries: 30
+      start_period: 10s
   broker:
     image: confluentinc/cp-enterprise-kafka:5.0.1
     hostname: broker
     depends_on:
-    - zookeeper
+      zookeeper:
+        condition: service_healthy
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -40,11 +49,20 @@ services:
     - core
     - apps
     - e2e
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - cub kafka-ready -b localhost:9092 1 10
+      interval: 5s
+      timeout: 15s
+      retries: 30
+      start_period: 10s
   kafka-setup:
     image: confluentinc/cp-kafka:5.1.1
     hostname: kafka-setup
     depends_on:
-    - broker
+      broker:
+        condition: service_healthy
     command: bash -c 'echo Waiting for Kafka to be ready... && cub kafka-ready -b
       broker:9092 1 60 && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
       --partitions 1 --replication-factor 1 --topic wb-list-command  && kafka-topics
@@ -80,12 +98,18 @@ services:
       1 --topic payment && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
       --partitions 1 --replication-factor 1 --topic refund && kafka-topics --create
       --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor
-      1 --topic chargeback && echo Waiting 60 seconds for Connect to be ready... &&
-      sleep 60'
+      1 --topic chargeback && touch /tmp/topics-ready && tail -f /dev/null'
     profiles:
     - core
     - apps
     - e2e
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - test -f /tmp/topics-ready
+      interval: 2s
+      timeout: 2s
+      retries: 300
   riak:
     image: basho/riak-kv
     hostname: riak
@@ -177,9 +201,14 @@ services:
       OTEL_METRICS_EXPORTER: none
       OTEL_LOGS_EXPORTER: none
     depends_on:
-    - riak
-    - broker
-    - postgres-wblist
+      riak:
+        condition: service_started
+      broker:
+        condition: service_healthy
+      postgres-wblist:
+        condition: service_healthy
+      kafka-setup:
+        condition: service_healthy
     ports:
     - 8991:8022
     profiles:
@@ -215,9 +244,14 @@ services:
       OTEL_METRICS_EXPORTER: none
       OTEL_LOGS_EXPORTER: none
     depends_on:
-    - riak
-    - broker
-    - postgres-trusted-tokens
+      riak:
+        condition: service_started
+      broker:
+        condition: service_healthy
+      postgres-trusted-tokens:
+        condition: service_healthy
+      kafka-setup:
+        condition: service_healthy
     ports:
     - 8992:8022
     volumes:
@@ -292,12 +326,18 @@ services:
       OTEL_METRICS_EXPORTER: none
       OTEL_LOGS_EXPORTER: none
     depends_on:
-    - clickhouse
-    - broker
-    - columbus
-    - wblist
-    - kafka-setup
-    - trusted-tokens-manager
+      clickhouse:
+        condition: service_started
+      broker:
+        condition: service_healthy
+      columbus:
+        condition: service_started
+      wblist:
+        condition: service_started
+      kafka-setup:
+        condition: service_healthy
+      trusted-tokens-manager:
+        condition: service_started
     ports:
     - 8999:8022
     - 8111:8089
@@ -327,6 +367,13 @@ services:
     - core
     - apps
     - e2e
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U postgres -d fraudbusters
+      interval: 5s
+      timeout: 5s
+      retries: 30
   fb-management:
     image: ghcr.io/valitydev/fraudbusters-management:${IMAGE_TAG:-local}
     hostname: fb-management
@@ -366,12 +413,18 @@ services:
     ports:
     - 8085:8080
     depends_on:
-    - fraudbusters
-    - broker
-    - wblist
-    - postgres-fb
-    - kafka-setup
-    - fb-notificator
+      fraudbusters:
+        condition: service_started
+      broker:
+        condition: service_healthy
+      wblist:
+        condition: service_started
+      postgres-fb:
+        condition: service_healthy
+      kafka-setup:
+        condition: service_healthy
+      fb-notificator:
+        condition: service_started
     volumes:
     - ./log-java:/opt/fraudbusters-management/tmp
     profiles:
@@ -399,8 +452,10 @@ services:
     ports:
     - 8086:8022
     depends_on:
-    - postgres-notificator
-    - fb-warehouse
+      postgres-notificator:
+        condition: service_healthy
+      fb-warehouse:
+        condition: service_started
     volumes:
     - ./log-java:/opt/fraudbusters-notificator/tmp
     profiles:
@@ -426,6 +481,13 @@ services:
     - core
     - apps
     - e2e
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U postgres -d fb_notificator
+      interval: 5s
+      timeout: 5s
+      retries: 30
   fb-warehouse:
     image: ghcr.io/valitydev/fraudbusters-warehouse:${IMAGE_TAG:-local}
     hostname: fb-warehouse
@@ -571,8 +633,10 @@ services:
       OTEL_METRICS_EXPORTER: none
       OTEL_LOGS_EXPORTER: none
     depends_on:
-    - broker
-    - kafka-setup
+      broker:
+        condition: service_healthy
+      kafka-setup:
+        condition: service_healthy
     ports:
     - 8993:8022
 networks:
@@ -584,7 +648,8 @@ volumes:
   postgres-trusted-tokens: {}
   postgres-fb: {}
   postgres-notificator: {}
-  zookeeper: {}
   broker: {}
   clickhouse-data: {}
+  zookeeper-data: {}
+  zookeeper-log: {}
 name: fraudbusters-project

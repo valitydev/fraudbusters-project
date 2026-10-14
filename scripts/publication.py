@@ -74,7 +74,10 @@ def main():
         if not os.environ.get("MAVEN_GPG_PASSPHRASE"):
             raise RuntimeError("MAVEN_GPG_PASSPHRASE is required")
         command = ["mvn", "-B", "-ntp", "-f", module["path"] + "/pom.xml", "clean", "deploy", "-Pdeploy,common" + ("," + profile if profile else ""), "-Drevision=" + revision, "-Dcommit.number=" + str(count), "-Dpath_to_thrift=thrift", "-Dgpg.passphrase=" + os.environ["MAVEN_GPG_PASSPHRASE"], "-DautoReleaseAfterClose=true"]
-        subprocess.run(command, cwd=ROOT, check=True)
+        # CalledProcessError renders the full command, including the signing secret.
+        result = subprocess.run(command, cwd=ROOT)
+        if result.returncode:
+            raise RuntimeError(f"Maven deployment failed with exit code {result.returncode}")
 
 
 if __name__ == "__main__":
