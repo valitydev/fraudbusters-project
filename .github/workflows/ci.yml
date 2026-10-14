@@ -77,9 +77,13 @@ jobs:
         env:
           MODULE: ${{ matrix.module.path }}
           PROFILE: ${{ matrix.module.profile }}
+          KIND: ${{ matrix.module.kind }}
         run: |
           args=()
           if [ -n "$PROFILE" ]; then args+=("-P$PROFILE"); fi
+          # Imported contract POMs default to bare SNAPSHOT. Strict Maven model
+          # validation requires a base version; verification never publishes it.
+          if [ "$KIND" = thrift ] || [ "$KIND" = openapi ]; then args+=("-Drevision=0-SNAPSHOT"); fi
           mvn -B -ntp -f "$MODULE/pom.xml" verify -Dpath_to_thrift=thrift "${args[@]}"
       - name: Prepare report name
         if: failure()
