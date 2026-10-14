@@ -30,8 +30,8 @@ python3 scripts/verify-imports.py
 
 Команда проверяет исходные деревья в импортирующих коммитах и наличие исходной
 истории. Локальные рабочие изменения и коммиты вне удалённого master не переносились.
-Старые checkout в корне этой рабочей папки исключены из индекса; при обычном
-клонировании нового репозитория они отсутствуют.
+Старые checkout и вспомогательные файлы перенесены за пределы репозитория в
+соседнюю папку `../fraudbusters-project-archive`; их локальные изменения сохранены.
 
 ## Требования и сборка
 
@@ -141,3 +141,20 @@ Compose сохраняет legacy-версии внешних Kafka, Riak, Click
 Порядок подключения GitHub, проверки публикации и переключения окружений:
 [Migration runbook](docs/migration/README.md).
 Проверенные сценарии и оставшиеся внешние шаги: [Validation report](docs/migration/validation.md).
+
+## Общие правила для агентов
+
+Правила Vality подключены Git submodule в `vendor/code-generation-rules`, как в
+backoffice. Символическая ссылка `.agent-rules` обеспечивает пути к инструкциям
+и hooks. SHA правил закреплён в Git; при обновлении коммитите его вместе с
+изменениями управляемых блоков `AGENTS.md`, `CLAUDE.md` и hooks.
+
+```bash
+git submodule update --init vendor/code-generation-rules
+./.agent-rules/install.sh
+```
+
+Для обновления правил используйте `git submodule update --init --remote
+vendor/code-generation-rules`, затем повторите установку. Исторический submodule
+`apps/fraudbusters-notificator/build_utils` сохранён на импортированном SHA;
+при необходимости он инициализируется отдельно.

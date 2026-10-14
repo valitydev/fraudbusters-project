@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x .agent-rules/hooks/format-kotlin.sh ]; then exec .agent-rules/hooks/format-kotlin.sh; fi",
+            "timeout": 300
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x .agent-rules/hooks/format-kotlin.sh ]; then exec .agent-rules/hooks/format-kotlin.sh; fi",
+            "timeout": 300
+          }
+        ]
+      }
+    ]
+  }
+}

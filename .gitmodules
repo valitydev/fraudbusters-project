@@ -1,0 +1,9 @@
+[submodule "vendor/code-generation-rules"]
+	path = vendor/code-generation-rules
+	url = git@github.com:valitydev/code-generation-rules.git
+	branch = master
+	ignore = all
+
+[submodule "apps/fraudbusters-notificator/build_utils"]
+	path = apps/fraudbusters-notificator/build_utils
+	url = git@github.com:rbkmoney/build_utils.git
