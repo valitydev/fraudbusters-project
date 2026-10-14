@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="669px" height="301px" viewBox="-0.5 -0.5 669 301"
+     content="&lt;mxfile host=&quot;app.diagrams.net&quot; modified=&quot;2021-09-21T10:18:15.054Z&quot; agent=&quot;5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 YaBrowser/21.8.0.1716 Yowser/2.5 Safari/537.36&quot; etag=&quot;QSc83xFtbSGSZs8rDD7r&quot; version=&quot;15.1.4&quot; type=&quot;google&quot;&gt;&lt;diagram id=&quot;kgpKYQtTHZ0yAKxKKP6v&quot; name=&quot;Page-1&quot;&gt;7VnLcuI4FP0aqqYXoWQLP1gGCOlFMsk0Xf1YTSlYgCrCcssigfn6lmz5KTs4BPKYahYUOpavZZ1z7z02PTheby85ilbXLMC0Z4Ng24OTnm37liO/FbBLAQeAFFhyEqSQVQAz8h/WYDZtQwIcVyYKxqggURWcszDEc1HBEOfssTptwWj1qhFaYgOYzRE10e8kECt9Ww4o8M+YLFfZla3s/tYom6yBeIUC9liC4EUPjjljIv213o4xVXuX7Ut63rTlaL4wjkPR5QQYbkbTLR/Od1cgCm++f7XR5ZmO8oDoRt/wPxvMd59RGFDM9cLFLtsNeQ+R+rlZ0yuywJSEcjSKMCdrLOR8OKEavi2wkeRGIImp41YyphRFMblLwgKJcDzf8Jg84C84TiWQoGwTBjjQo3z/koHg7D5nRAVdEErHjDKerBQCMJ36aqa5Tdk9Yy7wtgTpbbvETC6c7+QUfdT2tIi1hn3N6GMhiJz2VUkMMAORFuEyD13wJH9oqp5Bm23QZlAVMRKK5LrOqOdMajQxLlZsyUJEy0SdaMOfVF5nFgYdSDA5sPxTceA0p84M8wcyx39SJyXN9d9Z6rgfP3WcZ7NQTZ18x/flDjwVCZ5BglTvhgqDCnWPRHbjc0qWoYTumBBsLbcKh8G5au+KkAjLQ6MAxauEACs9rL2Ev58Oudt890MN+sDOgZ9qfn8IBhkw2eoI6WhXHpWkMHkydQTiS6yhb1+C+19i/De2ravV9b/b2eXN1zMLphNxUDEmrdyegT6Atj6JY4qErAVVG9TAng53q5RexLI8UBEKHNQEkK5en1X2GrVA0N4TKGYbPsdGIEkp2pWm6UxsXbDteX2n8UptK7Pd5pUVak7XUDs7WxBbLGIsenX957QcnhK+kRK/VDs5KCPuKJvfP0P3SkPeoCL8k4n+qaK8V/Mv1DeEVfINc9AiSyNQ/hTTFqglUQ4QS3ORMMRyc3V+K5HJ6Hr2ga3HdDqUn1xKRodrUFdrYXTf0no0svb+XfueDW/XYmfrAbtZD+9UHLQ7D0BJLJKVyYWp/iWLErTU3qxRJAG2SHcDJfsev5FV2RKRVWzL1cDP0sGiXqvBrjSoV+uy6xn4VdfjucPDG0Ctijd2hLTQ7s+Vbp3j6I3CqTUKu2N9NwK5Tj2Q36njHK1RgA+u95JIaxr1be8QjZYy6IUJdJjaX1HF0u70vWHpU7PKYNj33cN0PRjWbLTVzUkdTdemA3plu1wWowKA/RI1Snk7TkmNoC9LxZsrssPjqv069bejvMz6a9X8h3SXr2rUTc93sZWESQsn0fxdYbn6/rW4OwuZIAspW8H4pz92vurV342dz97U/N/8fEtKNxt6r5ufNxL4aK8STRJwkWCy8NPuLSGWxUDk1kVGbGkTatrzLbss8RBWSjwYuAeW+EPesdgt3WGvFU91fvQabzwaOseyEHJY/K2aTi/+m4YXvwE=&lt;/diagram&gt;&lt;/mxfile&gt;"
+     style="background-color: rgb(255, 255, 255);">
+    <defs/>
+    <g>
+        <rect x="175" y="0" width="100" height="40" fill="#00ff80" stroke="#000000" pointer-events="all"/>
+        <path d="M 225 40 L 225 300" fill="none" stroke="#000000" stroke-miterlimit="10" stroke-dasharray="3 3"
+              pointer-events="all"/>
+        <g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="12px">
+            <text x="224.5" y="24.5">QueryHandler</text>
+        </g>
+        <rect x="220" y="80" width="10" height="180" fill="#00ff80" stroke="#000000" pointer-events="all"/>
+        <rect x="368" y="0" width="100" height="40" fill="#00ff80" stroke="#000000" pointer-events="all"/>
+        <path d="M 418 40 L 418 300" fill="none" stroke="#000000" stroke-miterlimit="10" stroke-dasharray="3 3"
+              pointer-events="all"/>
+        <g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="12px">
+            <text x="417.5" y="24.5">QueryService</text>
+        </g>
+        <rect x="413" y="100" width="10" height="130" fill="#00ff80" stroke="#000000" pointer-events="all"/>
+        <path d="M 220 260 L 187.5 260 Q 177.5 260 168.75 260 L 164.38 260 Q 160 260 150 259.98 L 57.45 259.84"
+              fill="none" stroke="#000000" stroke-miterlimit="10" stroke-dasharray="3 3" pointer-events="stroke"/>
+        <path d="M 65.33 255.36 L 56.33 259.84 L 65.32 264.36" fill="none" stroke="#000000" stroke-miterlimit="10"
+              pointer-events="all"/>
+        <g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="11px">
+            <rect fill="#ffffff" stroke="none" x="124" y="244" width="33" height="14" stroke-width="0"/>
+            <text x="139.5" y="254.47">Result</text>
+        </g>
+        <path d="M 230 100 L 404.14 100" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 411.14 100 L 404.14 103.5 L 404.14 96.5 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"
+              pointer-events="all"/>
+        <g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="11px">
+            <rect fill="#ffffff" stroke="none" x="306" y="85" width="30" height="14" stroke-width="0"/>
+            <text x="320.36" y="94.5">query</text>
+        </g>
+        <rect x="568" y="0" width="100" height="40" fill="#ff9999" stroke="#000000" pointer-events="all"/>
+        <path d="M 618 40 L 618 300" fill="none" stroke="#000000" stroke-miterlimit="10" stroke-dasharray="3 3"
+              pointer-events="all"/>
+        <g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="12px">
+            <text x="617.5" y="24.5">OLAP DBMS</text>
+        </g>
+        <rect x="613" y="130" width="10" height="70" fill="#00ff80" stroke="#000000" pointer-events="all"/>
+        <path d="M 612.84 200 L 425.72 199.97" fill="none" stroke="#000000" stroke-miterlimit="10"
+              stroke-dasharray="3 3" pointer-events="stroke"/>
+        <path d="M 433.6 195.47 L 424.6 199.97 L 433.6 204.47" fill="none" stroke="#000000" stroke-miterlimit="10"
+              pointer-events="all"/>
+        <g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="11px">
+            <rect fill="#ffffff" stroke="none" x="471" y="171" width="94" height="27" stroke-width="0"/>
+            <text x="517.48" y="181.48">Result list with</text>
+            <text x="517.48" y="194.48">map of parameters</text>
+        </g>
+        <path d="M 411.4 230 L 233.04 229.86" fill="none" stroke="#000000" stroke-miterlimit="10" stroke-dasharray="3 3"
+              pointer-events="stroke"/>
+        <path d="M 240.92 225.37 L 231.92 229.86 L 240.91 234.37" fill="none" stroke="#000000" stroke-miterlimit="10"
+              pointer-events="all"/>
+        <g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="11px">
+            <rect fill="#ffffff" stroke="none" x="275" y="201" width="94" height="27" stroke-width="0"/>
+            <text x="320.61" y="211.43">Result list with</text>
+            <text x="320.61" y="224.43">map of parameters</text>
+        </g>
+        <path d="M 423.55 129.64 L 604.18 129.85" fill="none" stroke="#000000" stroke-miterlimit="10"
+              pointer-events="stroke"/>
+        <path d="M 611.18 129.86 L 604.18 133.35 L 604.19 126.35 Z" fill="#000000" stroke="#000000"
+              stroke-miterlimit="10" pointer-events="all"/>
+        <g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="11px">
+            <rect fill="#ffffff" stroke="none" x="503" y="114" width="30" height="14" stroke-width="0"/>
+            <text x="517.34" y="124.25">query</text>
+        </g>
+        <rect x="0" y="0" width="100" height="40" fill="#ff9999" stroke="#000000" pointer-events="all"/>
+        <path d="M 50 40 L 50 300" fill="none" stroke="#000000" stroke-miterlimit="10" stroke-dasharray="3 3"
+              pointer-events="all"/>
+        <g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="12px">
+            <text x="49.5" y="17.5">External Service</text>
+            <text x="49.5" y="31.5">(fb-notificator)</text>
+        </g>
+        <rect x="45" y="70" width="10" height="210" fill="#00ff80" stroke="#000000" pointer-events="all"/>
+        <path d="M 59.33 79.67 L 211.88 79.98" fill="none" stroke="#000000" stroke-miterlimit="10"
+              pointer-events="stroke"/>
+        <ellipse cx="55.33" cy="79.66" rx="4" ry="4" fill="#000000" stroke="#000000" pointer-events="all"/>
+        <path d="M 218.88 80 L 211.87 83.48 L 211.89 76.48 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"
+              pointer-events="all"/>
+        <g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="11px">
+            <rect fill="#ffffff" stroke="none" x="108" y="64" width="61" height="14" stroke-width="0"/>
+            <text x="137.12" y="74.33">external call</text>
+        </g>
+    </g>
+</svg>

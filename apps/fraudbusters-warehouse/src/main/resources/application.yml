@@ -1,0 +1,48 @@
+server:
+  port: ${server.port}
+
+management:
+  server:
+    port: ${management.port}
+  metrics:
+    export:
+      prometheus:
+        enabled: false
+    tags:
+      application: fraudbusters-warehouse
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+spring:
+  application:
+    name: ${project.name}
+  output:
+    ansi:
+      enabled: always
+  main:
+    allow-bean-definition-overriding: true
+
+info:
+  version: ${project.version}
+  stage: dev
+
+clickhouse:
+  db:
+    url: "jdbc:clickhouse://localhost:8123/default"
+    user: "user"
+    password: "password"
+    connection-timeout: 50000
+    compress: false
+
+testcontainers:
+  clickhouse:
+    tag: '19.17'
