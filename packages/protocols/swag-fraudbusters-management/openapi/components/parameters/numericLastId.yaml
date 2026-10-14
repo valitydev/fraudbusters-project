@@ -1,0 +1,5 @@
+name: lastId
+in: query
+schema:
+  type: integer
+  format: int64

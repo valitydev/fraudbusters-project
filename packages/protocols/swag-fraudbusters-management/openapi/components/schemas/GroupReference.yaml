@@ -1,0 +1,15 @@
+type: object
+properties:
+  groupId:
+    type: string
+  id:
+    type: string
+  lastUpdateDate:
+    type: string
+    format: date-time
+  modifiedByUser:
+    type: string
+  partyId:
+    type: string
+  shopId:
+    type: string

@@ -1,0 +1,11 @@
+type: object
+required:
+  - splitUnit
+  - offsetCountRatios
+properties:
+  splitUnit:
+    $ref: '../../schemas/SplitUnit.yaml'
+  offsetCountRatios:
+    type: array
+    items:
+      $ref: '../../schemas/RiskScoreOffsetCountRatio.yaml'

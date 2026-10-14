@@ -1,0 +1,12 @@
+type: object
+required:
+  - score
+  - offsetCountRatio
+properties:
+  score:
+    description: Оценка платежа
+    type: string
+  offsetCountRatio:
+    type: array
+    items:
+      $ref: './OffsetCountRatio.yaml'

@@ -1,0 +1,14 @@
+type: object
+required:
+    - countRatio
+    - offset
+properties:
+    countRatio:
+      description: Соотношение платежей c данной оценкой к общему количеству платежей
+      type: number
+      format: float
+    offset:
+      description: Номер интервала в списке
+      type: integer
+      format: int64
+      minimum: 0

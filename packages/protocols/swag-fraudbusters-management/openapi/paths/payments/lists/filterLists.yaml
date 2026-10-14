@@ -1,0 +1,47 @@
+get:
+  summary: Поиск по ЧБ спискам
+  operationId: filterLists
+  tags:
+    - lists
+  parameters:
+    - $ref: "../../../components/parameters/lastId.yaml"
+    - $ref: "../../../components/parameters/sortOrder.yaml"
+    - $ref: "../../../components/parameters/searchValue.yaml"
+    - $ref: "../../../components/parameters/sortBy.yaml"
+    - $ref: "../../../components/parameters/sortFieldValue.yaml"
+    - $ref: "../../../components/parameters/size.yaml"
+
+    - name: listNames
+      required: true
+      in: query
+      schema:
+        type: array
+        items:
+          type: string
+
+    - name: listType
+      required: true
+      in: query
+      schema:
+        type: string
+        enum:
+          - white
+          - black
+          - grey
+          - naming
+
+  responses:
+    '201':
+      description: WbList record models
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/responses/WbListRecordsResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
+
+

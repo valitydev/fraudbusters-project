@@ -1,0 +1,26 @@
+summary: Поиск группы
+operationId: getGroup
+tags:
+  - group
+parameters:
+  - name: groupId
+    required: true
+    in: path
+    schema:
+      type: string
+
+responses:
+  '201':
+    description: Group model
+    content:
+      application/json:
+        schema:
+          $ref: '../../../components/schemas/Group.yaml'
+  '401':
+    description: Unauthorized
+  '403':
+    description: Forbidden
+  '404':
+    description: Not Found
+
+

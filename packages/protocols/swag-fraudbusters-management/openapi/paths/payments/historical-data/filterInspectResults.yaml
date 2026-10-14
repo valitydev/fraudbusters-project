@@ -1,0 +1,103 @@
+get:
+  summary: Поиск по истории результатов срабатывания антифрода
+  operationId: filterInspectResults
+  tags:
+    - historical-data
+  parameters:
+    - $ref: "../../../components/parameters/continuationId.yaml"
+    - $ref: "../../../components/parameters/sortOrder.yaml"
+    - $ref: "../../../components/parameters/sortBy.yaml"
+    - $ref: "../../../components/parameters/size.yaml"
+
+    - name: partyId
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: shopId
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: paymentId
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: status
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: email
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: providerCountry
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: cardToken
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: fingerprint
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: terminal
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: invoiceId
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: maskedPan
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: template
+      description: Сработавший шаблон антифрода
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: rule
+      description: Сработавшее правило антифрода
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: from
+      required: true
+      in: query
+      schema:
+        type: string
+    - name: to
+      required: true
+      in: query
+      schema:
+        type: string
+
+  responses:
+    '201':
+      description: Payments
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/responses/InspectResultsResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
+

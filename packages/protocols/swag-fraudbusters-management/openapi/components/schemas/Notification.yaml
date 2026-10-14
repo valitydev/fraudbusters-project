@@ -1,0 +1,30 @@
+type: object
+properties:
+  id:
+    type: integer
+    format: int64
+  channel:
+    type: string
+  createdAt:
+    type: string
+    format: date-time
+  frequency:
+    type: string
+  name:
+    type: string
+  period:
+    type: string
+  status:
+    type: string
+    enum:
+      - CREATED
+      - ACTIVE
+      - ARCHIVE
+  subject:
+    type: string
+  templateId:
+    type: integer
+    format: int64
+  updatedAt:
+    type: string
+    format: date-time

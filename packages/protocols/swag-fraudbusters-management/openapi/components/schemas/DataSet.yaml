@@ -1,0 +1,15 @@
+type: object
+properties:
+  id:
+    type: string
+  name:
+    type: string
+  rows:
+    type: array
+    items:
+      $ref: './DataSetRow.yaml'
+  lastModificationAt:
+    type: string
+    format: date-time
+  lastModificationInitiator:
+    type: string

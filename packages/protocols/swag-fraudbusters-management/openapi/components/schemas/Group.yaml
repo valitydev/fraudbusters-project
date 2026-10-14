@@ -1,0 +1,10 @@
+type: object
+properties:
+  groupId:
+    type: string
+  modifiedByUser:
+    type: string
+  priorityTemplates:
+    type: array
+    items:
+      $ref: './PriorityId.yaml'

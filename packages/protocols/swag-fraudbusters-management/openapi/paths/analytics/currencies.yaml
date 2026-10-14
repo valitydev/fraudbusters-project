@@ -1,0 +1,19 @@
+get:
+  summary: Получить список денежных единиц
+  operationId: getCurrencies
+  tags:
+    - analytics
+
+  responses:
+    '200':
+      description: List of currencies
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/responses/ListResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found

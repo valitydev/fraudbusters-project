@@ -1,0 +1,28 @@
+type: object
+properties:
+  id:
+    type: string
+  paymentId:
+    type: string
+  eventTime:
+    type: string
+    format: date-time
+  merchantInfo:
+    $ref: './MerchantInfo.yaml'
+  paymentTool:
+    type: string
+  amount:
+    type: integer
+    format: int64
+  currency:
+    type: string
+  provider:
+    $ref: './ProviderInfo.yaml'
+  status:
+    type: string
+  error:
+    $ref: './Error.yaml'
+  clientInfo:
+    $ref: './ClientInfo.yaml'
+  payerType:
+    type: string

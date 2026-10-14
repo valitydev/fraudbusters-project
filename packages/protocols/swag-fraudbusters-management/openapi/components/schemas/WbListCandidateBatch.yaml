@@ -1,0 +1,14 @@
+type: object
+properties:
+  id:
+    type: string
+  source:
+    type: string
+  size:
+    type: integer
+    format: int32
+  fields:
+    type: string
+  createdAt:
+    type: string
+    format: date-time

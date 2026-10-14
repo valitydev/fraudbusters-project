@@ -1,0 +1,12 @@
+type: object
+required:
+  - result
+  - count
+properties:
+  count:
+    type: integer
+    format: int32
+  result:
+    type: array
+    items:
+      $ref: '../schemas/PaymentReference.yaml'

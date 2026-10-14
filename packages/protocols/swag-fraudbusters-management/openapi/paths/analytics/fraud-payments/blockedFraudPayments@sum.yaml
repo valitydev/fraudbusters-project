@@ -1,0 +1,25 @@
+get:
+  summary: Получить общую сумму заблокированных мошеннических платежей
+  operationId: getBlockedFraudPaymentsSum
+  tags:
+    - analytics
+  parameters:
+    - $ref: '../../../components/parameters/fromTime.yaml'
+    - $ref: '../../../components/parameters/toTime.yaml'
+    - $ref: '../../../components/parameters/currency.yaml'
+    - $ref: '../../../components/parameters/merchantId.yaml'
+    - $ref: '../../../components/parameters/shopId.yaml'
+
+  responses:
+    '200':
+      description: Blocked fraud-payments sum
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/responses/analytics/SumResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found

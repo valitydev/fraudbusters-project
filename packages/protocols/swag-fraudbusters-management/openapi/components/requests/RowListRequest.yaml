@@ -1,0 +1,11 @@
+type: object
+required:
+  - records
+  - listType
+properties:
+  records:
+    type: array
+    items:
+      $ref: '../schemas/PaymentCountInfo.yaml'
+  listType:
+      $ref: '../schemas/ListType.yaml'

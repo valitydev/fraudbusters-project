@@ -1,0 +1,27 @@
+delete:
+  summary: Удаление записи из списка
+  operationId: removeRow
+  tags:
+    - lists
+  parameters:
+    - name: id
+      required: true
+      in: path
+      schema:
+        type: string
+
+  responses:
+    '201':
+      description: Removed row from list
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/responses/IdResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
+
+

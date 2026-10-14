@@ -1,0 +1,14 @@
+type: object
+required:
+  - source
+  - result
+properties:
+  lastId:
+    type: integer
+    format: int64
+  source:
+    type: string
+  result:
+    type: array
+    items:
+      $ref: '../schemas/WbListRecord.yaml'

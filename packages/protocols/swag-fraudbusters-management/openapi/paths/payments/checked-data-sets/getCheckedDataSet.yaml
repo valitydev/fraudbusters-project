@@ -1,0 +1,27 @@
+get:
+  summary: Получить конкретный набор данных с последними результатами тестирования
+  operationId: getCheckedDataSet
+  tags:
+    - data-sets
+  parameters:
+    - name: id
+      required: true
+      in: path
+      schema:
+        type: string
+
+  responses:
+    '201':
+      description: Data set
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/CheckedDataSet.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
+
+

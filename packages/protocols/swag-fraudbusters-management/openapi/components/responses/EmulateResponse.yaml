@@ -1,0 +1,8 @@
+type: object
+required:
+  - result
+properties:
+  result:
+    type: array
+    items:
+      $ref: '../schemas/Template.yaml'

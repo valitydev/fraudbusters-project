@@ -1,0 +1,5 @@
+name: shopId
+in: query
+description: Идентификатор магазина
+schema:
+  type: string

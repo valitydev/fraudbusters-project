@@ -1,0 +1,19 @@
+type: object
+required:
+  - records
+  - template
+properties:
+  dataSetId:
+    type: integer
+    format: int64
+  records:
+    type: array
+    items:
+      $ref: '../schemas/Payment.yaml'
+  template:
+    type: string
+  reference:
+    $ref: '../schemas/PaymentReference.yaml'
+  ruleSetTimestamp:
+    type: string
+    format: date-time

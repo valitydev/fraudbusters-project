@@ -1,0 +1,28 @@
+post:
+  summary: Проверка темплейта
+  operationId: validateTemplate
+  tags:
+    - template
+
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../../components/schemas/Template.yaml'
+
+  responses:
+    '201':
+      description: Created new template
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/responses/ValidateTemplatesResponse.yaml'
+
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
+
+

@@ -1,0 +1,9 @@
+type: object
+required:
+  - validateResults
+properties:
+  validateResults:
+    type: array
+    items:
+      $ref: '../schemas/ErrorTemplate.yaml'
+

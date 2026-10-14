@@ -1,0 +1,26 @@
+get:
+  summary: Получение информации о партиях кандидатов в ЧБ списки
+  operationId: listCandidatesBatches
+  tags:
+    - lists
+  parameters:
+    - $ref: "../../../components/parameters/lastId.yaml"
+    - $ref: "../../../components/parameters/sortOrder.yaml"
+    - $ref: "../../../components/parameters/searchValue.yaml"
+    - $ref: "../../../components/parameters/sortBy.yaml"
+    - $ref: "../../../components/parameters/sortFieldValue.yaml"
+    - $ref: "../../../components/parameters/size.yaml"
+
+  responses:
+    '200':
+      description: List candidates batches
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/responses/WbListCandidatesBatchesResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found

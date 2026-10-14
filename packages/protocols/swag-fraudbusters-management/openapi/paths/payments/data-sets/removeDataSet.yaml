@@ -1,0 +1,24 @@
+summary: Удаление тестового набора данных
+operationId: removeDataSet
+tags:
+  - data-sets
+parameters:
+  - name: setId
+    required: true
+    in: path
+    schema:
+      type: string
+
+responses:
+  '201':
+    description: Removed data set
+    content:
+      application/json:
+        schema:
+          $ref: '../../../components/responses/IdResponse.yaml'
+  '401':
+    description: Unauthorized
+  '403':
+    description: Forbidden
+  '404':
+    description: Not Found

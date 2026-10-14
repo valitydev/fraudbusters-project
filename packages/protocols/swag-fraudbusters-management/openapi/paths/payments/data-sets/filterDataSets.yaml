@@ -1,0 +1,42 @@
+get:
+  summary: Поиск наборов данных
+  operationId: filterDataSets
+  tags:
+    - data-sets
+  parameters:
+    - $ref: "../../../components/parameters/continuationId.yaml"
+    - $ref: "../../../components/parameters/sortOrder.yaml"
+    - $ref: "../../../components/parameters/sortBy.yaml"
+    - $ref: "../../../components/parameters/size.yaml"
+
+    - name: from
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: to
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: dataSetName
+      required: false
+      in: query
+      schema:
+        type: string
+
+  responses:
+    '201':
+      description: Data sets
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/responses/DataSetsResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
+
+

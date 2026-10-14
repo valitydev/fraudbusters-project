@@ -1,0 +1,5 @@
+type: object
+properties:
+  sum:
+    type: number
+    format: float

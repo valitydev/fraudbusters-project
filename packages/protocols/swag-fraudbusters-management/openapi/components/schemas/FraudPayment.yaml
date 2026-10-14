@@ -1,0 +1,8 @@
+type: object
+properties:
+  payment:
+    $ref: './Payment.yaml'
+  type:
+    type: string
+  comment:
+    type: string

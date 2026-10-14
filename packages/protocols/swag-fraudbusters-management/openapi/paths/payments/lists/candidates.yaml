@@ -1,0 +1,48 @@
+get:
+  summary: Получение кандидатов в ЧБ списки
+  operationId: listCandidates
+  tags:
+    - lists
+  parameters:
+    - $ref: "../../../components/parameters/numericLastId.yaml"
+    - $ref: "../../../components/parameters/sortOrder.yaml"
+    - $ref: "../../../components/parameters/searchValue.yaml"
+    - $ref: "../../../components/parameters/sortBy.yaml"
+    - $ref: "../../../components/parameters/sortFieldValue.yaml"
+    - $ref: "../../../components/parameters/size.yaml"
+
+  responses:
+    '200':
+      description: List candidates
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/responses/WbListCandidatesResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
+
+post:
+  summary: Добавление в списки кандидатов
+  operationId: insertListCandidates
+  tags:
+    - lists
+
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../../components/requests/WbListCandidatesRequest.yaml'
+
+  responses:
+    '201':
+      description: Add list candidates
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found

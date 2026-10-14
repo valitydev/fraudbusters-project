@@ -1,0 +1,14 @@
+type: http
+scheme: bearer
+bearerFormat: JWT
+description: >
+  Для аутентификации вызовов мы используем [JWT](https://jwt.io).
+  Токен доступа передается в заголовке.
+
+  ```shell
+   Authorization: Bearer {JWT}
+  ```
+
+  Запросы к данному API авторизуются сессионным токеном доступа,
+  который вы получаете в результате аутентификации в личном кабинете
+  по адресу https://dashboard.vality.dev/.

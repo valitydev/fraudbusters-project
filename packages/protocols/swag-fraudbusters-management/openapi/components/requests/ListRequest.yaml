@@ -1,0 +1,8 @@
+type: object
+required:
+  - records
+properties:
+  records:
+    type: array
+    items:
+      type: string

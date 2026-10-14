@@ -1,0 +1,30 @@
+post:
+  summary: Проверка нотификации
+  operationId: validateNotification
+  tags:
+    - notification
+
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/Notification.yaml'
+
+  responses:
+    '201':
+      description: Validation result
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/responses/ValidationResponse.yaml'
+
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
+    '502':
+      description: Error call notificator
+
+

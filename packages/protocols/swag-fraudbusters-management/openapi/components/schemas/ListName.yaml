@@ -1,0 +1,7 @@
+type: string
+enum:
+  - CARD_TOKEN
+  - EMAIL
+  - BIN
+  - FINGERPRINT
+  - IP

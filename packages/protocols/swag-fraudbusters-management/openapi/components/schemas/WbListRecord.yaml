@@ -1,0 +1,26 @@
+type: object
+properties:
+  id:
+    type: string
+  insertTime:
+    type: string
+    format: date-time
+  createdByUser:
+    type: string
+  listName:
+    type: string
+  partyId:
+    type: string
+  shopId:
+    type: string
+  rowInfo:
+    type: string
+  value:
+    type: string
+  listType:
+    type: string
+    enum:
+      - white
+      - black
+      - grey
+      - naming

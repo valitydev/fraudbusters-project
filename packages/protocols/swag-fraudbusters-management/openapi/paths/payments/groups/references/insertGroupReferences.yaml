@@ -1,0 +1,35 @@
+post:
+  summary: Привязка группы к магазинам
+  operationId: insertGroupReferences
+  tags:
+    - group-reference
+  parameters:
+    - name: id
+      required: true
+      in: path
+      schema:
+        type: string
+
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '../../../../components/schemas/GroupReference.yaml'
+
+  responses:
+    '201':
+      description: Created group id
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/responses/ListResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
+
+

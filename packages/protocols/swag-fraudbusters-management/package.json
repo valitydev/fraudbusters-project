@@ -1,0 +1,16 @@
+{
+  "name": "vality-fraudbusters-management-api",
+  "version": "1.0.0",
+  "dependencies": {
+    "@redocly/openapi-cli": "1.0.0-beta.81",
+    "json-merge-patch": "1.0.2",
+    "redoc-cli": "0.13.7"
+  },
+  "private": true,
+  "scripts": {
+    "start": "openapi preview-docs",
+    "build": "openapi bundle -o dist/openapi.yaml && openapi bundle -o dist/openapi.json",
+    "redoc": "redoc-cli bundle dist/openapi.yaml",
+    "validate": "openapi lint"
+  }
+}

@@ -1,0 +1,14 @@
+type: object
+properties:
+  payment:
+    $ref: './Payment.yaml'
+  checkedTemplate:
+    type: string
+  resultStatus:
+    type: string
+  ruleChecked:
+    type: string
+  notificationsRule:
+    type: array
+    items:
+      type: string

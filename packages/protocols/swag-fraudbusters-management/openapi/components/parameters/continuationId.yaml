@@ -1,0 +1,4 @@
+name: continuationId
+in: query
+schema:
+  type: string

@@ -1,0 +1,6 @@
+name: toTime
+in: query
+description: Конец временного отрезка
+required: true
+schema:
+  type: string

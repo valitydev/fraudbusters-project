@@ -1,0 +1,28 @@
+delete:
+  summary: Удаление привязки по умолчанию
+  operationId: removeDefaultReference
+  tags:
+    - reference
+
+  parameters:
+    - name: id
+      required: true
+      in: path
+      schema:
+        type: string
+
+  responses:
+    '201':
+      description: Removed default reference
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/responses/IdResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
+
+

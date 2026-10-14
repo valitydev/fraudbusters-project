@@ -1,0 +1,11 @@
+type: object
+properties:
+  count:
+    type: integer
+    format: int32
+  sum:
+    type: number
+    format: float
+  ratio:
+    type: number
+    format: float

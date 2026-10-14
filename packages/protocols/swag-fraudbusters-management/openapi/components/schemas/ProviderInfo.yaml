@@ -1,0 +1,8 @@
+type: object
+properties:
+  providerId:
+    type: string
+  terminalId:
+    type: string
+  country:
+    type: string

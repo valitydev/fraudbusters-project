@@ -1,0 +1,4 @@
+name: sortBy
+in: query
+schema:
+  type: string

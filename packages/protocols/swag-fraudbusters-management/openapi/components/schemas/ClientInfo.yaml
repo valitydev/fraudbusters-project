@@ -1,0 +1,8 @@
+type: object
+properties:
+  ip:
+    type: string
+  fingerprint:
+    type: string
+  email:
+    type: string

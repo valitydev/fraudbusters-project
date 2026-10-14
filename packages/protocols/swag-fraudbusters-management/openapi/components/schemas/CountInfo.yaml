@@ -1,0 +1,11 @@
+type: object
+properties:
+  count:
+    type: integer
+    format: int64
+  endCountTime:
+    type: string
+    format: date-time
+  startCountTime:
+    type: string
+    format: date-time

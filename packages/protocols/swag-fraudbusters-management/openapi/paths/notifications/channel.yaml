@@ -1,0 +1,51 @@
+get:
+  summary: Получить канал для нотификации по имени
+  operationId: getChannel
+  tags:
+    - channel
+  parameters:
+    - name: name
+      in: path
+      required: true
+      schema:
+        type: string
+
+  responses:
+    '200':
+      description: Channel
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Channel.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
+    '502':
+      description: Error call notificator
+
+delete:
+  summary: Удалить канал для нотификации
+  operationId: removeChannel
+  tags:
+    - channel
+  parameters:
+    - name: name
+      in: path
+      required: true
+      schema:
+        type: string
+
+  responses:
+    '204':
+      description: Channel was removed
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
+    '502':
+      description: Error call notificator

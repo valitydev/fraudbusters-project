@@ -1,0 +1,28 @@
+description: Лог изменений в личном кабинете
+properties:
+  commandType:
+    type: string
+    enum:
+    - CREATE
+    - DELETE
+  id:
+    type: integer
+    format: int64
+  initiator:
+    type: string
+  insertTime:
+    type: string
+    format: date-time
+  object:
+    type: string
+  objectType:
+    type: string
+    enum:
+    - template
+    - reference
+    - group_reference
+    - group
+    - black
+    - white
+    - grey
+    - naming

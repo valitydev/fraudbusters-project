@@ -1,0 +1,49 @@
+type: object
+properties:
+  id:
+    type: string
+  paymentId:
+    type: string
+  eventTime:
+    type: string
+    format: date-time
+  merchantInfo:
+    $ref: './MerchantInfo.yaml'
+  amount:
+    type: integer
+    format: int64
+  currency:
+    type: string
+  cardToken:
+    type: string
+  bin:
+    type: string
+  lastDigits:
+    type: string
+  clientInfo:
+    $ref: './ClientInfo.yaml'
+  status:
+    type: string
+    enum:
+      - pending
+      - processed
+      - captured
+      - cancelled
+      - failed
+      - unknown
+  payerType:
+    type: string
+  mobile:
+    type: boolean
+  recurrent:
+    type: boolean
+  error:
+    $ref: './Error.yaml'
+  paymentSystem:
+    type: string
+  paymentCountry:
+    type: string
+  paymentTool:
+    type: string
+  provider:
+    $ref: './ProviderInfo.yaml'

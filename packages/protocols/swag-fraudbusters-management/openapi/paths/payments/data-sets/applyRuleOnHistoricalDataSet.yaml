@@ -1,0 +1,27 @@
+post:
+  summary: Эмуляция работы темплейта на тестовом наборе данных
+  operationId: applyRuleOnHistoricalDataSet
+  tags:
+    - data-sets
+
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../../components/requests/ApplyRuleOnHistoricalDataSetRequest.yaml'
+
+  responses:
+    '201':
+      description: Created data set
+      content:
+        application/json:
+          schema:
+            type: string
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
+
+

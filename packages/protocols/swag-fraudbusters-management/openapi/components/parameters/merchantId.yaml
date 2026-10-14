@@ -1,0 +1,5 @@
+name: merchantId
+in: query
+description: Идентификатор мерчанта
+schema:
+  type: string

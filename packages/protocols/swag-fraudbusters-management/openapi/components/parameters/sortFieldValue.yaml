@@ -1,0 +1,4 @@
+name: sortFieldValue
+in: query
+schema:
+  type: string

@@ -1,0 +1,6 @@
+name: currency
+in: query
+description: Денежные единицы
+required: true
+schema:
+  type: string

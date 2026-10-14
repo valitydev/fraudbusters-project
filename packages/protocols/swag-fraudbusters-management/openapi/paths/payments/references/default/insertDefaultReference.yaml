@@ -1,0 +1,27 @@
+post:
+  summary: Добавление новых привязок по умолчанию
+  operationId: insertDefaultReference
+  tags:
+    - reference
+
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../../../components/schemas/PaymentReference.yaml'
+
+  responses:
+    '201':
+      description: Created new default references
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/responses/IdResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
+
+

@@ -1,0 +1,22 @@
+type: object
+properties:
+  id:
+    type: string
+  testDataSetId:
+    type: string
+  template:
+    type: string
+  rows:
+    type: array
+    items:
+      $ref: './CheckedDataSetRow.yaml'
+  createdAt:
+    type: string
+    format: date-time
+  checkingTimestamp:
+    type: string
+    format: date-time
+  initiator:
+    type: string
+  merchantInfo:
+    $ref: './MerchantInfo.yaml'

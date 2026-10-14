@@ -1,0 +1,13 @@
+type: object
+required:
+  - status
+  - summary
+properties:
+  status:
+    type: string
+  checkedRule:
+    type: string
+  template:
+    type: string
+  summary:
+    $ref: './Summary.yaml'

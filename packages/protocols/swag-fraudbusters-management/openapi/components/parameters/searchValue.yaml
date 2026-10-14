@@ -1,0 +1,4 @@
+name: searchValue
+in: query
+schema:
+  type: string

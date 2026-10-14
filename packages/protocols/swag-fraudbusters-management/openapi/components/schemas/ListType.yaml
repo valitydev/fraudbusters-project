@@ -1,0 +1,6 @@
+type: string
+enum:
+  - black
+  - white
+  - grey
+  - naming

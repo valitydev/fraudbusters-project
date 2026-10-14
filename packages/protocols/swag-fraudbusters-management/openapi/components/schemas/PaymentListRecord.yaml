@@ -1,0 +1,10 @@
+type: object
+properties:
+  listName:
+    type: string
+  partyId:
+    type: string
+  shopId:
+    type: string
+  value:
+    type: string

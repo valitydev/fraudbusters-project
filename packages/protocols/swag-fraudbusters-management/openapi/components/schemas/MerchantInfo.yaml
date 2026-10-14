@@ -1,0 +1,6 @@
+type: object
+properties:
+  partyId:
+    type: string
+  shopId:
+    type: string

@@ -1,0 +1,26 @@
+type: object
+properties:
+  id:
+    type: string
+  checkedTemplate:
+    type: string
+  resultStatus:
+    type: string
+  ruleChecked:
+    type: string
+  notificationRule:
+    type: array
+    items:
+      type: string
+  testDataSetCheckingResultId:
+    type: integer
+    format: int64
+  testPaymentId:
+    type: integer
+    format: int64
+  payment:
+    $ref: './Payment.yaml'
+  runtimeResult:
+    $ref: './RuleApplyResult.yaml'
+  templateEmulationResult:
+    $ref: './TemplateEmulationResult.yaml'
