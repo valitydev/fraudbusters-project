@@ -1,0 +1,7 @@
+CREATE SCHEMA IF NOT EXISTS wb_list;
+
+create table wb_list.row
+(
+    id CHARACTER VARYING PRIMARY KEY,
+    value CHARACTER VARYING NOT NULL
+);

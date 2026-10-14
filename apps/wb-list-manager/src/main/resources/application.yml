@@ -1,0 +1,74 @@
+info:
+  version: ${project.version}
+  stage: dev
+
+server:
+  port: ${server.port}
+  rest:
+    port: ${server.rest.port}
+    endpoint: ch-manager
+
+spring:
+  application:
+    name: ${project.name}
+  output:
+    ansi:
+      enabled: always
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.postgresql.Driver
+    url: ${db.pg.url}
+    username: ${db.pg.user}
+    password: ${db.pg.password}
+  flyway:
+    baseline-on-migrate: true
+    table: flyway_schema_history
+  main:
+    allow-bean-definition-overriding: true
+  kafka:
+    bootstrap-servers: "localhost:29092"
+    streams:
+      application-id: wb-list
+      client-id: wb-list-client
+
+management:
+  server:
+    port: ${management.port}
+  metrics:
+    export:
+      prometheus:
+        enabled: false
+    tags:
+      application: wb-list-manager
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+riak-config:
+  address: localhost
+  port: 8087
+  bucket: wblist
+
+retry:
+  timeout: 2000
+  max.attempts: 3
+
+kafka:
+  wblist:
+    topic:
+      command: "wb-list-command"
+      event.sink: "wb-list-event-sink"
+  correction-stream:
+    enabled: true
+    application-id: wb-list-correction-empty-list-name
+    client-id: wb-list-correction-empty-list-name-client
+
+spring.jackson.use-jackson2-defaults: true
