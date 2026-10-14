@@ -1,0 +1,78 @@
+server:
+  port: '${server.port}'
+
+management:
+  security:
+    flag: false
+  server:
+    port: '${management.port}'
+  metrics:
+    export:
+      statsd:
+        flavor: etsy
+        enabled: false
+      prometheus:
+        enabled: false
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: false
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+spring:
+  application:
+    name: '${project.name}'
+  output:
+    ansi:
+      enabled: always
+  kafka:
+    bootstrap-servers: "localhost:29092"
+    client-id: fraud-connector-client
+    streams:
+      application-id: fraud-connector
+      properties:
+        retries: 300
+        retry.backoff.ms: 1000
+        num.stream.threads: 7
+        default.api.timeout.ms: 300000
+        clean.timeout.sec: 20
+        fixed.rate.timeout.ms: 60000
+
+info:
+  version: '${project.version}'
+  stage: dev
+
+service:
+  invoicing:
+    url: http://hellgate:8022/v1/processing/invoicing
+    networkTimeout: 5000
+  withdrawal:
+    url: http://hellgate:8022/v1/processing/invoicing
+    networkTimeout: 5000
+  dominant:
+    url: http://dominant:8022/v1/test
+    networkTimeout: 5000
+  destination:
+    url: http://hellgate:8022/v1/processing/invoicing
+    networkTimeout: 5000
+
+kafka:
+  topic:
+    source:
+      invoicing: mg-event
+      withdrawal: mg-withdrawal
+    sink:
+      payment: payment
+      refund: refund
+      chargeback: chargeback
+      withdrawal: withdrawal
+
+fb.stream:
+  withdrawalEnabled: true
+  invoiceEnabled: true
