@@ -1,0 +1,15 @@
+post:
+  summary: Загрузка изменений по платежу
+  operationId: insertPaymentsChanges
+  tags:
+    - historical-data
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../components/requests/PaymentsChangesRequest.yaml'
+  responses:
+    '201':
+      description: Изменения по платежу успешно сохранены
+    '400':
+      $ref: '../components/responses/BadResponse.yaml'

@@ -1,0 +1,32 @@
+description: Информация по выплате
+required:
+  - id
+  - paymentResource
+  - account
+  - cash
+  - status
+properties:
+  id:
+    description: Идентификатор выплаты
+    type: string
+  eventTime:
+    description: Дата и время создания
+    type: string
+    format: date-time
+  paymentResource:
+    title: paymentResource
+    oneOf:
+      - $ref: './BankCard.yaml'
+    discriminator:
+      propertyName: type
+  account:
+    $ref: './Account.yaml'
+  cash:
+    $ref: './Cash.yaml'
+  provider:
+    $ref: './Provider.yaml'
+  status:
+    description: Статус выплаты
+    $ref: './WithdrawalStatus.yaml'
+  error:
+    $ref: './Error.yaml'

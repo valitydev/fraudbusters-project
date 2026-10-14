@@ -1,0 +1,6 @@
+type: object
+properties:
+  fraudPayments:
+    type: array
+    items:
+      $ref: '../schemas/FraudPayment.yaml'

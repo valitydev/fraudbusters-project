@@ -1,0 +1,10 @@
+name: Maven Build Artifact
+
+on:
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    uses: valitydev/java-workflow/.github/workflows/maven-swag-build.yml@v3.1.3

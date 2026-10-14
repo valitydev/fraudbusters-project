@@ -1,0 +1,12 @@
+description: Информация о магазине
+required:
+  - id
+properties:
+  id:
+    type: string
+  name:
+    type: string
+  category:
+    type: string
+  location:
+    type: string

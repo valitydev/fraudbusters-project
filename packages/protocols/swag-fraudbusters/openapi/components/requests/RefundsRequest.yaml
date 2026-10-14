@@ -1,0 +1,6 @@
+type: object
+properties:
+  refunds:
+    type: array
+    items:
+      $ref: '../schemas/Refund.yaml'

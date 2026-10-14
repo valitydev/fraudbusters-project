@@ -1,0 +1,15 @@
+description: Переданы ошибочные данные
+content:
+  application/json:
+    schema:
+      description: Ошибка в переданных данных
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+          enum:
+            - invalidRequest
+        message:
+          type: string

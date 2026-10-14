@@ -1,0 +1,6 @@
+type: object
+properties:
+  chargebacks:
+    type: array
+    items:
+      $ref: '../schemas/Chargeback.yaml'

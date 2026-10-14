@@ -1,0 +1,11 @@
+type: object
+required:
+  - user
+  - merchants
+properties:
+  customer:
+    $ref: '../schemas/Customer.yaml'
+  merchants:
+    type: array
+    items:
+      $ref: '../schemas/Merchant.yaml'

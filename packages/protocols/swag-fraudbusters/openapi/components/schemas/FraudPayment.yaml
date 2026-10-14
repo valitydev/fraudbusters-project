@@ -1,0 +1,18 @@
+description: Информация по мошеннической операции
+required:
+  - paymentId
+  - eventTime
+properties:
+  paymentId:
+    description: Идентификатор платежа
+    type: string
+  eventTime:
+    description: Дата и время создания
+    type: string
+    format: date-time
+  type:
+    description: Тип мошенничества
+    type: string
+  comment:
+    description: Комментарий
+    type: string

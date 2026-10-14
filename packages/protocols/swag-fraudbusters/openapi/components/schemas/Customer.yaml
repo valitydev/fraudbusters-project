@@ -1,0 +1,8 @@
+description: Информация о клиенте
+properties:
+  name:
+    type: string
+  device:
+    $ref: './Device.yaml'
+  contact:
+    $ref: './Contact.yaml'

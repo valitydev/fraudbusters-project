@@ -1,0 +1,6 @@
+description: Информация об устройстве пользователя
+properties:
+  ip:
+    type: string
+  fingerprint:
+    type: string

@@ -1,0 +1,28 @@
+name: gh-pages
+on:
+  push:
+    branches: [master]
+
+env:
+  NODEJS_VERSION: "16"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODEJS_VERSION }}
+          cache: npm
+      - run: npm install
+      - name: Bundle specification & Build Docs
+        run: npm run build-web
+      - name: Publish ReDoc on Github Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          exclude_assets: "swagger-ui"

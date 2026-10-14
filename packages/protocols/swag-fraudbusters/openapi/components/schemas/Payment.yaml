@@ -1,0 +1,38 @@
+description: Информация о платеже
+required:
+  - id
+  - cash
+  - paymentResource
+  - merchant
+  - payerType
+properties:
+  id:
+    description: Идентификатор платежа
+    type: string
+  customer:
+    $ref: './Customer.yaml'
+  cash:
+    $ref: './Cash.yaml'
+  paymentResource:
+    title: paymentResource
+    oneOf:
+      - $ref: './BankCard.yaml'
+    discriminator:
+      propertyName: type
+  merchant:
+    $ref: './Merchant.yaml'
+  provider:
+    $ref: './Provider.yaml'
+  payerType:
+    description: Тип плательщика
+    $ref: './PayerType.yaml'
+  tokenMobileProvider:
+    description: Провайдер предоставляющий токен для мобильного платежа
+    type: string
+  createdAt:
+    description: Дата и время создания
+    type: string
+    format: date-time
+  description:
+    description: Описание оплачиваемой услуги
+    type: string

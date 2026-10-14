@@ -1,0 +1,19 @@
+post:
+  summary: Проверка платежа
+  operationId: inspectPayment
+  tags:
+    - inspector
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../components/requests/PaymentInspectRequest.yaml'
+  responses:
+    '200':
+      description: Результат проверки риска
+      content:
+        application/json:
+          schema:
+            $ref: '../components/responses/RiskScoreResult.yaml'
+    '400':
+      $ref: '../components/responses/BadResponse.yaml'

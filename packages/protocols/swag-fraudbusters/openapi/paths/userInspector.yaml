@@ -1,0 +1,19 @@
+post:
+  summary: Проверка доступных методов для плательщика
+  operationId: inspectUser
+  tags:
+    - inspector
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../components/requests/UserInspectRequest.yaml'
+  responses:
+    '200':
+      description: Результат проверки пользователя
+      content:
+        application/json:
+          schema:
+            $ref: '../components/responses/UserInspectResult.yaml'
+    '400':
+      $ref: '../components/responses/BadResponse.yaml'

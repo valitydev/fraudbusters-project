@@ -1,0 +1,15 @@
+post:
+  summary: Загрузка чарджбеков
+  operationId: insertChargebacks
+  tags:
+    - historical-data
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../components/requests/ChargebacksRequest.yaml'
+  responses:
+    '201':
+      description: Чарджбеки успешно сохранены
+    '400':
+      $ref: '../components/responses/BadResponse.yaml'

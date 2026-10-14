@@ -1,0 +1,14 @@
+description: |
+  Тип плательщика.
+  | Значение    | Пояснение  |
+  | ----------- | -----------|
+  | `payment-resource`| Платежное устройство |
+  | `customer`| Карта, привязанная к пользователю  |
+  | `recurrent`| Рекурентный платеж |
+  | `mobile`| Мобильное устройство |
+type: string
+enum:
+  - 'payment_resource'
+  - 'customer'
+  - 'recurrent'
+  - 'mobile'

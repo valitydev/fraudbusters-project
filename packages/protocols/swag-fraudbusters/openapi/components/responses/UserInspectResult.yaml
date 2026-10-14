@@ -1,0 +1,6 @@
+type: object
+properties:
+  blockedMerchants:
+    type: array
+    items:
+      $ref: '../schemas/Merchant.yaml'

@@ -1,0 +1,8 @@
+type: string
+enum:
+  - 'pending'
+  - 'processed'
+  - 'captured'
+  - 'cancelled'
+  - 'failed'
+  - 'unknown'

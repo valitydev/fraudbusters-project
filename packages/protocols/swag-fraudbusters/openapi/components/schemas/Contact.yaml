@@ -1,0 +1,6 @@
+description: Контактные данные пользователя
+properties:
+  email:
+    type: string
+  phone:
+    type: string

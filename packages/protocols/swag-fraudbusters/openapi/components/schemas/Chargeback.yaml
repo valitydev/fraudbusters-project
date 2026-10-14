@@ -1,0 +1,48 @@
+description: Информация о возвратном платеже
+required:
+  - id
+  - cash
+  - paymentResource
+  - merchant
+  - paymentId
+  - payerType
+  - status
+  - category
+  - chargebackCode
+properties:
+  id:
+    description: Идентификатор возвратного платежа
+    type: string
+  paymentId:
+    description: Идентификатор платежа
+    type: string
+  eventTime:
+    description: Дата и время создания
+    type: string
+    format: date-time
+  merchant:
+    $ref: './Merchant.yaml'
+  paymentResource:
+    title: paymentResource
+    oneOf:
+      - $ref: './BankCard.yaml'
+    discriminator:
+      propertyName: type
+  cash:
+    $ref: './Cash.yaml'
+  provider:
+    $ref: './Provider.yaml'
+  customer:
+    $ref: './Customer.yaml'
+  payerType:
+    description: Тип плательщика
+    $ref: './PayerType.yaml'
+  status:
+    description: Статус возвратного платежа
+    $ref: './ChargebackStatus.yaml'
+  category:
+    description: Категория возвратного платежа
+    $ref: './ChargebackCategory.yaml'
+  chargebackCode:
+    description: Код возвратного платежа
+    type: string

@@ -1,0 +1,15 @@
+post:
+  summary: Загрузка списка мошеннических операций
+  operationId: insertFraudPayments
+  tags:
+    - historical-data
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../components/requests/FraudPaymentsRequest.yaml'
+  responses:
+    '201':
+      description: Мошеннические операции успешно сохранены
+    '400':
+      $ref: '../components/responses/BadResponse.yaml'

@@ -1,0 +1,16 @@
+description: Изменения по платежу
+required:
+  - payment
+  - paymentStatus
+  - eventTime
+properties:
+  payment:
+    $ref: './Payment.yaml'
+  paymentStatus:
+    $ref: './PaymentStatus.yaml'
+  eventTime:
+    description: Дата и время создания
+    type: string
+    format: date-time
+  error:
+    $ref: './Error.yaml'

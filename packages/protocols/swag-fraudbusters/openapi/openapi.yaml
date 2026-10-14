@@ -1,0 +1,48 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: Vality Fraudbusters API
+  description:
+    $ref: './docs/api.md'
+  termsOfService: 'https://vality.dev/'
+  contact:
+    name: Vality Support Team
+    email: support@vality.dev
+    url: 'https://developer.vality.dev'
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+tags:
+  - name: inspector
+    x-displayName: Инспектор
+  - name: historical-data
+    x-displayName: Загрузка исторических данных
+  - name: error-codes
+    x-displayName: Коды ошибок
+    description:
+      $ref: './docs/error-codes.md'
+security:
+  - bearerAuth: []
+paths:
+  /inspect-payment:
+    $ref: ./paths/inspector.yaml
+  /inspect-user:
+    $ref: ./paths/userInspector.yaml
+  /chargebacks:
+    $ref: ./paths/chargebacks.yaml
+  /fraud-payments:
+    $ref: ./paths/fraudPayments.yaml
+  /payments:
+    $ref: ./paths/payments.yaml
+  /refunds:
+    $ref: ./paths/refunds.yaml
+  /withdrawals:
+    $ref: ./paths/withdrawals.yaml
+servers:
+  - url: 'https://api.vality.dev/org/v1'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

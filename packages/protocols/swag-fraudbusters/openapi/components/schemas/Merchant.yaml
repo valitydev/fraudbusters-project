@@ -1,0 +1,10 @@
+description: Информация о мерчанте
+required:
+  - id
+  - shop
+properties:
+  id:
+    description: Идентификатор мерчанта
+    type: string
+  shop:
+    $ref: './Shop.yaml'

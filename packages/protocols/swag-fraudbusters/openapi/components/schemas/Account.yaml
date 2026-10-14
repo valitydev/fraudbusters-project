@@ -1,0 +1,10 @@
+description: Информация о счете
+required:
+  - id
+properties:
+  id:
+    description: Идентификатор счета
+    type: string
+  currency:
+    description: Валюта
+    type: string

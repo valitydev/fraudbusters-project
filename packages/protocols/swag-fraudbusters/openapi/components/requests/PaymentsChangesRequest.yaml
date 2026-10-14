@@ -1,0 +1,6 @@
+type: object
+properties:
+  paymentsChanges:
+    type: array
+    items:
+      $ref: '../schemas/PaymentChange.yaml'

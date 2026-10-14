@@ -1,0 +1,42 @@
+description: Информация по возврату
+required:
+  - id
+  - paymentId
+  - merchant
+  - paymentResource
+  - cash
+  - payerType
+  - status
+properties:
+  id:
+    description: Идентификатор возврата
+    type: string
+  paymentId:
+    description: Идентификатор платежа
+    type: string
+  eventTime:
+    description: Дата и время создания
+    type: string
+    format: date-time
+  merchant:
+    $ref: './Merchant.yaml'
+  paymentResource:
+    title: paymentResource
+    oneOf:
+      - $ref: './BankCard.yaml'
+    discriminator:
+      propertyName: type
+  cash:
+    $ref: './Cash.yaml'
+  provider:
+    $ref: './Provider.yaml'
+  customer:
+    $ref: './Customer.yaml'
+  payerType:
+    description: Тип плательщика
+    $ref: './PayerType.yaml'
+  status:
+    description: Статус возврата
+    $ref: './RefundStatus.yaml'
+  error:
+    $ref: './Error.yaml'

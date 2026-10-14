@@ -1,0 +1,15 @@
+post:
+  summary: Загрузка результатов возвратов
+  operationId: insertRefunds
+  tags:
+    - historical-data
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../components/requests/RefundsRequest.yaml'
+  responses:
+    '201':
+      description: Возвраты успешно загружены
+    '400':
+      $ref: '../components/responses/BadResponse.yaml'
