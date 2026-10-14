@@ -1,0 +1,14 @@
+<mat-card fxLayoutAlign="center">
+    <mat-card-content>
+        <h4 fxLayoutAlign="center">{{ headerText }}</h4>
+        <div *ngIf="inProgress | async" fxLayout fxLayoutAlign="center" style="height: 33px; width: 135px">
+            <mat-progress-spinner color="primary" mode="indeterminate" diameter="33"></mat-progress-spinner>
+        </div>
+        <h1 *ngIf="!(inProgress | async) && !formatNumber" [class]="type" fxLayoutAlign="center">
+            {{ value | formatNumber }} {{ units }}
+        </h1>
+        <h1 *ngIf="!(inProgress | async) && formatNumber" [class]="type" fxLayoutAlign="center">
+            {{ value | formatNumber | number : '.1-4' }} {{ units }}
+        </h1>
+    </mat-card-content>
+</mat-card>

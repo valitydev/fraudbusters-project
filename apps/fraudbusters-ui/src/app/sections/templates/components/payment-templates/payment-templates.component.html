@@ -1,0 +1,26 @@
+<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <div fxLayout fxLayoutAlign="space-between center">
+        <fb-templates-search (valueChanges)="search($event)"></fb-templates-search>
+        <button mat-button color="primary" (click)="createTemplate()">CREATE TEMPLATE</button>
+    </div>
+    <div *ngIf="templates$ | async as templates">
+        <fb-payment-templates-list
+            *ngIf="templates.length; else Empty"
+            [templates]="templates"
+            (editItem)="editTemplate($event)"
+            (deleteItem)="removeTemplate($event)"
+            (copyItem)="copyTemplate($event)"
+        ></fb-payment-templates-list>
+    </div>
+    <fb-show-more-panel
+        *ngIf="hasMore$ | async"
+        [isLoading]="inProgress$ | async"
+        (showMore)="fetchMore()"
+    ></fb-show-more-panel>
+    <div *ngIf="inProgress$ | async" fxLayout fxLayoutAlign="center">
+        <mat-progress-spinner color="primary" mode="indeterminate" diameter="48"></mat-progress-spinner>
+    </div>
+    <ng-template #Empty>
+        <fb-empty-search-result *ngIf="!(inProgress$ | async)"></fb-empty-search-result>
+    </ng-template>
+</div>

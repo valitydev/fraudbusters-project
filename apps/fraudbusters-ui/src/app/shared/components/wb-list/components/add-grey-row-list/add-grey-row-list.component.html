@@ -1,0 +1,136 @@
+<div fxLayout="column">
+    <fb-headline fbSecondaryTitle>New rows</fb-headline>
+    <mat-card>
+        <mat-card-content fxLayout="column" [fxLayoutGap]="layoutGapM">
+            <ng-container *ngFor="let form of forms.controls; let i = index">
+                <form
+                    class="grey-list-form"
+                    [formGroup]="form"
+                    fxLayout
+                    [fxLayoutGap]="layoutGapM"
+                    fxLayoutAlign="center center"
+                >
+                    <div fxLayout="column">
+                        <mat-card-content fxLayout="row" [fxLayoutGap]="layoutGapM">
+                            <mat-form-field fxFlex="24" appearance="outline">
+                                <input
+                                    matInput
+                                    placeholder="List name"
+                                    formControlName="listName"
+                                    type="string"
+                                    [matAutocomplete]="auto"
+                                />
+                                <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                                    <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+                                        {{ option }}
+                                    </mat-option>
+                                </mat-autocomplete>
+                            </mat-form-field>
+                            <mat-form-field fxFlex="24" appearance="outline">
+                                <input
+                                    matInput
+                                    placeholder="Party id"
+                                    formControlName="partyId"
+                                    type="string"
+                                    autocomplete="false"
+                                />
+                            </mat-form-field>
+                            <mat-form-field fxFlex="24" appearance="outline">
+                                <input
+                                    matInput
+                                    placeholder="Shop ID"
+                                    formControlName="shopId"
+                                    type="string"
+                                    autocomplete="false"
+                                />
+                            </mat-form-field>
+                            <mat-form-field fxFlex="24" appearance="outline">
+                                <input
+                                    matInput
+                                    placeholder="Value"
+                                    formControlName="value"
+                                    type="string"
+                                    autocomplete="false"
+                                />
+                            </mat-form-field>
+                            <button
+                                fxFlex="4"
+                                [style.visibility]="forms.length > 1 ? 'visible' : 'hidden'"
+                                mat-icon-button
+                                class="remove-btn"
+                                (click)="removeItem(i)"
+                                [disabled]="inProgress$ | async"
+                            >
+                                <mat-icon>remove</mat-icon>
+                            </button>
+                        </mat-card-content>
+
+                        <mat-card-content fxLayout="row" [fxLayoutGap]="layoutGapM">
+                            <mat-form-field appearance="outline" fxFlex="23">
+                                <input
+                                    matInput
+                                    type="number"
+                                    placeholder="Count"
+                                    formControlName="count"
+                                    autocomplete="false"
+                                />
+                            </mat-form-field>
+                            <mat-form-field floatLabel="always" appearance="outline" fxFlex="23">
+                                <input
+                                    matInput
+                                    placeholder="Start time"
+                                    formControlName="startCountTime"
+                                    [ngxMatDatetimePicker]="pickerFrom"
+                                />
+                                <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+                                <ngx-mat-datetime-picker showSeconds="true" #pickerFrom></ngx-mat-datetime-picker>
+                            </mat-form-field>
+                            <mat-form-field floatLabel="always" appearance="outline" fxFlex="23">
+                                <input
+                                    matInput
+                                    placeholder="End time"
+                                    formControlName="endCountTime"
+                                    name="endCountTime"
+                                    [ngxMatDatetimePicker]="pickerTo"
+                                />
+                                <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+                                <ngx-mat-datetime-picker showSeconds="true" #pickerTo></ngx-mat-datetime-picker>
+                            </mat-form-field>
+                        </mat-card-content>
+                    </div>
+                </form>
+            </ng-container>
+
+            <div fxLayout fxLayoutAlign="end center" [fxLayoutGap]="layoutGapM">
+                <input
+                    hidden
+                    type="file"
+                    #fileDropRef
+                    id="fileDropRef"
+                    multiple
+                    (change)="prepareFilesList($event.target.files)"
+                />
+                <button mat-button color="accent" (click)="fileDropRef.click()">Add from CSV</button>
+                <button
+                    mat-button
+                    color="accent"
+                    (click)="addItem()"
+                    [disabled]="!forms.valid || (inProgress$ | async) || forms.value.length < 1"
+                >
+                    Add row
+                </button>
+                <button
+                    mat-raised-button
+                    color="primary"
+                    (click)="save()"
+                    [disabled]="!forms.valid || (inProgress$ | async) || forms.value.length < 1"
+                >
+                    Create
+                </button>
+            </div>
+        </mat-card-content>
+        <mat-card-footer *ngIf="inProgress$ | async">
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        </mat-card-footer>
+    </mat-card>
+</div>

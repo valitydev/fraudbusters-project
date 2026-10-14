@@ -1,0 +1,32 @@
+<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <fb-history-data-search (valueChanges)="search($event)"></fb-history-data-search>
+    <div fxLayout fxLayoutAlign="end start">
+        <button
+            mat-button
+            color="primary"
+            (click)="addToWbListCandidate()"
+            [disabled]="selectedChargebacks$.length === 0"
+        >
+            ADD TO LIST CANDIDATE
+        </button>
+    </div>
+    <div *ngIf="chargebacks$ | async as chargebacks; else Empty" fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <fb-historical-data-chargeback-list
+            *ngIf="chargebacks.length > 0; else Empty"
+            [chargebacks]="chargebacks"
+            [selectedChargebacks]="selectedChargebacks$"
+            (changed)="checkChargebacks($event)"
+        ></fb-historical-data-chargeback-list>
+        <fb-show-more-continuation-panel
+            *ngIf="hasMore$ | async"
+            [isLoading]="inProgress$ | async"
+            (showMore)="fetchMore()"
+        ></fb-show-more-continuation-panel>
+    </div>
+    <ng-template #Empty>
+        <div *ngIf="inProgress$ | async" fxLayout fxLayoutAlign="center">
+            <mat-progress-spinner color="primary" mode="indeterminate" diameter="48"></mat-progress-spinner>
+        </div>
+        <fb-empty-search-result *ngIf="!(inProgress$ | async)"></fb-empty-search-result>
+    </ng-template>
+</div>

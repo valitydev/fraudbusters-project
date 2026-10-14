@@ -1,0 +1,68 @@
+<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <div fxLayout fxFlexFill fxLayoutAlign="space-between center">
+        <fb-base-analytics-search
+            fxFlexFill
+            [inProgress]="inProgress$"
+            (valueChanges)="search($event)"
+        ></fb-base-analytics-search>
+    </div>
+    <div fxFlexFill fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <div fxLayout="row" fxlayoutgap="10px grid" fxLayoutAlign="space-between center" [fxLayoutGap]="layoutGapM">
+            <fb-info-card
+                fxFlex="25"
+                [headerText]="attemptedPayments"
+                [value]="attemptedPayments$ | async"
+                [inProgress]="inProgress$"
+                [type]="successStyle"
+            ></fb-info-card>
+            <fb-info-card
+                fxFlex="25"
+                [headerText]="blockedPayments"
+                [value]="blockedPayments$ | async"
+                [inProgress]="inProgress$"
+                [type]="errorStyle"
+            ></fb-info-card>
+            <fb-info-card
+                fxFlex="25"
+                [headerText]="ratioOfBlocked"
+                [value]="ratioOfBlocked$ | async"
+                [inProgress]="inProgress$"
+                [type]="errorStyle"
+                [formatNumber]="true"
+            ></fb-info-card>
+            <fb-info-card
+                fxFlex="25"
+                [headerText]="blockedSum"
+                [value]="blockedSum$ | async"
+                [inProgress]="inProgress$"
+                [type]="errorStyle"
+                [formatNumber]="true"
+            ></fb-info-card>
+        </div>
+        <div fxFlexFill fxLayout="column" fxLayoutAlign="space-between center" [fxLayoutGap]="layoutGapM">
+            <mat-card fxFlexFill fxLayoutAlign="start">
+                <mat-card-content fxFlexFill>
+                    <h4>Fraud result ratio</h4>
+                    <label>Ratio success and blocked operations</label>
+                    <fb-bar-chart
+                        *ngIf="chartData$ | async as chartData"
+                        fxFlexFill
+                        fxLayoutAlign="center"
+                        [series]="chartData.series"
+                        [colors]="colors"
+                    ></fb-bar-chart>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <div fxFlexFill fxLayout="column" fxLayoutAlign="space-between center" [fxLayoutGap]="layoutGapM">
+            <div fxFlexFill *ngIf="fraudSummary$ | async as summaries">
+                <fb-fraud-summary-templates-list
+                    fxFlexFill
+                    *ngIf="summaries.length"
+                    [summaryRows]="summaries | sort : 'summary.count'"
+                ></fb-fraud-summary-templates-list>
+            </div>
+        </div>
+    </div>
+</div>

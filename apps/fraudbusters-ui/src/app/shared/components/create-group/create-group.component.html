@@ -1,0 +1,67 @@
+<mat-card>
+    <mat-card-content fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <form [formGroup]="form" fxLayout="column" [fxLayoutGap]="layoutGapL">
+            <mat-form-field [attr.readonly]="!!group" class="full-width" fxFlex appearance="outline">
+                <input required matInput placeholder="Group name" formControlName="id" />
+            </mat-form-field>
+        </form>
+        <ng-container *ngFor="let form of forms.controls; let i = index">
+            <form
+                class="create-payment-reference-form"
+                [formGroup]="form"
+                fxLayout
+                [fxLayoutGap]="layoutGapM"
+                fxLayoutAlign="center center"
+            >
+                <mat-form-field fxFlex appearance="outline">
+                    <input
+                        matInput
+                        placeholder="Template ID"
+                        formControlName="id"
+                        type="string"
+                        [matAutocomplete]="auto"
+                    />
+                    <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                        <mat-option *ngFor="let option of options" [value]="option">
+                            {{ option }}
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+                <mat-form-field fxFlex appearance="outline">
+                    <input
+                        matInput
+                        placeholder="Priority"
+                        formControlName="priority"
+                        type="number"
+                        autocomplete="false"
+                    />
+                </mat-form-field>
+                <button
+                    [style.visibility]="forms.length > 1 ? 'visible' : 'hidden'"
+                    mat-icon-button
+                    class="remove-btn"
+                    (click)="removeItem(i)"
+                    [disabled]="inProgress$ | async"
+                >
+                    <mat-icon>remove</mat-icon>
+                </button>
+            </form>
+        </ng-container>
+        <div fxLayout fxLayoutAlign="end" [fxLayoutGap]="layoutGapM">
+            <button
+                mat-button
+                color="accent"
+                (click)="addItem()"
+                [disabled]="!forms.valid || (inProgress$ | async) || forms.value.length < 1"
+            >
+                Add template
+            </button>
+            <button mat-button color="primary" [disabled]="form.invalid || (inProgress$ | async)" (click)="save()">
+                {{ group ? 'Save' : 'Create' }}
+            </button>
+        </div>
+    </mat-card-content>
+    <mat-card-footer *ngIf="inProgress$ | async">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    </mat-card-footer>
+</mat-card>

@@ -1,0 +1,14 @@
+@mixin mat-card-override() {
+    .mat-card,
+    .mat-mdc-card {
+        padding: 24px !important;
+    }
+
+    .mat-card.fb-list-item,
+    .mat-mdc-card.fb-list-item {
+        min-height: 48px;
+        height: auto !important;
+        padding: 12px 24px !important;
+        align-items: center;
+    }
+}

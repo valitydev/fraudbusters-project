@@ -1,0 +1,63 @@
+<mat-expansion-panel>
+    <mat-expansion-panel-header #exppanel>
+        <div fxLayout fxFlexFill fxLayoutAlign="start center" [fxLayoutGap]="layoutGapM">
+            <div class="fb-body-checkbox" fxFlex="0 0 30px" (click)="!exppanel._toggle()">
+                <mat-checkbox color="primary" (change)="emmitChange()" [checked]="enabled"> </mat-checkbox>
+            </div>
+            <div class="fb-body-2" fxFlex="0 0 120px">{{ payment.id }}</div>
+            <div class="fb-body-2" fxFlex="0 0 120px">
+                <fb-tag [color]="payment.status | paymentStatusToColor" [title]="payment.status"></fb-tag>
+            </div>
+            <div class="fb-body-2" fxFlex>{{ payment.merchantInfo.partyId }}</div>
+            <div class="fb-body-2" fxFlex>{{ payment.merchantInfo.shopId }}</div>
+            <div class="fb-body-2" fxFlex="0 0 120px">{{ payment.amount }}</div>
+            <div class="fb-body-2" fxFlex="0 0 120px">{{ payment.currency }}</div>
+            <div class="fb-body-2" fxFlex>{{ payment.clientInfo.email }}</div>
+            <div class="fb-body-2" fxFlex="0 0 160px">{{ payment.eventTime | date : 'yyyy-MM-dd HH:mm:ss' }}</div>
+        </div>
+    </mat-expansion-panel-header>
+    <div class="panel-content" fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <mat-divider></mat-divider>
+        <div class="row">
+            <div fxFlex>Token:</div>
+            <div fxFlex>{{ payment.cardToken }}</div>
+        </div>
+        <div class="row" *ngIf="payment.bin">
+            <div fxFlex>BIN:</div>
+            <div fxFlex>{{ payment.bin }}</div>
+        </div>
+        <div class="row" *ngIf="payment.lastDigits">
+            <div fxFlex>Last Digits:</div>
+            <div fxFlex>{{ payment.lastDigits }}</div>
+        </div>
+        <div class="row" *ngIf="payment.paymentSystem">
+            <div fxFlex>Payment System:</div>
+            <div fxFlex>{{ payment.paymentSystem }}</div>
+        </div>
+        <div class="row" *ngIf="payment.clientInfo.fingerprint">
+            <div fxFlex>Fingerprint:</div>
+            <div fxFlex>{{ payment.clientInfo.fingerprint }}</div>
+        </div>
+        <div class="row" *ngIf="payment.clientInfo.ip">
+            <div fxFlex>IP:</div>
+            <div fxFlex>{{ payment.clientInfo.ip }}</div>
+        </div>
+        <div fxLayout="row">
+            <div fxFlex>Country:</div>
+            <div fxFlex>{{ payment.paymentCountry }}</div>
+        </div>
+        <div fxLayout="row">
+            <div fxFlex>Terminal:</div>
+            <div fxFlex>{{ payment.provider.terminalId }}</div>
+        </div>
+        <div class="row" *ngIf="payment.error.errorCode">
+            <div fxFlex>Error code:</div>
+            <div fxFlex>{{ payment.error.errorCode }}</div>
+        </div>
+        <div class="row" *ngIf="payment.error.errorReason">
+            <div fxFlex>Error reason:</div>
+            <div fxFlex>{{ payment.error.errorReason }}</div>
+        </div>
+        <mat-divider></mat-divider>
+    </div>
+</mat-expansion-panel>

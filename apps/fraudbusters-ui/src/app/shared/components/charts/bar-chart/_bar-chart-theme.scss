@@ -1,0 +1,14 @@
+@import '../../../../styles/utils/shadow';
+@import '../charts-theme';
+
+@mixin dsh-bar-chart-theme($theme) {
+    $foreground: map-get($theme, foreground);
+
+    @include dsh-charts-theme($theme);
+
+    .dsh-bar-chart-tooltip {
+        &-title {
+            color: map-get($foreground, light-text);
+        }
+    }
+}

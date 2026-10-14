@@ -1,0 +1,28 @@
+<mat-expansion-panel>
+    <mat-expansion-panel-header>
+        <div fxLayout fxFlexFill fxLayoutAlign="start center" [fxLayoutGap]="layoutGapM">
+            <div class="fb-body-2" fxFlex="0 0 120px">{{ refund.id }}</div>
+            <div class="fb-body-2" fxFlex="0 0 120px">
+                <fb-tag [color]="refund.status | refundStatusToColor" [title]="refund.status"></fb-tag>
+            </div>
+            <div class="fb-body-2" fxFlex>{{ refund.merchantInfo.partyId }}</div>
+            <div class="fb-body-2" fxFlex>{{ refund.merchantInfo.shopId }}</div>
+            <div class="fb-body-2" fxFlex="0 0 120px">{{ refund.amount }}</div>
+            <div class="fb-body-2" fxFlex="0 0 120px">{{ refund.currency }}</div>
+            <div class="fb-body-2" fxFlex>{{ refund.clientInfo.email }}</div>
+            <div class="fb-body-2" fxFlex="0 0 160px">{{ refund.eventTime | date : 'yyyy-MM-dd HH:mm:ss' }}</div>
+        </div>
+    </mat-expansion-panel-header>
+    <div class="panel-content" fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <mat-divider></mat-divider>
+        <div class="row">
+            <div fxFlex>Fingerprint:</div>
+            <div fxFlex>{{ refund.clientInfo.fingerprint }}</div>
+        </div>
+        <div fxLayout="row">
+            <div fxFlex>Terminal:</div>
+            <div fxFlex>{{ refund.provider.terminalId }}</div>
+        </div>
+        <mat-divider></mat-divider>
+    </div>
+</mat-expansion-panel>

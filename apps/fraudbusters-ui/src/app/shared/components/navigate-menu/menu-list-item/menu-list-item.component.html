@@ -1,0 +1,8 @@
+<div *ngIf="display()" class="menu-item-wrapper">
+    <a class="menu-item" [routerLink]="item.route" [routerLinkActive]="['active']">
+        <div class="menu-content">
+            <mat-icon>{{ item.iconName }}</mat-icon>
+            <span class="menu-text">{{ item.displayName }}</span>
+        </div>
+    </a>
+</div>

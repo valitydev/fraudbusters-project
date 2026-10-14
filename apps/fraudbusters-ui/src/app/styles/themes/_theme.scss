@@ -1,0 +1,15 @@
+@use '@angular/material' as mat;
+
+@import './mat-overrides-theme';
+@import './src/app/shared/components/headline/secondary-title/secondary-title-theme';
+@import './src/app/shared/components/tag/tag-colors-theme';
+@import './src/app/shared/components/list-header/list-header-theme';
+
+@mixin fb-theme($theme) {
+    body.#{map-get($theme, name)} {
+        @include mat-overrides-theme($theme);
+        @include fb-details-secondary-title-theme($theme);
+        @include fb-tag-colors-theme($theme);
+        @include fb-list-header-theme($theme);
+    }
+}

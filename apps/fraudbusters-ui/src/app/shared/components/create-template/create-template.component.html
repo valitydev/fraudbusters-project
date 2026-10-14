@@ -1,0 +1,39 @@
+<mat-card>
+    <mat-card-content fxLayout="column" [fxLayoutGap]="layoutGapL">
+        <form [formGroup]="form" fxLayout="column" [fxLayoutGap]="layoutGapL">
+            <mat-form-field
+                [attr.readonly]="isEditableName"
+                class="full-width"
+                floatLabel="always"
+                appearance="outline"
+            >
+                <input required matInput placeholder="Name" formControlName="id" />
+            </mat-form-field>
+            <mat-form-field class="full-width" floatLabel="always" appearance="outline">
+                <textarea
+                    required
+                    matInput
+                    placeholder="Templates rules"
+                    formControlName="template"
+                    class="code-editor"
+                ></textarea>
+            </mat-form-field>
+        </form>
+        <div fxLayout fxLayoutAlign="end" [fxLayoutGap]="layoutGapM">
+            <button mat-button color="accent" [disabled]="inProgress$ | async" (click)="validateTemplate()">
+                Validate
+            </button>
+            <button
+                mat-button
+                color="primary"
+                [disabled]="form.invalid || (inProgress$ | async)"
+                (click)="saveTemplate()"
+            >
+                {{ template ? 'Save' : 'Create' }}
+            </button>
+        </div>
+    </mat-card-content>
+    <mat-card-footer *ngIf="inProgress$ | async">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    </mat-card-footer>
+</mat-card>

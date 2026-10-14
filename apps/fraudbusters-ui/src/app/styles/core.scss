@@ -1,0 +1,55 @@
+@use '@angular/material' as mat;
+@import '@angular/material/prebuilt-themes/deeppurple-amber.css';
+
+@import './themes/deeppurple-amber';
+@import './overrides/_body';
+@import './overrides/mat-button';
+@import './overrides/mat-form-field';
+@import './overrides/mat-card';
+@import './overrides/mat-expansion-panel';
+
+@import './utils/typography';
+@import './utils/shadow';
+@import './utils/palette';
+
+@mixin fb-overrides() {
+    @include body-override();
+    @include mat-button-override();
+    @include mat-form-field-override();
+    @include mat-card-override();
+    @include mat-expansion-panel-override();
+}
+
+@mixin fb-typography($config) {
+    @include fb-base-typography($config);
+}
+
+@include fb-overrides();
+@include fb-typography(fb-typography-config());
+
+// Restore mat-headline styles after Angular Material update
+.mat-h1,
+.mat-headline,
+.mat-typography .mat-h1,
+.mat-typography .mat-headline,
+.mat-typography h1 {
+    font: 400 24px / 32px Roboto, 'Helvetica Neue', sans-serif;
+    letter-spacing: normal;
+    margin: 0 0 16px;
+}
+
+// Restore mat-drawer-container styles after Angular Material update
+.mat-drawer-container,
+.mat-mdc-drawer-container {
+    background-color: #fafafa;
+    color: #000000de;
+}
+
+.mat-mdc-tab-header.mat-mdc-tab-nav-bar-stretch-tabs .mat-mdc-tab-link {
+    flex-grow: 0 !important;
+}
+
+.mat-mdc-tab-nav-bar,
+.mat-mdc-tab-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}

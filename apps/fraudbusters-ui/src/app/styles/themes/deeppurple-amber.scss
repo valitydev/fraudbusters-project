@@ -1,0 +1,85 @@
+@use '@angular/material' as mat;
+@import './theme';
+
+@import '../utils/palette';
+
+$foreground: (
+    base: map-get($fb-grey, 700),
+    divider: map-get($fb-grey, 100),
+    dividers: map-get($fb-grey, 100),
+    disabled: rgba(black, 0.38),
+    disabled-button: white,
+    disabled-text: rgba(black, 0.38),
+    elevation: map-get($fb-grey, 100),
+    hint-text: rgba(black, 0.38),
+    secondary-text: map-get($fb-grey, 400),
+    icon: map-get($fb-grey, 700),
+    icons: map-get($fb-grey, 700),
+    text: map-get($fb-grey, 700),
+    slider-min: rgba(black, 0.87),
+    slider-off: rgba(black, 0.26),
+    slider-off-active: rgba(black, 0.38),
+    /*
+     * Custom
+     *
+  */ light-text: white,
+    primary-color: map-get($fb-purple, 600),
+    button-text: white,
+    warn-button: map-get($fb-warn, 400),
+    warn-button-hovered: map-get($fb-warn, 300),
+);
+
+$background: (
+    status-bar: map-get($fb-grey, 300),
+    app-bar: map-get($fb-grey, 100),
+    background: map-get($fb-grey, 50),
+    hover: rgba(black, 0.04),
+    // TODO(kara): check style with Material Design UX
+    card: white,
+    dialog: white,
+    disabled-button: map-get($fb-grey, 400),
+    raised-button: white,
+    focused-button: rgba(black, 0.12),
+    selected-button: map-get($fb-grey, 300),
+    selected-disabled-button: map-get($fb-grey, 400),
+    disabled-button-toggle: map-get($fb-grey, 200),
+    unselected-chip: map-get($fb-grey, 300),
+    disabled-list-option: map-get($fb-grey, 200),
+    tooltip: map-get($fb-grey, 700),
+    /*
+     * Custom
+     *
+    */ role-color-officer: map-get($fb-purple, 600),
+    role-color-monitoring: map-get($fb-success, 600),
+    role-color-auditor: map-get($fb-warn, 500),
+    role-color-support: map-get($fb-blue, 500),
+    border: map-get($fb-grey, 100),
+    list-header: map-get($fb-purple, 50),
+);
+
+$theme: (
+    primary: $fb-purple,
+    accent: $fb-blue,
+    is-dark: false,
+    foreground: $foreground,
+    background: $background,
+    /*
+      * Custom
+      *
+    */ name: 'deeppurple-amber',
+    success: $fb-success,
+    pending: $fb-pending,
+    warn: $fb-warn,
+    primary-base: map-get($fb-purple, 600),
+    success-base: map-get($fb-success, 500),
+    pending-base: map-get($fb-pending, 800),
+    warn-base: map-get($fb-warn, 400),
+    cancel-base: map-get($fb-warn, 200),
+    failed-base: map-get($fb-warn, 900),
+    unknown-base: map-get($fb-grey, 400),
+    blue-base: map-get($fb-blue, 500),
+    gray: $fb-grey,
+    headline: #655b76,
+);
+
+@include fb-theme($theme);

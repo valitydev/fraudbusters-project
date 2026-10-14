@@ -1,0 +1,12 @@
+.mat-card,
+.mat-mdc-card {
+    padding: 8px 24px !important;
+}
+
+mat-card.mat-mdc-card.mdc-card.list-header {
+    max-height: 48px;
+}
+
+mat-card.mat-mdc-card.mdc-card.list-header.reserve-toggle-space {
+    padding-right: 32px !important;
+}

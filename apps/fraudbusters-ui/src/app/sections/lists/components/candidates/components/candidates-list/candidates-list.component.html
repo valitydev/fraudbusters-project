@@ -1,0 +1,6 @@
+<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <fb-candidate-header></fb-candidate-header>
+    <div *ngFor="let candidate of candidates" fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <fb-candidate-item [candidate]="candidate" (approveItem)="approveItem.emit($event)"></fb-candidate-item>
+    </div>
+</div>

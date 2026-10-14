@@ -1,0 +1,34 @@
+<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <div fxLayout fxLayoutAlign="space-between center">
+        <div fxLayoutGap="10px grid">
+            <mat-form-field class="search fb-full-width" appearance="outline">
+                <input matInput placeholder="Party ID" label="partyId" [(ngModel)]="filter.partyId" name="partyId" />
+            </mat-form-field>
+            <mat-form-field class="search fb-full-width" appearance="outline">
+                <input matInput placeholder="Shop ID" label="shopId" [(ngModel)]="filter.shopId" name="shopId" />
+            </mat-form-field>
+        </div>
+        <button mat-button color="primary" (click)="emulate()">Emulate</button>
+    </div>
+    <mat-card>
+        <mat-card-content>
+            <div fxLayout>
+                <div fxFlex="100">
+                    <table mat-table [dataSource]="templates$ | async" class="fb-table">
+                        <ng-container matColumnDef="id">
+                            <td mat-cell *matCellDef="let element" fxFlex="0 0 200px">{{ element.id }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="template">
+                            <td mat-cell *matCellDef="let element" fxLayout="column" fxLayoutGap="8px">
+                                <div *ngFor="let rule of element.template | templateToRules">
+                                    <code>{{ rule }}</code>
+                                </div>
+                            </td>
+                        </ng-container>
+                        <tr mat-row *matRowDef="let row; columns: ['id', 'template']"></tr>
+                    </table>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>

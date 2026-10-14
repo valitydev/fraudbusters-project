@@ -1,0 +1,4 @@
+{
+    "fbManagementEndpoint": "https://api.empayre.com/fb-management/v1",
+    "pageSize": 100
+}

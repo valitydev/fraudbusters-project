@@ -1,0 +1,7 @@
+{
+    "realm": "internal",
+    "auth-server-url": "https://auth.paydev-app.tech",
+    "ssl-required": "none",
+    "resource": "fraudbusters-app",
+    "public-client": true
+}

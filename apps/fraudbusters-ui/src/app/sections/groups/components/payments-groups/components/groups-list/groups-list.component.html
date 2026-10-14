@@ -1,0 +1,10 @@
+<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <fb-group-header></fb-group-header>
+    <div *ngFor="let group of groups" fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <fb-group-item
+            [group]="group"
+            (editItem)="editItem.emit($event)"
+            (deleteItem)="deleteItem.emit($event)"
+        ></fb-group-item>
+    </div>
+</div>

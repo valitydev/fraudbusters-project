@@ -1,0 +1,6 @@
+<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <fb-wb-rows-header></fb-wb-rows-header>
+    <div *ngFor="let record of listRecords" fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <fb-wb-rows-item [listRecord]="record" (deleteItem)="deleteItem.emit($event)"></fb-wb-rows-item>
+    </div>
+</div>

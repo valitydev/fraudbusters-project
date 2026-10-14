@@ -1,0 +1,6 @@
+@import '../fraud-summary-grid';
+
+.fraud-summary-grid {
+    @include fraud-summary-grid;
+    width: 100%;
+}

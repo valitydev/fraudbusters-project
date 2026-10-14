@@ -1,0 +1,21 @@
+@mixin mat-expansion-panel-override() {
+    .mat-expansion-panel,
+    .mat-mdc-expansion-panel,
+    .mat-mdc-expansion-panel {
+        box-shadow: none !important;
+        border: 1px solid;
+    }
+
+    .mat-expansion-panel-header,
+    .mat-mdc-expansion-panel-header,
+    .mat-mdc-expansion-panel-header {
+        height: fit-content !important;
+        padding: 16px 24px !important;
+    }
+
+    .mat-expansion-panel-header:hover,
+    .mat-mdc-expansion-panel-header:hover,
+    .mat-mdc-expansion-panel-header:hover {
+        background-color: transparent !important;
+    }
+}

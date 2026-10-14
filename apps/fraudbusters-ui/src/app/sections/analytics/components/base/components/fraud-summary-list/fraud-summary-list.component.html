@@ -1,0 +1,6 @@
+<div fxFlexFill fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <fb-fraud-summary-header></fb-fraud-summary-header>
+    <div *ngFor="let summary of summaryRows" fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <fb-fraud-summary-item [summary]="summary"></fb-fraud-summary-item>
+    </div>
+</div>

@@ -1,0 +1,8 @@
+<mat-card class="fb-list-item fraud-summary-grid" [style.column-gap]="layoutGapM">
+    <div class="fb-body-2">{{ summary.status }}</div>
+    <div class="fb-body-2 wrap">{{ summary.template }}</div>
+    <div class="fb-body-2 wrap">{{ summary.checkedRule }}</div>
+    <div class="fb-body-2">{{ summary.summary.sum }}</div>
+    <div class="fb-body-2">{{ summary.summary.count }}</div>
+    <div class="fb-body-2">{{ numberFormat(summary.summary.ratio) | number : '.1-4' }}</div>
+</mat-card>

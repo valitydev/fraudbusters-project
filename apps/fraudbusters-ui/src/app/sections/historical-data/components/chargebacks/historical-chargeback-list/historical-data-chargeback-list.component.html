@@ -1,0 +1,10 @@
+<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <fb-historical-data-chargeback-header (changedAll)="onChangeAll($event)"></fb-historical-data-chargeback-header>
+    <div *ngFor="let chargeback of chargebacks" fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <fb-historical-data-chargeback-item
+            [chargeback]="chargeback"
+            (changed)="onChange($event)"
+            [enabled]="selectedChargebacks.includes(chargeback)"
+        ></fb-historical-data-chargeback-item>
+    </div>
+</div>

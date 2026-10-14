@@ -1,0 +1,41 @@
+@use '@angular/material' as mat;
+
+@mixin fb-tag-colors-theme($theme) {
+    $foreground: map-get($theme, foreground);
+
+    .fb-tag {
+        color: map-get($foreground, light-text);
+
+        &-primary {
+            background-color: map-get($theme, primary-base);
+        }
+
+        &-success {
+            background-color: map-get($theme, success-base);
+        }
+
+        &-warn {
+            background-color: map-get($theme, warn-base);
+        }
+
+        &-pending {
+            background-color: map-get($theme, pending-base);
+        }
+
+        &-blue {
+            background-color: map-get($theme, blue-base);
+        }
+
+        &-cancel {
+            background-color: map-get($theme, cancel-base);
+        }
+
+        &-failed {
+            background-color: map-get($theme, failed-base);
+        }
+
+        &-unknown {
+            background-color: map-get($theme, unknown-base);
+        }
+    }
+}

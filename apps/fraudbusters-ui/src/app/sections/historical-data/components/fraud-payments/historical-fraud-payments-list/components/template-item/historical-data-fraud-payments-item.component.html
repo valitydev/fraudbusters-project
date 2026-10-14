@@ -1,0 +1,40 @@
+<mat-expansion-panel>
+    <mat-expansion-panel-header>
+        <div fxLayout fxFlexFill fxLayoutAlign="start center" [fxLayoutGap]="layoutGapM">
+            <div class="fb-body-2" fxFlex="0 0 120px">{{ fraudPayment.payment.id }}</div>
+            <div class="fb-body-2" fxFlex="0 0 120px">
+                <fb-tag
+                    [color]="fraudPayment.payment.status | paymentStatusToColor"
+                    [title]="fraudPayment.payment.status"
+                ></fb-tag>
+            </div>
+            <div class="fb-body-2" fxFlex>{{ fraudPayment.payment.merchantInfo.partyId }}</div>
+            <div class="fb-body-2" fxFlex>{{ fraudPayment.payment.merchantInfo.shopId }}</div>
+            <div class="fb-body-2" fxFlex="0 0 120px">{{ fraudPayment.payment.amount }}</div>
+            <div class="fb-body-2" fxFlex="0 0 120px">{{ fraudPayment.payment.currency }}</div>
+            <div class="fb-body-2" fxFlex>{{ fraudPayment.payment.clientInfo.email }}</div>
+            <div class="fb-body-2" fxFlex="0 0 120px">{{ fraudPayment.type }}</div>
+            <div class="fb-body-2" fxFlex="0 0 160px">
+                {{ fraudPayment.payment.eventTime | date : 'yyyy-MM-dd HH:mm:ss' }}
+            </div>
+        </div>
+    </mat-expansion-panel-header>
+    <div class="panel-content" fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <mat-divider></mat-divider>
+        <div class="column">
+            <div class="row">
+                <div fxFlex>Fingerprint:</div>
+                <div fxFlex>{{ fraudPayment.payment.clientInfo.fingerprint }}</div>
+            </div>
+            <div class="row">
+                <div fxFlex>Terminal:</div>
+                <div fxFlex>{{ fraudPayment.payment.provider.terminalId }}</div>
+            </div>
+            <div class="row">
+                <div fxFlex>Comment:</div>
+                <div fxFlex>{{ fraudPayment.comment }}</div>
+            </div>
+        </div>
+        <mat-divider></mat-divider>
+    </div>
+</mat-expansion-panel>

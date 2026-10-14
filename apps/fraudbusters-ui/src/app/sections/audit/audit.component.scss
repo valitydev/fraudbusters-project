@@ -1,0 +1,95 @@
+mat-toolbar {
+    .mat-icon,
+    .mat-mdc-icon {
+        cursor: pointer;
+    }
+}
+
+::ng-deep {
+    mat-toolbar {
+        height: 48px;
+
+        .mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-prefix .mat-icon-button,
+        .mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-suffix .mat-icon-button,
+        .mat-mdc-form-field:not(.mat-mdc-form-field-appearance-legacy) .mat-mdc-form-field-prefix .mat-mdc-icon-button,
+        .mat-mdc-form-field:not(.mat-mdc-form-field-appearance-legacy) .mat-mdc-form-field-suffix .mat-mdc-icon-button {
+            margin-left: -30px;
+            top: 6px;
+            font-size: revert;
+            height: 1.5em;
+            width: 1.5em;
+        }
+
+        .mat-form-field:not(.mat-form-field-appearance-legacy)
+            .mat-form-field-prefix
+            .mat-datepicker-toggle-default-icon,
+        .mat-form-field:not(.mat-form-field-appearance-legacy)
+            .mat-form-field-suffix
+            .mat-datepicker-toggle-default-icon,
+        .mat-mdc-form-field:not(.mat-mdc-form-field-appearance-legacy)
+            .mat-mdc-form-field-prefix
+            .mat-datepicker-toggle-default-icon,
+        .mat-mdc-form-field:not(.mat-mdc-form-field-appearance-legacy)
+            .mat-mdc-form-field-suffix
+            .mat-datepicker-toggle-default-icon {
+            display: inherit;
+        }
+    }
+
+    mat-form-field.mat-form-field.search {
+        margin-top: 0;
+    }
+
+    form {
+        .mat-form-field:not(.mat-form-field-appearance-legacy)
+            .mat-form-field-prefix
+            .mat-datepicker-toggle-default-icon,
+        .mat-form-field:not(.mat-form-field-appearance-legacy)
+            .mat-form-field-suffix
+            .mat-datepicker-toggle-default-icon,
+        .mat-mdc-form-field:not(.mat-mdc-form-field-appearance-legacy)
+            .mat-mdc-form-field-prefix
+            .mat-datepicker-toggle-default-icon,
+        .mat-mdc-form-field:not(.mat-mdc-form-field-appearance-legacy)
+            .mat-mdc-form-field-suffix
+            .mat-datepicker-toggle-default-icon {
+            display: inherit;
+        }
+
+        mat-form-field.date-picker {
+            div {
+                .mat-form-field-flex,
+                .mat-mdc-form-field-flex {
+                    padding: 0;
+                    background-color: transparent;
+                }
+            }
+        }
+
+        .mat-form-field-wrapper,
+        .mat-mdc-form-field-wrapper {
+            padding: 0;
+            margin: 0;
+        }
+
+        .mat-form-field-appearance-outline .mat-form-field-flex,
+        .mat-mdc-form-field-appearance-outline .mat-mdc-form-field-flex {
+            margin-top: 0;
+        }
+
+        .mat-form-field-appearance-fill .mat-form-field-flex,
+        .mat-mdc-form-field-appearance-fill .mat-mdc-form-field-flex {
+            padding: 0;
+        }
+
+        .mat-select-arrow-wrapper,
+        .mat-mdc-select-arrow-wrapper {
+            height: 4px;
+            display: block;
+        }
+
+        div.row-margin {
+            margin: 0 !important;
+        }
+    }
+}

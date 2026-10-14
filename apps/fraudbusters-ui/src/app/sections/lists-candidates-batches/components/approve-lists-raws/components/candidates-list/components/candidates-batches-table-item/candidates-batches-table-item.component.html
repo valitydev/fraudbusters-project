@@ -1,0 +1,12 @@
+<mat-card class="fb-list-item" fxLayout fxFlexFill fxLayoutAlign="center center" [fxLayoutGap]="layoutGapM">
+    <div fxLayout fxFlexFill [fxLayoutGap]="layoutGapM">
+        <div class="fb-body-checkbox" fxFlex="0 0 30px">
+            <mat-checkbox color="primary" (change)="emmitChange()" [checked]="enabled"> </mat-checkbox>
+        </div>
+        <div class="fb-body-2" fxFlex>{{ candidate.listType }}</div>
+        <div class="fb-body-2" fxFlex>{{ candidate.listName }}</div>
+        <div class="fb-body-2" fxFlex>{{ candidate.partyId }}</div>
+        <div class="fb-body-2" fxFlex>{{ candidate.shopId }}</div>
+        <div class="fb-body-2" fxFlex>{{ candidate.value }}</div>
+    </div>
+</mat-card>

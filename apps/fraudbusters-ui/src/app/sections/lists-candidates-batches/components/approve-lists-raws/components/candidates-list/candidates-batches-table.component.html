@@ -1,0 +1,29 @@
+<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <div fxLayout fxLayoutAlign="space-between center">
+        <fb-candidates-batches-table-search (valueChanges)="search($event)"></fb-candidates-batches-table-search>
+        <button mat-button color="primary" (click)="approveCandidates()" [disabled]="selectedRecords.length < 1">
+            ADD TO LIST
+        </button>
+    </div>
+    <fb-candidates-batches-table-header (changedAll)="onChangeAll($event)"></fb-candidates-batches-table-header>
+    <div *ngIf="candidates$ | async as candidates">
+        <div *ngFor="let candidate of candidates" fxLayout="column" [fxLayoutGap]="layoutGapM">
+            <fb-candidates-batches-table-item
+                [candidate]="candidate"
+                (approve)="onChange($event)"
+                [enabled]="allSelected"
+            ></fb-candidates-batches-table-item>
+        </div>
+    </div>
+    <fb-show-more-panel
+        *ngIf="hasMore$ | async"
+        [isLoading]="inProgress$ | async"
+        (showMore)="fetchMore()"
+    ></fb-show-more-panel>
+    <div *ngIf="inProgress$ | async" fxLayout fxLayoutAlign="center">
+        <mat-progress-spinner color="primary" mode="indeterminate" diameter="48"></mat-progress-spinner>
+    </div>
+    <ng-template #Empty>
+        <fb-empty-search-result *ngIf="!(inProgress$ | async)"></fb-empty-search-result>
+    </ng-template>
+</div>

@@ -1,0 +1,9 @@
+@import '../fraud-summary-grid';
+
+.fraud-summary-grid {
+    @include fraud-summary-grid;
+}
+
+.wrap {
+    word-wrap: anywhere;
+}

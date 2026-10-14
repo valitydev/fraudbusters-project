@@ -1,0 +1,19 @@
+::ng-deep {
+    form.grey-list-form {
+        display: inline-block !important;
+
+        .mat-form-field-appearance-outline .mat-form-field-prefix,
+        .mat-form-field-appearance-outline .mat-form-field-suffix,
+        .mat-mdc-form-field-appearance-outline .mat-mdc-form-field-prefix,
+        .mat-mdc-form-field-appearance-outline .mat-mdc-form-field-suffix {
+            top: auto;
+        }
+    }
+
+    .mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-prefix .mat-icon-button,
+    .mat-form-field:not(.mat-form-field-appearance-legacy) .mat-form-field-suffix .mat-icon-button,
+    .mat-mdc-form-field:not(.mat-mdc-form-field-appearance-legacy) .mat-mdc-form-field-prefix .mat-mdc-icon-button,
+    .mat-mdc-form-field:not(.mat-mdc-form-field-appearance-legacy) .mat-mdc-form-field-suffix .mat-mdc-icon-button {
+        height: auto;
+    }
+}

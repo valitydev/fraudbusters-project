@@ -1,0 +1,39 @@
+<mat-expansion-panel>
+    <mat-expansion-panel-header #exppanel>
+        <div fxLayout fxFlexFill fxLayoutAlign="start center" [fxLayoutGap]="layoutGapM">
+            <div class="fb-body-checkbox" fxFlex="0 0 30px" (click)="!exppanel._toggle()">
+                <mat-checkbox color="primary" (change)="emmitChange()" [checked]="enabled"> </mat-checkbox>
+            </div>
+            <div class="fb-body-2" fxFlex="0 0 120px">{{ chargeback.id }}</div>
+            <div class="fb-body-2" fxFlex="0 0 120px">
+                <fb-tag [color]="chargeback.status | chargebackStatusToColor" [title]="chargeback.status"></fb-tag>
+            </div>
+            <div class="fb-body-2" fxFlex>{{ chargeback.merchantInfo.partyId }}</div>
+            <div class="fb-body-2" fxFlex>{{ chargeback.merchantInfo.shopId }}</div>
+            <div class="fb-body-2" fxFlex="0 0 120px">{{ chargeback.category }}</div>
+            <div class="fb-body-2" fxFlex="0 0 120px">{{ chargeback.chargebackCode }}</div>
+            <div class="fb-body-2" fxFlex>{{ chargeback.clientInfo.email }}</div>
+            <div class="fb-body-2" fxFlex="0 0 160px">{{ chargeback.eventTime | date : 'yyyy-MM-dd HH:mm:ss' }}</div>
+        </div>
+    </mat-expansion-panel-header>
+    <div class="panel-content" fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <mat-divider></mat-divider>
+        <div class="row">
+            <div fxFlex>Fingerprint:</div>
+            <div fxFlex>{{ chargeback.clientInfo.fingerprint }}</div>
+        </div>
+        <div fxLayout="row">
+            <div fxFlex>Terminal:</div>
+            <div fxFlex>{{ chargeback.provider.terminalId }}</div>
+        </div>
+        <div fxLayout="row">
+            <div fxFlex>Amount:</div>
+            <div fxFlex>{{ chargeback.amount }}</div>
+        </div>
+        <div fxLayout="row">
+            <div fxFlex>Currency:</div>
+            <div fxFlex>{{ chargeback.currency }}</div>
+        </div>
+        <mat-divider></mat-divider>
+    </div>
+</mat-expansion-panel>

@@ -1,0 +1,5 @@
+@mixin fraud-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) repeat(3, 140px);
+    align-items: center;
+}

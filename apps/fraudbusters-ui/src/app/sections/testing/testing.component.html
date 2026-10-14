@@ -1,0 +1,18 @@
+<div class="mat-headline">Testing</div>
+<div fxLayout="column" fxLayoutGap="8px">
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel">
+        <a
+            mat-tab-link
+            *ngFor="let link of links"
+            [routerLink]="link.path"
+            routerLinkActive
+            #rla="routerLinkActive"
+            [active]="rla.isActive || hasActiveFragments(link.otherActiveUrlFragments)"
+        >
+            {{ link.name }}
+        </a>
+    </nav>
+    <mat-tab-nav-panel #tabPanel>
+        <router-outlet></router-outlet>
+    </mat-tab-nav-panel>
+</div>

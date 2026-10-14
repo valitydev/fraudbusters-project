@@ -1,0 +1,28 @@
+name: Master
+on:
+  push:
+    branches:
+      - 'master'
+      - 'main'
+      - 'epic/*'
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Init
+        uses: ./.github/actions/init
+      - name: Build
+        run: npm run build
+      - name: Deploy image
+        uses: valitydev/action-deploy-docker@v2
+        with:
+          registry-username: ${{ github.actor }}
+          registry-access-token: ${{ secrets.GITHUB_TOKEN }}
