@@ -1,0 +1,28 @@
+package dev.vality.fraudbusters.management.converter.payment;
+
+import dev.vality.swag.fraudbusters.management.model.InspectResult;
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Component;
+
+
+@Component
+@RequiredArgsConstructor
+public class FraudResultToInspectResultConverter
+        implements Converter<dev.vality.damsel.fraudbusters.HistoricalTransactionCheck, InspectResult> {
+
+    private final PaymentToApiPaymentConverter paymentInfoToPaymentConverter;
+
+    @NonNull
+    @Override
+    public InspectResult convert(dev.vality.damsel.fraudbusters.HistoricalTransactionCheck transactionCheck) {
+        var checkResult = transactionCheck.getCheckResult();
+        return new InspectResult()
+                .payment(paymentInfoToPaymentConverter.convert(transactionCheck.getTransaction()))
+                .checkedTemplate(checkResult.getCheckedTemplate())
+                .resultStatus(checkResult.getConcreteCheckResult().getResultStatus().getSetField().getFieldName())
+                .notificationsRule(checkResult.getConcreteCheckResult().getNotificationsRule())
+                .ruleChecked(checkResult.getConcreteCheckResult().getRuleChecked());
+    }
+}

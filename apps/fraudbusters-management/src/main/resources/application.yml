@@ -1,0 +1,109 @@
+server:
+  port: ${server.port}
+  servlet:
+    context-path: "/fb-management/v1"
+management:
+  server:
+    port: ${management.port}
+  endpoint:
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+spring:
+  application:
+    name: ${name}
+  output:
+    ansi:
+      enabled: always
+  security:
+    oauth2:
+      resourceserver:
+        url: https://auth.domain
+        jwt:
+          realm: internal
+          issuer-uri: >
+            ${spring.security.oauth2.resourceserver.url}/auth/realms/
+            ${spring.security.oauth2.resourceserver.jwt.realm}
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.postgresql.Driver
+    url: ${db.url}
+    username: ${db.user}
+    password: ${db.password}
+    hikari:
+      idle-timeout: 30000
+      maximum-pool-size: 10
+    flyway:
+      schemas: af
+  kafka:
+    bootstrap-servers: "localhost:29092"
+    consumer:
+      group-id: FraudBusterListener
+      auto-offset-reset: earliest
+      max-poll-records: 1
+
+info:
+  version: ${project.version}
+  stage: dev
+
+kafka:
+  consumer-group:
+    wb-list: FraudBusterListenerWbList
+  topic:
+    wblist:
+      command: "wb-list-command"
+      event.sink: "wb-list-event-sink"
+      candidate: "wb-list-candidate"
+    fraudbusters:
+      payment:
+        template: "template"
+        reference: "template_reference"
+        group:
+          list: "group"
+          reference: "group_reference"
+      unknown-initiating-entity: unknown_initiating_entity
+
+service:
+  payment:
+    url: http://localhost:8999/fraud_payment/v1
+    networkTimeout: 5000
+  historical:
+    url: http://localhost:8999/historical_data/v1
+    networkTimeout: 5000
+  cleaner:
+    cron: "-"
+    fresh-period: 30
+  notification:
+    url: http://localhost:8999/notification/v1
+    networkTimeout: 5000
+  notification-channel:
+    url: http://localhost:8999/notification-channel/v1
+    networkTimeout: 5000
+  notification-template:
+    url: http://localhost:8999/notification-template/v1
+    networkTimeout: 5000
+  warehouse:
+    url: http://localhost:8022/change_it
+    networkTimeout: 10000
+
+keycloak:
+  auth-server-url: http://localhost:8080/auth
+  realm: SpringBootKeycloack
+  resource: login-app
+  bearer-only: true
+  ssl-required: external
+  public-client: true
+  enabled: false
+  principal-attribute: preferred_username
+
+cors.allowed-origins: "http://localhost:4200"
+
+spring.servlet.multipart.max-file-size: 10MB
+spring.servlet.multipart.max-request-size: 10MB
+
+parameters.listNames: EMAIL,IP,FINGERPRINT,CARD_TOKEN,BIN,PAN

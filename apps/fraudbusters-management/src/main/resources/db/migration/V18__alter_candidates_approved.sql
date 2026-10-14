@@ -1,0 +1,1 @@
+ALTER TABLE ONLY af.wb_list_candidate ALTER COLUMN approved SET DEFAULT false;
