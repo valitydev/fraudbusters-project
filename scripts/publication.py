@@ -19,6 +19,8 @@ def git(*args):
 
 
 def release_identity(module):
+    if git("rev-parse", "--is-shallow-repository") == "true":
+        raise RuntimeError("Release versioning requires full Git history; configure actions/checkout with fetch-depth: 0")
     sources = json.loads((ROOT / "docs/migration/sources.json").read_text())["sources"]
     source = next(s for s in sources if s["path"] == module["path"])
     imports = git("log", "--first-parent", "--format=%H", "--fixed-strings", "--grep=Import " + source["name"] + " master at " + source["sha"]).splitlines()

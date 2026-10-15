@@ -189,3 +189,40 @@ class PublicationTests(unittest.TestCase):
                 (root / "README.md").write_text("another unrelated change")
                 commit("unrelated again")
                 self.assertEqual(publication.release_identity(module)[1], f"1.{initial[0] + 1}-{changed[:7]}")
+
+    def test_shallow_checkout_requires_full_history_and_recovers_the_same_release(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "source"
+            root.mkdir()
+            def git(*args):
+                return subprocess.check_output(["git", *args], cwd=root, text=True).strip()
+            def commit(message):
+                git("add", ".")
+                git("commit", "-qm", message)
+                return git("rev-parse", "HEAD")
+            git("init", "-q")
+            git("config", "user.name", "Test")
+            git("config", "user.email", "test@example.invalid")
+            (root / "README.md").write_text("source")
+            source = commit("source")
+            path = "packages/protocols/example"
+            (root / path).mkdir(parents=True)
+            (root / path / "contract.thrift").write_text("initial")
+            commit("Import example master at " + source)
+            (root / "docs/migration").mkdir(parents=True)
+            (root / "docs/migration/sources.json").write_text(json.dumps({"sources": [{"name": "example", "sha": source, "path": path}]}))
+            commit("manifest")
+            (root / path / "contract.thrift").write_text("changed")
+            commit("contract change")
+            (root / "README.md").write_text("unrelated")
+            commit("unrelated change")
+            module = {"path": path}
+            with patch.object(publication, "ROOT", root):
+                expected = publication.release_identity(module)
+            shallow = Path(directory) / "checkout"
+            subprocess.run(["git", "clone", "-q", "--depth", "1", root.as_uri(), str(shallow)], check=True)
+            with patch.object(publication, "ROOT", shallow):
+                with self.assertRaisesRegex(RuntimeError, "fetch-depth: 0"):
+                    publication.release_identity(module)
+                subprocess.run(["git", "fetch", "-q", "--unshallow"], cwd=shallow, check=True)
+                self.assertEqual(publication.release_identity(module), expected)

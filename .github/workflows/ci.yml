@@ -62,6 +62,9 @@ jobs:
         module: ${{ fromJSON(needs.affected.outputs.java) }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Release versions include the imported source history.
+          fetch-depth: 0
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
