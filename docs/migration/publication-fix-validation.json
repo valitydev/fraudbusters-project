@@ -1,0 +1,118 @@
+{
+  "checked_on": "2026-10-15",
+  "unit_tests": 42,
+  "release_modules": [
+    {
+      "module": "fraudbusters-proto",
+      "exit_code": 0
+    },
+    {
+      "module": "fraudbusters-notificator-proto",
+      "exit_code": 0
+    },
+    {
+      "module": "fraud-data-crawler-proto",
+      "exit_code": 0
+    },
+    {
+      "module": "fraudbusters-warehouse-proto",
+      "exit_code": 0
+    },
+    {
+      "module": "trusted-tokens-proto",
+      "exit_code": 0
+    },
+    {
+      "module": "wb-list-proto",
+      "exit_code": 0
+    },
+    {
+      "module": "swag-fraudbusters",
+      "exit_code": 0
+    },
+    {
+      "module": "swag-fraudbusters-management",
+      "exit_code": 0
+    },
+    {
+      "module": "fraudo",
+      "exit_code": 0
+    }
+  ],
+  "release_variants_verified": 11,
+  "effective_publishing_models": [
+    {
+      "module": "fraudbusters-proto",
+      "native_central": true,
+      "legacy_nexus_disabled": true,
+      "gpg": "3.2.8"
+    },
+    {
+      "module": "fraudbusters-notificator-proto",
+      "native_central": true,
+      "legacy_nexus_disabled": true,
+      "gpg": "3.2.8"
+    },
+    {
+      "module": "fraud-data-crawler-proto",
+      "native_central": true,
+      "legacy_nexus_disabled": true,
+      "gpg": "3.2.8"
+    },
+    {
+      "module": "fraudbusters-warehouse-proto",
+      "native_central": true,
+      "legacy_nexus_disabled": true,
+      "gpg": "3.2.8"
+    },
+    {
+      "module": "trusted-tokens-proto",
+      "native_central": true,
+      "legacy_nexus_disabled": true,
+      "gpg": "3.2.8"
+    },
+    {
+      "module": "wb-list-proto",
+      "native_central": true,
+      "legacy_nexus_disabled": true,
+      "gpg": "3.2.8"
+    },
+    {
+      "module": "swag-fraudbusters",
+      "native_central": true,
+      "legacy_nexus_disabled": true,
+      "gpg": "3.2.8"
+    },
+    {
+      "module": "swag-fraudbusters-management",
+      "native_central": true,
+      "legacy_nexus_disabled": true,
+      "gpg": "3.2.8"
+    },
+    {
+      "module": "fraudo",
+      "native_central": true,
+      "legacy_nexus_disabled": true,
+      "gpg": "3.2.8"
+    }
+  ],
+  "signing_test": {
+    "module": "packages/protocols/fraudbusters-notificator-proto",
+    "signatures_verified": 5,
+    "resolved_pom_version": true,
+    "temporary_key": true,
+    "uploaded": false
+  },
+  "maven_installer": {
+    "version": "3.9.12",
+    "distribution_sha512_verified": true
+  },
+  "schemas_runtime_dependencies_and_parent_coordinates_changed": false,
+  "external_artifacts_published": false,
+  "compose_started": false,
+  "actionlint": {
+    "version": "1.7.12",
+    "exit_code": 0
+  },
+  "ghcr_preflight_existing_and_missing_tags": "passed"
+}

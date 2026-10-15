@@ -6,8 +6,8 @@ Local results: [validation report](validation.md).
 
 `sources.json` records the remote master SHA and source tree for each of the 20
 imports. `python3 scripts/verify-imports.py` verifies tree equality at each import
-commit and reachability of the original history. Original local checkouts are
-excluded from the root index and were not changed.
+commit and reachability of the original history. Original local checkouts were moved intact to the sibling
+`fraudbusters-project-archive` directory.
 
 The eight Java services use JDK 25 on the fetched master. Fraudo compiles for Java
 17; protocol compiler settings and parent POMs are unchanged. The OpenAPI source
@@ -15,29 +15,33 @@ CI uses Node 16/JDK 21, UI uses Node 23. `scripts/modules.json` defines the CI m
 
 ## GitHub setup
 
-The local repository is ready under the name `fraudbusters-project`. GitHub CLI
-on the migration workstation is not authenticated; no remote repository was
-created and no publication, deployment or source-repository archival was executed.
+The public repository is `https://github.com/valitydev/fraudbusters-project`, default
+branch `master`. Configure the following before the first release:
 
-1. Create `fraudbusters-project` in the same organization as the existing services,
-   with the intended visibility and `master` as its default branch.
-2. Push the master history and namespaced source tags. Configure `origin` only
-   for the new repository; the `source-*` remotes are provenance references.
-3. Configure branch protection with required check `Required checks`.
-4. Grant the new repository Actions access to all existing GHCR service packages.
-   If package permissions cannot be inherited, configure `GHCR_PAT` with write
-   access to those packages. Keep each image name unchanged.
-5. Transfer `OSSRH_USERNAME`, `OSSRH_TOKEN`, `OSSRH_GPG_SECRET_KEY`,
-   `OSSRH_GPG_SECRET_KEY_PASSWORD` through the organization's secret store.
-   Credentials are never copied into repository files.
-6. Verify read access to any private transitive dependencies; this checkout's
-   dependencies currently use their original Maven repository configuration.
+1. Require `Required checks` and `Publication checks` in branch protection.
+2. In every existing GHCR package, grant **Manage Actions access → fraudbusters-project → Write**.
+   If using a PAT instead, configure `GHCR_PAT` with `write:packages`; set repository
+   variable `GHCR_USERNAME` to the token owner's login. Otherwise GITHUB_TOKEN uses
+   the workflow actor. Package names remain unchanged and must allow public pulls.
+3. Configure `CENTRAL_USERNAME` and `CENTRAL_TOKEN` from a **Central Portal user token**,
+   plus `MAVEN_GPG_PRIVATE_KEY` and `MAVEN_GPG_PASSPHRASE`. The signing key must be the
+   one approved for publishing. Legacy OSSRH_* secret names remain supported as
+   fallbacks; their credentials must also be Portal credentials, not retired OSSRH tokens.
+4. Run `Fraudbusters CI` manually on `master`, target `all`, for one complete baseline
+   of nine image tags and all missing package releases. Alternatively run `images`
+   and `contracts` separately. A single IMAGE_TAG for all local apps requires a complete
+   image baseline; ordinary selective releases may use different last-built SHA tags.
+5. Confirm **Publication checks** succeeded and the emitted SHA tags/digests and
+   Maven artifacts/signatures can be fetched. Re-running skips immutable versions/tags.
 
-The imported older library parents use Sonatype OSSRH, newer parents use Central
-Publishing. Both preserve their upstream release channels. If the old OSSRH
-endpoint is no longer accepted for the account, resolve publishing configuration
-with the package owner before enabling releases; do not silently change package
-coordinates or overwrite a release.
+All package releases use native Central Publishing, with server-id `ossrh` retained
+for settings compatibility. Five older protocol POMs have an additional `central-release`
+profile disabling the inherited Nexus extension and adding Central 0.8.0, GPG 3.2.8
+and flatten 1.7.1. Existing parent POMs, Java/compiler settings, source generators,
+coordinates, classifiers and relocation rules remain unchanged. The publication helper
+activates the extra profile automatically; use it instead of bare `mvn -Pdeploy`.
+Maven 3.9.12 is installed with SHA-512 verification to avoid changes in hosted-runner
+Maven defaults affecting the existing Central plugin. No service runtime was upgraded.
 
 ## Validation gates
 
@@ -75,14 +79,20 @@ payment contour to validate live ingestion; local defaults disable that ingestio
 
 Use Actions manual target `contracts` to check and publish missing immutable Java
 versions. Server/client OpenAPI artifacts publish independently within each module.
-Repeat the run to verify existing versions are skipped. `--check` is read-only:
+Repeat the run to verify existing versions are skipped. `--check` reads public
+POM/JAR/classifier availability; `--prepare` runs release verify without signing or upload:
 
 ```bash
 python3 scripts/publication.py packages/protocols/fraudbusters-proto --check
+python3 scripts/publication.py packages/protocols/fraudbusters-proto --prepare
+python3 scripts/publication.py packages/protocols/swag-fraudbusters --prepare --profile client
 ```
 
 Registry authentication failures, HTTP 429/5xx and transport errors fail the
-preflight rather than trigger a publish. Test that a separate consumer can resolve
+preflight rather than trigger a publish. Partial existing releases are not overwritten.
+After deploy, the helper waits for main artifacts, sources/javadoc, classifiers and
+ASCII signatures to become readable from Central. GPG passphrases are passed only
+through the environment, never as process arguments. Test that a separate consumer can resolve
 its explicitly selected release before updating an application dependency.
 
 Fraudo uses a fixed POM version: raise it explicitly before releasing changed code.

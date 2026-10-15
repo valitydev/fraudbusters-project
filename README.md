@@ -83,8 +83,11 @@ Thrift сохраняет генераторы, classifiers и relocation. Но�
 python3 scripts/publication.py packages/protocols/fraudbusters-proto --check
 ```
 
-`--check` только проверяет наличие версии. Публикация пропускает существующие
-релизы, а ошибки доступа или сети останавливают её. Старые npm-workflows
+`--check` проверяет POM/JAR и Thrift classifier без загрузки файлов. `--prepare`
+проверяет release-профиль, sources/javadoc, flattened POM и relocation без подписи
+и upload; этот режим выполняется и в CI. Публикация пропускает существующие
+релизы, а ошибки доступа, сети и неполные версии останавливают её. После выпуска
+проверяется доступность артефактов и подписей в Central. Старые npm-workflows
 протоколов были условными: в импортированном master нет npm-пакетов для выпуска.
 Erlang-проверки сохранены для двух протоколов с `rebar.config`.
 
@@ -131,12 +134,23 @@ Compose сохраняет legacy-версии внешних Kafka, Riak, Click
 Корневой GitHub Actions проверяет изменённые модули; server/client OpenAPI
 проверяются отдельно. Общие изменения сборки проверяют весь контур. PR diff
 использует merge-base, push — SHA до/после события, включая несколько коммитов.
-Обязательный итоговый check: `Required checks`.
+Итоговые checks: `Required checks` для сборки и `Publication checks` для выпуска.
+Выбранная публикация со статусом skipped/failure не считается успешным выпуском.
 
 Ручные режимы: `all`, `images`, `contracts`. После успешных проверок master
 публикует отдельные образы с SHA-тегом и новые Java-пакеты. Имена образов
-сохраняются. Для publication нужны исходные OSSRH/GPG secrets; для прежних GHCR
-пакетов нужно предоставить новому репозиторию доступ либо настроить `GHCR_PAT`.
+сохраняются; существующий SHA-тег не перезаписывается, после push проверяется
+публичный manifest/digest. Выпуск идёт только с default branch после успешных checks.
+Для первого полного выпуска выберите Actions → Fraudbusters CI → Run workflow →
+`master`, target `all` (или отдельно `images` и `contracts`).
+
+Для Central Portal нужны `CENTRAL_USERNAME`, `CENTRAL_TOKEN`,
+`MAVEN_GPG_PRIVATE_KEY`, `MAVEN_GPG_PASSPHRASE`. Поддержаны прежние имена
+`OSSRH_USERNAME`, `OSSRH_TOKEN`, `OSSRH_GPG_SECRET_KEY`,
+`OSSRH_GPG_SECRET_KEY_PASSWORD`, но username/token должны быть от Central Portal.
+Для прежних GHCR packages предоставьте новому репозиторию Actions write access
+либо задайте `GHCR_PAT`; для PAT другого пользователя укажите variable `GHCR_USERNAME`.
+Maven в CI закреплён на 3.9.12 с SHA-512-проверкой дистрибутива; версии Java и parent POM сохранены.
 
 Порядок подключения GitHub, проверки публикации и переключения окружений:
 [Migration runbook](docs/migration/README.md).
