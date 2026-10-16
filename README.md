@@ -148,8 +148,9 @@ Compose сохраняет legacy-версии внешних Kafka, Riak, Click
 `MAVEN_GPG_PRIVATE_KEY`, `MAVEN_GPG_PASSPHRASE`. Поддержаны прежние имена
 `OSSRH_USERNAME`, `OSSRH_TOKEN`, `OSSRH_GPG_SECRET_KEY`,
 `OSSRH_GPG_SECRET_KEY_PASSWORD`, но username/token должны быть от Central Portal.
-Для прежних GHCR packages предоставьте новому репозиторию Actions write access
-либо задайте `GHCR_PAT`; для PAT другого пользователя укажите variable `GHCR_USERNAME`.
+Для прежних GHCR packages предоставьте новому репозиторию Actions write access.
+Публикация образов использует только автоматический `GITHUB_TOKEN` и `github.actor`;
+`GHCR_PAT` и `GHCR_USERNAME` не используются.
 Maven в CI закреплён на 3.9.12 с SHA-512-проверкой дистрибутива; версии Java и parent POM сохранены.
 
 Порядок подключения GitHub, проверки публикации и переключения окружений:

@@ -20,9 +20,11 @@ branch `master`. Configure the following before the first release:
 
 1. Require `Required checks` and `Publication checks` in branch protection.
 2. In every existing GHCR package, grant **Manage Actions access → fraudbusters-project → Write**.
-   If using a PAT instead, configure `GHCR_PAT` with `write:packages`; set repository
-   variable `GHCR_USERNAME` to the token owner's login. Otherwise GITHUB_TOKEN uses
-   the workflow actor. Package names remain unchanged and must allow public pulls.
+   Image jobs authenticate only with the automatic `GITHUB_TOKEN` and `github.actor`.
+   `GHCR_PAT` and `GHCR_USERNAME` are not used, so existing organization credentials
+   cannot override the repository token. Package names remain unchanged and must allow public pulls.
+   After changing workflow authentication, push the change and start a new run on that
+   commit; rerunning an older run still uses its original workflow.
 3. Configure `CENTRAL_USERNAME` and `CENTRAL_TOKEN` from a **Central Portal user token**,
    plus `MAVEN_GPG_PRIVATE_KEY` and `MAVEN_GPG_PASSPHRASE`. The signing key must be the
    one approved for publishing. Legacy OSSRH_* secret names remain supported as
