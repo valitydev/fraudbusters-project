@@ -1,176 +1,184 @@
-# fraudbusters-project
+# Fraudbusters
 
-Монорепозиторий Fraudbusters: инспекция платежей, управление антифрод-правилами
-и списками, обработка событий, аналитическое хранилище, уведомления и UI.
+[![CI](https://github.com/valitydev/fraudbusters-project/actions/workflows/ci.yml/badge.svg)](https://github.com/valitydev/fraudbusters-project/actions/workflows/ci.yml)
 
-## Структура
+Fraudbusters is a platform for detecting and analyzing fraudulent payment activity.
+It evaluates transactions against rules written in the Fraudo domain-specific
+language and provides tools for managing rules, reviewing transaction data,
+maintaining allowlists and blocklists, and configuring notifications.
 
-- `apps/` — восемь Java-сервисов и `fraudbusters-ui`.
-- `packages/protocols/` — шесть Thrift-контрактов и два Swagger/OpenAPI-контракта.
-- `packages/libs/fraudo/` — язык антифрод-правил.
-- `infra/` — локальные зависимости и конфигурация Docker Compose.
-- `tests/e2e/` — существующие сквозные сценарии инспекции, агрегатов, геолокации,
-  trusted tokens и белых/чёрных списков.
-- `tests/ci/` — проверки выбора модулей и безопасной публикации.
-- `docs/` — документация продукта, Fraudo и миграции.
+This repository contains the backend services, web application, shared libraries,
+and API contracts that make up the platform.
 
-Crawler-функциональность реализована в `fraudbusters-management`;
-`fraud-data-crawler-proto` описывает её контракт, отдельного сервиса нет.
+## Components
 
-## Исходники и история
+| Application | Responsibility |
+| --- | --- |
+| [fraudbusters](apps/fraudbusters) | Evaluates transactions against fraud detection rules. |
+| [fraudbusters-api](apps/fraudbusters-api) | Exposes the payment inspection REST API. |
+| [fraudbusters-management](apps/fraudbusters-management) | Manages rules, templates, bindings, lists, and data crawler operations. |
+| [fraudbusters-mg-connector](apps/fraudbusters-mg-connector) | Converts payment processing events into the Fraudbusters event model. |
+| [fraudbusters-notificator](apps/fraudbusters-notificator) | Manages notification rules, channels, and scheduled delivery. |
+| [fraudbusters-warehouse](apps/fraudbusters-warehouse) | Provides access to transaction and fraud analytics in ClickHouse. |
+| [trusted-tokens-manager](apps/trusted-tokens-manager) | Manages trusted payment tokens. |
+| [wb-list-manager](apps/wb-list-manager) | Manages allowlists and blocklists. |
+| [fraudbusters-ui](apps/fraudbusters-ui) | Provides the web interface for fraud management and analysis. |
 
-Импортированы свежие `origin/master` 20 исходных репозиториев через Git subtree
-без squash. SHA, деревья исходников и инструменты сборки записаны в
-`docs/migration/sources.json` и `scripts/modules.json`. Исходные коммиты доступны
-в истории нового репозитория; исходные теги имеют префикс имени компонента.
+[Fraudo](packages/libs/fraudo) defines the rule language. Shared Thrift and
+OpenAPI definitions live in [packages/protocols](packages/protocols).
+Services communicate through REST, Thrift, and Kafka.
+
+## Build a service
+
+For a backend build, install **JDK 25** and **Maven 3.9.12**. Run commands from the
+repository root.
+
+Build a single service using its published dependencies:
 
 ```bash
-python3 scripts/verify-imports.py
+mvn -B -f apps/fraudbusters-api/pom.xml package -DskipTests
 ```
 
-Команда проверяет исходные деревья в импортирующих коммитах и наличие исходной
-истории. Локальные рабочие изменения и коммиты вне удалённого master не переносились.
-Старые checkout и вспомогательные файлы перенесены за пределы репозитория в
-соседнюю папку `../fraudbusters-project-archive`; их локальные изменения сохранены.
+The application JAR and container resources are written to the service's `target/`
+directory. Replace `fraudbusters-api` with another backend service as needed.
+There is no need to build the shared packages first.
 
-## Требования и сборка
-
-Нужны JDK 25, Maven 3, Node.js 23 для UI, Docker с Compose и Thrift 0.19.0
-для Java-контрактов. OpenAPI-модули сохраняют Node.js 16 из исходного CI:
-Maven самостоятельно устанавливает его в `target/frontend`. Компиляционные
-настройки, parent POM и версии библиотек приложений сохранены.
+Build and run the service's tests:
 
 ```bash
-mvn -B verify -Dpath_to_thrift=thrift
 mvn -B -f apps/fraudbusters-api/pom.xml verify
-mvn -B -pl apps/fraudbusters-management -am verify
-python3 -m unittest discover -s tests/ci -v
 ```
 
-Полная сборка OpenAPI по умолчанию генерирует server-артефакты; client проверяется
-отдельно с `-Pclient`. Maven автоматически устанавливает npm-зависимости и
-собирает bundle контракта до Java codegen.
+Integration tests in some services require Docker. The management and notificator
+builds also start embedded PostgreSQL for schema generation; use `-Ddb.port=55431`
+if the default port is occupied. See each application's README for runtime
+configuration.
+
+## Build the web application
+
+Install **Node.js 23**, npm, and a JDK, then run:
+
+```bash
+npm run ui:install
+npm run ui:build
+```
+
+The build bundles the management OpenAPI contract, generates the TypeScript client,
+and builds the Angular application. Output is written to
+`apps/fraudbusters-ui/dist/`.
+
+To run the UI checks and tests:
+
+```bash
+npm run ui:check
+npm run ui:test
+```
+
+Run the build before these commands to generate the API client. UI tests require
+Chrome or Chromium; set `CHROME_BIN` if the executable is not detected automatically.
+
+## Build all Java modules
+
+In addition to the backend requirements, install **Apache Thrift 0.19.0** and make
+`thrift` available on `PATH`:
+
+```bash
+mvn -B verify -Drevision=0-SNAPSHOT -Dpath_to_thrift=thrift
+```
+
+`revision` supplies a valid snapshot version for locally generated contract
+artifacts. Applications use the dependency versions declared in their own POMs.
+The root Maven build covers Java modules; build the UI separately with the commands
+above.
+
+When building packages independently, CI uses JDK 17 for Thrift contracts and Fraudo,
+and JDK 21 for OpenAPI contracts. OpenAPI Maven builds provision Node.js 16 for their
+contract tooling. OpenAPI Java generation defaults to the server profile; verify a
+client explicitly with:
+
+```bash
+mvn -B -f packages/protocols/swag-fraudbusters-management/pom.xml \
+  verify -Pclient -Drevision=0-SNAPSHOT
+```
+
+Validate the OpenAPI specifications and the CI tooling independently:
 
 ```bash
 npm run openapi:install
 npm run openapi:validate
-npm run ui:install
-npm run ui:codegen
-npm run ui:check
-npm run ui:test
-npm run ui:build
+npm run test:ci
 ```
 
-Существующий Swagger Codegen 3.0.57 генерирует TypeScript-модели из текущего
-management OpenAPI. JSON-копия контракта и генерируемые модели не хранятся в Git.
+## Local development
 
-## Контракты и публикация
-
-В CI приложения используют **явно опубликованные версии** из своих POM:
-каждый сервис собирается отдельно через `-f apps/<service>/pom.xml`.
-Изменение контракта или Fraudo не подменяет зависимости в CI. Локальный корневой
-reactor и `-am` допускают совместную проверку модулей с совпадающими версиями.
-После выпуска пакета его потребители обновляются отдельным PR.
-
-Java-контракты и Fraudo сохраняют Maven Central и исходные Maven coordinates.
-Thrift сохраняет генераторы, classifiers и relocation. Новый формат номера
-остаётся `1.<commit-number>-<sha>`: исходный счётчик дополняется коммитами
-конкретного модуля после импорта. Изменение другого сервиса не меняет релиз
-контракта. Для Fraudo сохраняется явная версия из POM — её нужно поднимать
-при выпуске нового содержимого.
+Docker Compose configuration, dependency initialization, and monitoring are in
+[infra](infra). To build local images and start the application stack:
 
 ```bash
-python3 scripts/publication.py packages/protocols/fraudbusters-proto --check
-```
-
-`--check` проверяет POM/JAR и Thrift classifier без загрузки файлов. `--prepare`
-проверяет release-профиль, sources/javadoc, flattened POM и relocation без подписи
-и upload; этот режим выполняется и в CI. Публикация пропускает существующие
-релизы, а ошибки доступа, сети и неполные версии останавливают её. После выпуска
-проверяется доступность артефактов и подписей в Central. Старые npm-workflows
-протоколов были условными: в импортированном master нет npm-пакетов для выпуска.
-Erlang-проверки сохранены для двух протоколов с `rebar.config`.
-
-## Локальный запуск
-
-```bash
-docker compose -f infra/compose.yaml --profile core up -d
 scripts/build-local-images.sh
-docker compose -f infra/compose.yaml --profile apps up --build -d
+docker compose -f infra/compose.yaml --profile apps up -d
+```
+
+The image script requires the backend and UI build tools listed above. It builds
+all nine application images with the `local` tag. To build only selected backend
+images, pass their names, for example:
+
+```bash
+scripts/build-local-images.sh fraudbusters fraudbusters-api
+```
+
+Compose profiles select the required environment:
+
+| Profile | Purpose |
+| --- | --- |
+| `core` | Databases, messaging, authentication, and supporting infrastructure. |
+| `apps` | Application services and their local dependencies. |
+| `e2e` | Infrastructure and services used by the end-to-end test suite. |
+
+On Apple Silicon, add `-f infra/compose.arm.yaml` after the main Compose file.
+
+| Endpoint | Local address |
+| --- | --- |
+| Web application | http://localhost:8989 |
+| Management API | http://localhost:8085/fb-management/v1 |
+| Inspection API | http://localhost:9999 |
+| Grafana | http://localhost:3000 |
+
+Run cross-service scenarios with:
+
+```bash
 npm run e2e
 ```
 
-Java-образы собираются из Dockerfile, полученного исходным Maven-процессом,
-включая OpenTelemetry agent. Локальные имена — `ghcr.io/valitydev/<app>:local`.
-Для опубликованного набора можно задать `IMAGE_TAG=sha-<sha>` и запускать без
-`--build`. Сквозные тесты используют отдельный Compose project
-`fraudbusters-project-e2e`.
+External payment processing integrations require the appropriate service endpoints
+and credentials in your environment. See the application configuration and
+[local infrastructure guide](infra/README.md) before enabling them.
 
-На Apple Silicon подключите исходные ARM overrides:
+## Repository layout
 
-```bash
-docker compose -f infra/compose.yaml -f infra/compose.arm.yaml --profile apps up --build -d
+```text
+apps/                 Backend services and Angular web application
+packages/libs/        Fraudo rule language
+packages/protocols/   Thrift and OpenAPI contracts
+infra/                Local infrastructure and monitoring
+scripts/              Build, code generation, and CI tools
+tests/                Cross-service tests and CI tooling tests
+docs/                 Product and rule language documentation
 ```
 
-| Ресурс | Адрес |
-|---|---|
-| UI | http://localhost:8989 |
-| Management | http://localhost:8085/fb-management/v1 |
-| Inspector API | http://localhost:9999 |
-| Fraudbusters Thrift | http://localhost:8999 |
-| Kafka на хосте | localhost:29092 |
-| ClickHouse HTTP | http://localhost:8123 |
-| Grafana | http://localhost:3000 |
-| Keycloak | http://localhost:8080/auth |
+## Documentation and contributions
 
-Compose сохраняет legacy-версии внешних Kafka, Riak, ClickHouse и Keycloak;
-обновление этих компонентов не входит в структурную миграцию. Для mg-connector
-внешние обращения отключены по умолчанию: для живого платёжного контура задайте
-адреса `INVOICING_URL`, `WITHDRAWAL_URL`, `DOMINANT_URL`, `DESTINATION_URL` и включите
-`fb.stream.invoiceEnabled`/`fb.stream.withdrawalEnabled` в override.
+- [Product documentation](docs/content/index.md)
+- [Architecture](docs/content/docs/architecture.md)
+- [API documentation](docs/content/docs/api.md)
+- [Fraudo language reference](docs/fraudo/content/index.md)
+- [Issue tracker](https://github.com/valitydev/fraudbusters-project/issues)
 
-## CI и переключение
+When contributing, run the checks for the affected modules. Change contract sources
+or generators when updating API clients; generated Java and TypeScript files should
+not be edited directly.
 
-Корневой GitHub Actions проверяет изменённые модули; server/client OpenAPI
-проверяются отдельно. Общие изменения сборки проверяют весь контур. PR diff
-использует merge-base, push — SHA до/после события, включая несколько коммитов.
-Итоговые checks: `Required checks` для сборки и `Publication checks` для выпуска.
-Выбранная публикация со статусом skipped/failure не считается успешным выпуском.
+## License
 
-Ручные режимы: `all`, `images`, `contracts`. После успешных проверок master
-публикует отдельные образы с SHA-тегом и новые Java-пакеты. Имена образов
-сохраняются; существующий SHA-тег не перезаписывается, после push проверяется
-публичный manifest/digest. Выпуск идёт только с default branch после успешных checks.
-Для первого полного выпуска выберите Actions → Fraudbusters CI → Run workflow →
-`master`, target `all` (или отдельно `images` и `contracts`).
-
-Для Central Portal нужны `CENTRAL_USERNAME`, `CENTRAL_TOKEN`,
-`MAVEN_GPG_PRIVATE_KEY`, `MAVEN_GPG_PASSPHRASE`. Поддержаны прежние имена
-`OSSRH_USERNAME`, `OSSRH_TOKEN`, `OSSRH_GPG_SECRET_KEY`,
-`OSSRH_GPG_SECRET_KEY_PASSWORD`, но username/token должны быть от Central Portal.
-Для прежних GHCR packages предоставьте новому репозиторию Actions write access.
-Публикация образов использует только автоматический `GITHUB_TOKEN` и `github.actor`;
-`GHCR_PAT` и `GHCR_USERNAME` не используются.
-Maven в CI закреплён на 3.9.12 с SHA-512-проверкой дистрибутива; версии Java и parent POM сохранены.
-
-Порядок подключения GitHub, проверки публикации и переключения окружений:
-[Migration runbook](docs/migration/README.md).
-Проверенные сценарии и оставшиеся внешние шаги: [Validation report](docs/migration/validation.md).
-Повторная сверка исходников и проверки без Compose: [Compatibility audit](docs/migration/compatibility-audit.md).
-
-## Общие правила для агентов
-
-Правила Vality подключены Git submodule в `vendor/code-generation-rules`, как в
-backoffice. Символическая ссылка `.agent-rules` обеспечивает пути к инструкциям
-и hooks. SHA правил закреплён в Git; при обновлении коммитите его вместе с
-изменениями управляемых блоков `AGENTS.md`, `CLAUDE.md` и hooks.
-
-```bash
-git submodule update --init vendor/code-generation-rules
-./.agent-rules/install.sh
-```
-
-Для обновления правил используйте `git submodule update --init --remote
-vendor/code-generation-rules`, затем повторите установку. Исторический submodule
-`apps/fraudbusters-notificator/build_utils` сохранён на импортированном SHA;
-при необходимости он инициализируется отдельно.
+Apache License 2.0. License files are included in each application and shared package;
+see the [Fraudbusters license](apps/fraudbusters/LICENSE).
