@@ -103,6 +103,28 @@ class HistoricalFraudResultDataTest {
     }
 
     @Test
+    void getFraudResultsByResultStatus() {
+        FilterDto filter = new FilterDto();
+        filter.setTimeFrom("2019-01-01T00:00:00");
+        filter.setTimeTo("2020-10-01T18:04:53");
+        filter.setSearchFields(Set.of(
+                SearchFieldDto.builder()
+                        .field(FraudResultField.RESULT_STATUS)
+                        .type(FieldType.ENUM)
+                        .value("NOTIFY")
+                        .build()
+        ));
+        SortDto sortDto = new SortDto();
+        sortDto.setOrder(SortOrder.DESC);
+        filter.setSort(sortDto);
+
+        List<Event> fraudResults = fraudResultRepository.getByFilter(filter);
+
+        assertEquals(1, fraudResults.size());
+        assertEquals("NOTIFY", fraudResults.get(0).getResultStatus());
+    }
+
+    @Test
     void getFraudResultsByEmailTemplateAndRule() {
         FilterDto filter = new FilterDto();
         filter.setTimeFrom("2020-05-01T18:04:53");
