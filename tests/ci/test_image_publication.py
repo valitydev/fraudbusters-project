@@ -25,6 +25,33 @@ class ImagePublicationTests(unittest.TestCase):
             self.assertEqual(images.manifest_digest(IMAGE), DIGEST)
         self.assertEqual(request.call_args.args[0].method, "HEAD")
 
+    def manifest(self, platforms):
+        response = io.BytesIO(json.dumps({"manifests": [
+            {"platform": {"os": os, "architecture": arch}}
+            for os, arch in platforms
+        ]}).encode())
+        response.headers = {"Docker-Content-Digest": DIGEST}
+        return response
+
+    def test_multiarch_index_including_attestation_satisfies_required_platforms(self):
+        response = self.manifest([("linux", "amd64"), ("linux", "arm64"), ("unknown", "unknown")])
+        with patch.object(images.urllib.request, "urlopen", side_effect=[self.token(), response]) as request:
+            self.assertEqual(images.manifest_digest(IMAGE, ["linux/amd64", "linux/arm64"]), DIGEST)
+        self.assertEqual(request.call_args.args[0].method, "GET")
+
+    def test_existing_amd64_tag_fails_instead_of_being_skipped_or_overwritten(self):
+        response = self.manifest([("linux", "amd64"), ("unknown", "unknown")])
+        with patch("sys.argv", ["images", IMAGE, "--platform", "linux/amd64", "--platform", "linux/arm64",
+                                "--github-output"]), \
+                patch.object(images.urllib.request, "urlopen", side_effect=[self.token(), response]):
+            with self.assertRaisesRegex(RuntimeError, "lacks required platforms: linux/arm64"):
+                images.main()
+
+    def test_missing_tag_with_required_platforms_can_be_published(self):
+        error = urllib.error.HTTPError("https://registry.invalid", 404, "missing", {}, None)
+        with patch.object(images.urllib.request, "urlopen", side_effect=[self.token(), error]):
+            self.assertIsNone(images.manifest_digest(IMAGE, ["linux/amd64", "linux/arm64"]))
+
     def test_only_manifest_404_means_tag_is_missing(self):
         for code in [401, 403, 429, 500, 503]:
             error = urllib.error.HTTPError("https://registry.invalid", code, "error", {}, None)
