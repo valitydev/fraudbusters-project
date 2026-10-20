@@ -103,15 +103,15 @@ class HistoricalFraudResultDataTest {
     }
 
     @Test
-    void getFraudResultsByResultStatusIgnoresCase() {
+    void getFraudResultsByResultStatus() {
         FilterDto filter = new FilterDto();
         filter.setTimeFrom("2019-01-01T00:00:00");
         filter.setTimeTo("2020-10-01T18:04:53");
         filter.setSearchFields(Set.of(
                 SearchFieldDto.builder()
-                        .field(PaymentField.STATUS)
+                        .field(FraudResultField.RESULT_STATUS)
                         .type(FieldType.ENUM)
-                        .value("notify")
+                        .value("NOTIFY")
                         .build()
         ));
         SortDto sortDto = new SortDto();

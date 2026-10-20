@@ -3,8 +3,6 @@ package dev.vality.fraudbusters.repository.clickhouse.impl;
 import com.google.common.collect.Lists;
 import dev.vality.fraudbusters.constant.ClickhouseSchemeNames;
 import dev.vality.fraudbusters.constant.EventSource;
-import dev.vality.fraudbusters.constant.FraudResultField;
-import dev.vality.fraudbusters.constant.PaymentField;
 import dev.vality.fraudbusters.domain.Event;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.repository.AggregationGeneralRepository;
@@ -18,9 +16,7 @@ import dev.vality.fraudbusters.repository.clickhouse.query.FraudResultQuery;
 import dev.vality.fraudbusters.repository.clickhouse.setter.EventBatchPreparedStatementSetter;
 import dev.vality.fraudbusters.repository.clickhouse.util.AggregationUtil;
 import dev.vality.fraudbusters.repository.clickhouse.util.FilterUtil;
-import dev.vality.fraudbusters.service.dto.FieldType;
 import dev.vality.fraudbusters.service.dto.FilterDto;
-import dev.vality.fraudbusters.service.dto.SearchFieldDto;
 import dev.vality.fraudo.constant.ResultStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,13 +25,9 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -73,40 +65,10 @@ public class FraudResultRepository implements Repository<Event>, PaymentReposito
 
     @Override
     public List<Event> getByFilter(FilterDto filter) {
-        resolveResultStatusFilter(filter);
         String filters = FilterUtil.appendFraudResultFilters(filter);
         String query = FraudResultQuery.SELECT_HISTORY_FRAUD_RESULT + filters;
         MapSqlParameterSource params = FilterUtil.initParams(filter);
         return namedParameterJdbcTemplate.query(query, params, eventMapper);
-    }
-
-    private static void resolveResultStatusFilter(FilterDto filter) {
-        if (CollectionUtils.isEmpty(filter.getSearchFields())) {
-            return;
-        }
-        Set<SearchFieldDto> searchFields = filter.getSearchFields().stream()
-                .map(searchField -> PaymentField.STATUS.equals(searchField.getField())
-                        ? SearchFieldDto.builder()
-                        .field(FraudResultField.RESULT_STATUS)
-                        .type(FieldType.ENUM)
-                        .value(resolveResultStatus(searchField.getValue()))
-                        .build()
-                        : searchField)
-                .collect(Collectors.toSet());
-        filter.setSearchFields(searchFields);
-    }
-
-    private static String resolveResultStatus(String value) {
-        String trimmed = value.trim();
-        ResultStatus byValue = ResultStatus.getByValue(trimmed);
-        if (byValue != null) {
-            return byValue.name();
-        }
-        return Arrays.stream(ResultStatus.values())
-                .filter(status -> status.name().equalsIgnoreCase(trimmed))
-                .findFirst()
-                .map(ResultStatus::name)
-                .orElse(value);
     }
 
     @Override
