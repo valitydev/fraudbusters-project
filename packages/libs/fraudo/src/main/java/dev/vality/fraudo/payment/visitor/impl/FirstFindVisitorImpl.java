@@ -438,6 +438,16 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
     }
 
     @Override
+    public String visitCustomer_id(FraudoPaymentParser.Customer_idContext ctx) {
+        return threadLocalModel.get().getCustomerId() != null ? threadLocalModel.get().getCustomerId() : UNKNOWN;
+    }
+
+    @Override
+    public String visitUser_id(FraudoPaymentParser.User_idContext ctx) {
+        return threadLocalModel.get().getUserId() != null ? threadLocalModel.get().getUserId() : UNKNOWN;
+    }
+
+    @Override
     public Integer visitRand(RandContext ctx) {
         return customFuncVisitor.visitRand(ctx, threadLocalModel.get());
     }

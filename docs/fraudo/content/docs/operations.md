@@ -239,3 +239,19 @@ paymentSystem()
     3ds
     highRisk
     notify
+
+### Идентификация клиента
+
+`customerId()` возвращает `customer_id` из `Invoice.client_identity`,
+`userId()` — `user_id` в системе мерчанта. Регистр идентификаторов сохраняется.
+Для старых запросов без этих данных функции возвращают `UNKNOWN`.
+
+В операциях `count`, `sum`, `unique`, `like` и списках доступны имена полей
+`customer_id` и `user_id`. Для `user_id` учитывайте область party:
+
+```text
+rule: count("user_id", 60, "party_id") > 5 -> decline;
+rule: customerId() != "UNKNOWN" AND userId() != "UNKNOWN" -> notify;
+```
+
+Один `user_id` может обозначать разных пользователей у разных party.

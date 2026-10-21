@@ -150,6 +150,8 @@ struct ClientInfo {
     3:  optional string email
     4:  optional string phone
     5:  optional string payment_country
+    6:  optional string customer_id
+    7:  optional string user_id
 }
 
 struct MerchantInfo {
@@ -310,6 +312,8 @@ struct Filter {
     12: optional string masked_pan
     13: optional string template
     14: optional string rule
+    15: optional string customer_id
+    16: optional string user_id
 }
 
 struct Page {

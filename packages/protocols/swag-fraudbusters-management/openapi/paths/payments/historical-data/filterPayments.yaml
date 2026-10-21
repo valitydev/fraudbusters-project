@@ -87,6 +87,17 @@ get:
       schema:
         type: string
 
+    - name: customerId
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: userId
+      description: User identifier in the merchant system; use partyId to scope the search.
+      required: false
+      in: query
+      schema:
+        type: string
   responses:
     '201':
       description: Payments
