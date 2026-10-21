@@ -58,6 +58,11 @@ public class ContextToFraudRequestConverter implements Converter<Context, FraudR
                         }
                 );
 
+        if (payment.getInvoice().isSetClientIdentity()) {
+            var identity = payment.getInvoice().getClientIdentity();
+            paymentModel.setCustomerId(identity.getCustomerId());
+            paymentModel.setUserId(identity.getUserId());
+        }
         paymentModel.setShopId(payment.getShop().getShopRef().getId());
         Cash cost = payment.getPayment().getCost();
         paymentModel.setAmount(cost.getAmount());

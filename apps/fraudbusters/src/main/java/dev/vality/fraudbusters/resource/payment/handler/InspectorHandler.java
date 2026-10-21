@@ -38,7 +38,7 @@ public class InspectorHandler implements InspectorServiceSrv.Iface {
     )
     public BlockedShops inspectUserShops(InspectUserContext context) throws InvalidRequest, TException {
         if (CollectionUtils.isEmpty(context.getShopList())) {
-            log.warn("InspectorHandler inspectUser with empty shopList: {}", context);
+            log.warn("InspectorHandler inspectUser with empty shopList");
             return new BlockedShops().setShopList(Collections.emptyList());
         }
         try {

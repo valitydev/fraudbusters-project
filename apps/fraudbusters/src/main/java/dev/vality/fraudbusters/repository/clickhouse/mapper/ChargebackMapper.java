@@ -35,6 +35,8 @@ public class ChargebackMapper implements RowMapper<Chargeback> {
                 .setEventTime(TimestampUtil.getStringDate(rs.getLong(PaymentField.EVENT_TIME.getValue())))
                 .setClientInfo(new ClientInfo()
                         .setFingerprint(rs.getString(PaymentField.FINGERPRINT.getValue()))
+                        .setCustomerId(rs.getString(PaymentField.CUSTOMER_ID.getValue()))
+                        .setUserId(rs.getString(PaymentField.USER_ID.getValue()))
                         .setIp(rs.getString(PaymentField.IP.getValue()))
                         .setEmail(rs.getString(PaymentField.EMAIL.getValue())))
                 .setReferenceInfo(referenceInfo)

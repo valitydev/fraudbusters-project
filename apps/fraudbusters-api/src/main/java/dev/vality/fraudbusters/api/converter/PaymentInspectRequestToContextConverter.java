@@ -58,7 +58,22 @@ public class PaymentInspectRequestToContextConverter implements Converter<Paymen
                 .setDetails(new InvoiceDetails()
                         .setProduct(payment.getDescription()))
                 .setCreatedAt(payment.getCreatedAt().toInstant().toString())
-                .setDue(payment.getCreatedAt().toInstant().toString());
+                .setDue(payment.getCreatedAt().toInstant().toString())
+                .setClientIdentity(buildClientIdentity(payment));
+    }
+
+    private ClientIdentity buildClientIdentity(Payment payment) {
+        Customer customer = payment.getCustomer();
+        if (customer != null && customer.getUserId() != null && customer.getCustomerId() == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "customerId is required with userId");
+        }
+        if (customer == null || customer.getCustomerId() == null) {
+            return null;
+        }
+        return new ClientIdentity()
+                .setCustomerId(customer.getCustomerId())
+                .setUserId(customer.getUserId());
     }
 
     private InvoicePayment buildInvoicePayment(Payment payment) {

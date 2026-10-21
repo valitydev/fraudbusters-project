@@ -31,7 +31,7 @@ public class AggregationGeneralRepositoryImpl implements AggregationGeneralRepos
                 and %1$s = ?
                 group by %1$s""", fieldName, table);
         List<Object> params = AggregationUtil.generateParams(from, to, value);
-        log.debug("AggregationGeneralRepositoryImpl countOperationByField sql: {} params: {}", sql, params);
+        log.debug("AggregationGeneralRepositoryImpl countOperationByField sql: {}", sql);
         return jdbcTemplate.query(sql, params.toArray(), new CountExtractor());
     }
 
@@ -104,7 +104,7 @@ public class AggregationGeneralRepositoryImpl implements AggregationGeneralRepos
                 and %1$s = ?
                 group by %1$s""", fieldNameBy, fieldNameCount, table);
         List<Object> params = AggregationUtil.generateParams(from, to, value);
-        log.debug("AggregationGeneralRepositoryImpl uniqCountOperation sql: {} params: {}", sql, params);
+        log.debug("AggregationGeneralRepositoryImpl uniqCountOperation sql: {}", sql);
         return jdbcTemplate.query(sql, params.toArray(), new CountExtractor());
     }
 

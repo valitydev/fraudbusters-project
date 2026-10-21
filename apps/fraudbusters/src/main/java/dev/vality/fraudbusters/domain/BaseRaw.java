@@ -29,6 +29,10 @@ public class BaseRaw {
 
     private String ip;
     private String fingerprint;
+    @lombok.ToString.Exclude
+    private String customerId;
+    @lombok.ToString.Exclude
+    private String userId;
     private String cardToken;
     private String paymentSystem;
 

@@ -25,6 +25,8 @@ public class PaymentToPaymentModelConverter implements Converter<Payment, Paymen
                 ? payment.getPaymentTool().getBankCard().getIssuerCountry().name()
                 : UNKNOWN);
         ClientInfo clientInfo = payment.getClientInfo();
+        paymentModel.setCustomerId(clientInfo.getCustomerId());
+        paymentModel.setUserId(clientInfo.getUserId());
         paymentModel.setIp(clientInfo.isSetIp() ? clientInfo.getIp() : ClickhouseUtilsValue.UNKNOWN);
         paymentModel.setFingerprint(
                 clientInfo.isSetFingerprint() ? clientInfo.getFingerprint() : ClickhouseUtilsValue.UNKNOWN);

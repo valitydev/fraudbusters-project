@@ -24,7 +24,7 @@ public class UserInspectorResource implements InspectUserApi {
 
     @Override
     public ResponseEntity<UserInspectResult> inspectUser(@Valid UserInspectRequest userInspectRequest) {
-        log.debug("-> inspectUser request: {}", userInspectRequest);
+        log.debug("-> inspectUser");
         InspectUserContext context = userInspectRequestToInspectUserContextConverter.convert(userInspectRequest);
         UserInspectResult result = fraudbustersInspectorService.inspectUser(context);
         log.debug("<- inspectUser result: {}", result);

@@ -24,12 +24,12 @@ public class RefundResource implements RefundsApi {
 
     @Override
     public ResponseEntity<Void> insertRefunds(RefundsRequest refundsRequest) {
-        log.debug("-> insertRefunds request: {}", refundsRequest);
+        log.debug("-> insertRefunds");
         if (!CollectionUtils.isEmpty(refundsRequest.getRefunds())) {
             List<Refund> refunds = refundsRequestToRefundsConverter.convert(refundsRequest);
             fraudbustersService.insertRefunds(refunds);
         }
-        log.debug("<- insertRefunds success request: {}", refundsRequest);
+        log.debug("<- insertRefunds success");
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .build();

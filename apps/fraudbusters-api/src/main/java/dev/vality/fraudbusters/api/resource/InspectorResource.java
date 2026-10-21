@@ -22,7 +22,7 @@ public class InspectorResource implements InspectPaymentApi {
 
     @Override
     public ResponseEntity<RiskScoreResult> inspectPayment(PaymentInspectRequest paymentInspectRequest) {
-        log.debug("-> inspectPayment request: {}", paymentInspectRequest);
+        log.debug("-> inspectPayment");
         Context context = paymentInspectRequestToContextConverter.convert(paymentInspectRequest);
         RiskScore riskScore = fraudbustersInspectorService.inspectPayment(context);
         RiskScoreResult riskScoreResult = new RiskScoreResult();

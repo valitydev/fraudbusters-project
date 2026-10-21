@@ -22,6 +22,20 @@ class FilterConverterTest {
     private final FilterConverter filterConverter = new FilterConverter();
 
     @Test
+    void identityFiltersBindExactValues() {
+        String userId = "Synthetic_'User%";
+        var filter = new Filter().setCustomerId("synthetic-customer").setUserId(userId);
+        var dto = filterConverter.convert(filter, new Page(), new Sort().setOrder(SortOrder.DESC));
+        String sql = dev.vality.fraudbusters.repository.clickhouse.util.FilterUtil.appendFilters(dto);
+        final var params = dev.vality.fraudbusters.repository.clickhouse.util.FilterUtil.initParams(dto);
+        assertTrue(sql.contains("customerId = :customerId"));
+        assertTrue(sql.contains("userId = :userId"));
+        assertFalse(sql.contains(userId));
+        assertEquals(userId, params.getValue("userId"));
+        assertEquals("synthetic-customer", params.getValue("customerId"));
+    }
+
+    @Test
     void convertWithEmptyFiled() {
         Filter filter = new Filter();
         filter.setPaymentId("");

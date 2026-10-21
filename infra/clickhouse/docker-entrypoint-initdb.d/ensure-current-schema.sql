@@ -1,4 +1,4 @@
--- Local schema additions from the owning service test migrations.
+-- Local schema additions from the owning service migrations.
 -- V5__add_fields.sql
 ALTER TABLE fraud.events_unique ADD COLUMN IF NOT EXISTS payerType String;
 ALTER TABLE fraud.events_unique ADD COLUMN IF NOT EXISTS tokenProvider String;
@@ -35,3 +35,15 @@ ALTER TABLE fraud.payment ADD COLUMN IF NOT EXISTS cardCategory String;
 
 -- V10__add_id_inspect_result.sql
 ALTER TABLE fraud.events_unique ADD COLUMN IF NOT EXISTS id String;
+
+-- V12__add_client_identity.sql
+ALTER TABLE fraud.events_unique ADD COLUMN IF NOT EXISTS customerId Nullable(String);
+ALTER TABLE fraud.events_unique ADD COLUMN IF NOT EXISTS userId Nullable(String);
+ALTER TABLE fraud.payment ADD COLUMN IF NOT EXISTS customerId Nullable(String);
+ALTER TABLE fraud.payment ADD COLUMN IF NOT EXISTS userId Nullable(String);
+ALTER TABLE fraud.refund ADD COLUMN IF NOT EXISTS customerId Nullable(String);
+ALTER TABLE fraud.refund ADD COLUMN IF NOT EXISTS userId Nullable(String);
+ALTER TABLE fraud.chargeback ADD COLUMN IF NOT EXISTS customerId Nullable(String);
+ALTER TABLE fraud.chargeback ADD COLUMN IF NOT EXISTS userId Nullable(String);
+ALTER TABLE fraud.fraud_payment ADD COLUMN IF NOT EXISTS customerId Nullable(String);
+ALTER TABLE fraud.fraud_payment ADD COLUMN IF NOT EXISTS userId Nullable(String);

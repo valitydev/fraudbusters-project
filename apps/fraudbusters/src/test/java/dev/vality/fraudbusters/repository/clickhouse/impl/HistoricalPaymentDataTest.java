@@ -59,6 +59,32 @@ class HistoricalPaymentDataTest {
     }
 
     @Test
+    void clientIdentitySurvivesWriteAndHistoryRead() {
+        var context = dev.vality.fraudbusters.util.BeanUtil.createContext();
+        CheckedPayment payment = dev.vality.fraudbusters.util.BeanUtil.convertContextToPayment(context, "captured");
+        var time = dev.vality.fraudbusters.util.TimestampUtil.generateTimePropertiesByString("2031-01-01T00:00:00");
+        payment.setTimestamp(time.getTimestamp());
+        payment.setEventTime(time.getEventTime());
+        payment.setEventTimeHour(time.getEventTimeHour());
+        payment.setId("synthetic-identity-payment");
+        payment.setCustomerId("synthetic-customer");
+        payment.setUserId("Synthetic_'User%");
+        paymentRepository.insertBatch(List.of(payment));
+        FilterDto filter = new FilterDto();
+        filter.setTimeFrom("2031-01-01T00:00:00");
+        filter.setTimeTo("2031-01-02T00:00:00");
+        SortDto sort = new SortDto();
+        sort.setOrder(SortOrder.DESC);
+        filter.setSort(sort);
+        filter.setSearchFields(Set.of(SearchFieldDto.builder().field(PaymentField.USER_ID)
+                .type(FieldType.STRING).value(payment.getUserId()).build()));
+        var rows = paymentRepository.getByFilter(filter);
+        assertEquals(1, rows.size());
+        assertEquals(payment.getCustomerId(), rows.get(0).getCustomerId());
+        assertEquals(payment.getUserId(), rows.get(0).getUserId());
+    }
+
+    @Test
     void getPaymentsByTimeSlot() {
         FilterDto filter = new FilterDto();
         filter.setTimeFrom("2020-05-01T18:04:53");

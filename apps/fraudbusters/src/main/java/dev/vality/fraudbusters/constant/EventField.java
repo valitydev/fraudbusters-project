@@ -11,6 +11,8 @@ public enum EventField {
     email,
     bin,
     fingerprint,
+    customerId,
+    userId,
     shopId,
     partyId,
     resultStatus,

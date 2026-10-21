@@ -19,6 +19,8 @@ public class PaymentFieldValueResolver {
             case EMAIL -> Optional.of(checkedPayment.getEmail());
             case LAST_DIGITS -> Optional.of(checkedPayment.getLastDigits());
             case FINGERPRINT -> Optional.of(checkedPayment.getFingerprint());
+            case CUSTOMER_ID -> Optional.ofNullable(checkedPayment.getCustomerId());
+            case USER_ID -> Optional.ofNullable(checkedPayment.getUserId());
             case SHOP_ID -> Optional.of(checkedPayment.getShopId());
             case COUNTRY_BANK -> Optional.of(checkedPayment.getBankCountry());
             case CURRENCY -> Optional.of(checkedPayment.getCurrency());

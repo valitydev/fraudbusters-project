@@ -73,10 +73,10 @@ public class MgEventSinkInvoiceToFraudStreamFactory implements EventSinkFactory 
                             .mapValues(machineEvent -> Map
                                     .entry(machineEvent, paymentEventParser.parseEvent(machineEvent)))
                             .peek((s, payment) ->
-                                    log.debug("MgEventSinkToFraudStreamFactory machineEvent: {}", payment))
+                                    log.debug("Invoice event received"))
                             .filter((s, entry) -> entry.getValue().isSetInvoiceChanges())
                             .peek((s, payment) ->
-                                    log.debug("MgEventSinkToFraudStreamFactory machineEvent: {}", payment))
+                                    log.debug("Invoice event received"))
                             .flatMapValues(entry -> entry.getValue().getInvoiceChanges().stream()
                                     .map(invoiceChange -> wrapMgEvent(entry, invoiceChange))
                                     .collect(Collectors.toList()))

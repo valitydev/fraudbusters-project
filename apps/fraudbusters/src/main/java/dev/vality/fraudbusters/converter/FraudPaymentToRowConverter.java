@@ -41,6 +41,8 @@ public class FraudPaymentToRowConverter implements Converter<FraudPayment, Fraud
                 StringUtils.hasText(checkedPayment.getEmail()) ? checkedPayment.getEmail().toLowerCase() : UNKNOWN);
         payment.setIp(checkedPayment.getIp());
         payment.setFingerprint(checkedPayment.getFingerprint());
+        payment.setCustomerId(checkedPayment.getCustomerId());
+        payment.setUserId(checkedPayment.getUserId());
         payment.setPhone(checkedPayment.getPhone());
         payment.setBin(checkedPayment.getBin());
         payment.setLastDigits(checkedPayment.getLastDigits());

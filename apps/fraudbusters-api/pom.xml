@@ -29,7 +29,7 @@
         <swag-fraudbusters.version>1.119-7d5622c</swag-fraudbusters.version>
         <fraudbusters-proto.version>1.128-79c32f2</fraudbusters-proto.version>
         <jjwt-version>0.12.6</jjwt-version>
-        <damsel.version>1.681-7a97267</damsel.version>
+        <damsel.version>1.712-1018337</damsel.version>
     </properties>
 
     <dependencies>

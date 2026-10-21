@@ -77,7 +77,7 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
                 group by %1$s""", fieldName, TABLE);
         List<Object> params =
                 AggregationUtil.generateStatusesParams(from, to, value, AggregationUtil.getFinalStatuses());
-        log.debug("AggregationGeneralRepositoryImpl countOperationByField sql: {} params: {}", sql, params);
+        log.debug("AggregationGeneralRepositoryImpl countOperationByField sql: {}", sql);
         return jdbcTemplate.query(sql, params.toArray(), new CountExtractor());
     }
 
@@ -100,7 +100,7 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
         List<Object> params = AggregationUtil.generateStatusesParams(from, to, fieldModels, value,
                 AggregationUtil.getFinalStatuses());
-        log.debug("PaymentRepositoryImpl countOperationByFieldWithGroupBy sql: {} params: {}", sql, params);
+        log.debug("PaymentRepositoryImpl countOperationByFieldWithGroupBy sql: {}", sql);
         return jdbcTemplate.query(resultSql.toString(), params.toArray(), new CountExtractor());
     }
 
@@ -124,7 +124,7 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
         List<Object> params =
                 AggregationUtil.generateStatusesParams(from, to, fieldModels, value,
                         AggregationUtil.getFinalStatuses());
-        log.debug("PaymentRepositoryImpl sumOperationSuccessWithGroupBy sql: {} params: {}", sql, params);
+        log.debug("PaymentRepositoryImpl sumOperationSuccessWithGroupBy sql: {}", sql);
         return jdbcTemplate.query(resultSql.toString(), params.toArray(), new SumExtractor());
     }
 
@@ -141,7 +141,7 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
                 group by %1$s""", fieldNameBy, fieldNameCount, TABLE);
         List<Object> params =
                 AggregationUtil.generateStatusesParams(from, to, value, AggregationUtil.getFinalStatuses());
-        log.debug("AggregationGeneralRepositoryImpl uniqCountOperation sql: {} params: {}", sql, params);
+        log.debug("AggregationGeneralRepositoryImpl uniqCountOperation sql: {}", sql);
         return jdbcTemplate.query(sql, params.toArray(), new CountExtractor());
     }
 
@@ -187,7 +187,7 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
         List<Object> params =
                 AggregationUtil.generateParams(from, to, fieldModels, value, PaymentStatus.captured.name());
-        log.debug("PaymentRepositoryImpl countOperationSuccessWithGroupBy sql: {} params: {}", sql, params);
+        log.debug("PaymentRepositoryImpl countOperationSuccessWithGroupBy sql: {}", sql);
         return jdbcTemplate.query(resultSql.toString(), params.toArray(), new CountExtractor());
     }
 
@@ -206,7 +206,7 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
         List<Object> params =
                 AggregationUtil.generateParams(from, to, fieldModels, value, PaymentStatus.pending.name());
-        log.debug("PaymentRepositoryImpl countOperationPendingWithGroupBy sql: {} params: {}", sql, params);
+        log.debug("PaymentRepositoryImpl countOperationPendingWithGroupBy sql: {}", sql);
         return jdbcTemplate.query(resultSql.toString(), params.toArray(), new CountExtractor());
     }
 
@@ -232,7 +232,7 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
         List<Object> params =
                 AggregationUtil.generateParams(from, to, fieldModels, value, PaymentStatus.failed.name(), errorCode);
-        log.debug("PaymentRepositoryImpl countOperationErrorWithGroupBy sql: {} params: {}", sql, params);
+        log.debug("PaymentRepositoryImpl countOperationErrorWithGroupBy sql: {}", sql);
         return jdbcTemplate.query(resultSql.toString(), params.toArray(), new CountExtractor());
     }
 
@@ -257,7 +257,7 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
         List<Object> params =
                 AggregationUtil.generateParams(from, to, fieldModels, value, PaymentStatus.failed.name());
-        log.debug("PaymentRepositoryImpl countOperationErrorWithGroupBy sql: {} params: {}", sql, params);
+        log.debug("PaymentRepositoryImpl countOperationErrorWithGroupBy sql: {}", sql);
         return jdbcTemplate.query(resultSql.toString(), params.toArray(), new CountExtractor());
     }
 
@@ -277,7 +277,7 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
         List<Object> params =
                 AggregationUtil.generateParams(from, to, fieldModels, value, PaymentStatus.captured.name());
-        log.debug("PaymentRepositoryImpl sumOperationSuccessWithGroupBy sql: {} params: {}", sql, params);
+        log.debug("PaymentRepositoryImpl sumOperationSuccessWithGroupBy sql: {}", sql);
         return jdbcTemplate.query(resultSql.toString(), params.toArray(), new SumExtractor());
     }
 
@@ -303,7 +303,7 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
         List<Object> params =
                 AggregationUtil.generateParams(from, to, fieldModels, value, PaymentStatus.failed.name(), errorCode);
-        log.debug("PaymentRepositoryImpl sumOperationErrorWithGroupBy sql: {} params: {}", sql, params);
+        log.debug("PaymentRepositoryImpl sumOperationErrorWithGroupBy sql: {}", sql);
         return jdbcTemplate.query(resultSql.toString(), params.toArray(), new SumExtractor());
     }
 
@@ -328,7 +328,7 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
         List<Object> params =
                 AggregationUtil.generateParams(from, to, fieldModels, value, PaymentStatus.failed.name());
-        log.debug("PaymentRepositoryImpl sumOperationErrorWithGroupBy sql: {} params: {}", sql, params);
+        log.debug("PaymentRepositoryImpl sumOperationErrorWithGroupBy sql: {}", sql);
         return jdbcTemplate.query(resultSql.toString(), params.toArray(), new SumExtractor());
     }
 
@@ -344,7 +344,7 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
                 and %1$s = ?
                 limit 1""", fieldName, TABLE);
         List<Object> params = AggregationUtil.generateParams(from, to, value);
-        log.debug("AggregationGeneralRepositoryImpl isExistByField sql: {} params: {}", sql, params);
+        log.debug("AggregationGeneralRepositoryImpl isExistByField sql: {}", sql);
         return jdbcTemplate.query(sql, params.toArray(), new CountExtractor()) != 0;
     }
 

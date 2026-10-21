@@ -83,6 +83,8 @@ public class PaymentApiToPaymentConverter
                 .setIp(payment.getClientInfo().getIp())
                 .setEmail(payment.getClientInfo().getEmail())
                 .setFingerprint(payment.getClientInfo().getFingerprint())
+                .setCustomerId(payment.getClientInfo().getCustomerId())
+                .setUserId(payment.getClientInfo().getUserId())
                 : null;
     }
 }

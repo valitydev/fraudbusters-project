@@ -80,6 +80,12 @@ public class FilterConverter {
         if (filter.isSetFingerprint() && StringUtils.hasLength(filter.getFingerprint())) {
             addSearchField(searchFields, PaymentField.FINGERPRINT, FieldType.STRING, filter.getFingerprint());
         }
+        if (filter.isSetCustomerId() && StringUtils.hasLength(filter.getCustomerId())) {
+            addSearchField(searchFields, PaymentField.CUSTOMER_ID, FieldType.STRING, filter.getCustomerId());
+        }
+        if (filter.isSetUserId() && StringUtils.hasLength(filter.getUserId())) {
+            addSearchField(searchFields, PaymentField.USER_ID, FieldType.STRING, filter.getUserId());
+        }
         if (filter.isSetTerminal() && StringUtils.hasLength(filter.getTerminal())) {
             addSearchField(searchFields, PaymentField.TERMINAL, FieldType.STRING, filter.getTerminal());
         }

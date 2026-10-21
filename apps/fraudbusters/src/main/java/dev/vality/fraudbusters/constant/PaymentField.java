@@ -13,6 +13,8 @@ public enum PaymentField implements FilterField {
     PHONE("phone"),
     IP("ip"),
     FINGERPRINT("fingerprint"),
+    CUSTOMER_ID("customerId"),
+    USER_ID("userId"),
     BANK_COUNTRY("bankCountry"),
     CARD_TOKEN("cardToken"),
     CARD_CATEGORY("cardCategory"),
