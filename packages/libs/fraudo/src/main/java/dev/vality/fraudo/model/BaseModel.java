@@ -9,9 +9,7 @@ public class BaseModel {
     private String email;
     private String phone;
     private String fingerprint;
-    @lombok.ToString.Exclude
     private String customerId;
-    @lombok.ToString.Exclude
     private String userId;
     private Long amount;
     private String currency;
