@@ -24,12 +24,12 @@ public class PaymentResource implements PaymentsApi {
 
     @Override
     public ResponseEntity<Void> insertPaymentsChanges(PaymentsChangesRequest paymentsChangesRequest) {
-        log.debug("-> insertPaymentsChanges");
+        log.debug("-> insertPaymentsChanges request: {}", paymentsChangesRequest);
         if (!CollectionUtils.isEmpty(paymentsChangesRequest.getPaymentsChanges())) {
             List<Payment> payments = paymentsChangesRequestToPaymentsConverter.convert(paymentsChangesRequest);
             fraudbustersService.insertPaymentsChanges(payments);
         }
-        log.debug("<- insertPaymentsChanges success");
+        log.debug("<- insertPaymentsChanges success request: {}", paymentsChangesRequest);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .build();

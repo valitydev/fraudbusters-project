@@ -37,7 +37,7 @@ public class AggregationStatusGeneralRepositoryImpl implements AggregationStatus
                 and %1$s = ? and status = ?
                 group by %1$s""", fieldName, table);
         List<Object> params = AggregationUtil.generateStatusParams(from, to, value, status);
-        log.debug("AggregationGeneralRepositoryImpl countOperationByField sql: {}", sql);
+        log.debug("AggregationGeneralRepositoryImpl countOperationByField sql: {} params: {}", sql, params);
         return jdbcTemplate.query(sql, params.toArray(), new CountExtractor());
     }
 
@@ -108,7 +108,7 @@ public class AggregationStatusGeneralRepositoryImpl implements AggregationStatus
                 and %1$s = ? and status = ?
                 group by %1$s""", fieldNameBy, fieldNameCount, table);
         List<Object> params = AggregationUtil.generateStatusParams(from, to, value, status);
-        log.debug("AggregationGeneralRepositoryImpl uniqCountOperation sql: {}", sql);
+        log.debug("AggregationGeneralRepositoryImpl uniqCountOperation sql: {} params: {}", sql, params);
         return jdbcTemplate.query(sql, params.toArray(), new CountExtractor());
     }
 

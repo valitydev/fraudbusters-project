@@ -68,7 +68,7 @@ public class PaymentMapper implements Mapper<InvoiceChange, MachineEvent, Paymen
                     invoicePayment, payer, paymentTool)
                     .setError(generalInfoInitiator.initError(invoicePaymentStatusChanged));
         }
-        log.debug("Mapped payment");
+        log.debug("Map payment: {}", payment);
         return payment;
     }
 

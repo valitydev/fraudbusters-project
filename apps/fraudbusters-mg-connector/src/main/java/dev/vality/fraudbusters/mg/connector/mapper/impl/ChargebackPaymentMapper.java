@@ -87,7 +87,7 @@ public class ChargebackPaymentMapper implements Mapper<InvoiceChange, MachineEve
                                     ChargebackCategory.class));
                 });
 
-        log.debug("Mapped chargeback");
+        log.debug("ChargebackPaymentMapper chargebackRow: {}", chargeback);
         return chargeback;
     }
 

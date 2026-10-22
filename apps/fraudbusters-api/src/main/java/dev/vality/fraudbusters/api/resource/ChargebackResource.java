@@ -24,12 +24,12 @@ public class ChargebackResource implements ChargebacksApi {
 
     @Override
     public ResponseEntity<Void> insertChargebacks(ChargebacksRequest chargebacksRequest) {
-        log.debug("-> insertChargebacks");
+        log.debug("-> insertChargebacks request: {}", chargebacksRequest);
         if (!CollectionUtils.isEmpty(chargebacksRequest.getChargebacks())) {
             List<Chargeback> chargebacks = chargebacksRequestToChargebacksConverter.convert(chargebacksRequest);
             fraudbustersService.insertChargebacks(chargebacks);
         }
-        log.debug("<- insertChargebacks success");
+        log.debug("<- insertChargebacks success request: {}", chargebacksRequest);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .build();

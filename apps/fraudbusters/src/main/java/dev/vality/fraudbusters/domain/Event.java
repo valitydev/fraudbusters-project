@@ -17,9 +17,7 @@ public class Event {
     private String email;
     private String bin;
     private String fingerprint;
-    @lombok.ToString.Exclude
     private String customerId;
-    @lombok.ToString.Exclude
     private String userId;
     private String shopId;
     private String partyId;

@@ -157,7 +157,7 @@ public class FraudResultRepository implements Repository<Event>, PaymentReposito
         StringBuilder sqlGroupBy = new StringBuilder(String.format("group by %1$s", fieldName));
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
         List<Object> params = AggregationUtil.generateParams(from, to, fieldModels, value, ResultStatus.DECLINE.name());
-        log.debug("FraudResultRepository countOperationSuccessWithGroupBy sql: {}", sql);
+        log.debug("FraudResultRepository countOperationSuccessWithGroupBy sql: {} params: {}", sql, params);
         return jdbcTemplate.query(resultSql.toString(), params.toArray(), new CountExtractor());
     }
 
@@ -178,7 +178,7 @@ public class FraudResultRepository implements Repository<Event>, PaymentReposito
         StringBuilder sqlGroupBy = new StringBuilder(String.format("group by %1$s", fieldName));
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
         List<Object> params = AggregationUtil.generateParams(from, to, fieldModels, value, ResultStatus.DECLINE.name());
-        log.debug("FraudResultRepository countOperationPendingWithGroupBy sql: {}", sql);
+        log.debug("FraudResultRepository countOperationPendingWithGroupBy sql: {} params: {}", sql, params);
         return jdbcTemplate.query(resultSql.toString(), params.toArray(), new CountExtractor());
     }
 
@@ -205,7 +205,7 @@ public class FraudResultRepository implements Repository<Event>, PaymentReposito
         StringBuilder sqlGroupBy = new StringBuilder(String.format("group by %1$s", fieldName));
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
         List<Object> params = AggregationUtil.generateParams(from, to, fieldModels, value, ResultStatus.DECLINE.name());
-        log.debug("FraudResultRepository countOperationErrorWithGroupBy sql: {}", sql);
+        log.debug("FraudResultRepository countOperationErrorWithGroupBy sql: {} params: {}", sql, params);
         return jdbcTemplate.query(resultSql.toString(), params.toArray(), new CountExtractor());
     }
 
@@ -236,7 +236,7 @@ public class FraudResultRepository implements Repository<Event>, PaymentReposito
         StringBuilder sqlGroupBy = new StringBuilder(String.format("group by %1$s", fieldName));
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
         List<Object> params = AggregationUtil.generateParams(from, to, fieldModels, value, ResultStatus.DECLINE.name());
-        log.debug("FraudResultRepository sumOperationSuccessWithGroupBy sql: {}", sql);
+        log.debug("FraudResultRepository sumOperationSuccessWithGroupBy sql: {} params: {}", sql, params);
         return jdbcTemplate.query(resultSql.toString(), params.toArray(), new SumExtractor());
     }
 
@@ -263,7 +263,7 @@ public class FraudResultRepository implements Repository<Event>, PaymentReposito
         StringBuilder sqlGroupBy = new StringBuilder(String.format("group by %1$s", fieldName));
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
         List<Object> params = AggregationUtil.generateParams(from, to, fieldModels, value, ResultStatus.DECLINE.name());
-        log.debug("FraudResultRepository sumOperationErrorWithGroupBy sql: {}", sql);
+        log.debug("FraudResultRepository sumOperationErrorWithGroupBy sql: {} params: {}", sql, params);
         return jdbcTemplate.query(resultSql.toString(), params.toArray(), new SumExtractor());
     }
 

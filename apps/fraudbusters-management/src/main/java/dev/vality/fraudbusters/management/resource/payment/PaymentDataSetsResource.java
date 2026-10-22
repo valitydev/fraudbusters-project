@@ -41,7 +41,7 @@ public class PaymentDataSetsResource implements PaymentsDataSetApi {
         String userName = userInfoService.getUserName();
         log.info("getCheckedDataSet initiator: {} id: {}", userName, id);
         var dataSet = paymentsDataSetService.getCheckedDataSet(id);
-        log.info("getCheckedDataSet succeeded");
+        log.info("getCheckedDataSet succeeded checkedDataSet: {}", dataSet);
         return ResponseEntity.ok(checkedDataSetModelToCheckedDataSetApiConverter.convert(dataSet));
     }
 
@@ -49,7 +49,7 @@ public class PaymentDataSetsResource implements PaymentsDataSetApi {
     @PreAuthorize("hasAnyRole('fraud-officer')")
     public ResponseEntity<String> applyRuleOnHistoricalDataSet(ApplyRuleOnHistoricalDataSetRequest request) {
         String userName = userInfoService.getUserName();
-        log.info("applyRuleOnHistoricalDataSet");
+        log.info("applyRuleOnHistoricalDataSet initiator: {} request: {}", userName, request);
         try {
             var historicalDataSetCheckResult = historicalDataServiceSrv
                     .applyRuleOnHistoricalDataSet(applyConverter.convert(request));
@@ -92,7 +92,7 @@ public class PaymentDataSetsResource implements PaymentsDataSetApi {
         String userName = userInfoService.getUserName();
         log.info("getDataSet initiator: {} id: {}", userName, setId);
         var dataSet = paymentsDataSetService.getDataSet(setId);
-        log.info("getDataSet succeeded");
+        log.info("getDataSet succeeded dataSet: {}", dataSet);
         return ResponseEntity.ok(dataSetModelToDataSetApiConverter.convert(dataSet));
     }
 
@@ -100,11 +100,11 @@ public class PaymentDataSetsResource implements PaymentsDataSetApi {
     @PreAuthorize("hasAnyRole('fraud-officer')")
     public ResponseEntity<IdResponse> insertDataSet(DataSet dataSet) {
         String userName = userInfoService.getUserName();
-        log.info("insertDataSet");
+        log.info("insertDataSet initiator: {} dataSet: {}", userName, dataSet);
         DataSetModel dataSetModel = dataSetToTestDataSetModelConverter.convert(dataSet);
         dataSetModel.setLastModificationInitiator(userName);
         Long id = paymentsDataSetService.insertDataSet(dataSetModel);
-        log.info("insertDataSet succeeded");
+        log.info("insertDataSet succeeded dataSet: {}", dataSet);
         return ResponseEntity.ok(new IdResponse()
                 .id(String.valueOf(id))
         );

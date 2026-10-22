@@ -72,7 +72,7 @@ public class RefundPaymentMapper implements Mapper<InvoiceChange, MachineEvent, 
                 .setPayerType(TBaseUtil.unionFieldToEnum(payer, PayerType.class))
                 .setError(generalInfoInitiator.initError(invoicePaymentRefundStatusChanged));
 
-        log.debug("RefundPaymentMapper refund mapped");
+        log.debug("RefundPaymentMapper refund: {}", refund);
         return refund;
     }
 

@@ -56,7 +56,7 @@ public class PaymentHistoricalDataResource implements PaymentsHistoricalDataApi 
         var paymentsResponse = new PaymentsResponse()
                 .result(listToListConverter.convert(payments.getData().getPayments(), paymentInfoToPaymentConverter))
                 .continuationId(payments.getContinuationId());
-        log.info("<- filterPaymentsInfo paymentsResponse received");
+        log.info("<- filterPaymentsInfo paymentsResponse: {}", paymentsResponse);
         return ResponseEntity.ok(paymentsResponse);
     }
 
@@ -86,7 +86,7 @@ public class PaymentHistoricalDataResource implements PaymentsHistoricalDataApi 
                 .result(listToListConverter
                         .convert(chargebacks.getData().getChargebacks(), chargebackInfoToChargebackConverter))
                 .continuationId(chargebacks.getContinuationId());
-        log.info("<- filterChargebacks chargebacksResponse received");
+        log.info("<- filterChargebacks chargebacksResponse: {}", chargebacksResponse);
         return ResponseEntity.ok(chargebacksResponse);
     }
 
@@ -118,7 +118,7 @@ public class PaymentHistoricalDataResource implements PaymentsHistoricalDataApi 
                 .result(listToListConverter
                         .convert(fraudPayments.getData().getFraudPayments(), fraudPaymentInfoToFraudPaymentConverter))
                 .continuationId(fraudPayments.getContinuationId());
-        log.info("<- filterFraudPayments fraudPaymentsResponse received");
+        log.info("<- filterFraudPayments fraudPaymentsResponse: {}", fraudPaymentsResponse);
         return ResponseEntity.ok(fraudPaymentsResponse);
     }
 
@@ -155,7 +155,7 @@ public class PaymentHistoricalDataResource implements PaymentsHistoricalDataApi 
                 .result(listToListConverter
                         .convert(fraudResults.getData().getFraudResults(), fraudResultToInspectResultConverter))
                 .continuationId(fraudResults.getContinuationId());
-        log.info("<- filterInspectResults inspectResultsResponse received");
+        log.info("<- filterInspectResults inspectResultsResponse: {}", inspectResultsResponse);
         return ResponseEntity.ok(inspectResultsResponse);
     }
 
@@ -183,7 +183,7 @@ public class PaymentHistoricalDataResource implements PaymentsHistoricalDataApi 
         var refundsResponse = new RefundsResponse()
                 .result(listToListConverter.convert(fraudResults.getData().getRefunds(), refundInfoToRefundConverter))
                 .continuationId(fraudResults.getContinuationId());
-        log.info("<- filterFraudPayments paymentsResponse received");
+        log.info("<- filterFraudPayments paymentsResponse: {}", refundsResponse);
         return ResponseEntity.ok(refundsResponse);
     }
 
