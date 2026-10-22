@@ -1,5 +1,11 @@
 type: object
 properties:
+  customerId:
+    description: Customer identifier associated with the invoice.
+    type: string
+  userId:
+    description: User identifier in the merchant system, scoped to the invoice party.
+    type: string
   ip:
     type: string
   fingerprint:

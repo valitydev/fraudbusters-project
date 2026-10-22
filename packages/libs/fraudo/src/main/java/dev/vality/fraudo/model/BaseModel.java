@@ -9,6 +9,8 @@ public class BaseModel {
     private String email;
     private String phone;
     private String fingerprint;
+    private String customerId;
+    private String userId;
     private Long amount;
     private String currency;
     private String paymentSystem;

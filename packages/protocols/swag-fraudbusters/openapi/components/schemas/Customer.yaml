@@ -1,5 +1,11 @@
 description: Информация о клиенте
 properties:
+  customerId:
+    description: Customer identifier associated with the invoice.
+    type: string
+  userId:
+    description: User identifier in the merchant system, scoped to the invoice party. Requires customerId for inspection.
+    type: string
   name:
     type: string
   device:

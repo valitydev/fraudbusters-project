@@ -27,6 +27,7 @@ stringExpression
     | currency
     | payment_system
     | card_category
+    | user_id
     | STRING
     ;
 

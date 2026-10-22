@@ -32,6 +32,10 @@ currency
  : 'currency' LPAREN RPAREN
  ;
 
+user_id
+ : 'userId' LPAREN RPAREN
+ ;
+
 payment_system
  : 'paymentSystem' LPAREN RPAREN
  ;
