@@ -13,9 +13,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class ClientIdentityTest extends AbstractPaymentTest {
 
     @Test
-    void identityFunctionsWorkInBothVisitorsAndPreserveCase() throws Exception {
+    void userIdWorksInBothVisitorsAndPreservesCase() throws Exception {
         var parse = getParseContext(new ByteArrayInputStream((
-                "rule: customerId() = \"synthetic-customer\" AND in(userId(), \"Synthetic-User\") -> accept;")
+                "rule: in(userId(), \"Synthetic-User\") -> accept;")
                 .getBytes(StandardCharsets.UTF_8)));
         PaymentModel model = new PaymentModel();
         model.setCustomerId("synthetic-customer");
@@ -31,9 +31,19 @@ class ClientIdentityTest extends AbstractPaymentTest {
     @Test
     void oldPaymentsWithoutIdentityRemainSupported() throws Exception {
         var parse = getParseContext(new ByteArrayInputStream((
-                "rule: customerId() = \"UNKNOWN\" AND userId() = \"UNKNOWN\" -> accept;")
+                "rule: userId() = \"UNKNOWN\" -> accept;")
                 .getBytes(StandardCharsets.UTF_8)));
         assertEquals(ResultStatus.ACCEPT, ResultUtils.findFirstNotNotifyStatus(invoke(parse, new PaymentModel()))
                 .orElseThrow().getResultStatus());
+    }
+
+    @Test
+    void customerIdIsNotALanguageFunction() {
+        var lexer = new FraudoPaymentLexer(org.antlr.v4.runtime.CharStreams.fromString(
+                "rule: customerId() = \"synthetic-customer\" -> accept;"));
+        var parser = new FraudoPaymentParser(new org.antlr.v4.runtime.CommonTokenStream(lexer));
+        parser.removeErrorListeners();
+        parser.parse();
+        assertTrue(parser.getNumberOfSyntaxErrors() > 0);
     }
 }

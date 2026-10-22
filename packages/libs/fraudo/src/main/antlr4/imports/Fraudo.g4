@@ -32,10 +32,6 @@ currency
  : 'currency' LPAREN RPAREN
  ;
 
-customer_id
- : 'customerId' LPAREN RPAREN
- ;
-
 user_id
  : 'userId' LPAREN RPAREN
  ;
