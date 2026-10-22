@@ -40,15 +40,16 @@ public class UniqueValueAggregatorImpl implements UniqueValueAggregator<PaymentM
         try {
             Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
-            FieldModel resolve = databasePaymentFieldResolver.resolve(countField, paymentModel);
+            FieldModel resolve = databasePaymentFieldResolver.resolve(countField, paymentModel, list);
             if (Objects.isNull(resolve.getValue())) {
                 return CURRENT_ONE;
             }
-            List<FieldModel> fieldModels = databasePaymentFieldResolver.resolveListFields(paymentModel, list);
+            List<FieldModel> fieldModels =
+                    databasePaymentFieldResolver.resolveListFields(paymentModel, list, countField);
             Integer uniqCountOperation = paymentRepository.uniqCountOperationWithGroupBy(
                     resolve.getName(),
                     resolve.getValue(),
-                    databasePaymentFieldResolver.resolve(onField),
+                    databasePaymentFieldResolver.resolveAggregationName(onField, list, countField),
                     timeBound.getLeft().toEpochMilli(),
                     timeBound.getRight().toEpochMilli(),
                     fieldModels

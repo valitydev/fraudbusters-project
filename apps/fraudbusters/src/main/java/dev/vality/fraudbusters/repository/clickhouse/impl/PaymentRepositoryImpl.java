@@ -167,7 +167,7 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
                 AggregationUtil.generateStatusesParams(from, to, fieldModels, value,
                         AggregationUtil.getFinalStatuses());
         String sqlResult = resultSql.toString();
-        log.debug("uniqCountOperationWithGroupBy sql: {} params: {}", sqlResult, params);
+        log.debug("uniqCountOperationWithGroupBy sql: {}", sqlResult);
         return jdbcTemplate.query(sqlResult, params.toArray(), new CountExtractor());
     }
 

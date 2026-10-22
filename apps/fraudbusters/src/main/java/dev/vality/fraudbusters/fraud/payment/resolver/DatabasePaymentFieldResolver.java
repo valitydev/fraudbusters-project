@@ -7,6 +7,7 @@ import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,14 +16,42 @@ import java.util.stream.Collectors;
 @Service
 public class DatabasePaymentFieldResolver {
 
+    private static final String GLOBAL_USER_ID = "coalesce(nullIf(customerId, ''), userId)";
+
+    public String resolveAggregationName(PaymentCheckedField field, List<PaymentCheckedField> groups,
+                                         PaymentCheckedField primaryField) {
+        return usesGlobalUserIdentity(field, groups, primaryField) ? GLOBAL_USER_ID : resolve(field);
+    }
+
+    public boolean usesGlobalUserIdentity(PaymentCheckedField field, List<PaymentCheckedField> groups,
+                                          PaymentCheckedField primaryField) {
+        return field == PaymentCheckedField.USER_ID && primaryField != PaymentCheckedField.PARTY_ID
+                && (groups == null || !groups.contains(PaymentCheckedField.PARTY_ID));
+    }
+
     @NotNull
     public List<FieldModel> resolveListFields(PaymentModel model, List<PaymentCheckedField> list) {
+        return resolveListFields(model, list, null);
+    }
+
+    @NotNull
+    public List<FieldModel> resolveListFields(PaymentModel model, List<PaymentCheckedField> list,
+                                              PaymentCheckedField primaryField) {
         if (list != null) {
             return list.stream()
-                    .map(field -> resolve(field, model))
+                    .map(field -> primaryField == PaymentCheckedField.PARTY_ID
+                            ? resolve(field, model) : resolve(field, model, list))
                     .collect(Collectors.toList());
         }
         return new ArrayList<>();
+    }
+
+    public FieldModel resolve(PaymentCheckedField field, PaymentModel model, List<PaymentCheckedField> groups) {
+        if (usesGlobalUserIdentity(field, groups, null)) {
+            return new FieldModel(GLOBAL_USER_ID,
+                    StringUtils.hasLength(model.getCustomerId()) ? model.getCustomerId() : model.getUserId());
+        }
+        return resolve(field, model);
     }
 
     public FieldModel resolve(PaymentCheckedField field, PaymentModel model) {
@@ -34,7 +63,6 @@ public class DatabasePaymentFieldResolver {
             case EMAIL -> new FieldModel(EventField.email.name(), model.getEmail());
             case BIN -> new FieldModel(EventField.bin.name(), model.getBin());
             case FINGERPRINT -> new FieldModel(EventField.fingerprint.name(), model.getFingerprint());
-            case CUSTOMER_ID -> new FieldModel(EventField.customerId.name(), model.getCustomerId());
             case USER_ID -> new FieldModel(EventField.userId.name(), model.getUserId());
             case PARTY_ID -> new FieldModel(EventField.partyId.name(), model.getPartyId());
             case SHOP_ID -> new FieldModel(EventField.shopId.name(), model.getShopId());
@@ -60,7 +88,6 @@ public class DatabasePaymentFieldResolver {
             case BIN -> EventField.bin.name();
             case LAST_DIGITS -> EventField.lastDigits.name();
             case FINGERPRINT -> EventField.fingerprint.name();
-            case CUSTOMER_ID -> EventField.customerId.name();
             case USER_ID -> EventField.userId.name();
             case PARTY_ID -> EventField.partyId.name();
             case SHOP_ID -> EventField.shopId.name();

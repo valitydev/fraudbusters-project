@@ -59,6 +59,70 @@ class HistoricalPaymentDataTest {
     }
 
     @Test
+    void aggregatesUseCustomersGloballyAndUsersWithinParty() {
+        var rows = List.of(
+                identityPayment("a", "party-a", "shared-user", "customer-a", 100L),
+                identityPayment("b", "party-b", "other-user", "customer-a", 200L),
+                identityPayment("c", "party-b", "shared-user", "customer-b", 300L),
+                identityPayment("d", "party-b", "fallback-user", null, 400L),
+                identityPayment("e", "party-c", "fallback-user", "", 500L),
+                identityPayment("f", "party-a", "shared-user", null, 700L));
+        paymentRepository.insertBatch(rows);
+        var resolver = new dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver();
+        var boundaries = new dev.vality.fraudbusters.service.TimeBoundaryServiceImpl();
+        var repository = (dev.vality.fraudbusters.repository.PaymentRepository) paymentRepository;
+        final var counts = new dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.CountAggregatorImpl(
+                resolver, repository, null, null, boundaries);
+        final var sums = new dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.SumAggregatorImpl(
+                resolver, repository, null, null, boundaries);
+        final var unique = new dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.UniqueValueAggregatorImpl(
+                resolver, repository, boundaries);
+        var model = new dev.vality.fraudbusters.fraud.model.PaymentModel();
+        model.setTimestamp(java.time.Instant.parse("2032-01-01T01:00:00Z").toEpochMilli());
+        model.setPartyId("party-a");
+        model.setUserId("shared-user");
+        model.setCustomerId("customer-a");
+        model.setCardToken(rows.get(0).getCardToken());
+        var window = dev.vality.fraudo.model.TimeWindow.builder().start(120)
+                .timeUnit(dev.vality.fraudo.constant.TimeUnit.MINUTES).build();
+        var user = dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.USER_ID;
+        var party = dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.PARTY_ID;
+        final var card = dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.CARD_TOKEN;
+        assertEquals(2, counts.countSuccess(user, model, window, List.of()));
+        assertEquals(300.0, sums.sumSuccess(user, model, window, List.of()));
+        assertEquals(2, counts.countSuccess(user, model, window, List.of(party)));
+        assertEquals(800.0, sums.sumSuccess(user, model, window, List.of(party)));
+        assertEquals(2, counts.countSuccess(card, model, window, List.of(user)));
+        assertEquals(2, counts.countSuccess(party, model, window, List.of(user)));
+        assertEquals(5, unique.countUniqueValue(card, model, user, window, List.of()));
+        assertEquals(2, unique.countUniqueValue(card, model, user, window, List.of(party)));
+        assertEquals(2, unique.countUniqueValue(party, model, user, window, List.of()));
+        model.setCustomerId(null);
+        model.setUserId("fallback-user");
+        assertEquals(2, counts.countSuccess(user, model, window, List.of()));
+        assertEquals(900.0, sums.sumSuccess(user, model, window, List.of()));
+        model.setCustomerId("customer-a");
+        model.setUserId(null);
+        assertEquals(2, counts.countSuccess(user, model, window, List.of()));
+        assertEquals(0, counts.countSuccess(user, model, window, List.of(party)));
+    }
+
+    private CheckedPayment identityPayment(String suffix, String party, String user, String customer, long amount) {
+        var context = dev.vality.fraudbusters.util.BeanUtil.createContext();
+        CheckedPayment payment = dev.vality.fraudbusters.util.BeanUtil.convertContextToPayment(context, "captured");
+        var time = dev.vality.fraudbusters.util.TimestampUtil.generateTimePropertiesByString("2032-01-01T00:00:00");
+        payment.setTimestamp(time.getTimestamp());
+        payment.setEventTime(time.getEventTime());
+        payment.setEventTimeHour(time.getEventTimeHour());
+        payment.setId("synthetic-scope-" + suffix);
+        payment.setPartyId(party);
+        payment.setUserId(user);
+        payment.setCustomerId(customer);
+        payment.setAmount(amount);
+        return payment;
+    }
+
+    @Test
     void clientIdentitySurvivesWriteAndHistoryRead() {
         var context = dev.vality.fraudbusters.util.BeanUtil.createContext();
         CheckedPayment payment = dev.vality.fraudbusters.util.BeanUtil.convertContextToPayment(context, "captured");

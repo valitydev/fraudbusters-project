@@ -53,12 +53,13 @@ class ClientIdentityConverterTest {
         model.setUserId("Synthetic-User");
         var fields = new dev.vality.fraudbusters.fraud.payment.resolver.PaymentModelFieldResolver();
         var database = new dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver();
-        assertEquals("synthetic-customer", fields.resolveValue("customer_id", model));
+        assertNull(fields.resolveName("customer_id"));
         assertEquals("Synthetic-User", fields.resolveValue("user_id", model));
         var userField = fields.resolveName("user_id");
         assertEquals("userId", database.resolve(userField));
         assertEquals("Synthetic-User", database.resolve(userField, model).getValue());
-        assertEquals("customerId", database.resolve(fields.resolveName("customer_id")));
+        assertThrows(dev.vality.fraudbusters.exception.UnknownFieldException.class,
+                () -> database.resolve(fields.resolveName("customer_id")));
     }
 
     @Test

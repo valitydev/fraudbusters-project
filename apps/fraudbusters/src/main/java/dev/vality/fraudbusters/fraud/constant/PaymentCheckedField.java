@@ -8,7 +8,6 @@ public enum PaymentCheckedField {
     EMAIL("email"),
     IP("ip"),
     FINGERPRINT("fingerprint"),
-    CUSTOMER_ID("customer_id"),
     USER_ID("user_id"),
     COUNTRY_BANK("country_bank"),
     COUNTRY_IP("country_ip"),

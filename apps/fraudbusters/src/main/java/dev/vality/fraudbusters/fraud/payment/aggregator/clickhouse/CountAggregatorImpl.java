@@ -75,8 +75,9 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
         try {
             Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
-            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel);
-            List<FieldModel> eventFields = databasePaymentFieldResolver.resolveListFields(paymentModel, list);
+            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel, list);
+            List<FieldModel> eventFields =
+                    databasePaymentFieldResolver.resolveListFields(paymentModel, list, checkedField);
             if (Objects.isNull(resolve.getValue())) {
                 return 0;
             }
@@ -90,9 +91,8 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
             );
 
             log.debug(
-                    "CountAggregatorImpl field: {} value: {}  countError: {}",
+                    "CountAggregatorImpl field: {}  countError: {}",
                     resolve.getName(),
-                    resolve.getValue(),
                     count
             );
             return count;
@@ -110,8 +110,9 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
         try {
             Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
-            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel);
-            List<FieldModel> eventFields = databasePaymentFieldResolver.resolveListFields(paymentModel, list);
+            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel, list);
+            List<FieldModel> eventFields =
+                    databasePaymentFieldResolver.resolveListFields(paymentModel, list, checkedField);
             if (Objects.isNull(resolve.getValue())) {
                 return 0;
             }
@@ -124,9 +125,8 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
             );
 
             log.debug(
-                    "CountAggregatorImpl field: {} value: {}  countError: {}",
+                    "CountAggregatorImpl field: {}  countError: {}",
                     resolve.getName(),
-                    resolve.getValue(),
                     count
             );
             return count + CURRENT_ONE;
@@ -204,8 +204,9 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
         try {
             Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
-            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel);
-            List<FieldModel> eventFields = databasePaymentFieldResolver.resolveListFields(paymentModel, list);
+            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel, list);
+            List<FieldModel> eventFields =
+                    databasePaymentFieldResolver.resolveListFields(paymentModel, list, checkedField);
             if (Objects.isNull(resolve.getValue())) {
                 return withCurrent ? CURRENT_ONE : 0;
             }
@@ -217,9 +218,8 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
                     eventFields
             );
             log.debug(
-                    "CountAggregatorImpl field: {} value: {}  count: {}",
+                    "CountAggregatorImpl field: {}  count: {}",
                     resolve.getName(),
-                    resolve.getValue(),
                     count
             );
             return withCurrent ? count + CURRENT_ONE : count;
