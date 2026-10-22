@@ -102,7 +102,8 @@ public class PaymentHistoricalDataResource implements PaymentsHistoricalDataApi 
                                                                      String providerCountry,
                                                                      String cardToken, String fingerprint,
                                                                      String terminal, String invoiceId,
-                                                                     String maskedPan, String customerId, String userId) {
+                                                                     String maskedPan, String customerId,
+                                                                     String userId) {
         log.info("-> filterFraudPayments continuationId: {} size: {} partyId: {} shopId: {} paymentId: {} status: {} " +
                         "email: {} providerCountry: {} cardToken: {} fingerprint: {} terminal: {}",
                 continuationId, size, partyId, shopId, paymentId, status, email, providerCountry, cardToken,
