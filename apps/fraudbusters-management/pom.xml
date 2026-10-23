@@ -33,9 +33,9 @@
         <db.password>postgres</db.password>
         <db.schema>af</db.schema>
         <wb.list.proto.version>1.44-5dbd6d4</wb.list.proto.version>
-        <fraudbusters.proto.version>1.134-b64531d</fraudbusters.proto.version>
-        <fraudo.version>1.0.7</fraudo.version>
-        <swag-fraudbusters-management.version>1.160-e326aa8</swag-fraudbusters-management.version>
+        <fraudbusters.proto.version>1.136-89a0bc7</fraudbusters.proto.version>
+        <fraudo.version>1.0.10</fraudo.version>
+        <swag-fraudbusters-management.version>1.162-89a0bc7</swag-fraudbusters-management.version>
         <fraudbusters.notificator.proto.version>1.27-4907168</fraudbusters.notificator.proto.version>
         <warehouse.proto.version>1.12-afdcd48</warehouse.proto.version>
         <fraud.data.crawler.proto.version>1.6-326f056</fraud.data.crawler.proto.version>
