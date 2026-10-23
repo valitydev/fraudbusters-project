@@ -64,11 +64,7 @@ public class PaymentInspectRequestToContextConverter implements Converter<Paymen
 
     private ClientIdentity buildClientIdentity(Payment payment) {
         Customer customer = payment.getCustomer();
-        if (customer != null && customer.getUserId() != null && customer.getCustomerId() == null) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                    org.springframework.http.HttpStatus.BAD_REQUEST, "customerId is required with userId");
-        }
-        if (customer == null || customer.getCustomerId() == null) {
+        if (customer == null || (customer.getCustomerId() == null && customer.getUserId() == null)) {
             return null;
         }
         return new ClientIdentity()
