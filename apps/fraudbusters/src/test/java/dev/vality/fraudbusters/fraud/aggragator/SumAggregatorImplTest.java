@@ -1,6 +1,7 @@
 package dev.vality.fraudbusters.fraud.aggragator;
 
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.model.AggregationFields;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.SumAggregatorImpl;
@@ -15,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 import static dev.vality.fraudo.constant.TimeUnit.MINUTES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,7 +43,8 @@ public class SumAggregatorImplTest {
 
     @BeforeEach
     public void init() {
-        when(databasePaymentFieldResolver.resolve(any(), any(), any())).thenReturn(modelMock);
+        when(databasePaymentFieldResolver.resolveAggregation(any(), any(), any()))
+                .thenReturn(new AggregationFields(modelMock, List.of(), null));
 
         sumAggregator = new SumAggregatorImpl(
                 databasePaymentFieldResolver,

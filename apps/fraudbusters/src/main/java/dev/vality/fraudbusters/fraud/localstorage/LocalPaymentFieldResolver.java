@@ -1,15 +1,14 @@
 package dev.vality.fraudbusters.fraud.localstorage;
 
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.model.AggregationFields;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static dev.vality.fraudbusters.fraud.filter.PaymentFieldValueResolver.GLOBAL_USER_ID;
 
@@ -18,40 +17,26 @@ public class LocalPaymentFieldResolver {
 
     private final DatabasePaymentFieldResolver databasePaymentFieldResolver;
 
-    public FieldModel resolve(PaymentCheckedField field, PaymentModel model) {
-        FieldModel fieldModel = databasePaymentFieldResolver.resolve(field, model);
-        return new FieldModel(resolveName(field), fieldModel.getValue());
+    public AggregationFields resolveAggregation(PaymentCheckedField field, PaymentModel model,
+                                                 List<PaymentCheckedField> groups) {
+        return resolveAggregation(field, model, groups, null);
     }
 
-    public FieldModel resolve(PaymentCheckedField field, PaymentModel model, List<PaymentCheckedField> groups) {
-        FieldModel resolved = databasePaymentFieldResolver.resolve(field, model, groups);
-        return new FieldModel(resolveName(field, groups, null), resolved.getValue());
+    public AggregationFields resolveAggregation(PaymentCheckedField field, PaymentModel model,
+                                                 List<PaymentCheckedField> groups, PaymentCheckedField countedField) {
+        var resolved = databasePaymentFieldResolver.resolveAggregation(field, model, groups, countedField);
+        var localGroups = IntStream.range(0, resolved.getGroups().size())
+                .mapToObj(i -> localField(groups.get(i), resolved.getGroups().get(i))).toList();
+        return new AggregationFields(localField(field, resolved.getField()), localGroups,
+                countedField == null ? null : localName(countedField, resolved.getCountedField()));
     }
 
-    public String resolveName(PaymentCheckedField field) {
-        return field.name();
+    private FieldModel localField(PaymentCheckedField field, FieldModel resolved) {
+        return new FieldModel(localName(field, resolved.getName()), resolved.getValue());
     }
 
-    public String resolveName(PaymentCheckedField field, List<PaymentCheckedField> groups,
-                              PaymentCheckedField primaryField) {
-        return databasePaymentFieldResolver.usesGlobalUserIdentity(field, groups, primaryField)
-                ? GLOBAL_USER_ID : resolveName(field);
-    }
-
-    @NotNull
-    public List<FieldModel> resolveListFields(PaymentModel model, List<PaymentCheckedField> fields) {
-        return resolveListFields(model, fields, null);
-    }
-
-    @NotNull
-    public List<FieldModel> resolveListFields(PaymentModel model, List<PaymentCheckedField> fields,
-                                              PaymentCheckedField primaryField) {
-        if (fields != null) {
-            return fields.stream()
-                    .map(field -> primaryField == PaymentCheckedField.PARTY_ID
-                            ? resolve(field, model) : resolve(field, model, fields))
-                    .collect(Collectors.toList());
-        }
-        return new ArrayList<>();
+    private String localName(PaymentCheckedField field, String resolvedName) {
+        return field == PaymentCheckedField.USER_ID && !resolvedName.equals(databasePaymentFieldResolver.resolve(field))
+                ? GLOBAL_USER_ID : field.name();
     }
 }

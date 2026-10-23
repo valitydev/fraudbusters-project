@@ -59,7 +59,7 @@ class HistoricalPaymentDataTest {
     }
 
     @Test
-    void aggregatesUseCustomersGloballyAndUsersWithinParty() {
+    void aggregatesUseCustomersGloballyAndUsersWithinPartyOrShop() {
         var rows = List.of(
                 identityPayment("a", "party-a", "shared-user", "customer-a", 100L),
                 identityPayment("b", "party-b", "other-user", "customer-a", 200L),
@@ -80,6 +80,7 @@ class HistoricalPaymentDataTest {
         var model = new dev.vality.fraudbusters.fraud.model.PaymentModel();
         model.setTimestamp(java.time.Instant.parse("2032-01-01T01:00:00Z").toEpochMilli());
         model.setPartyId("party-a");
+        model.setShopId("party-a-shop");
         model.setUserId("shared-user");
         model.setCustomerId("customer-a");
         model.setCardToken(rows.get(0).getCardToken());
@@ -87,15 +88,21 @@ class HistoricalPaymentDataTest {
                 .timeUnit(dev.vality.fraudo.constant.TimeUnit.MINUTES).build();
         var user = dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.USER_ID;
         var party = dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.PARTY_ID;
+        final var shop = dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.SHOP_ID;
         final var card = dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.CARD_TOKEN;
         assertEquals(2, counts.countSuccess(user, model, window, List.of()));
         assertEquals(300.0, sums.sumSuccess(user, model, window, List.of()));
         assertEquals(2, counts.countSuccess(user, model, window, List.of(party)));
         assertEquals(800.0, sums.sumSuccess(user, model, window, List.of(party)));
+        assertEquals(2, counts.countSuccess(user, model, window, List.of(shop)));
+        assertEquals(800.0, sums.sumSuccess(user, model, window, List.of(shop)));
+        assertEquals(2, counts.countSuccess(shop, model, window, List.of(user)));
         assertEquals(2, counts.countSuccess(card, model, window, List.of(user)));
         assertEquals(2, counts.countSuccess(party, model, window, List.of(user)));
         assertEquals(5, unique.countUniqueValue(card, model, user, window, List.of()));
         assertEquals(2, unique.countUniqueValue(card, model, user, window, List.of(party)));
+        assertEquals(2, unique.countUniqueValue(card, model, user, window, List.of(shop)));
+        assertEquals(2, unique.countUniqueValue(shop, model, user, window, List.of()));
         assertEquals(2, unique.countUniqueValue(party, model, user, window, List.of()));
         model.setCustomerId(null);
         model.setUserId("fallback-user");
@@ -116,6 +123,7 @@ class HistoricalPaymentDataTest {
         payment.setEventTimeHour(time.getEventTimeHour());
         payment.setId("synthetic-scope-" + suffix);
         payment.setPartyId(party);
+        payment.setShopId(party + "-shop");
         payment.setUserId(user);
         payment.setCustomerId(customer);
         payment.setAmount(amount);

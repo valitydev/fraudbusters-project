@@ -50,31 +50,38 @@ class UserIdentityAggregationTest {
     @Test
     void globalIdentityFallsBackOnlyWhenCustomerIsAbsent() {
         PaymentModel model = model();
-        for (List<PaymentCheckedField> groups : List.of(List.<PaymentCheckedField>of(), List.of(SHOP_ID))) {
-            assertEquals(GLOBAL_USER, resolver.resolve(USER_ID, model, groups).getName());
-            assertEquals("synthetic-customer", resolver.resolve(USER_ID, model, groups).getValue());
-            model.setCustomerId(null);
-            assertEquals("Synthetic-User", resolver.resolve(USER_ID, model, groups).getValue());
-            model.setCustomerId("");
-            assertEquals("Synthetic-User", resolver.resolve(USER_ID, model, groups).getValue());
-            model.setCustomerId("synthetic-customer");
-        }
-        model.setUserId(null);
-        assertEquals("synthetic-customer", resolver.resolve(USER_ID, model, null).getValue());
+        assertEquals(GLOBAL_USER, resolver.resolveAggregation(USER_ID, model, List.of()).getField().getName());
+        assertEquals("synthetic-customer",
+                resolver.resolveAggregation(USER_ID, model, List.of()).getField().getValue());
         model.setCustomerId(null);
-        assertNull(resolver.resolve(USER_ID, model, null).getValue());
+        assertEquals("Synthetic-User", resolver.resolveAggregation(USER_ID, model, List.of()).getField().getValue());
+        model.setCustomerId("");
+        assertEquals("Synthetic-User", resolver.resolveAggregation(USER_ID, model, List.of()).getField().getValue());
+        model.setCustomerId("synthetic-customer");
+        model.setUserId(null);
+        assertEquals("synthetic-customer", resolver.resolveAggregation(USER_ID, model, null).getField().getValue());
+        model.setCustomerId(null);
+        assertNull(resolver.resolveAggregation(USER_ID, model, null).getField().getValue());
     }
 
     @Test
-    void partyScopeAndDirectFieldsUseOriginalUserId() {
+    void partyAndShopScopeUseOriginalUserIdForAllAggregationFields() {
         PaymentModel model = model();
-        assertEquals("userId", resolver.resolve(USER_ID, model, List.of(PARTY_ID)).getName());
-        assertEquals("Synthetic-User", resolver.resolve(USER_ID, model, List.of(PARTY_ID)).getValue());
+        for (var scope : List.of(PARTY_ID, SHOP_ID)) {
+            var grouped = resolver.resolveAggregation(USER_ID, model, List.of(scope), USER_ID);
+            assertEquals("userId", grouped.getField().getName());
+            assertEquals("Synthetic-User", grouped.getField().getValue());
+            assertEquals("userId", grouped.getCountedField());
+            var primary = resolver.resolveAggregation(scope, model, List.of(USER_ID), USER_ID);
+            assertEquals("userId", primary.getGroups().getFirst().getName());
+            assertEquals("Synthetic-User", primary.getGroups().getFirst().getValue());
+            assertEquals("userId", primary.getCountedField());
+        }
         assertEquals("Synthetic-User", resolver.resolve(USER_ID, model).getValue());
-        assertEquals("userId", resolver.resolveListFields(model, List.of(USER_ID), PARTY_ID).get(0).getName());
-        assertEquals(GLOBAL_USER, resolver.resolveListFields(model, List.of(USER_ID), CARD_TOKEN).get(0).getName());
-        assertEquals("userId", resolver.resolveAggregationName(USER_ID, List.of(), PARTY_ID));
-        assertEquals(GLOBAL_USER, resolver.resolveAggregationName(USER_ID, List.of(), CARD_TOKEN));
+        var global = resolver.resolveAggregation(CARD_TOKEN, model, List.of(USER_ID), USER_ID);
+        assertEquals(GLOBAL_USER, global.getGroups().getFirst().getName());
+        assertEquals("synthetic-customer", global.getGroups().getFirst().getValue());
+        assertEquals(GLOBAL_USER, global.getCountedField());
     }
 
     @Test
@@ -152,6 +159,7 @@ class UserIdentityAggregationTest {
         model.setUserId("shared-user");
         model.setCustomerId("customer-a");
         model.setPartyId("party-a");
+        model.setShopId("party-a-shop");
         model.setCardToken("synthetic-card");
         model.setAmount(0L);
         assertEquals(2, counts.count(USER_ID, model, window, List.of()));
@@ -159,10 +167,15 @@ class UserIdentityAggregationTest {
         assertEquals(2, counts.countSuccess(USER_ID, model, window, List.of()));
         assertEquals(300.0, sums.sumSuccess(USER_ID, model, window, List.of()));
         assertEquals(800.0, sums.sumSuccess(USER_ID, model, window, List.of(PARTY_ID)));
+        assertEquals(2, counts.countSuccess(USER_ID, model, window, List.of(SHOP_ID)));
+        assertEquals(800.0, sums.sumSuccess(USER_ID, model, window, List.of(SHOP_ID)));
+        assertEquals(2, counts.countSuccess(SHOP_ID, model, window, List.of(USER_ID)));
         assertEquals(2, counts.countSuccess(CARD_TOKEN, model, window, List.of(USER_ID)));
         assertEquals(2, counts.countSuccess(PARTY_ID, model, window, List.of(USER_ID)));
         assertEquals(4, unique.countUniqueValue(CARD_TOKEN, model, USER_ID, window, List.of()));
         assertEquals(1, unique.countUniqueValue(CARD_TOKEN, model, USER_ID, window, List.of(PARTY_ID)));
+        assertEquals(1, unique.countUniqueValue(CARD_TOKEN, model, USER_ID, window, List.of(SHOP_ID)));
+        assertEquals(1, unique.countUniqueValue(SHOP_ID, model, USER_ID, window, List.of()));
         model.setCustomerId(null);
         model.setUserId("fallback-user");
         assertEquals(2, counts.countSuccess(USER_ID, model, window, List.of()));
@@ -173,6 +186,7 @@ class UserIdentityAggregationTest {
         var payment = new CheckedPayment();
         payment.setEventTime(java.time.Instant.now().getEpochSecond() - 60);
         payment.setPartyId(party);
+        payment.setShopId(party + "-shop");
         payment.setUserId(user);
         payment.setCustomerId(customer);
         payment.setAmount(amount);
