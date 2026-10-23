@@ -10,6 +10,7 @@ import dev.vality.fraudbusters.fraud.localstorage.LocalResultStorageRepository;
 import dev.vality.fraudbusters.fraud.localstorage.aggregator.LocalCountAggregatorDecorator;
 import dev.vality.fraudbusters.fraud.localstorage.aggregator.LocalSumAggregatorDecorator;
 import dev.vality.fraudbusters.fraud.localstorage.aggregator.LocalUniqueValueAggregatorDecorator;
+import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.CountAggregatorImpl;
 import dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.SumAggregatorImpl;
@@ -31,7 +32,6 @@ import static org.mockito.Mockito.*;
 
 class UserIdentityAggregationTest {
 
-    private static final String GLOBAL_USER = "coalesce(nullIf(customerId, ''), userId)";
     private final DatabasePaymentFieldResolver resolver = new DatabasePaymentFieldResolver();
     private final PaymentRepository payments = mock(PaymentRepository.class);
     private final AggregationRepository refunds = mock(AggregationRepository.class);
@@ -48,37 +48,31 @@ class UserIdentityAggregationTest {
     }
 
     @Test
-    void globalIdentityFallsBackOnlyWhenCustomerIsAbsent() {
+    void userIdIsIndependentOfCustomerId() {
         PaymentModel model = model();
-        assertEquals(GLOBAL_USER, resolver.resolve(USER_ID, model, List.of()).getName());
-        assertEquals("synthetic-customer", resolver.resolve(USER_ID, model, List.of()).getValue());
+        assertEquals("userId", resolver.resolve(USER_ID, model).getName());
+        assertEquals("Synthetic-User", resolver.resolve(USER_ID, model).getValue());
         model.setCustomerId(null);
-        assertEquals("Synthetic-User", resolver.resolve(USER_ID, model, List.of()).getValue());
+        assertEquals("Synthetic-User", resolver.resolve(USER_ID, model).getValue());
         model.setCustomerId("");
-        assertEquals("Synthetic-User", resolver.resolve(USER_ID, model, List.of()).getValue());
+        assertEquals("Synthetic-User", resolver.resolve(USER_ID, model).getValue());
         model.setCustomerId("synthetic-customer");
         model.setUserId(null);
-        assertEquals("synthetic-customer", resolver.resolve(USER_ID, model, null).getValue());
-        model.setCustomerId(null);
-        assertNull(resolver.resolve(USER_ID, model, null).getValue());
+        assertNull(resolver.resolve(USER_ID, model).getValue());
     }
 
     @Test
-    void partyAndShopScopeUseOriginalUserId() {
+    void groupedFieldsAlwaysUseUserId() {
         PaymentModel model = model();
-        for (var scope : List.of(PARTY_ID, SHOP_ID)) {
-            assertEquals("userId", resolver.resolve(USER_ID, model, List.of(scope)).getName());
-            assertEquals("Synthetic-User", resolver.resolve(USER_ID, model, List.of(scope)).getValue());
-            assertEquals("userId", resolver.resolveListFields(model, List.of(USER_ID), scope).get(0).getName());
-            assertEquals("userId", resolver.resolveAggregationName(USER_ID, List.of(), scope));
+        for (var scope : List.of(PARTY_ID, SHOP_ID, CARD_TOKEN)) {
+            var group = resolver.resolveListFields(model, List.of(scope, USER_ID)).get(1);
+            assertEquals("userId", group.getName());
+            assertEquals("Synthetic-User", group.getValue());
         }
-        assertEquals("Synthetic-User", resolver.resolve(USER_ID, model).getValue());
-        assertEquals(GLOBAL_USER, resolver.resolveListFields(model, List.of(USER_ID), CARD_TOKEN).get(0).getName());
-        assertEquals(GLOBAL_USER, resolver.resolveAggregationName(USER_ID, List.of(), CARD_TOKEN));
     }
 
     @Test
-    void everyCountPathUsesGlobalIdentity() {
+    void everyCountPathUsesUserId() {
         var counts = new CountAggregatorImpl(resolver, payments, refunds, chargebacks, boundaries);
         PaymentModel model = model();
         counts.count(USER_ID, model, window, List.of());
@@ -88,24 +82,24 @@ class UserIdentityAggregationTest {
         counts.countError(USER_ID, model, window, "synthetic-error", List.of());
         counts.countRefund(USER_ID, model, window, List.of());
         counts.countChargeback(USER_ID, model, window, List.of());
-        verify(payments, times(2)).countOperationByFieldWithGroupBy(eq(GLOBAL_USER), eq("synthetic-customer"),
+        verify(payments, times(2)).countOperationByFieldWithGroupBy(eq("userId"), eq("Synthetic-User"),
                 any(), any(), eq(List.of()));
-        verify(payments).countOperationSuccessWithGroupBy(eq(GLOBAL_USER), eq("synthetic-customer"),
+        verify(payments).countOperationSuccessWithGroupBy(eq("userId"), eq("Synthetic-User"),
                 any(), any(), eq(List.of()));
-        verify(payments).countOperationPendingWithGroupBy(eq(GLOBAL_USER), eq("synthetic-customer"),
+        verify(payments).countOperationPendingWithGroupBy(eq("userId"), eq("Synthetic-User"),
                 any(), any(), eq(List.of()));
-        verify(payments).countOperationErrorWithGroupBy(eq(GLOBAL_USER), eq("synthetic-customer"),
+        verify(payments).countOperationErrorWithGroupBy(eq("userId"), eq("Synthetic-User"),
                 any(), any(), eq(List.of()));
-        verify(payments).countOperationErrorWithGroupBy(eq(GLOBAL_USER), eq("synthetic-customer"),
+        verify(payments).countOperationErrorWithGroupBy(eq("userId"), eq("Synthetic-User"),
                 any(), any(), eq(List.of()), eq("synthetic-error"));
-        verify(refunds).countOperationByFieldWithGroupBy(eq(GLOBAL_USER), eq("synthetic-customer"),
+        verify(refunds).countOperationByFieldWithGroupBy(eq("userId"), eq("Synthetic-User"),
                 any(), any(), eq(List.of()));
-        verify(chargebacks).countOperationByFieldWithGroupBy(eq(GLOBAL_USER), eq("synthetic-customer"),
+        verify(chargebacks).countOperationByFieldWithGroupBy(eq("userId"), eq("Synthetic-User"),
                 any(), any(), eq(List.of()));
     }
 
     @Test
-    void everySumPathUsesGlobalIdentity() {
+    void everySumPathUsesUserId() {
         var sums = new SumAggregatorImpl(resolver, payments, refunds, chargebacks, boundaries);
         PaymentModel model = model();
         sums.sum(USER_ID, model, window, List.of());
@@ -114,22 +108,22 @@ class UserIdentityAggregationTest {
         sums.sumError(USER_ID, model, window, "synthetic-error", List.of());
         sums.sumRefund(USER_ID, model, window, List.of());
         sums.sumChargeback(USER_ID, model, window, List.of());
-        verify(payments).sumOperationByFieldWithGroupBy(eq(GLOBAL_USER), eq("synthetic-customer"),
+        verify(payments).sumOperationByFieldWithGroupBy(eq("userId"), eq("Synthetic-User"),
                 any(), any(), eq(List.of()));
-        verify(payments).sumOperationSuccessWithGroupBy(eq(GLOBAL_USER), eq("synthetic-customer"),
+        verify(payments).sumOperationSuccessWithGroupBy(eq("userId"), eq("Synthetic-User"),
                 any(), any(), eq(List.of()));
-        verify(payments).sumOperationErrorWithGroupBy(eq(GLOBAL_USER), eq("synthetic-customer"),
+        verify(payments).sumOperationErrorWithGroupBy(eq("userId"), eq("Synthetic-User"),
                 any(), any(), eq(List.of()));
-        verify(payments).sumOperationErrorWithGroupBy(eq(GLOBAL_USER), eq("synthetic-customer"),
+        verify(payments).sumOperationErrorWithGroupBy(eq("userId"), eq("Synthetic-User"),
                 any(), any(), eq(List.of()), eq("synthetic-error"));
-        verify(refunds).sumOperationByFieldWithGroupBy(eq(GLOBAL_USER), eq("synthetic-customer"),
+        verify(refunds).sumOperationByFieldWithGroupBy(eq("userId"), eq("Synthetic-User"),
                 any(), any(), eq(List.of()));
-        verify(chargebacks).sumOperationByFieldWithGroupBy(eq(GLOBAL_USER), eq("synthetic-customer"),
+        verify(chargebacks).sumOperationByFieldWithGroupBy(eq("userId"), eq("Synthetic-User"),
                 any(), any(), eq(List.of()));
     }
 
     @Test
-    void historicalEmulationUsesTheSameIdentityRule() {
+    void historicalEmulationUsesOnlyUserId() {
         var storage = new LocalResultStorage();
         var values = new PaymentFieldValueResolver();
         var repository = new LocalResultStorageRepository(storage, new PaymentFieldValueFilter(values), values);
@@ -155,21 +149,26 @@ class UserIdentityAggregationTest {
         model.setShopId("party-a-shop");
         model.setCardToken("synthetic-card");
         model.setAmount(0L);
-        assertEquals(2, counts.count(USER_ID, model, window, List.of()));
+        assertEquals(3, counts.count(USER_ID, model, window, List.of()));
         assertEquals(2, counts.count(USER_ID, model, window, List.of(PARTY_ID)));
-        assertEquals(2, counts.countSuccess(USER_ID, model, window, List.of()));
-        assertEquals(300.0, sums.sumSuccess(USER_ID, model, window, List.of()));
+        assertEquals(3, counts.countSuccess(USER_ID, model, window, List.of()));
+        assertEquals(1100.0, sums.sumSuccess(USER_ID, model, window, List.of()));
         assertEquals(800.0, sums.sumSuccess(USER_ID, model, window, List.of(PARTY_ID)));
         assertEquals(2, counts.countSuccess(USER_ID, model, window, List.of(SHOP_ID)));
         assertEquals(800.0, sums.sumSuccess(USER_ID, model, window, List.of(SHOP_ID)));
         assertEquals(2, counts.countSuccess(SHOP_ID, model, window, List.of(USER_ID)));
-        assertEquals(2, counts.countSuccess(CARD_TOKEN, model, window, List.of(USER_ID)));
+        assertEquals(3, counts.countSuccess(CARD_TOKEN, model, window, List.of(USER_ID)));
         assertEquals(2, counts.countSuccess(PARTY_ID, model, window, List.of(USER_ID)));
-        assertEquals(4, unique.countUniqueValue(CARD_TOKEN, model, USER_ID, window, List.of()));
+        assertEquals(3, unique.countUniqueValue(CARD_TOKEN, model, USER_ID, window, List.of()));
         assertEquals(1, unique.countUniqueValue(CARD_TOKEN, model, USER_ID, window, List.of(PARTY_ID)));
         assertEquals(1, unique.countUniqueValue(CARD_TOKEN, model, USER_ID, window, List.of(SHOP_ID)));
         assertEquals(1, unique.countUniqueValue(SHOP_ID, model, USER_ID, window, List.of()));
-        model.setCustomerId(null);
+        model.setCustomerId("different-customer");
+        assertEquals(3, counts.countSuccess(USER_ID, model, window, List.of()));
+        assertEquals(1100.0, sums.sumSuccess(USER_ID, model, window, List.of()));
+        model.setUserId(null);
+        assertEquals(0, counts.countSuccess(USER_ID, model, window, List.of()));
+        assertEquals(0.0, sums.sumSuccess(USER_ID, model, window, List.of()));
         model.setUserId("fallback-user");
         assertEquals(2, counts.countSuccess(USER_ID, model, window, List.of()));
         assertEquals(900.0, sums.sumSuccess(USER_ID, model, window, List.of()));
@@ -192,11 +191,12 @@ class UserIdentityAggregationTest {
     void uniqueResolvesBothSelectionAndCountedField() {
         var unique = new UniqueValueAggregatorImpl(resolver, payments, boundaries);
         PaymentModel model = model();
+        model.setPartyId("synthetic-party");
         unique.countUniqueValue(USER_ID, model, USER_ID, window, List.of());
-        verify(payments).uniqCountOperationWithGroupBy(eq(GLOBAL_USER), eq("synthetic-customer"), eq(GLOBAL_USER),
+        verify(payments).uniqCountOperationWithGroupBy(eq("userId"), eq("Synthetic-User"), eq("userId"),
                 any(), any(), eq(List.of()));
         unique.countUniqueValue(USER_ID, model, USER_ID, window, List.of(PARTY_ID));
         verify(payments).uniqCountOperationWithGroupBy(eq("userId"), eq("Synthetic-User"), eq("userId"),
-                any(), any(), anyList());
+                any(), any(), eq(List.of(new FieldModel("partyId", "synthetic-party"))));
     }
 }

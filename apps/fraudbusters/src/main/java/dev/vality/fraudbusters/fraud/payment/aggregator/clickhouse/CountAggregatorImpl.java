@@ -75,9 +75,8 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
         try {
             Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
-            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel, list);
-            List<FieldModel> eventFields =
-                    databasePaymentFieldResolver.resolveListFields(paymentModel, list, checkedField);
+            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel);
+            List<FieldModel> eventFields = databasePaymentFieldResolver.resolveListFields(paymentModel, list);
             if (Objects.isNull(resolve.getValue())) {
                 return 0;
             }
@@ -111,9 +110,8 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
         try {
             Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
-            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel, list);
-            List<FieldModel> eventFields =
-                    databasePaymentFieldResolver.resolveListFields(paymentModel, list, checkedField);
+            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel);
+            List<FieldModel> eventFields = databasePaymentFieldResolver.resolveListFields(paymentModel, list);
             if (Objects.isNull(resolve.getValue())) {
                 return 0;
             }
@@ -206,9 +204,8 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
         try {
             Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
-            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel, list);
-            List<FieldModel> eventFields =
-                    databasePaymentFieldResolver.resolveListFields(paymentModel, list, checkedField);
+            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel);
+            List<FieldModel> eventFields = databasePaymentFieldResolver.resolveListFields(paymentModel, list);
             if (Objects.isNull(resolve.getValue())) {
                 return withCurrent ? CURRENT_ONE : 0;
             }

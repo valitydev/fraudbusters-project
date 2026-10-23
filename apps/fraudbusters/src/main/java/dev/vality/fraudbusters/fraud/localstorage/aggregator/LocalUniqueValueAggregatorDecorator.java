@@ -38,13 +38,12 @@ public class LocalUniqueValueAggregatorDecorator implements UniqueValueAggregato
             Integer uniq = uniqueValueAggregator.countUniqueValue(countField, paymentModel, onField, timeWindow, list);
             Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
-            FieldModel resolve = localPaymentFieldResolver.resolve(countField, paymentModel, list);
-            List<FieldModel> fieldModels =
-                    localPaymentFieldResolver.resolveListFields(paymentModel, list, countField);
+            FieldModel resolve = localPaymentFieldResolver.resolve(countField, paymentModel);
+            List<FieldModel> fieldModels = localPaymentFieldResolver.resolveListFields(paymentModel, list);
             Integer localUniqCountOperation = localStorageRepository.uniqCountOperationWithGroupBy(
                     resolve.getName(),
                     resolve.getValue(),
-                    localPaymentFieldResolver.resolveName(onField, list, countField),
+                    localPaymentFieldResolver.resolveName(onField),
                     timeBound.getLeft().getEpochSecond(),
                     timeBound.getRight().getEpochSecond(),
                     fieldModels

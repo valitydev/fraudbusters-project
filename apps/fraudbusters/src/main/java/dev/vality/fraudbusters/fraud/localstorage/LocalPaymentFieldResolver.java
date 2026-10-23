@@ -49,7 +49,6 @@ public class LocalPaymentFieldResolver {
         if (fields != null) {
             return fields.stream()
                     .map(field -> primaryField == PaymentCheckedField.PARTY_ID
-                            || primaryField == PaymentCheckedField.SHOP_ID
                             ? resolve(field, model) : resolve(field, model, fields))
                     .collect(Collectors.toList());
         }

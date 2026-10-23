@@ -43,7 +43,7 @@ class ClientIdentityConverterTest {
         context.getUserInfo().setUserId("different-synthetic-user");
         assertNotEquals(firstKey, dev.vality.fraudbusters.util.UserCacheKeyUtil.buildInspectUserCacheKey(context));
         context.getUserInfo().setUserId("Synthetic-User").setCustomerId("different-synthetic-customer");
-        assertNotEquals(firstKey, dev.vality.fraudbusters.util.UserCacheKeyUtil.buildInspectUserCacheKey(context));
+        assertEquals(firstKey, dev.vality.fraudbusters.util.UserCacheKeyUtil.buildInspectUserCacheKey(context));
     }
 
     @Test

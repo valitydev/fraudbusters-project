@@ -59,7 +59,7 @@ class HistoricalPaymentDataTest {
     }
 
     @Test
-    void aggregatesUseCustomersGloballyAndUsersWithinPartyOrShop() {
+    void aggregatesAlwaysUseUserId() {
         var rows = List.of(
                 identityPayment("a", "party-a", "shared-user", "customer-a", 100L),
                 identityPayment("b", "party-b", "other-user", "customer-a", 200L),
@@ -90,27 +90,30 @@ class HistoricalPaymentDataTest {
         var party = dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.PARTY_ID;
         final var shop = dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.SHOP_ID;
         final var card = dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.CARD_TOKEN;
-        assertEquals(2, counts.countSuccess(user, model, window, List.of()));
-        assertEquals(300.0, sums.sumSuccess(user, model, window, List.of()));
+        assertEquals(3, counts.countSuccess(user, model, window, List.of()));
+        assertEquals(1100.0, sums.sumSuccess(user, model, window, List.of()));
         assertEquals(2, counts.countSuccess(user, model, window, List.of(party)));
         assertEquals(800.0, sums.sumSuccess(user, model, window, List.of(party)));
         assertEquals(2, counts.countSuccess(user, model, window, List.of(shop)));
         assertEquals(800.0, sums.sumSuccess(user, model, window, List.of(shop)));
         assertEquals(2, counts.countSuccess(shop, model, window, List.of(user)));
-        assertEquals(2, counts.countSuccess(card, model, window, List.of(user)));
+        assertEquals(3, counts.countSuccess(card, model, window, List.of(user)));
         assertEquals(2, counts.countSuccess(party, model, window, List.of(user)));
-        assertEquals(5, unique.countUniqueValue(card, model, user, window, List.of()));
+        assertEquals(4, unique.countUniqueValue(card, model, user, window, List.of()));
         assertEquals(2, unique.countUniqueValue(card, model, user, window, List.of(party)));
         assertEquals(2, unique.countUniqueValue(card, model, user, window, List.of(shop)));
         assertEquals(2, unique.countUniqueValue(shop, model, user, window, List.of()));
         assertEquals(2, unique.countUniqueValue(party, model, user, window, List.of()));
-        model.setCustomerId(null);
+        model.setCustomerId("different-customer");
+        assertEquals(3, counts.countSuccess(user, model, window, List.of()));
+        assertEquals(1100.0, sums.sumSuccess(user, model, window, List.of()));
         model.setUserId("fallback-user");
         assertEquals(2, counts.countSuccess(user, model, window, List.of()));
         assertEquals(900.0, sums.sumSuccess(user, model, window, List.of()));
         model.setCustomerId("customer-a");
         model.setUserId(null);
-        assertEquals(2, counts.countSuccess(user, model, window, List.of()));
+        assertEquals(0, counts.countSuccess(user, model, window, List.of()));
+        assertEquals(0.0, sums.sumSuccess(user, model, window, List.of()));
         assertEquals(0, counts.countSuccess(user, model, window, List.of(party)));
     }
 

@@ -40,7 +40,7 @@ public class SumAggregatorImplTest {
 
     @BeforeEach
     public void init() {
-        when(databasePaymentFieldResolver.resolve(any(), any(), any())).thenReturn(modelMock);
+        when(databasePaymentFieldResolver.resolve(any(), any())).thenReturn(modelMock);
 
         sumAggregator = new SumAggregatorImpl(
                 databasePaymentFieldResolver,

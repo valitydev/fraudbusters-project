@@ -26,8 +26,7 @@ public class UserCacheKeyUtil {
                     : ClickhouseUtilsValue.UNKNOWN;
         }
         String identityKey = context.getUserInfo() == null ? ""
-                : encodeIdentity(context.getUserInfo().getCustomerId()) +
-                        encodeIdentity(context.getUserInfo().getUserId());
+                : encodeIdentity(context.getUserInfo().getUserId());
         if (context.getShopList() == null || context.getShopList().isEmpty()) {
             return email + "|" + phone + "|" + identityKey + "|";
         }

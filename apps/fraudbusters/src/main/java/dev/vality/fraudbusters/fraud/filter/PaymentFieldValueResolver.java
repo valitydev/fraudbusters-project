@@ -3,20 +3,13 @@ package dev.vality.fraudbusters.fraud.filter;
 import dev.vality.fraudbusters.domain.CheckedPayment;
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 
 @Service
 public class PaymentFieldValueResolver {
 
-    public static final String GLOBAL_USER_ID = "__global_user_identity";
-
     public Optional<String> resolve(String fieldName, CheckedPayment checkedPayment) {
-        if (GLOBAL_USER_ID.equals(fieldName)) {
-            return Optional.ofNullable(StringUtils.hasLength(checkedPayment.getCustomerId())
-                    ? checkedPayment.getCustomerId() : checkedPayment.getUserId());
-        }
         PaymentCheckedField byValue = PaymentCheckedField.valueOf(fieldName);
         return switch (byValue) {
             case IP -> Optional.of(checkedPayment.getIp());
