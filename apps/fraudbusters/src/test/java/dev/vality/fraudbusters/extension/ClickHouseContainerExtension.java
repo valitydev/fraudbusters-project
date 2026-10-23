@@ -32,7 +32,7 @@ public class ClickHouseContainerExtension implements BeforeAllCallback, AfterAll
                 "sql/V9__add_phone_category_card.sql",
                 "sql/V10__add_id_inspect_result.sql",
                 "sql/V11__rename_masked_pan.sql",
-                "db/clickhouse/V12__add_client_identity.sql"
+                "sql/V12__add_client_identity.sql"
         ));
     }
 

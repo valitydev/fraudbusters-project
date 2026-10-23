@@ -79,7 +79,7 @@ public class FraudResultRepositoryTest {
                 "sql/V8__create_withdrawal.sql",
                 "sql/V10__add_id_inspect_result.sql",
                 "sql/V11__rename_masked_pan.sql",
-                "db/clickhouse/V12__add_client_identity.sql"
+                "sql/V12__add_client_identity.sql"
         ));
     }
 
