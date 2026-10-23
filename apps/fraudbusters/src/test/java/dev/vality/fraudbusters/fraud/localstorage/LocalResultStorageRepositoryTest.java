@@ -93,11 +93,9 @@ class LocalResultStorageRepositoryTest {
         payment.setCardToken(TOKEN);
 
         List<FieldModel> clickHouseFields =
-                resolver.resolveAggregation(PaymentCheckedField.CARD_TOKEN, payment,
-                        List.of(PaymentCheckedField.CARD_TOKEN)).getGroups();
+                resolver.resolveListFields(payment, List.of(PaymentCheckedField.CARD_TOKEN));
         List<FieldModel> localFields =
-                localResolver.resolveAggregation(PaymentCheckedField.CARD_TOKEN, payment,
-                        List.of(PaymentCheckedField.CARD_TOKEN)).getGroups();
+                localResolver.resolveListFields(payment, List.of(PaymentCheckedField.CARD_TOKEN));
 
         assertEquals("cardToken", clickHouseFields.get(0).getName());
         assertEquals("CARD_TOKEN", localFields.get(0).getName());

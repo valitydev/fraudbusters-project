@@ -36,11 +36,10 @@ public class LocalCountAggregatorDecorator implements CountPaymentAggregator<Pay
             TimeWindow timeWindow,
             List<PaymentCheckedField> list) {
         Integer count = countAggregator.count(checkedField, paymentModel, timeWindow, list);
-        var aggregation = localPaymentFieldResolver.resolveAggregation(checkedField, paymentModel, list);
-        FieldModel resolve = aggregation.getField();
+        FieldModel resolve = localPaymentFieldResolver.resolve(checkedField, paymentModel, list);
         Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
         TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
-        List<FieldModel> fields = aggregation.getGroups();
+        List<FieldModel> fields = localPaymentFieldResolver.resolveListFields(paymentModel, list, checkedField);
         Integer localCount = localStorageRepository.countOperationByFieldWithGroupBy(
                 resolve.getName(),
                 resolve.getValue(),
@@ -77,9 +76,9 @@ public class LocalCountAggregatorDecorator implements CountPaymentAggregator<Pay
             Integer countError = countAggregator.countError(checkedField, paymentModel, timeWindow, errorCode, list);
             Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
-            var aggregation = localPaymentFieldResolver.resolveAggregation(checkedField, paymentModel, list);
-            FieldModel resolve = aggregation.getField();
-            List<FieldModel> eventFields = aggregation.getGroups();
+            FieldModel resolve = localPaymentFieldResolver.resolve(checkedField, paymentModel, list);
+            List<FieldModel> eventFields =
+                    localPaymentFieldResolver.resolveListFields(paymentModel, list, checkedField);
             Integer localCount = localStorageRepository.countOperationErrorWithGroupBy(
                     resolve.getName(),
                     resolve.getValue(),
@@ -90,8 +89,9 @@ public class LocalCountAggregatorDecorator implements CountPaymentAggregator<Pay
             );
             int result = localCount + countError;
             log.debug(
-                    "LocalStorageCountAggregatorImpl field: {}  countError: {}",
+                    "LocalStorageCountAggregatorImpl field: {} value: {}  countError: {}",
                     resolve.getName(),
+                    resolve.getValue(),
                     result
             );
             return result;
@@ -108,9 +108,9 @@ public class LocalCountAggregatorDecorator implements CountPaymentAggregator<Pay
             Integer countError = countAggregator.countError(paymentCheckedField, paymentModel, timeWindow, list);
             Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
-            var aggregation = localPaymentFieldResolver.resolveAggregation(paymentCheckedField, paymentModel, list);
-            FieldModel resolve = aggregation.getField();
-            List<FieldModel> eventFields = aggregation.getGroups();
+            FieldModel resolve = localPaymentFieldResolver.resolve(paymentCheckedField, paymentModel, list);
+            List<FieldModel> eventFields =
+                    localPaymentFieldResolver.resolveListFields(paymentModel, list, paymentCheckedField);
             Integer localCount = localStorageRepository.countOperationErrorWithGroupBy(
                     resolve.getName(),
                     resolve.getValue(),
@@ -120,8 +120,9 @@ public class LocalCountAggregatorDecorator implements CountPaymentAggregator<Pay
             );
             int result = localCount + countError;
             log.debug(
-                    "LocalStorageCountAggregatorImpl field: {}  countError: {}",
+                    "LocalStorageCountAggregatorImpl field: {} value: {}  countError: {}",
                     resolve.getName(),
+                    resolve.getValue(),
                     result
             );
             return result;
@@ -174,9 +175,9 @@ public class LocalCountAggregatorDecorator implements CountPaymentAggregator<Pay
         try {
             Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
-            var aggregation = localPaymentFieldResolver.resolveAggregation(checkedField, paymentModel, list);
-            FieldModel resolve = aggregation.getField();
-            List<FieldModel> eventFields = aggregation.getGroups();
+            FieldModel resolve = localPaymentFieldResolver.resolve(checkedField, paymentModel, list);
+            List<FieldModel> eventFields =
+                    localPaymentFieldResolver.resolveListFields(paymentModel, list, checkedField);
             Integer count = aggregateFunction.accept(
                     resolve.getName(),
                     resolve.getValue(),
@@ -185,8 +186,9 @@ public class LocalCountAggregatorDecorator implements CountPaymentAggregator<Pay
                     eventFields
             );
             log.debug(
-                    "LocalStorageCountAggregatorImpl field: {}  count: {}",
+                    "LocalStorageCountAggregatorImpl field: {} value: {}  count: {}",
                     resolve.getName(),
+                    resolve.getValue(),
                     count
             );
             return count;

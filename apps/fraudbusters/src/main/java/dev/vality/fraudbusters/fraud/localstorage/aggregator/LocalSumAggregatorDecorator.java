@@ -36,11 +36,11 @@ public class LocalSumAggregatorDecorator implements SumPaymentAggregator<Payment
             TimeWindow timeWindow,
             List<PaymentCheckedField> list) {
         Double sum = sumAggregatorImpl.sum(checkedField, paymentModel, timeWindow, list);
-        var aggregation = localPaymentFieldResolver.resolveAggregation(checkedField, paymentModel, list);
-        FieldModel resolve = aggregation.getField();
+        FieldModel resolve = localPaymentFieldResolver.resolve(checkedField, paymentModel, list);
         Instant now = TimestampUtil.instantFromPaymentModel(paymentModel);
         TimeBound timeBound = timeBoundaryService.getBoundary(now, timeWindow);
-        List<FieldModel> eventFields = aggregation.getGroups();
+        List<FieldModel> eventFields =
+                localPaymentFieldResolver.resolveListFields(paymentModel, list, checkedField);
         Long localSum = localStorageRepository.sumOperationByFieldWithGroupBy(
                 resolve.getName(),
                 resolve.getValue(),
@@ -81,9 +81,9 @@ public class LocalSumAggregatorDecorator implements SumPaymentAggregator<Payment
             Double sumError = sumAggregatorImpl.sumError(checkedField, paymentModel, timeWindow, errorCode, list);
             Instant now = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(now, timeWindow);
-            var aggregation = localPaymentFieldResolver.resolveAggregation(checkedField, paymentModel, list);
-            FieldModel resolve = aggregation.getField();
-            List<FieldModel> eventFields = aggregation.getGroups();
+            FieldModel resolve = localPaymentFieldResolver.resolve(checkedField, paymentModel, list);
+            List<FieldModel> eventFields =
+                    localPaymentFieldResolver.resolveListFields(paymentModel, list, checkedField);
             Long localSum = localStorageRepository.sumOperationErrorWithGroupBy(
                     resolve.getName(),
                     resolve.getValue(),
@@ -94,8 +94,9 @@ public class LocalSumAggregatorDecorator implements SumPaymentAggregator<Payment
             );
             Double result = checkedLong(localSum) + sumError;
             log.debug(
-                    "LocalSumAggregatorDecorator field: {}  sumError: {}",
+                    "LocalSumAggregatorDecorator field: {} value: {}  sumError: {}",
                     resolve.getName(),
+                    resolve.getValue(),
                     result
             );
             return result;
@@ -114,9 +115,9 @@ public class LocalSumAggregatorDecorator implements SumPaymentAggregator<Payment
             Double sumError = sumAggregatorImpl.sumError(checkedField, paymentModel, timeWindow, list);
             Instant now = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(now, timeWindow);
-            var aggregation = localPaymentFieldResolver.resolveAggregation(checkedField, paymentModel, list);
-            FieldModel resolve = aggregation.getField();
-            List<FieldModel> eventFields = aggregation.getGroups();
+            FieldModel resolve = localPaymentFieldResolver.resolve(checkedField, paymentModel, list);
+            List<FieldModel> eventFields =
+                    localPaymentFieldResolver.resolveListFields(paymentModel, list, checkedField);
             Long localSum = localStorageRepository.sumOperationErrorWithGroupBy(
                     resolve.getName(),
                     resolve.getValue(),
@@ -126,8 +127,9 @@ public class LocalSumAggregatorDecorator implements SumPaymentAggregator<Payment
             );
             Double result = checkedLong(localSum) + sumError;
             log.debug(
-                    "LocalSumAggregatorDecorator field: {}  sumError: {}",
+                    "LocalSumAggregatorDecorator field: {} value: {}  sumError: {}",
                     resolve.getName(),
+                    resolve.getValue(),
                     result
             );
             return result;
@@ -176,9 +178,9 @@ public class LocalSumAggregatorDecorator implements SumPaymentAggregator<Payment
         try {
             Instant now = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(now, timeWindow);
-            var aggregation = localPaymentFieldResolver.resolveAggregation(checkedField, paymentModel, list);
-            FieldModel resolve = aggregation.getField();
-            List<FieldModel> eventFields = aggregation.getGroups();
+            FieldModel resolve = localPaymentFieldResolver.resolve(checkedField, paymentModel, list);
+            List<FieldModel> eventFields =
+                    localPaymentFieldResolver.resolveListFields(paymentModel, list, checkedField);
             Long sum = aggregateFunction.accept(
                     resolve.getName(),
                     resolve.getValue(),
@@ -190,8 +192,9 @@ public class LocalSumAggregatorDecorator implements SumPaymentAggregator<Payment
                     ? (double) checkedLong(sum) + checkedLong(paymentModel.getAmount())
                     : checkedLong(sum);
             log.debug(
-                    "LocalSumAggregatorDecorator field: {}  sum: {}",
+                    "LocalSumAggregatorDecorator field: {} value: {}  sum: {}",
                     resolve.getName(),
+                    resolve.getValue(),
                     resultSum
             );
             return resultSum;

@@ -50,38 +50,31 @@ class UserIdentityAggregationTest {
     @Test
     void globalIdentityFallsBackOnlyWhenCustomerIsAbsent() {
         PaymentModel model = model();
-        assertEquals(GLOBAL_USER, resolver.resolveAggregation(USER_ID, model, List.of()).getField().getName());
-        assertEquals("synthetic-customer",
-                resolver.resolveAggregation(USER_ID, model, List.of()).getField().getValue());
+        assertEquals(GLOBAL_USER, resolver.resolve(USER_ID, model, List.of()).getName());
+        assertEquals("synthetic-customer", resolver.resolve(USER_ID, model, List.of()).getValue());
         model.setCustomerId(null);
-        assertEquals("Synthetic-User", resolver.resolveAggregation(USER_ID, model, List.of()).getField().getValue());
+        assertEquals("Synthetic-User", resolver.resolve(USER_ID, model, List.of()).getValue());
         model.setCustomerId("");
-        assertEquals("Synthetic-User", resolver.resolveAggregation(USER_ID, model, List.of()).getField().getValue());
+        assertEquals("Synthetic-User", resolver.resolve(USER_ID, model, List.of()).getValue());
         model.setCustomerId("synthetic-customer");
         model.setUserId(null);
-        assertEquals("synthetic-customer", resolver.resolveAggregation(USER_ID, model, null).getField().getValue());
+        assertEquals("synthetic-customer", resolver.resolve(USER_ID, model, null).getValue());
         model.setCustomerId(null);
-        assertNull(resolver.resolveAggregation(USER_ID, model, null).getField().getValue());
+        assertNull(resolver.resolve(USER_ID, model, null).getValue());
     }
 
     @Test
-    void partyAndShopScopeUseOriginalUserIdForAllAggregationFields() {
+    void partyAndShopScopeUseOriginalUserId() {
         PaymentModel model = model();
         for (var scope : List.of(PARTY_ID, SHOP_ID)) {
-            var grouped = resolver.resolveAggregation(USER_ID, model, List.of(scope), USER_ID);
-            assertEquals("userId", grouped.getField().getName());
-            assertEquals("Synthetic-User", grouped.getField().getValue());
-            assertEquals("userId", grouped.getCountedField());
-            var primary = resolver.resolveAggregation(scope, model, List.of(USER_ID), USER_ID);
-            assertEquals("userId", primary.getGroups().getFirst().getName());
-            assertEquals("Synthetic-User", primary.getGroups().getFirst().getValue());
-            assertEquals("userId", primary.getCountedField());
+            assertEquals("userId", resolver.resolve(USER_ID, model, List.of(scope)).getName());
+            assertEquals("Synthetic-User", resolver.resolve(USER_ID, model, List.of(scope)).getValue());
+            assertEquals("userId", resolver.resolveListFields(model, List.of(USER_ID), scope).get(0).getName());
+            assertEquals("userId", resolver.resolveAggregationName(USER_ID, List.of(), scope));
         }
         assertEquals("Synthetic-User", resolver.resolve(USER_ID, model).getValue());
-        var global = resolver.resolveAggregation(CARD_TOKEN, model, List.of(USER_ID), USER_ID);
-        assertEquals(GLOBAL_USER, global.getGroups().getFirst().getName());
-        assertEquals("synthetic-customer", global.getGroups().getFirst().getValue());
-        assertEquals(GLOBAL_USER, global.getCountedField());
+        assertEquals(GLOBAL_USER, resolver.resolveListFields(model, List.of(USER_ID), CARD_TOKEN).get(0).getName());
+        assertEquals(GLOBAL_USER, resolver.resolveAggregationName(USER_ID, List.of(), CARD_TOKEN));
     }
 
     @Test
