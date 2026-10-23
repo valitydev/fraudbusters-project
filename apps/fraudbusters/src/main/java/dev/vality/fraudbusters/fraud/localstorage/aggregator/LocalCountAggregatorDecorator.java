@@ -39,13 +39,11 @@ public class LocalCountAggregatorDecorator implements CountPaymentAggregator<Pay
         FieldModel resolve = localPaymentFieldResolver.resolve(checkedField, paymentModel);
         Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
         TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
-        List<FieldModel> fields = localPaymentFieldResolver.resolveListFields(paymentModel, list);
-        Integer localCount = localStorageRepository.countOperationByFieldWithGroupBy(
+        Integer localCount = localStorageRepository.countOperationByField(
                 resolve.getName(),
                 resolve.getValue(),
                 timeBound.getLeft().getEpochSecond(),
-                timeBound.getRight().getEpochSecond(),
-                fields
+                timeBound.getRight().getEpochSecond()
         );
         return localCount + count;
     }

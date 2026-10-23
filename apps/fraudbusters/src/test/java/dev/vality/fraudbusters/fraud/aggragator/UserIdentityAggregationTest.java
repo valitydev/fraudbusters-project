@@ -150,7 +150,7 @@ class UserIdentityAggregationTest {
         model.setCardToken("synthetic-card");
         model.setAmount(0L);
         assertEquals(3, counts.count(USER_ID, model, window, List.of()));
-        assertEquals(2, counts.count(USER_ID, model, window, List.of(PARTY_ID)));
+        assertEquals(2, counts.countSuccess(USER_ID, model, window, List.of(PARTY_ID)));
         assertEquals(3, counts.countSuccess(USER_ID, model, window, List.of()));
         assertEquals(1100.0, sums.sumSuccess(USER_ID, model, window, List.of()));
         assertEquals(800.0, sums.sumSuccess(USER_ID, model, window, List.of(PARTY_ID)));
