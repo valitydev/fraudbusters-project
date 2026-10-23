@@ -27,14 +27,19 @@ class FilterUtilTest {
         sort.setOrder(SortOrder.DESC);
         filter.setSort(sort);
         filter.setSearchFields(Set.of(
-                searchField(PaymentField.EMAIL, FieldType.STRING, "test@example.com"),
+                searchField(PaymentField.EMAIL, FieldType.STRING, "synthetic_'mail%"),
+                searchField(PaymentField.STATUS, FieldType.ENUM, "captured"),
                 searchField(FraudResultField.CHECKED_TEMPLATE, FieldType.STRING, "shop-template"),
                 searchField(FraudResultField.CHECKED_RULE, FieldType.STRING, "many_emails_per_card")
         ));
 
         String sql = FilterUtil.appendPaymentFilters(filter);
 
-        assertTrue(sql.contains("like(email,'test@example.com')"));
+        assertTrue(sql.contains("like(email,:email)"));
+        assertTrue(sql.contains("status = :status"));
+        assertFalse(sql.contains("synthetic_'mail%"));
+        assertEquals("synthetic_'mail%", FilterUtil.initParams(filter).getValue("email"));
+        assertEquals("captured", FilterUtil.initParams(filter).getValue("status"));
         assertTrue(sql.contains("id in ("));
         assertTrue(sql.contains("SELECT id"));
         assertTrue(sql.contains("fraud.events_unique"));

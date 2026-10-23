@@ -157,6 +157,11 @@ class HistoricalPaymentDataTest {
         assertEquals(1, rows.size());
         assertEquals(payment.getCustomerId(), rows.get(0).getCustomerId());
         assertEquals(payment.getUserId(), rows.get(0).getUserId());
+        filter.setSearchFields(Set.of(SearchFieldDto.builder().field(PaymentField.CUSTOMER_ID)
+                .type(FieldType.STRING).value(payment.getCustomerId()).build()));
+        rows = paymentRepository.getByFilter(filter);
+        assertEquals(1, rows.size());
+        assertEquals(payment.getUserId(), rows.get(0).getUserId());
     }
 
     @Test

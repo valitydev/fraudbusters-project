@@ -29,7 +29,6 @@ public class FilterUtil {
         Set<SearchFieldDto> searchFields = filter.getSearchFields();
         if (!CollectionUtils.isEmpty(searchFields)) {
             addLikeSearchFields(filters, searchFields);
-            addIdentitySearchFields(filters, searchFields);
             addEqualSearchFields(filters, searchFields);
             if (fraudResultFilterMode == FraudResultFilterMode.DIRECT) {
                 addDirectFraudResultSearchFields(filters, searchFields);
@@ -57,26 +56,14 @@ public class FilterUtil {
     private static void addLikeSearchFields(StringBuilder filters, Set<SearchFieldDto> searchFields) {
         searchFields.stream()
                 .filter(searchField -> searchField.getType().equals(FieldType.STRING))
-                .filter(searchField -> !isIdentityField(searchField))
                 .filter(searchField -> searchField.getField() instanceof PaymentField)
                 .forEach(searchField ->
                         filters
                                 .append(" and like(")
                                 .append(searchField.getField().getValue())
-                                .append(",'")
-                                .append(searchField.getValue())
-                                .append("')"));
-    }
-
-    private static boolean isIdentityField(SearchFieldDto field) {
-        return field.getField() == PaymentField.CUSTOMER_ID || field.getField() == PaymentField.USER_ID;
-    }
-
-    private static void addIdentitySearchFields(StringBuilder filters, Set<SearchFieldDto> searchFields) {
-        searchFields.stream()
-                .filter(FilterUtil::isIdentityField)
-                .forEach(field -> filters.append(" and ").append(field.getField().getValue())
-                        .append(" = :").append(field.getField().getValue()));
+                                .append(",:")
+                                .append(searchField.getField().getValue())
+                                .append(")"));
     }
 
     private static void addEqualSearchFields(StringBuilder filters, Set<SearchFieldDto> searchFields) {
@@ -87,9 +74,8 @@ public class FilterUtil {
                         filters
                                 .append(" and ")
                                 .append(searchField.getField().getValue())
-                                .append(" = '")
-                                .append(searchField.getValue())
-                                .append("'"));
+                                .append(" = :")
+                                .append(searchField.getField().getValue()));
     }
 
     private static void addPaymentFraudResultSearchFields(StringBuilder filters, Set<SearchFieldDto> searchFields) {
@@ -129,8 +115,6 @@ public class FilterUtil {
                 .addValue(QueryParamName.SIZE, filter.getSize());
         if (!CollectionUtils.isEmpty(filter.getSearchFields())) {
             filter.getSearchFields().stream()
-                    .filter(searchField -> searchField.getField() instanceof FraudResultField
-                            || isIdentityField(searchField))
                     .forEach(searchField -> params.addValue(
                             searchField.getField().getValue(),
                             searchField.getValue()));
