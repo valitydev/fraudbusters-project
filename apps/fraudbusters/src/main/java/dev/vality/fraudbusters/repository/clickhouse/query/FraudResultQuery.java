@@ -32,6 +32,8 @@ public class FraudResultQuery {
                         cardToken,
                         ip,
                         fingerprint,
+                        customerId,
+                        userId,
                         id,
                         invoiceId,
                         lastDigits,

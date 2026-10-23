@@ -15,6 +15,8 @@ public interface InfoInitializer<T> {
 
     ClientInfo initClientInfo(Payer payer);
 
+    ClientInfo initClientInfo(Payer payer, Invoice invoice);
+
     void initContactInfo(ClientInfo clientInfo, Payer payer);
 
     ProviderInfo initProviderInfo(InvoicePayment invoicePayment);

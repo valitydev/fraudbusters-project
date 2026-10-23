@@ -23,6 +23,8 @@ public class RefundToApiRefundConverter
                 .clientInfo(new ClientInfo()
                         .email(refund.getClientInfo().getEmail())
                         .fingerprint(refund.getClientInfo().getFingerprint())
+                        .customerId(refund.getClientInfo().getCustomerId())
+                        .userId(refund.getClientInfo().getUserId())
                         .ip(refund.getClientInfo().getIp())
                 )
                 .currency(cost.getCurrency().getSymbolicCode())

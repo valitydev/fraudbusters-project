@@ -22,6 +22,14 @@
     <div class="panel-content" fxLayout="column" [fxLayoutGap]="layoutGapM">
         <mat-divider></mat-divider>
         <div class="column">
+            <div fxLayout="row" *ngIf="fraudPayment.payment.clientInfo?.customerId">
+                <div fxFlex>Customer ID:</div>
+                <div fxFlex>{{ fraudPayment.payment.clientInfo.customerId }}</div>
+            </div>
+            <div fxLayout="row" *ngIf="fraudPayment.payment.clientInfo?.userId">
+                <div fxFlex>User ID:</div>
+                <div fxFlex>{{ fraudPayment.payment.clientInfo.userId }}</div>
+            </div>
             <div class="row">
                 <div fxFlex>Fingerprint:</div>
                 <div fxFlex>{{ fraudPayment.payment.clientInfo.fingerprint }}</div>

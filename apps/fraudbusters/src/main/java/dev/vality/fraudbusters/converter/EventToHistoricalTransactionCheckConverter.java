@@ -63,6 +63,8 @@ public class EventToHistoricalTransactionCheckConverter implements Converter<Eve
                 .setEventTime(TimestampUtil.getStringDate(event.getEventTime()))
                 .setClientInfo(new ClientInfo()
                         .setFingerprint(event.getFingerprint())
+                        .setCustomerId(event.getCustomerId())
+                        .setUserId(event.getUserId())
                         .setIp(event.getIp())
                         .setEmail(event.getEmail())
                         .setPaymentCountry(event.getCountry()))

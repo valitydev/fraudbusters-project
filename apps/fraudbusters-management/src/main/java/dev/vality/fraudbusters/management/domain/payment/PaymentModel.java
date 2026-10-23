@@ -45,6 +45,8 @@ public class PaymentModel {
 
     private String ip;
     private String fingerprint;
+    private String customerId;
+    private String userId;
     private String email;
 
     private String errorCode;

@@ -31,6 +31,14 @@
             <div fxFlex>{{ checkedDataSetRow.notificationRule }}</div>
         </div>
         <mat-divider></mat-divider>
+        <div fxLayout="row" *ngIf="checkedDataSetRow.payment.clientInfo?.customerId">
+            <div fxFlex>Customer ID:</div>
+            <div fxFlex>{{ checkedDataSetRow.payment.clientInfo.customerId }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="checkedDataSetRow.payment.clientInfo?.userId">
+            <div fxFlex>User ID:</div>
+            <div fxFlex>{{ checkedDataSetRow.payment.clientInfo.userId }}</div>
+        </div>
         <div class="row">
             <div class="fb-body-2" fxFlex="15%">Fingerprint:</div>
             <div fxFlex>{{ checkedDataSetRow.payment.clientInfo.fingerprint }}</div>

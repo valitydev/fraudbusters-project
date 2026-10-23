@@ -86,7 +86,7 @@ public class PaymentMapper implements Mapper<InvoiceChange, MachineEvent, Paymen
                 .setPaymentTool(paymentTool)
                 .setId(String.join(DELIMITER, invoice.getId(), payment.getId()))
                 .setEventTime(event.getCreatedAt())
-                .setClientInfo(generalInfoInitiator.initClientInfo(payer))
+                .setClientInfo(generalInfoInitiator.initClientInfo(payer, invoice))
                 .setProviderInfo(generalInfoInitiator.initProviderInfo(invoicePayment))
                 .setPayerType(TBaseUtil.unionFieldToEnum(payer, PayerType.class))
                 .setMobile(isMobile(paymentTool))

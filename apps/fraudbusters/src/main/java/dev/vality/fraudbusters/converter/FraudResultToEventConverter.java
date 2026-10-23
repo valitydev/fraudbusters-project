@@ -33,6 +33,8 @@ public class FraudResultToEventConverter implements BatchConverter<FraudResult, 
         event.setEventTimeHour(timeProperties.getEventTimeHour());
 
         event.setFingerprint(paymentModel.getFingerprint());
+        event.setCustomerId(paymentModel.getCustomerId());
+        event.setUserId(paymentModel.getUserId());
         String ip = paymentModel.getIp();
         String country = getCountryCode(ip);
         event.setCountry(country);

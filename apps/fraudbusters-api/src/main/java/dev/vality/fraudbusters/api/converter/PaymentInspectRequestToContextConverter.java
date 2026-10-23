@@ -58,7 +58,18 @@ public class PaymentInspectRequestToContextConverter implements Converter<Paymen
                 .setDetails(new InvoiceDetails()
                         .setProduct(payment.getDescription()))
                 .setCreatedAt(payment.getCreatedAt().toInstant().toString())
-                .setDue(payment.getCreatedAt().toInstant().toString());
+                .setDue(payment.getCreatedAt().toInstant().toString())
+                .setClientIdentity(buildClientIdentity(payment));
+    }
+
+    private ClientIdentity buildClientIdentity(Payment payment) {
+        Customer customer = payment.getCustomer();
+        if (customer == null || (customer.getCustomerId() == null && customer.getUserId() == null)) {
+            return null;
+        }
+        return new ClientIdentity()
+                .setCustomerId(customer.getCustomerId())
+                .setUserId(customer.getUserId());
     }
 
     private InvoicePayment buildInvoicePayment(Payment payment) {

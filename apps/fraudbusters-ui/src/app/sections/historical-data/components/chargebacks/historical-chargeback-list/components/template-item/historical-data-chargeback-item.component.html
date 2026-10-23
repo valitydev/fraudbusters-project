@@ -18,6 +18,14 @@
     </mat-expansion-panel-header>
     <div class="panel-content" fxLayout="column" [fxLayoutGap]="layoutGapM">
         <mat-divider></mat-divider>
+        <div fxLayout="row" *ngIf="chargeback.clientInfo?.customerId">
+            <div fxFlex>Customer ID:</div>
+            <div fxFlex>{{ chargeback.clientInfo.customerId }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="chargeback.clientInfo?.userId">
+            <div fxFlex>User ID:</div>
+            <div fxFlex>{{ chargeback.clientInfo.userId }}</div>
+        </div>
         <div class="row">
             <div fxFlex>Fingerprint:</div>
             <div fxFlex>{{ chargeback.clientInfo.fingerprint }}</div>
