@@ -1,15 +1,40 @@
 grammar Fraudo;
 
-parse
- : fraud_rule* EOF
+expression
+    : booleanAndExpression ( OR booleanAndExpression )*
+    ;
+
+booleanAndExpression
+    : equalityExpression ( AND equalityExpression )*
+    ;
+
+equalityExpression
+    : relationalExpression
+    | stringExpression (EQ | NEQ) stringExpression
+    | NOT expression
+    | LPAREN expression RPAREN
+    ;
+
+stringExpression
+    : country_by
+    | currency
+    | payment_system
+    | card_category
+    | user_id
+    | STRING
+    ;
+
+unaryExpression
+    : integerExpression
+    | floatExpression
+    ;
+
+in
+ : 'in' LPAREN (stringExpression) DELIMITER string_list RPAREN
  ;
 
 fraud_rule
  : RULE_BLOCK (IDENTIFIER ':')? expression RETURN result (CATCH_ERROR catch_result)? SCOL
- ;
-
-expression
- : LPAREN expression RPAREN  #parenExpression
  ;
 
 comparator
@@ -52,24 +77,8 @@ token_provider
  : 'tokenProvider' LPAREN RPAREN
  ;
 
-count
- : 'count' LPAREN STRING time_window (group_by)? RPAREN
- ;
-
-sum
- : 'sum' LPAREN STRING time_window (group_by)? RPAREN
- ;
-
-unique
- : 'unique' LPAREN STRING DELIMITER STRING time_window (group_by)? RPAREN
- ;
-
 rand
  : 'rand' LPAREN INTEGER RPAREN
- ;
-
-in
- : 'in' LPAREN (country_by | STRING) DELIMITER string_list RPAREN
  ;
 
 in_white_list
