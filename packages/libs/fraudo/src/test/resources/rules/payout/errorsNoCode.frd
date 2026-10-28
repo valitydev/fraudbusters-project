@@ -1,0 +1,2 @@
+rule: countPayoutsError("user_id", 24, hours) = 1
+  AND sumPayoutsError("user_id", 24, hours) = 100 -> decline;

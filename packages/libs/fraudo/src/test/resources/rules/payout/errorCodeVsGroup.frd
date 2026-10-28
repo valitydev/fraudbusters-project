@@ -1,0 +1,1 @@
+rule: countPayoutsError("user_id", 24, hours, "party_id") > 0 -> decline;
