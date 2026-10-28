@@ -1,8 +1,8 @@
 package dev.vality.fraudo.payment.visitor.impl;
 
 import dev.vality.fraudo.payment.aggregator.SumPaymentAggregator;
-import dev.vality.fraudo.payment.resolver.PaymentGroupResolver;
-import dev.vality.fraudo.payment.resolver.PaymentTimeWindowResolver;
+import dev.vality.fraudo.resolver.impl.GroupFieldsResolverImpl;
+import dev.vality.fraudo.resolver.impl.TimeWindowResolverImpl;
 import dev.vality.fraudo.payment.visitor.SumVisitor;
 import dev.vality.fraudo.resolver.FieldResolver;
 import dev.vality.fraudo.utils.TextUtil;
@@ -15,8 +15,8 @@ public class SumVisitorImpl<T, U> implements SumVisitor<T> {
 
     private final SumPaymentAggregator<T, U> sumPaymentAggregator;
     private final FieldResolver<T, U> fieldResolver;
-    private final PaymentGroupResolver<T, U> groupResolver;
-    private final PaymentTimeWindowResolver timeWindowResolver;
+    private final GroupFieldsResolverImpl<T, U> groupResolver;
+    private final TimeWindowResolverImpl timeWindowResolver;
 
     @Override
     public Double visitSum(SumContext ctx, T model) {

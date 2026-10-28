@@ -15,8 +15,8 @@ import dev.vality.fraudo.payment.aggregator.SumPaymentAggregator;
 import dev.vality.fraudo.payment.factory.FraudVisitorFactoryImpl;
 import dev.vality.fraudo.payment.factory.FullVisitorFactoryImpl;
 import dev.vality.fraudo.payment.resolver.CustomerTypeResolver;
-import dev.vality.fraudo.payment.resolver.PaymentGroupResolver;
-import dev.vality.fraudo.payment.resolver.PaymentTimeWindowResolver;
+import dev.vality.fraudo.resolver.impl.GroupFieldsResolverImpl;
+import dev.vality.fraudo.resolver.impl.TimeWindowResolverImpl;
 import dev.vality.fraudo.payment.resolver.PaymentTypeResolver;
 import dev.vality.fraudo.resolver.CountryResolver;
 import dev.vality.fraudo.resolver.FieldResolver;
@@ -46,15 +46,15 @@ public class AbstractPaymentTest {
     @Mock
     InListFinder<PaymentModel, PaymentCheckedField> inListFinder;
     @Mock
-    PaymentTimeWindowResolver timeWindowResolver;
+    TimeWindowResolverImpl timeWindowResolver;
     @Mock
     PaymentTypeResolver<PaymentModel> paymentModelPaymentTypeResolver;
     @Mock
     CustomerTypeResolver<PaymentModel> customerTypeResolver;
 
     private final FieldResolver<PaymentModel, PaymentCheckedField> fieldResolver = new PaymentModelFieldResolver();
-    private final PaymentGroupResolver<PaymentModel, PaymentCheckedField> paymentGroupResolver =
-            new PaymentGroupResolver<>(fieldResolver);
+    private final GroupFieldsResolverImpl<PaymentModel, PaymentCheckedField> groupFieldsResolver =
+            new GroupFieldsResolverImpl<>(fieldResolver);
 
     ResultModel parseAndVisit(InputStream resourceAsStream) throws IOException {
         ParseContext parse = getParseContext(resourceAsStream);
@@ -88,7 +88,7 @@ public class AbstractPaymentTest {
         var resolverBundle = new ResolverBundle<>(
                 countryResolver,
                 fieldResolver,
-                paymentGroupResolver,
+                groupFieldsResolver,
                 timeWindowResolver,
                 paymentModelPaymentTypeResolver,
                 customerTypeResolver);

@@ -23,6 +23,15 @@ category: operations
 `FraudoRulesLexer` и `FraudoRulesBaseVisitor`. При обновлении Fraudo сервисам нужно
 заменить ссылки на прежние классы `FraudoPayment*` новыми именами `FraudoRules*`.
 
+Общие посетители `visitor.FirstFindRulesVisitor` и `visitor.FullRulesVisitor`
+исполняют функции платежей и выплат. Первый останавливается на первом решении,
+второй обходит все правила. `payout.visitor.PayoutFuncVisitor` отвечает только
+за функции истории выплат.
+
+Для обоих типов операций используются общие реализации
+`resolver.impl.GroupFieldsResolverImpl` и `resolver.impl.TimeWindowResolverImpl`.
+В `ResolverBundle` резолвер группировок доступен через `getGroupFieldsResolver()`.
+
 ## Параметры функций
 
 #### Поля группировки (group_field):

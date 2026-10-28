@@ -1,4 +1,4 @@
-package dev.vality.fraudo.payment.resolver;
+package dev.vality.fraudo.resolver.impl;
 
 import dev.vality.fraudo.resolver.FieldResolver;
 import dev.vality.fraudo.resolver.GroupFieldsResolver;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import static dev.vality.fraudo.FraudoRulesParser.Group_byContext;
 
 @RequiredArgsConstructor
-public class PaymentGroupResolver<T, U> implements GroupFieldsResolver<Group_byContext, U> {
+public class GroupFieldsResolverImpl<T, U> implements GroupFieldsResolver<Group_byContext, U> {
 
     private final FieldResolver<T, U> fieldResolver;
 

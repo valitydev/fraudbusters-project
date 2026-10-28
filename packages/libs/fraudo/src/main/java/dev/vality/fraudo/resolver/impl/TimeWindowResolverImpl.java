@@ -1,4 +1,4 @@
-package dev.vality.fraudo.payment.resolver;
+package dev.vality.fraudo.resolver.impl;
 
 import dev.vality.fraudo.FraudoRulesParser;
 import dev.vality.fraudo.model.TimeWindow;
@@ -12,7 +12,7 @@ import java.util.Objects;
 import static dev.vality.fraudo.constant.TimeUnit.HOURS;
 
 
-public class PaymentTimeWindowResolver implements TimeWindowResolver<FraudoRulesParser.Time_windowContext> {
+public class TimeWindowResolverImpl implements TimeWindowResolver<FraudoRulesParser.Time_windowContext> {
 
     @Override
     public TimeWindow resolve(FraudoRulesParser.Time_windowContext ctx) {

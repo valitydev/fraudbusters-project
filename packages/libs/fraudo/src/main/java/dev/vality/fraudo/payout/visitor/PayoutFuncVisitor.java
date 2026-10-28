@@ -3,8 +3,8 @@ package dev.vality.fraudo.payout.visitor;
 import dev.vality.fraudo.aggregator.UniqueValueAggregator;
 import dev.vality.fraudo.payout.aggregator.CountPayoutAggregator;
 import dev.vality.fraudo.payout.aggregator.SumPayoutAggregator;
-import dev.vality.fraudo.payment.resolver.PaymentGroupResolver;
-import dev.vality.fraudo.payment.resolver.PaymentTimeWindowResolver;
+import dev.vality.fraudo.resolver.impl.GroupFieldsResolverImpl;
+import dev.vality.fraudo.resolver.impl.TimeWindowResolverImpl;
 import dev.vality.fraudo.resolver.FieldResolver;
 import dev.vality.fraudo.exception.NotImplementedOperatorException;
 import dev.vality.fraudo.utils.TextUtil;
@@ -19,8 +19,8 @@ public class PayoutFuncVisitor<T, U> {
     private final SumPayoutAggregator<T, U> sumPayoutAggregator;
     private final UniqueValueAggregator<T, U> uniquePayoutValueAggregator;
     private final FieldResolver<T, U> fieldResolver;
-    private final PaymentGroupResolver<T, U> groupResolver;
-    private final PaymentTimeWindowResolver timeWindowResolver;
+    private final GroupFieldsResolverImpl<T, U> groupResolver;
+    private final TimeWindowResolverImpl timeWindowResolver;
 
     private <A> A aggregator(A aggregator) {
         if (aggregator == null) {

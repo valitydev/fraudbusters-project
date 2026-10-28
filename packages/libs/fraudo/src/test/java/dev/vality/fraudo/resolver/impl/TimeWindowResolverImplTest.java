@@ -1,4 +1,4 @@
-package dev.vality.fraudo.payment.resolver;
+package dev.vality.fraudo.resolver.impl;
 
 import dev.vality.fraudo.FraudoRulesLexer;
 import dev.vality.fraudo.FraudoRulesParser;
@@ -16,10 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
-class PaymentTimeWindowResolverTest {
+class TimeWindowResolverImplTest {
 
     private final TimeWindowResolver<FraudoRulesParser.Time_windowContext> timeWindowResolver =
-            new PaymentTimeWindowResolver();
+            new TimeWindowResolverImpl();
 
     @Test
     void withoutEndTimeAndWithoutTimeUnit() throws Exception {
@@ -100,7 +100,7 @@ class PaymentTimeWindowResolverTest {
     }
 
     private FraudoRulesParser.Time_windowContext getTimeWindowContext(String path) throws IOException {
-        InputStream resourceAsStream = PaymentTimeWindowResolverTest.class.getResourceAsStream(path);
+        InputStream resourceAsStream = TimeWindowResolverImplTest.class.getResourceAsStream(path);
         FraudoRulesLexer lexer = new FraudoRulesLexer(CharStreams.fromStream(resourceAsStream));
         FraudoRulesParser parser =
                 new FraudoRulesParser(new CommonTokenStream(lexer));

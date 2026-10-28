@@ -1,19 +1,20 @@
-package dev.vality.fraudo.payout.visitor;
+package dev.vality.fraudo.visitor;
 
 import dev.vality.fraudo.converter.TrustConditionConverter;
 import dev.vality.fraudo.exception.NotImplementedOperatorException;
 import dev.vality.fraudo.model.BaseModel;
+import dev.vality.fraudo.payout.visitor.PayoutFuncVisitor;
 import dev.vality.fraudo.payment.visitor.*;
-import dev.vality.fraudo.payment.visitor.impl.FullVisitorImpl;
+import dev.vality.fraudo.payment.visitor.impl.FirstFindVisitorImpl;
 import dev.vality.fraudo.resolver.FieldResolver;
 
 import static dev.vality.fraudo.FraudoRulesParser.*;
 
-public class FullFraudWithPayoutVisitor<T extends BaseModel, U> extends FullVisitorImpl<T, U> {
+public class FirstFindRulesVisitor<T extends BaseModel, U> extends FirstFindVisitorImpl<T, U> {
 
     private final PayoutFuncVisitor<T, U> payoutFuncVisitor;
 
-    public FullFraudWithPayoutVisitor(
+    public FirstFindRulesVisitor(
             CountVisitor<T> countVisitor,
             SumVisitor<T> sumVisitor,
             ListVisitor<T> listVisitor,

@@ -15,8 +15,8 @@ import dev.vality.fraudo.payment.aggregator.SumPaymentAggregator;
 import dev.vality.fraudo.payment.factory.FraudVisitorFactory;
 import dev.vality.fraudo.payment.factory.FraudVisitorFactoryImpl;
 import dev.vality.fraudo.payment.factory.FullVisitorFactoryImpl;
-import dev.vality.fraudo.payment.resolver.PaymentGroupResolver;
-import dev.vality.fraudo.payment.resolver.PaymentTimeWindowResolver;
+import dev.vality.fraudo.resolver.impl.GroupFieldsResolverImpl;
+import dev.vality.fraudo.resolver.impl.TimeWindowResolverImpl;
 import dev.vality.fraudo.payout.aggregator.CountPayoutAggregator;
 import dev.vality.fraudo.payout.aggregator.SumPayoutAggregator;
 import dev.vality.fraudo.resolver.FieldResolver;
@@ -267,8 +267,8 @@ class PayoutFunctionsTest {
         var aggregators = history == null
                 ? new AggregatorBundle<>(payments, paymentSums, paymentUnique, null, null, null)
                 : new AggregatorBundle<>(payments, paymentSums, paymentUnique, history, payoutSums, payoutUnique);
-        var resolvers = new ResolverBundle<>(null, fields, new PaymentGroupResolver<>(fields),
-                new PaymentTimeWindowResolver(), null, null);
+        var resolvers = new ResolverBundle<>(null, fields, new GroupFieldsResolverImpl<>(fields),
+                new TimeWindowResolverImpl(), null, null);
         var bundle = new VisitorBundle<>(aggregators, resolvers, new FinderBundle<BaseModel, String>(null));
         FraudVisitorFactory factory = fullVisitor ? new FullVisitorFactoryImpl() : new FraudVisitorFactoryImpl();
         try (var visitor = factory.createVisitor(bundle)) {

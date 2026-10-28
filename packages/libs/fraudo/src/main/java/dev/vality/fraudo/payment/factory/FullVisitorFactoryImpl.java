@@ -6,7 +6,7 @@ import dev.vality.fraudo.bundle.FinderBundle;
 import dev.vality.fraudo.bundle.ResolverBundle;
 import dev.vality.fraudo.bundle.VisitorBundle;
 import dev.vality.fraudo.model.BaseModel;
-import dev.vality.fraudo.payout.visitor.FullFraudWithPayoutVisitor;
+import dev.vality.fraudo.visitor.FullRulesVisitor;
 import dev.vality.fraudo.payout.visitor.PayoutFuncVisitor;
 import dev.vality.fraudo.payment.visitor.*;
 import dev.vality.fraudo.payment.visitor.impl.*;
@@ -20,11 +20,11 @@ public class FullVisitorFactoryImpl implements FraudVisitorFactory {
         FinderBundle<T, U> finderBundle = visitorBundle.getFinderBundle();
         CountVisitor<T> countVisitor = new CountVisitorImpl<>(aggregatorBundle.getCountPaymentAggregator(),
                 resolverBundle.getFieldPairResolver(),
-                resolverBundle.getPaymentGroupResolver(),
+                resolverBundle.getGroupFieldsResolver(),
                 resolverBundle.getTimeWindowResolver());
         SumVisitor<T> sumVisitor = new SumVisitorImpl<>(aggregatorBundle.getSumPaymentAggregator(),
                 resolverBundle.getFieldPairResolver(),
-                resolverBundle.getPaymentGroupResolver(),
+                resolverBundle.getGroupFieldsResolver(),
                 resolverBundle.getTimeWindowResolver());
         ListVisitor<T> listVisitor = new ListVisitorImpl<>(finderBundle.getListFinder(),
                 resolverBundle.getFieldPairResolver());
@@ -35,10 +35,10 @@ public class FullVisitorFactoryImpl implements FraudVisitorFactory {
                 aggregatorBundle.getUniqueValueAggregator(),
                 resolverBundle.getCountryResolver(),
                 resolverBundle.getFieldPairResolver(),
-                resolverBundle.getPaymentGroupResolver(),
+                resolverBundle.getGroupFieldsResolver(),
                 resolverBundle.getTimeWindowResolver(),
                 resolverBundle.getPaymentTypeResolver());
-        return new FullFraudWithPayoutVisitor<T, U>(
+        return new FullRulesVisitor<T, U>(
                 countVisitor,
                 sumVisitor,
                 listVisitor,
@@ -51,7 +51,7 @@ public class FullVisitorFactoryImpl implements FraudVisitorFactory {
                         aggregatorBundle.getSumPayoutAggregator(),
                         aggregatorBundle.getUniquePayoutValueAggregator(),
                         resolverBundle.getFieldPairResolver(),
-                        resolverBundle.getPaymentGroupResolver(),
+                        resolverBundle.getGroupFieldsResolver(),
                         resolverBundle.getTimeWindowResolver()));
     }
 
