@@ -6,6 +6,8 @@ import dev.vality.fraudo.bundle.FinderBundle;
 import dev.vality.fraudo.bundle.ResolverBundle;
 import dev.vality.fraudo.bundle.VisitorBundle;
 import dev.vality.fraudo.model.BaseModel;
+import dev.vality.fraudo.payout.visitor.FullFraudWithPayoutVisitor;
+import dev.vality.fraudo.payout.visitor.PayoutFuncVisitor;
 import dev.vality.fraudo.payment.visitor.*;
 import dev.vality.fraudo.payment.visitor.impl.*;
 
@@ -36,15 +38,21 @@ public class FullVisitorFactoryImpl implements FraudVisitorFactory {
                 resolverBundle.getPaymentGroupResolver(),
                 resolverBundle.getTimeWindowResolver(),
                 resolverBundle.getPaymentTypeResolver());
-        return new FullVisitorImpl<>(
+        return new FullFraudWithPayoutVisitor<T, U>(
                 countVisitor,
                 sumVisitor,
                 listVisitor,
                 customFuncVisitor,
                 isTrustedFuncVisitor,
                 resolverBundle.getFieldPairResolver(),
-                trustConditionConverter
-        );
+                trustConditionConverter,
+                new PayoutFuncVisitor<>(
+                        aggregatorBundle.getCountPayoutAggregator(),
+                        aggregatorBundle.getSumPayoutAggregator(),
+                        aggregatorBundle.getUniquePayoutValueAggregator(),
+                        resolverBundle.getFieldPairResolver(),
+                        resolverBundle.getPaymentGroupResolver(),
+                        resolverBundle.getTimeWindowResolver()));
     }
 
 }

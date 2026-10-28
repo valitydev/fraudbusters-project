@@ -84,7 +84,7 @@ public class AbstractPaymentTest {
         var aggregatorBundle = new AggregatorBundle<>(
                 countPaymentAggregator,
                 sumPaymentAggregator,
-                uniqueValueAggregator);
+                uniqueValueAggregator, null, null, null);
         var resolverBundle = new ResolverBundle<>(
                 countryResolver,
                 fieldResolver,

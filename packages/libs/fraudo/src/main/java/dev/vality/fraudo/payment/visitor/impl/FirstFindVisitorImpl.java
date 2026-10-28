@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static dev.vality.fraudo.FraudoPaymentParser.*;
 
@@ -446,4 +447,9 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
     public Integer visitRand(RandContext ctx) {
         return customFuncVisitor.visitRand(ctx, threadLocalModel.get());
     }
+
+    protected Object cacheFunction(String key, Function<T, ?> function) {
+        return localFuncCache.get().computeIfAbsent(key, ignored -> function.apply(threadLocalModel.get()));
+    }
+
 }
