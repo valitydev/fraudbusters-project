@@ -10,7 +10,7 @@ import dev.vality.fraudo.exception.NotImplementedOperatorException;
 import dev.vality.fraudo.utils.TextUtil;
 import lombok.RequiredArgsConstructor;
 
-import static dev.vality.fraudo.FraudoPaymentParser.*;
+import static dev.vality.fraudo.FraudoRulesParser.*;
 
 @RequiredArgsConstructor
 public class PayoutFuncVisitor<T, U> {

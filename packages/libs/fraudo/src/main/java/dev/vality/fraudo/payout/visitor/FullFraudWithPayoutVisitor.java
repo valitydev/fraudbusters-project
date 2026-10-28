@@ -7,7 +7,7 @@ import dev.vality.fraudo.payment.visitor.*;
 import dev.vality.fraudo.payment.visitor.impl.FullVisitorImpl;
 import dev.vality.fraudo.resolver.FieldResolver;
 
-import static dev.vality.fraudo.FraudoPaymentParser.*;
+import static dev.vality.fraudo.FraudoRulesParser.*;
 
 public class FullFraudWithPayoutVisitor<T extends BaseModel, U> extends FullVisitorImpl<T, U> {
 

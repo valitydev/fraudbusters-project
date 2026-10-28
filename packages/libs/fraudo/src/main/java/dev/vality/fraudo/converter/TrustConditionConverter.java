@@ -1,6 +1,6 @@
 package dev.vality.fraudo.converter;
 
-import dev.vality.fraudo.FraudoPaymentParser;
+import dev.vality.fraudo.FraudoRulesParser;
 import dev.vality.fraudo.model.TrustCondition;
 import lombok.RequiredArgsConstructor;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -18,13 +18,13 @@ public class TrustConditionConverter {
     private static final int COUNT_INDEX = 1;
     private static final int SUM_INDEX = 2;
 
-    public List<TrustCondition> convertToList(FraudoPaymentParser.Conditions_listContext conditionsListContext) {
+    public List<TrustCondition> convertToList(FraudoRulesParser.Conditions_listContext conditionsListContext) {
         return conditionsListContext.trusted_token_condition().stream()
                 .map(this::convert)
                 .collect(Collectors.toList());
     }
 
-    public TrustCondition convert(FraudoPaymentParser.Trusted_token_conditionContext ctx) {
+    public TrustCondition convert(FraudoRulesParser.Trusted_token_conditionContext ctx) {
         List<TerminalNode> intNodes = ctx.INTEGER();
         return TrustCondition.builder()
                 .transactionsCurrency(safeGetText(ctx.STRING()))

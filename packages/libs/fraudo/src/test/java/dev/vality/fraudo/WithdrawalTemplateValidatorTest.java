@@ -38,8 +38,8 @@ class WithdrawalTemplateValidatorTest {
             "rule: isMobile() -> accept;",
             "rule: isRecurrent() -> accept;"})
     void rejectsUnsupportedWithdrawalFeaturesWithoutChangingPaymentSyntax(String template) {
-        var parser = new FraudoPaymentParser(new CommonTokenStream(
-                new FraudoPaymentLexer(CharStreams.fromString(template))));
+        var parser = new FraudoRulesParser(new CommonTokenStream(
+                new FraudoRulesLexer(CharStreams.fromString(template))));
         parser.parse();
         assertEquals(0, parser.getNumberOfSyntaxErrors());
         assertFalse(validator.validate(template).isEmpty());

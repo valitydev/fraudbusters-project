@@ -1,7 +1,7 @@
 package dev.vality.fraudo.payment.resolver;
 
-import dev.vality.fraudo.FraudoPaymentLexer;
-import dev.vality.fraudo.FraudoPaymentParser;
+import dev.vality.fraudo.FraudoRulesLexer;
+import dev.vality.fraudo.FraudoRulesParser;
 import dev.vality.fraudo.model.TimeWindow;
 import dev.vality.fraudo.resolver.TimeWindowResolver;
 import org.antlr.v4.runtime.CharStreams;
@@ -18,12 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class PaymentTimeWindowResolverTest {
 
-    private final TimeWindowResolver<FraudoPaymentParser.Time_windowContext> timeWindowResolver =
+    private final TimeWindowResolver<FraudoRulesParser.Time_windowContext> timeWindowResolver =
             new PaymentTimeWindowResolver();
 
     @Test
     void withoutEndTimeAndWithoutTimeUnit() throws Exception {
-        FraudoPaymentParser.Time_windowContext timeWindowContext =
+        FraudoRulesParser.Time_windowContext timeWindowContext =
                 getTimeWindowContext("/rules/time_window/withoutEndTimeAndWithoutTimeUnit.frd");
 
         TimeWindow timeWindow = timeWindowResolver.resolve(timeWindowContext);
@@ -36,7 +36,7 @@ class PaymentTimeWindowResolverTest {
 
     @Test
     void withEndTimeAndWithoutTimeUnit() throws Exception {
-        FraudoPaymentParser.Time_windowContext timeWindowContext =
+        FraudoRulesParser.Time_windowContext timeWindowContext =
                 getTimeWindowContext("/rules/time_window/withEndTimeAndWithoutTimeUnit.frd");
 
         TimeWindow timeWindow = timeWindowResolver.resolve(timeWindowContext);
@@ -49,7 +49,7 @@ class PaymentTimeWindowResolverTest {
 
     @Test
     void withoutEndTimeAndWithDayTimeUnitTest() throws Exception {
-        FraudoPaymentParser.Time_windowContext timeWindowContext =
+        FraudoRulesParser.Time_windowContext timeWindowContext =
                 getTimeWindowContext("/rules/time_window/withoutEndTimeAndWithDayTimeUnit.frd");
 
         TimeWindow timeWindow = timeWindowResolver.resolve(timeWindowContext);
@@ -62,7 +62,7 @@ class PaymentTimeWindowResolverTest {
 
     @Test
     void withEndTimeAndHourTimeUnitTest() throws Exception {
-        FraudoPaymentParser.Time_windowContext timeWindowContext =
+        FraudoRulesParser.Time_windowContext timeWindowContext =
                 getTimeWindowContext("/rules/time_window/withEndTimeAndHourTimeUnit.frd");
 
         TimeWindow timeWindow = timeWindowResolver.resolve(timeWindowContext);
@@ -75,7 +75,7 @@ class PaymentTimeWindowResolverTest {
 
     @Test
     void withCalMonthsTimeUnitTest() throws Exception {
-        FraudoPaymentParser.Time_windowContext timeWindowContext =
+        FraudoRulesParser.Time_windowContext timeWindowContext =
                 getTimeWindowContext("/rules/time_window/withCalMonthsTimeUnit.frd");
 
         TimeWindow timeWindow = timeWindowResolver.resolve(timeWindowContext);
@@ -88,7 +88,7 @@ class PaymentTimeWindowResolverTest {
 
     @Test
     void withCalDaysTimeUnitTest() throws Exception {
-        FraudoPaymentParser.Time_windowContext timeWindowContext =
+        FraudoRulesParser.Time_windowContext timeWindowContext =
                 getTimeWindowContext("/rules/time_window/withCalDaysTimeUnit.frd");
 
         TimeWindow timeWindow = timeWindowResolver.resolve(timeWindowContext);
@@ -99,12 +99,12 @@ class PaymentTimeWindowResolverTest {
         assertEquals(CALENDAR_DAYS, timeWindow.getTimeUnit());
     }
 
-    private FraudoPaymentParser.Time_windowContext getTimeWindowContext(String path) throws IOException {
+    private FraudoRulesParser.Time_windowContext getTimeWindowContext(String path) throws IOException {
         InputStream resourceAsStream = PaymentTimeWindowResolverTest.class.getResourceAsStream(path);
-        FraudoPaymentLexer lexer = new FraudoPaymentLexer(CharStreams.fromStream(resourceAsStream));
-        FraudoPaymentParser parser =
-                new FraudoPaymentParser(new CommonTokenStream(lexer));
-        FraudoPaymentParser.Time_windowContext timeWindowContext = parser.time_window();
+        FraudoRulesLexer lexer = new FraudoRulesLexer(CharStreams.fromStream(resourceAsStream));
+        FraudoRulesParser parser =
+                new FraudoRulesParser(new CommonTokenStream(lexer));
+        FraudoRulesParser.Time_windowContext timeWindowContext = parser.time_window();
         return timeWindowContext;
     }
 }

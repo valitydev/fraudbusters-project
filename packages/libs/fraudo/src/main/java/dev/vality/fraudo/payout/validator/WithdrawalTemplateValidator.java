@@ -1,7 +1,7 @@
 package dev.vality.fraudo.payout.validator;
 
-import dev.vality.fraudo.FraudoPaymentLexer;
-import dev.vality.fraudo.FraudoPaymentParser;
+import dev.vality.fraudo.FraudoRulesLexer;
+import dev.vality.fraudo.FraudoRulesParser;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -12,7 +12,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import java.util.ArrayList;
 import java.util.List;
 
-import static dev.vality.fraudo.FraudoPaymentParser.*;
+import static dev.vality.fraudo.FraudoRulesParser.*;
 
 /** Validates withdrawal rules using the shared grammar, without changing payment rule validation. */
 public class WithdrawalTemplateValidator {
@@ -26,10 +26,10 @@ public class WithdrawalTemplateValidator {
                 errors.add("line " + line + ":" + charPositionInLine + " " + msg);
             }
         };
-        FraudoPaymentLexer lexer = new FraudoPaymentLexer(CharStreams.fromString(template));
+        FraudoRulesLexer lexer = new FraudoRulesLexer(CharStreams.fromString(template));
         lexer.removeErrorListeners();
         lexer.addErrorListener(errorListener);
-        FraudoPaymentParser parser = new FraudoPaymentParser(new CommonTokenStream(lexer));
+        FraudoRulesParser parser = new FraudoRulesParser(new CommonTokenStream(lexer));
         parser.removeErrorListeners();
         parser.addErrorListener(errorListener);
         ParseContext tree = parser.parse();

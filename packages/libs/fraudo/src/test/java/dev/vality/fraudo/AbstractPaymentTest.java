@@ -1,6 +1,6 @@
 package dev.vality.fraudo;
 
-import dev.vality.fraudo.FraudoPaymentParser.ParseContext;
+import dev.vality.fraudo.FraudoRulesParser.ParseContext;
 import dev.vality.fraudo.aggregator.UniqueValueAggregator;
 import dev.vality.fraudo.bundle.AggregatorBundle;
 import dev.vality.fraudo.bundle.FinderBundle;
@@ -8,8 +8,8 @@ import dev.vality.fraudo.bundle.ResolverBundle;
 import dev.vality.fraudo.bundle.VisitorBundle;
 import dev.vality.fraudo.finder.InListFinder;
 import dev.vality.fraudo.model.ResultModel;
-import dev.vality.fraudo.FraudoPaymentParser;
-import dev.vality.fraudo.FraudoPaymentLexer;
+import dev.vality.fraudo.FraudoRulesParser;
+import dev.vality.fraudo.FraudoRulesLexer;
 import dev.vality.fraudo.payment.aggregator.CountPaymentAggregator;
 import dev.vality.fraudo.payment.aggregator.SumPaymentAggregator;
 import dev.vality.fraudo.payment.factory.FraudVisitorFactoryImpl;
@@ -97,8 +97,8 @@ public class AbstractPaymentTest {
     }
 
     ParseContext getParseContext(InputStream resourceAsStream) throws IOException {
-        FraudoPaymentLexer lexer = new FraudoPaymentLexer(new ANTLRInputStream(resourceAsStream));
-        FraudoPaymentParser parser = new FraudoPaymentParser(new CommonTokenStream(lexer));
+        FraudoRulesLexer lexer = new FraudoRulesLexer(new ANTLRInputStream(resourceAsStream));
+        FraudoRulesParser parser = new FraudoRulesParser(new CommonTokenStream(lexer));
         return parser.parse();
     }
 

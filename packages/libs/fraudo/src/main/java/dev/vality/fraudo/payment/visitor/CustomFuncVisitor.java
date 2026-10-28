@@ -1,6 +1,6 @@
 package dev.vality.fraudo.payment.visitor;
 
-import static dev.vality.fraudo.FraudoPaymentParser.*;
+import static dev.vality.fraudo.FraudoRulesParser.*;
 
 public interface CustomFuncVisitor<T> {
 

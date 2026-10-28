@@ -14,8 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 
-import static dev.vality.fraudo.FraudoPaymentParser.Fraud_ruleContext;
-import static dev.vality.fraudo.FraudoPaymentParser.ParseContext;
+import static dev.vality.fraudo.FraudoRulesParser.Fraud_ruleContext;
+import static dev.vality.fraudo.FraudoRulesParser.ParseContext;
 
 @Slf4j
 public class FullVisitorImpl<T extends BaseModel, U> extends FirstFindVisitorImpl<T, U> {

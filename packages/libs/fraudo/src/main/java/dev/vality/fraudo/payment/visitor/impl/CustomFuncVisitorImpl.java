@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Random;
 
-import static dev.vality.fraudo.FraudoPaymentParser.*;
+import static dev.vality.fraudo.FraudoRulesParser.*;
 
 @RequiredArgsConstructor
 public class CustomFuncVisitorImpl<T, U> implements CustomFuncVisitor<T> {

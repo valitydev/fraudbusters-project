@@ -260,8 +260,8 @@ class PayoutFunctionsTest {
 
     private ResultModel evaluate(String template, boolean fullVisitor,
                                  CountPayoutAggregator<BaseModel, String> history) {
-        var lexer = new FraudoPaymentLexer(CharStreams.fromString(template));
-        var parser = new FraudoPaymentParser(new CommonTokenStream(lexer));
+        var lexer = new FraudoRulesLexer(CharStreams.fromString(template));
+        var parser = new FraudoRulesParser(new CommonTokenStream(lexer));
         var tree = parser.parse();
         assertEquals(0, parser.getNumberOfSyntaxErrors());
         var aggregators = history == null

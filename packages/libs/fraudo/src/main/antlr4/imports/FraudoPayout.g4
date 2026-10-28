@@ -1,6 +1,6 @@
 grammar FraudoPayout;
 
-import Fraudo;
+import FraudoCommon;
 
 count_payouts
  : 'countPayouts' LPAREN STRING time_window (group_by)? RPAREN

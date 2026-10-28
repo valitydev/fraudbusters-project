@@ -8,7 +8,7 @@ import dev.vality.fraudo.resolver.FieldResolver;
 import dev.vality.fraudo.utils.TextUtil;
 import lombok.RequiredArgsConstructor;
 
-import static dev.vality.fraudo.FraudoPaymentParser.*;
+import static dev.vality.fraudo.FraudoRulesParser.*;
 
 @RequiredArgsConstructor
 public class SumVisitorImpl<T, U> implements SumVisitor<T> {

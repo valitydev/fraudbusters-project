@@ -1,7 +1,7 @@
 package dev.vality.fraudo.payment.visitor.impl;
 
-import dev.vality.fraudo.FraudoPaymentBaseVisitor;
-import dev.vality.fraudo.FraudoPaymentParser;
+import dev.vality.fraudo.FraudoRulesBaseVisitor;
+import dev.vality.fraudo.FraudoRulesParser;
 import dev.vality.fraudo.constant.ResultStatus;
 import dev.vality.fraudo.converter.TrustConditionConverter;
 import dev.vality.fraudo.exception.NotImplementedOperatorException;
@@ -30,11 +30,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import static dev.vality.fraudo.FraudoPaymentParser.*;
+import static dev.vality.fraudo.FraudoRulesParser.*;
 
 @Slf4j
 @RequiredArgsConstructor
-public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentBaseVisitor<Object>
+public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBaseVisitor<Object>
         implements TemplateVisitor<T, ResultModel> {
 
     public static final String UNKNOWN = "UNKNOWN";
@@ -429,7 +429,7 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
     }
 
     @Override
-    public String visitCard_category(FraudoPaymentParser.Card_categoryContext ctx) {
+    public String visitCard_category(FraudoRulesParser.Card_categoryContext ctx) {
         return threadLocalModel.get().getCardCategory() != null ? threadLocalModel.get().getCardCategory() : UNKNOWN;
     }
 
@@ -439,7 +439,7 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
     }
 
     @Override
-    public String visitUser_id(FraudoPaymentParser.User_idContext ctx) {
+    public String visitUser_id(FraudoRulesParser.User_idContext ctx) {
         return threadLocalModel.get().getUserId() != null ? threadLocalModel.get().getUserId() : UNKNOWN;
     }
 
