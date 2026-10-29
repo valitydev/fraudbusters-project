@@ -67,6 +67,10 @@ public class PayoutCacheTest extends AbstractPayoutTest {
                 TimeWindow.builder().start(24).timeUnit("days").build(), List.of())).thenReturn(3);
         when(payouts.count("user_id", model,
                 TimeWindow.builder().start(48).end(24).timeUnit("hours").build(), List.of())).thenReturn(4);
+        when(payouts.count("user_id", model,
+                TimeWindow.builder().start(48).end(12).timeUnit("hours").build(), List.of())).thenReturn(23);
+        when(payouts.count("user_id", model,
+                TimeWindow.builder().start(48).timeUnit("hours").build(), List.of())).thenReturn(24);
         when(payouts.count("user_id", model, window, List.of("party_id"))).thenReturn(5);
         when(payouts.count("user_id", model, window, List.of("wallet_id"))).thenReturn(6);
         when(payouts.count("user_id", model, window, List.of("party_id", "currency"))).thenReturn(7);
@@ -79,16 +83,22 @@ public class PayoutCacheTest extends AbstractPayoutTest {
         when(payoutSums.sumSuccess("user_id", model, window, List.of())).thenReturn(14.0);
         when(payoutSums.sumError("user_id", model, window, List.of())).thenReturn(15.0);
         when(payoutSums.sumError("user_id", model, window, "failed", List.of())).thenReturn(16.0);
+        when(payoutSums.sumError("user_id", model, window, "other", List.of())).thenReturn(22.0);
         when(payoutUnique.countUniqueValue("user_id", model, "card_token", window, List.of())).thenReturn(17);
         when(payoutUnique.countUniqueValue("card_token", model, "user_id", window, List.of())).thenReturn(18);
+        when(payoutUnique.countUniqueValue("user_id", model, "currency", window, List.of())).thenReturn(19);
+        when(payoutUnique.countUniqueValue("user_id", model, "card_token",
+                TimeWindow.builder().start(24).timeUnit("days").build(), List.of())).thenReturn(20);
+        when(payoutUnique.countUniqueValue("user_id", model, "card_token", window, List.of("party_id")))
+                .thenReturn(21);
 
         var result = evaluate("/rules/payout/cacheKeys.frd", fullVisitor);
 
         assertStatus(ResultStatus.ACCEPT, result);
         assertEquals(9, result.getRuleResults().size());
-        assertEquals(12, mockingDetails(payouts).getInvocations().size());
-        assertEquals(4, mockingDetails(payoutSums).getInvocations().size());
-        assertEquals(2, mockingDetails(payoutUnique).getInvocations().size());
+        assertEquals(14, mockingDetails(payouts).getInvocations().size());
+        assertEquals(5, mockingDetails(payoutSums).getInvocations().size());
+        assertEquals(5, mockingDetails(payoutUnique).getInvocations().size());
     }
 
     @ParameterizedTest
