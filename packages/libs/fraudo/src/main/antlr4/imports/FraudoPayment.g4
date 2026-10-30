@@ -61,32 +61,4 @@ is_recurrent
 is_trusted
  : 'isTrusted' LPAREN RPAREN                                                        #isTrusted
  | 'isTrusted' LPAREN STRING RPAREN                                                 #isTrustedTemplateName
- | 'isTrusted' LPAREN (payment_conditions | payout_conditions) RPAREN               #isTrustedConditionsSingleList
- | 'isTrusted' LPAREN payment_conditions DELIMITER payout_conditions RPAREN         #isTrustedPaymentsAndPayoutConditions
- ;
-
-payment_conditions
- : 'paymentsConditions' LPAREN conditions_list RPAREN
- ;
-
-payout_conditions
- : 'payoutsConditions' LPAREN conditions_list RPAREN
- ;
-
-conditions_list
- : trusted_token_condition (DELIMITER trusted_token_condition | WS)*
- ;
-
-trusted_token_condition
- : 'condition' LPAREN
-        STRING DELIMITER            //transactions_currency
-        INTEGER DELIMITER           //transactions_years_offset
-        INTEGER DELIMITER           //transactions_count
-        INTEGER                     //transactions_sum
-    RPAREN
- | 'condition' LPAREN
-        STRING DELIMITER            //transactions_currency
-        INTEGER DELIMITER           //transactions_years_offset
-        INTEGER                     //transactions_count
-    RPAREN
  ;

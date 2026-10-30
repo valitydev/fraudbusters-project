@@ -1,11 +1,8 @@
 package dev.vality.fraudo.payment.visitor.impl;
 
-import dev.vality.fraudo.model.TrustCondition;
 import dev.vality.fraudo.payment.resolver.CustomerTypeResolver;
 import dev.vality.fraudo.payment.visitor.IsTrustedFuncVisitor;
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 public class IsTrustedFuncVisitorImpl<T> implements IsTrustedFuncVisitor<T> {
@@ -20,13 +17,6 @@ public class IsTrustedFuncVisitorImpl<T> implements IsTrustedFuncVisitor<T> {
     @Override
     public boolean visitCheckTrusted(T model, String templateName) {
         return customerTypeResolver.isTrusted(model, templateName);
-    }
-
-    @Override
-    public boolean visitCheckTrusted(T model,
-                                     List<TrustCondition> paymentsConditionsList,
-                                     List<TrustCondition> payoutConditionsList) {
-        return customerTypeResolver.isTrusted(model, paymentsConditionsList, payoutConditionsList);
     }
 
 }

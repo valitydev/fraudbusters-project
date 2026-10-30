@@ -1,12 +1,7 @@
 package dev.vality.fraudo.payment.visitor;
 
-import dev.vality.fraudo.converter.TrustConditionConverter;
-import dev.vality.fraudo.exception.NotValidContextException;
-import dev.vality.fraudo.model.TrustCondition;
 import dev.vality.fraudo.utils.TextUtil;
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
 
 import static dev.vality.fraudo.FraudoRulesParser.*;
 
@@ -17,7 +12,6 @@ public class PaymentFuncVisitor<T> {
     private final SumVisitor<T> sumVisitor;
     private final CustomFuncVisitor<T> customFuncVisitor;
     private final IsTrustedFuncVisitor<T> isTrustedFuncVisitor;
-    private final TrustConditionConverter trustConditionConverter;
 
     public Object visitIsTrusted(IsTrustedContext ctx, T model) {
         return isTrustedFuncVisitor.visitCheckTrusted(model);
@@ -25,33 +19,6 @@ public class PaymentFuncVisitor<T> {
 
     public Object visitIsTrustedTemplateName(IsTrustedTemplateNameContext ctx, T model) {
         return isTrustedFuncVisitor.visitCheckTrusted(model, TextUtil.safeGetText(ctx.STRING()));
-    }
-
-    public Object visitIsTrustedConditionsSingleList(IsTrustedConditionsSingleListContext ctx, T model) {
-        if (ctx.payment_conditions() != null && !ctx.payment_conditions().isEmpty()) {
-            List<TrustCondition> paymentsConditions =
-                    trustConditionConverter.convertToList(ctx.payment_conditions().conditions_list());
-            return isTrustedFuncVisitor.visitCheckTrusted(model, paymentsConditions, null);
-        }
-        if (ctx.payout_conditions() != null && !ctx.payout_conditions().isEmpty()) {
-            List<TrustCondition> payoutsConditions =
-                    trustConditionConverter.convertToList(ctx.payout_conditions().conditions_list());
-            return isTrustedFuncVisitor.visitCheckTrusted(model, null, payoutsConditions);
-        }
-        throw new NotValidContextException();
-    }
-
-    public Object visitIsTrustedPaymentsAndPayoutConditions(
-            IsTrustedPaymentsAndPayoutConditionsContext ctx, T model) {
-        List<TrustCondition> paymentsConditions =
-                trustConditionConverter.convertToList(ctx.payment_conditions().conditions_list());
-        List<TrustCondition> payoutsConditions =
-                trustConditionConverter.convertToList(ctx.payout_conditions().conditions_list());
-        return isTrustedFuncVisitor.visitCheckTrusted(
-                model,
-                paymentsConditions,
-                payoutsConditions
-        );
     }
 
     public Integer visitCount(CountContext ctx, T model) {

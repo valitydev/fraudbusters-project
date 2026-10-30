@@ -30,10 +30,6 @@ class PayoutTemplateValidatorTest {
             "rule: amount() > 0 -> accept catch: 3ds;",
             "rule: isTrusted() -> accept;",
             "rule: isTrusted(\"template\") -> accept;",
-            "rule: isTrusted(paymentsConditions(condition(\"RUB\", 1, 2))) -> accept;",
-            "rule: isTrusted(payoutsConditions(condition(\"RUB\", 1, 2))) -> accept;",
-            "rule: isTrusted(paymentsConditions(condition(\"RUB\", 1, 2)), " +
-                    "payoutsConditions(condition(\"RUB\", 1, 2))) -> accept;",
             "rule: amount() > 0 OR isTrusted() -> accept;",
             "rule: isMobile() -> accept;",
             "rule: isRecurrent() -> accept;"})

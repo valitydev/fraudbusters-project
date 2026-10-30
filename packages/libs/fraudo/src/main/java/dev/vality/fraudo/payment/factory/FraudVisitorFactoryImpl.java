@@ -1,6 +1,5 @@
 package dev.vality.fraudo.payment.factory;
 
-import dev.vality.fraudo.converter.TrustConditionConverter;
 import dev.vality.fraudo.bundle.AggregatorBundle;
 import dev.vality.fraudo.bundle.FinderBundle;
 import dev.vality.fraudo.bundle.ResolverBundle;
@@ -38,11 +37,10 @@ public class FraudVisitorFactoryImpl implements FraudVisitorFactory {
                 resolverBundle.getPaymentTypeResolver());
         IsTrustedFuncVisitor<T> isTrustedFuncVisitor =
                 new IsTrustedFuncVisitorImpl<>(resolverBundle.getCustomerTypeResolver());
-        TrustConditionConverter trustConditionConverter = new TrustConditionConverter();
 
         return createRulesVisitor(
                 new PaymentFuncVisitor<>(countVisitor, sumVisitor, customFuncVisitor,
-                        isTrustedFuncVisitor, trustConditionConverter),
+                        isTrustedFuncVisitor),
                 listVisitor,
                 resolverBundle.getFieldPairResolver(),
                 new PayoutFuncVisitor<>(

@@ -395,16 +395,6 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBas
     }
 
     @Override
-    public Object visitIsTrustedConditionsSingleList(IsTrustedConditionsSingleListContext ctx) {
-        return paymentFuncVisitor.visitIsTrustedConditionsSingleList(ctx, threadLocalModel.get());
-    }
-
-    @Override
-    public Object visitIsTrustedPaymentsAndPayoutConditions(IsTrustedPaymentsAndPayoutConditionsContext ctx) {
-        return paymentFuncVisitor.visitIsTrustedPaymentsAndPayoutConditions(ctx, threadLocalModel.get());
-    }
-
-    @Override
     public String visitCard_category(FraudoRulesParser.Card_categoryContext ctx) {
         return threadLocalModel.get().getCardCategory() != null ? threadLocalModel.get().getCardCategory() : UNKNOWN;
     }

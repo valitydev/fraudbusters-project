@@ -96,21 +96,14 @@ catch: decline;
 ####Определение доверенного трафика
 
 ```sh
-rule: isTrusted(
-    paymentsConditions(
-        condition("RUB", 1, 1000, 10),
-        condition("EUR", 2, 20)
-    ),
-    payoutsConditions(
-        condition("USD", 3, 3000, 3)
-    )
-) -> accept;
+rule: isTrusted() -> accept;
+rule: isTrusted("trusted-template") -> accept;
 ```
 
-В случае если сумма за 1 последний год > 100 рублей и количество транзакций > 10 
-или количество транзакций за 2 последних года  > 20 в евро 
-или количество выплат в USD за 3 последних года по сумме > 3000 или больше 3 успешных операций,
-то операция будет помечена как ```accept```.
+Первый вариант проверяет доверенность карты, второй — по именованному шаблону
+trusted-tokens. Условия по истории операций задаются обычными функциями
+`countSuccess`, `sumSuccess`, `countPayoutsSuccess`, `sumPayoutsSuccess`
+и логическими операциями.
 
 ####Определение типа карты
 
