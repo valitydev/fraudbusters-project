@@ -1,6 +1,7 @@
 package dev.vality.fraudbusters.management.listener;
 
 import dev.vality.damsel.wb_list.Event;
+import dev.vality.fraudbusters.management.dao.payout.PayoutConfigurationDao;
 import dev.vality.dao.DaoException;
 import dev.vality.fraudbusters.management.converter.payment.EventToListRecordConverter;
 import dev.vality.fraudbusters.management.dao.CdDao;
@@ -19,11 +20,17 @@ import org.springframework.stereotype.Component;
 public class WbListEventListener {
 
     private final WbListDao wbListDao;
+    private final PayoutConfigurationDao payoutConfigurationDao;
     private final EventToListRecordConverter eventToListRecordConverter;
     private final AuditService auditService;
 
     @KafkaListener(topics = "${kafka.topic.wblist.event.sink}", containerFactory = "kafkaListenerContainerFactory")
     public void listen(Event event) throws DaoException {
+        if (event.getRow().isSetId() && event.getRow().getId().isSetPayoutId()) {
+            payoutConfigurationDao.applyList(event);
+            auditService.logEvent(event);
+            return;
+        }
         log.info("WbListListener event: {}", event);
         if (!event.getRow().isSetId() || event.getRow().getId().isSetPaymentId()) {
             WbListRecords record = eventToListRecordConverter.convert(event);

@@ -1,6 +1,7 @@
 package dev.vality.fraudbusters.management.listener.payment;
 
 import dev.vality.damsel.fraudbusters.Command;
+import dev.vality.fraudbusters.management.dao.payout.PayoutConfigurationDao;
 import dev.vality.fraudbusters.management.converter.CommandToGroupModelConverter;
 import dev.vality.fraudbusters.management.dao.GroupDao;
 import dev.vality.fraudbusters.management.listener.CommandListener;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PaymentGroupListener extends CommandListener {
 
+    private final PayoutConfigurationDao payoutConfigurationDao;
     private final GroupDao paymentGroupDao;
     private final CommandToGroupModelConverter converter;
     private final AuditService auditService;
@@ -22,6 +24,11 @@ public class PaymentGroupListener extends CommandListener {
     @KafkaListener(topics = "${kafka.topic.fraudbusters.payment.group.list}",
             containerFactory = "kafkaGroupListenerContainerFactory")
     public void listen(Command command) {
+        if (PayoutConfigurationDao.supports(command)) {
+            payoutConfigurationDao.apply(command);
+            auditService.logCommand(command);
+            return;
+        }
         log.info("GroupListener event: {}", command);
         handle(command, converter, paymentGroupDao::insert, paymentGroupDao::remove);
         auditService.logCommand(command);

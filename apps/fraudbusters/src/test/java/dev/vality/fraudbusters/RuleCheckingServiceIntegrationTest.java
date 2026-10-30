@@ -22,7 +22,7 @@ import dev.vality.fraudbusters.service.TimeBoundaryServiceImpl;
 import dev.vality.fraudbusters.service.dto.CascadingTemplateDto;
 import dev.vality.fraudbusters.util.BeanUtil;
 import dev.vality.fraudbusters.util.CheckedResultFactory;
-import dev.vality.fraudo.FraudoPaymentParser;
+import dev.vality.fraudo.FraudoRulesParser;
 import dev.vality.fraudo.constant.ResultStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -64,6 +64,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class RuleCheckingServiceIntegrationTest {
 
     @MockitoBean
+    private dev.vality.fraudbusters.fraud.payout.PayoutAggregators payoutAggregators;
+
+    @MockitoBean
     private RefundRepository refundRepository;
     @MockitoBean
     private ChargebackRepository chargebackRepository;
@@ -85,7 +88,7 @@ class RuleCheckingServiceIntegrationTest {
     @Autowired
     private HistoricalPool<ParserRuleContext> timeTemplatePoolImpl;
     @Autowired
-    private FraudContextParser<FraudoPaymentParser.ParseContext> paymentContextParser;
+    private FraudContextParser<FraudoRulesParser.ParseContext> paymentContextParser;
 
     private static final Instant now = Instant.now();
     private static final long TIMESTAMP = now.toEpochMilli();

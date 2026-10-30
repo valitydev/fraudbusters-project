@@ -1,6 +1,7 @@
 package dev.vality.fraudbusters.listener.payment.historical;
 
 import dev.vality.damsel.fraudbusters.Command;
+import dev.vality.fraudbusters.util.OperationTypeUtil;
 import dev.vality.damsel.fraudbusters.CommandType;
 import dev.vality.damsel.fraudbusters.Template;
 import dev.vality.fraudbusters.fraud.FraudContextParser;
@@ -8,7 +9,7 @@ import dev.vality.fraudbusters.fraud.payment.validator.PaymentTemplateValidator;
 import dev.vality.fraudbusters.listener.CommandListener;
 import dev.vality.fraudbusters.pool.HistoricalPool;
 import dev.vality.fraudbusters.util.TimestampUtil;
-import dev.vality.fraudo.FraudoPaymentParser;
+import dev.vality.fraudo.FraudoRulesParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -25,7 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TimeTemplateListener extends AbstractTimePoolCommandListenerExecutor implements CommandListener {
 
-    private final FraudContextParser<FraudoPaymentParser.ParseContext> paymentContextParser;
+    private final FraudContextParser<FraudoRulesParser.ParseContext> paymentContextParser;
     private final PaymentTemplateValidator paymentTemplateValidator;
     private final HistoricalPool<ParserRuleContext> timeTemplateTimePoolImpl;
 
@@ -33,6 +34,9 @@ public class TimeTemplateListener extends AbstractTimePoolCommandListenerExecuto
     @KafkaListener(autoStartup = "${kafka.historical.listener.enable}", topics = "${kafka.topic.full-template}",
             containerFactory = "timeTemplateListenerContainerFactory")
     public void listen(@Payload Command command) {
+        if (OperationTypeUtil.isPayout(command)) {
+            return;
+        }
         log.info("TimeTemplateListener command: {}", command);
         if (command != null && command.isSetCommandBody() && command.getCommandBody().isSetTemplate()) {
             Template template = command.getCommandBody().getTemplate();

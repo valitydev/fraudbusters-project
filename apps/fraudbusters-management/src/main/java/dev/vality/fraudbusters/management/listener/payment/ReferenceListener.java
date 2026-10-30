@@ -1,6 +1,7 @@
 package dev.vality.fraudbusters.management.listener.payment;
 
 import dev.vality.damsel.fraudbusters.Command;
+import dev.vality.fraudbusters.management.dao.payout.PayoutConfigurationDao;
 import dev.vality.fraudbusters.management.converter.payment.CommandToPaymentReferenceModelConverter;
 import dev.vality.fraudbusters.management.dao.ReferenceDao;
 import dev.vality.fraudbusters.management.domain.payment.PaymentReferenceModel;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ReferenceListener extends CommandListener {
 
+    private final PayoutConfigurationDao payoutConfigurationDao;
     private final ReferenceDao<PaymentReferenceModel> referenceDao;
     private final CommandToPaymentReferenceModelConverter paymentReferenceConverter;
     private final AuditService auditService;
@@ -23,6 +25,11 @@ public class ReferenceListener extends CommandListener {
     @KafkaListener(topics = "${kafka.topic.fraudbusters.payment.reference}",
             containerFactory = "kafkaReferenceListenerContainerFactory")
     public void listen(Command command) {
+        if (PayoutConfigurationDao.supports(command)) {
+            payoutConfigurationDao.apply(command);
+            auditService.logCommand(command);
+            return;
+        }
         log.info("ReferenceListener command: {}", command);
         if (command.getCommandBody().isSetReference()) {
             handle(command, paymentReferenceConverter, referenceDao::insert, referenceDao::remove);

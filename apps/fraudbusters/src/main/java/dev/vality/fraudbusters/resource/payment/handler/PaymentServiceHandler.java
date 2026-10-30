@@ -59,7 +59,7 @@ public class PaymentServiceHandler implements PaymentServiceSrv.Iface {
 
     @Override
     public void insertWithdrawals(List<Withdrawal> list) throws TException {
-        log.debug("InsertWithdrawals list: {}", list);
+        log.debug("InsertWithdrawals count: {}", list.size());
         for (Withdrawal withdrawal : list) {
             send(kafkaFraudWithdrawalTemplate, withdrawalEventTopic, withdrawal.getId(), withdrawal);
         }
@@ -85,7 +85,7 @@ public class PaymentServiceHandler implements PaymentServiceSrv.Iface {
         try {
             template.send(topic, id, t).get();
         } catch (Exception e) {
-            log.error("Error when insert to: {} : {}", topic, t);
+            log.error("Error when inserting event to topic: {}", topic);
             throw new InsertionException()
                     .setId(id)
                     .setReason(e.getMessage());

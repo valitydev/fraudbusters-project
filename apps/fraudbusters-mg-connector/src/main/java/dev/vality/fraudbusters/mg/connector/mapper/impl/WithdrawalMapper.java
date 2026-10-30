@@ -60,6 +60,10 @@ public class WithdrawalMapper implements Mapper<TimestampedChange, MachineEvent,
                 withdrawalInfo.getWalletId());
 
         withdrawal.setAccount(accountConverter.convert(walletConfig.getAccount()));
+        withdrawal.setWalletId(withdrawalInfo.getWalletId());
+        if (walletConfig.isSetPartyRef()) {
+            withdrawal.setPartyId(walletConfig.getPartyRef().getId());
+        }
 
         final Resource resource = fistfulResourceToDomainResourceConverter.convert(destinationInfo.getResource());
         withdrawal.setDestinationResource(resource);

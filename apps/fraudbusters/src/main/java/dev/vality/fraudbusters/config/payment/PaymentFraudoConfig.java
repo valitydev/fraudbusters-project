@@ -21,6 +21,7 @@ import dev.vality.fraudbusters.repository.clickhouse.impl.ChargebackRepository;
 import dev.vality.fraudbusters.repository.clickhouse.impl.RefundRepository;
 import dev.vality.fraudbusters.service.TimeBoundaryService;
 import dev.vality.fraudo.aggregator.UniqueValueAggregator;
+import dev.vality.fraudbusters.fraud.payout.PayoutAggregators;
 import dev.vality.fraudo.bundle.AggregatorBundle;
 import dev.vality.fraudo.bundle.FinderBundle;
 import dev.vality.fraudo.bundle.ResolverBundle;
@@ -31,8 +32,8 @@ import dev.vality.fraudo.payment.aggregator.SumPaymentAggregator;
 import dev.vality.fraudo.payment.factory.FraudVisitorFactoryImpl;
 import dev.vality.fraudo.payment.factory.FullVisitorFactoryImpl;
 import dev.vality.fraudo.payment.resolver.CustomerTypeResolver;
-import dev.vality.fraudo.payment.resolver.PaymentGroupResolver;
-import dev.vality.fraudo.payment.resolver.PaymentTimeWindowResolver;
+import dev.vality.fraudo.resolver.impl.GroupFieldsResolverImpl;
+import dev.vality.fraudo.resolver.impl.TimeWindowResolverImpl;
 import dev.vality.fraudo.payment.resolver.PaymentTypeResolver;
 import dev.vality.fraudo.payment.visitor.impl.FirstFindVisitorImpl;
 import dev.vality.fraudo.resolver.CountryResolver;
@@ -116,14 +117,16 @@ public class PaymentFraudoConfig {
             InListFinder<PaymentModel, PaymentCheckedField> paymentInListFinder,
             FieldResolver<PaymentModel, PaymentCheckedField> paymentModelFieldResolver,
             PaymentTypeResolver<PaymentModel> paymentTypeResolver,
-            CustomerTypeResolver<PaymentModel> customerTypeResolver) {
+            CustomerTypeResolver<PaymentModel> customerTypeResolver,
+            PayoutAggregators payoutAggregators) {
         AggregatorBundle<PaymentModel, PaymentCheckedField> aggregatorBundle =
-                new AggregatorBundle<>(countAggregator, sumAggregator, uniqueValueAggregator);
+                new AggregatorBundle<>(countAggregator, sumAggregator, uniqueValueAggregator,
+                        payoutAggregators, payoutAggregators, payoutAggregators);
         ResolverBundle<PaymentModel, PaymentCheckedField> resolverBundle = new ResolverBundle<>(
                 countryResolver,
                 paymentModelFieldResolver,
-                new PaymentGroupResolver<>(paymentModelFieldResolver),
-                new PaymentTimeWindowResolver(),
+                new GroupFieldsResolverImpl<>(paymentModelFieldResolver),
+                new TimeWindowResolverImpl(),
                 paymentTypeResolver,
                 customerTypeResolver
         );
@@ -209,14 +212,16 @@ public class PaymentFraudoConfig {
             InListFinder<PaymentModel, PaymentCheckedField> paymentInListFinder,
             FieldResolver<PaymentModel, PaymentCheckedField> paymentModelFieldResolver,
             PaymentTypeResolver<PaymentModel> paymentTypeResolver,
-            CustomerTypeResolver<PaymentModel> customerTypeResolver) {
+            CustomerTypeResolver<PaymentModel> customerTypeResolver,
+            PayoutAggregators payoutAggregators) {
         AggregatorBundle<PaymentModel, PaymentCheckedField> aggregatorBundle =
-                new AggregatorBundle<>(countResultAggregator, sumResultAggregator, uniqueValueResultAggregator);
+                new AggregatorBundle<>(countResultAggregator, sumResultAggregator, uniqueValueResultAggregator,
+                        payoutAggregators, payoutAggregators, payoutAggregators);
         ResolverBundle<PaymentModel, PaymentCheckedField> resolverBundle = new ResolverBundle<>(
                 countryResolver,
                 paymentModelFieldResolver,
-                new PaymentGroupResolver<>(paymentModelFieldResolver),
-                new PaymentTimeWindowResolver(),
+                new GroupFieldsResolverImpl<>(paymentModelFieldResolver),
+                new TimeWindowResolverImpl(),
                 paymentTypeResolver,
                 customerTypeResolver
         );

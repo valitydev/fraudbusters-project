@@ -9,7 +9,7 @@ import dev.vality.fraudbusters.pool.HistoricalPool;
 import dev.vality.fraudbusters.service.dto.CascadingTemplateDto;
 import dev.vality.fraudbusters.stream.impl.RuleCheckingApplierImpl;
 import dev.vality.fraudbusters.util.CheckedResultFactory;
-import dev.vality.fraudo.FraudoPaymentParser;
+import dev.vality.fraudo.FraudoRulesParser;
 import dev.vality.fraudo.constant.ResultStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +42,7 @@ class RuleCheckingServiceImplTest {
     private PaymentTemplateValidator paymentTemplateValidator;
 
     @MockitoBean
-    private FraudContextParser<FraudoPaymentParser.ParseContext> paymentContextParser;
+    private FraudContextParser<FraudoRulesParser.ParseContext> paymentContextParser;
 
     @MockitoBean
     private RuleCheckingApplierImpl<PaymentModel> ruleCheckingApplier;
@@ -88,13 +88,13 @@ class RuleCheckingServiceImplTest {
 
     @Test
     void checkSingleRule() {
-        FraudoPaymentParser.ParseContext context = new FraudoPaymentParser.ParseContext(null, 0);
+        FraudoRulesParser.ParseContext context = new FraudoRulesParser.ParseContext(null, 0);
         CheckedResultModel firstResultModel = createCheckedResultModel(ResultStatus.ACCEPT);
         CheckedResultModel secondResultModel = createCheckedResultModel(ResultStatus.DECLINE);
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
         when(paymentContextParser.parse(anyString())).thenReturn(context);
         when(ruleCheckingApplier
-                .applyWithContext(any(PaymentModel.class), anyString(), any(FraudoPaymentParser.ParseContext.class))
+                .applyWithContext(any(PaymentModel.class), anyString(), any(FraudoRulesParser.ParseContext.class))
         )
                 .thenReturn(Optional.of(firstResultModel))
                 .thenReturn(Optional.of(secondResultModel));
@@ -118,8 +118,8 @@ class RuleCheckingServiceImplTest {
         ArgumentCaptor<String> validatorTemplateStringCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> contextParserTemplateStringCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> ruleCheckingApplierTemplateStringCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<FraudoPaymentParser.ParseContext> contextCaptor =
-                ArgumentCaptor.forClass(FraudoPaymentParser.ParseContext.class);
+        ArgumentCaptor<FraudoRulesParser.ParseContext> contextCaptor =
+                ArgumentCaptor.forClass(FraudoRulesParser.ParseContext.class);
         ArgumentCaptor<PaymentModel> paymentModelCaptor = ArgumentCaptor.forClass(PaymentModel.class);
 
         verify(paymentTemplateValidator, times(1))
@@ -170,7 +170,7 @@ class RuleCheckingServiceImplTest {
 
     @Test
     void checkRuleWithinRulesetGroupTemplateByParty() {
-        FraudoPaymentParser.ParseContext context = new FraudoPaymentParser.ParseContext(null, 0);
+        FraudoRulesParser.ParseContext context = new FraudoRulesParser.ParseContext(null, 0);
         PaymentModel paymentModel = createPaymentModel(ThreadLocalRandom.current().nextLong(), TIMESTAMP);
 
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
@@ -204,7 +204,7 @@ class RuleCheckingServiceImplTest {
     @Test
     void checkRuleWithinRulesetGroupTemplateByPartyShop() {
         PaymentModel paymentModel = createPaymentModel(ThreadLocalRandom.current().nextLong(), TIMESTAMP);
-        FraudoPaymentParser.ParseContext context = new FraudoPaymentParser.ParseContext(null, 0);
+        FraudoRulesParser.ParseContext context = new FraudoRulesParser.ParseContext(null, 0);
 
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
         when(paymentContextParser.parse(anyString())).thenReturn(context);
@@ -246,7 +246,7 @@ class RuleCheckingServiceImplTest {
         String differentPartyId = UUID.randomUUID().toString();
         PaymentModel paymentModel = createPaymentModel(ThreadLocalRandom.current().nextLong(), TIMESTAMP);
         paymentModel.setPartyId(differentPartyId);
-        FraudoPaymentParser.ParseContext context = new FraudoPaymentParser.ParseContext(null, 0);
+        FraudoRulesParser.ParseContext context = new FraudoRulesParser.ParseContext(null, 0);
 
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
         when(paymentContextParser.parse(anyString())).thenReturn(context);
@@ -302,7 +302,7 @@ class RuleCheckingServiceImplTest {
         PaymentModel paymentModel = createPaymentModel(ThreadLocalRandom.current().nextLong(), TIMESTAMP);
         paymentModel.setPartyId(differentPartyId);
         paymentModel.setShopId(differentShopId);
-        FraudoPaymentParser.ParseContext context = new FraudoPaymentParser.ParseContext(null, 0);
+        FraudoRulesParser.ParseContext context = new FraudoRulesParser.ParseContext(null, 0);
 
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
         when(paymentContextParser.parse(anyString())).thenReturn(context);
@@ -360,7 +360,7 @@ class RuleCheckingServiceImplTest {
     @Test
     void checkRuleWithinRulesetTemplateByPartyIdSamePartyId() {
         PaymentModel paymentModel = createPaymentModel(ThreadLocalRandom.current().nextLong(), TIMESTAMP);
-        FraudoPaymentParser.ParseContext context = new FraudoPaymentParser.ParseContext(null, 0);
+        FraudoRulesParser.ParseContext context = new FraudoRulesParser.ParseContext(null, 0);
 
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
         when(paymentContextParser.parse(anyString())).thenReturn(context);
@@ -398,7 +398,7 @@ class RuleCheckingServiceImplTest {
         verify(ruleCheckingApplier, times(2))
                 .applyForAny(any(PaymentModel.class), anyList(), anyLong());
         verify(ruleCheckingApplier, times(1))
-                .applyWithContext(any(PaymentModel.class), anyString(), any(FraudoPaymentParser.ParseContext.class));
+                .applyWithContext(any(PaymentModel.class), anyString(), any(FraudoRulesParser.ParseContext.class));
         verify(checkedResultFactory, times(0))
                 .createNotificationOnlyResultModel(anyString(), anyList());
     }
@@ -406,7 +406,7 @@ class RuleCheckingServiceImplTest {
     @Test
     void checkRuleWithinRulesetTemplateByPartyShopKeySamePartyShopKey() {
         PaymentModel paymentModel = createPaymentModel(ThreadLocalRandom.current().nextLong(), TIMESTAMP);
-        FraudoPaymentParser.ParseContext context = new FraudoPaymentParser.ParseContext(null, 0);
+        FraudoRulesParser.ParseContext context = new FraudoRulesParser.ParseContext(null, 0);
 
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
         when(paymentContextParser.parse(anyString())).thenReturn(context);
@@ -455,7 +455,7 @@ class RuleCheckingServiceImplTest {
         verify(ruleCheckingApplier, times(1))
                 .apply(any(PaymentModel.class), anyString(), anyLong());
         verify(ruleCheckingApplier, times(1))
-                .applyWithContext(any(PaymentModel.class), anyString(), any(FraudoPaymentParser.ParseContext.class));
+                .applyWithContext(any(PaymentModel.class), anyString(), any(FraudoRulesParser.ParseContext.class));
         verify(checkedResultFactory, times(0))
                 .createNotificationOnlyResultModel(anyString(), anyList());
     }
@@ -467,7 +467,7 @@ class RuleCheckingServiceImplTest {
         PaymentModel paymentModel = createPaymentModel(ThreadLocalRandom.current().nextLong(), TIMESTAMP);
         paymentModel.setPartyId(differentPartyId);
         paymentModel.setShopId(differentShopId);
-        FraudoPaymentParser.ParseContext context = new FraudoPaymentParser.ParseContext(null, 0);
+        FraudoRulesParser.ParseContext context = new FraudoRulesParser.ParseContext(null, 0);
 
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
         when(paymentContextParser.parse(anyString())).thenReturn(context);
@@ -535,7 +535,7 @@ class RuleCheckingServiceImplTest {
         PaymentModel paymentModel = createPaymentModel(ThreadLocalRandom.current().nextLong(), differentTimestamp);
         paymentModel.setPartyId(differentPartyId);
         paymentModel.setShopId(differentShopId);
-        FraudoPaymentParser.ParseContext context = new FraudoPaymentParser.ParseContext(null, 0);
+        FraudoRulesParser.ParseContext context = new FraudoRulesParser.ParseContext(null, 0);
 
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
         when(paymentContextParser.parse(anyString())).thenReturn(context);

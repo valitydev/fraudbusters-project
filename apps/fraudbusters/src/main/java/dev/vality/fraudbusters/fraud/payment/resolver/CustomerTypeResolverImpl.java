@@ -4,7 +4,7 @@ import dev.vality.fraudbusters.exception.RuleFunctionException;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.fraud.pool.CardTokenPool;
 import dev.vality.fraudbusters.util.ConditionTemplateFactory;
-import dev.vality.fraudo.model.TrustCondition;
+import dev.vality.fraudbusters.fraud.model.TrustCondition;
 import dev.vality.fraudo.payment.resolver.CustomerTypeResolver;
 import dev.vality.trusted.tokens.TrustedTokensSrv;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +39,6 @@ public class CustomerTypeResolverImpl implements CustomerTypeResolver<PaymentMod
         }
     }
 
-    @Override
     public Boolean isTrusted(PaymentModel model, List<TrustCondition> paymentsConditions,
                              List<TrustCondition> withdrawalsConditions) {
         try {

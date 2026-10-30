@@ -17,7 +17,7 @@ import dev.vality.fraudbusters.util.BeanUtil;
 import dev.vality.fraudo.constant.ResultStatus;
 import dev.vality.fraudo.model.ResultModel;
 import dev.vality.fraudo.model.RuleResult;
-import dev.vality.fraudo.model.TrustCondition;
+import dev.vality.fraudbusters.fraud.model.TrustCondition;
 import dev.vality.trusted.tokens.Condition;
 import dev.vality.trusted.tokens.*;
 

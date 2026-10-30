@@ -5,6 +5,7 @@ import dev.vality.damsel.wb_list.WbListServiceSrv;
 import dev.vality.fraudbusters.converter.CheckedResultToRiskScoreConverter;
 import dev.vality.fraudbusters.converter.ContextToFraudRequestConverter;
 import dev.vality.fraudbusters.domain.FraudResult;
+import dev.vality.fraudbusters.fraud.payout.PayoutInspectionService;
 import dev.vality.fraudbusters.resource.payment.handler.FraudInspectorHandler;
 import dev.vality.fraudbusters.stream.impl.TemplateVisitorImpl;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,14 +25,16 @@ public class PaymentResourceConfig {
             CheckedResultToRiskScoreConverter checkedResultToRiskScoreConverter,
             ContextToFraudRequestConverter requestConverter,
             TemplateVisitorImpl templateVisitor,
-            WbListServiceSrv.Iface wbListServiceSrv) {
+            WbListServiceSrv.Iface wbListServiceSrv,
+            PayoutInspectionService payoutInspectionService) {
         return new FraudInspectorHandler(
                 resultTopic,
                 checkedResultToRiskScoreConverter,
                 requestConverter,
                 templateVisitor,
                 kafkaFraudResultTemplate,
-                wbListServiceSrv
+                wbListServiceSrv,
+                payoutInspectionService
         );
     }
 

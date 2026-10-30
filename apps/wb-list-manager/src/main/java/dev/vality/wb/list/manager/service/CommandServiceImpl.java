@@ -21,11 +21,10 @@ public class CommandServiceImpl implements CommandService {
 
     @Override
     public Event apply(ChangeCommand command) {
-        log.info("CommandService apply command: {}", command);
+        log.debug("Applying list command type: {}", command.getCommand());
         Row row = commandToRowConverter.convert(command);
-        log.info("CommandService apply row: {}", row);
         if (row == null || !StringUtils.hasText(row.getValue())) {
-            log.warn("Ignore empty command row value: {}", row);
+            log.warn("Ignore empty command row value");
             return null;
         }
         Event event = applyCommandAndGetEvent(command, row);
@@ -45,7 +44,7 @@ public class CommandServiceImpl implements CommandService {
                 yield new Event().setEventType(EventType.DELETED);
             }
             default -> {
-                log.warn("CommandService command for list not found! command: {}", command);
+                log.warn("Unknown list command type: {}", command.getCommand());
                 throw new RuntimeException("WbListStreamFactory command for list not found!");
             }
         };

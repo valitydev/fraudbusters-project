@@ -16,6 +16,7 @@ public enum PaymentCheckedField {
     CURRENCY("currency"),
     SHOP_ID("shop_id"),
     PARTY_ID("party_id"),
+    WALLET_ID("wallet_id"),
     MOBILE("mobile"),
     RECURRENT("recurrent"),
     CARD_TOKEN("card_token"),

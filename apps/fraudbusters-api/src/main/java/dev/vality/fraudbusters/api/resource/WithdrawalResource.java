@@ -25,12 +25,12 @@ public class WithdrawalResource implements WithdrawalsApi {
 
     @Override
     public ResponseEntity<Void> insertWithdrawals(WithdrawalsRequest withdrawalsRequest) {
-        log.debug("-> insertWithdrawals request: {}", withdrawalsRequest);
+        log.debug("-> insertWithdrawals");
         if (!CollectionUtils.isEmpty(withdrawalsRequest.getWithdrawals())) {
             List<Withdrawal> withdrawals = withdrawalsRequestToWithdrawalsConverter.convert(withdrawalsRequest);
             fraudbustersService.insertWithdrawals(withdrawals);
         }
-        log.debug("<- insertWithdrawals success request: {}", withdrawalsRequest);
+        log.debug("<- insertWithdrawals success");
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .build();

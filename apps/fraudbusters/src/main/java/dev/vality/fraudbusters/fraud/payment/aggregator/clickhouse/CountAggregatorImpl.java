@@ -26,8 +26,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel, PaymentCheckedField> {
 
-    private static final int CURRENT_ONE = 1;
-
     private final DatabasePaymentFieldResolver databasePaymentFieldResolver;
     private final PaymentRepository paymentRepository;
     private final AggregationRepository refundRepository;
@@ -129,7 +127,7 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
                     resolve.getValue(),
                     count
             );
-            return count + CURRENT_ONE;
+            return count + CurrentPaymentContribution.count(paymentModel);
         } catch (Exception e) {
             log.warn("CountAggregatorImpl error when countError e: ", e);
             throw new RuleFunctionException(e);
@@ -207,7 +205,7 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
             FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel);
             List<FieldModel> eventFields = databasePaymentFieldResolver.resolveListFields(paymentModel, list);
             if (Objects.isNull(resolve.getValue())) {
-                return withCurrent ? CURRENT_ONE : 0;
+                return withCurrent ? CurrentPaymentContribution.count(paymentModel) : 0;
             }
             Integer count = aggregateFunction.accept(
                     resolve.getName(),
@@ -222,7 +220,7 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
                     resolve.getValue(),
                     count
             );
-            return withCurrent ? count + CURRENT_ONE : count;
+            return withCurrent ? count + CurrentPaymentContribution.count(paymentModel) : count;
         } catch (Exception e) {
             log.warn("CountAggregatorImpl error when getCount e: ", e);
             throw new RuleFunctionException(e);

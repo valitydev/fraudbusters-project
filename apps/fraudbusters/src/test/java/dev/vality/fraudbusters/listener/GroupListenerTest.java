@@ -23,7 +23,7 @@ public class GroupListenerTest {
     @BeforeEach
     public void init() {
         groupPoolImpl = new PoolImpl<>("group");
-        groupListener = new GroupListener(groupPoolImpl);
+        groupListener = new GroupListener(null, groupPoolImpl);
     }
 
     @Test

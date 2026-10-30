@@ -23,7 +23,7 @@ public class GroupReferenceListenerTest {
     @BeforeEach
     public void init() {
         groupReferencePoolImpl = new PoolImpl<>("group-reference");
-        groupReferenceListener = new GroupReferenceListener(groupReferencePoolImpl);
+        groupReferenceListener = new GroupReferenceListener(null, groupReferencePoolImpl);
     }
 
     @Test

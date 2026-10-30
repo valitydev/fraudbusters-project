@@ -28,16 +28,7 @@ public class EndToEndIntegrationTemplates {
             "rule:GROUP_NORMAL:  1 < 0  -> decline;";
     public static final String TEMPLATE_CONCRETE_SHOP = """
             rule:TEMPLATE_CONCRETE_SHOP:  sum("email", 10) >= 18000
-             AND isTrusted(
-                paymentsConditions(
-                    condition("RUB",1,1000,10),
-                    condition("EUR",2,20)
-                ),
-                withdrawalsConditions(
-                    condition("USD",0,3000,3),
-                    condition("CAD",2,4)
-                )
-             )
+             AND isTrusted("synthetic-trusted-template")
              -> accept;";
             """;
 

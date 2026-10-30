@@ -123,6 +123,24 @@ class UserIdentityAggregationTest {
     }
 
     @Test
+    void inspectingPayoutDoesNotAddItToPaymentHistory() {
+        PaymentModel model = model();
+        model.setOperationType(dev.vality.damsel.fraudbusters.OperationType.payout);
+        var counts = new CountAggregatorImpl(resolver, payments, refunds, chargebacks, boundaries);
+        var sums = new SumAggregatorImpl(resolver, payments, refunds, chargebacks, boundaries);
+        final var unique = new UniqueValueAggregatorImpl(resolver, payments, boundaries);
+        assertEquals(0, counts.count(USER_ID, model, window, List.of()));
+        assertEquals(0, counts.countError(USER_ID, model, window, List.of()));
+        assertEquals(0.0, sums.sum(USER_ID, model, window, List.of()));
+        assertEquals(0.0, sums.sumError(USER_ID, model, window, List.of()));
+        assertEquals(0, unique.countUniqueValue(USER_ID, model, CARD_TOKEN, window, List.of()));
+        model.setUserId(null);
+        assertEquals(0, counts.count(USER_ID, model, window, List.of()));
+        assertEquals(0.0, sums.sum(USER_ID, model, window, List.of()));
+        assertEquals(0, unique.countUniqueValue(USER_ID, model, CARD_TOKEN, window, List.of()));
+    }
+
+    @Test
     void historicalEmulationUsesOnlyUserId() {
         var storage = new LocalResultStorage();
         var values = new PaymentFieldValueResolver();
@@ -189,7 +207,7 @@ class UserIdentityAggregationTest {
 
     @Test
     void uniqueResolvesBothSelectionAndCountedField() {
-        var unique = new UniqueValueAggregatorImpl(resolver, payments, boundaries);
+        final var unique = new UniqueValueAggregatorImpl(resolver, payments, boundaries);
         PaymentModel model = model();
         model.setPartyId("synthetic-party");
         unique.countUniqueValue(USER_ID, model, USER_ID, window, List.of());

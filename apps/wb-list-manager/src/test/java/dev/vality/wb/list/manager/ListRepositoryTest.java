@@ -40,7 +40,7 @@ public class ListRepositoryTest {
 
     @BeforeEach
     public void setUp() throws SQLException {
-        jdbcTemplate.execute("truncate table wb_list.row;");
+        jdbcTemplate.execute("truncate table wb_list.row, wb_list.payout_row;");
     }
 
     @DynamicPropertySource
@@ -48,6 +48,18 @@ public class ListRepositoryTest {
         registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
         registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+    }
+
+    @Test
+    void paymentAndPayoutRowsWithSameKeyRemainIndependent() {
+        listRepository.create(new Row(KEY, "payment", false));
+        listRepository.create(new Row(KEY, "payout", true));
+        listRepository.create(new Row(KEY, "updated-payout", true));
+        assertEquals("payment", listRepository.get(KEY).orElseThrow().getValue());
+        assertEquals("updated-payout", listRepository.get(KEY, true).orElseThrow().getValue());
+        listRepository.remove(new Row(KEY, "updated-payout", true));
+        assertTrue(listRepository.get(KEY, true).isEmpty());
+        assertEquals("payment", listRepository.get(KEY).orElseThrow().getValue());
     }
 
     @Test

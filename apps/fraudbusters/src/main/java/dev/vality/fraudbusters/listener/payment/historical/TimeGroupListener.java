@@ -1,6 +1,7 @@
 package dev.vality.fraudbusters.listener.payment.historical;
 
 import dev.vality.damsel.fraudbusters.Command;
+import dev.vality.fraudbusters.util.OperationTypeUtil;
 import dev.vality.fraudbusters.listener.CommandListener;
 import dev.vality.fraudbusters.pool.HistoricalPool;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,9 @@ public class TimeGroupListener extends AbstractTimeGroupCommandListenerExecutor 
     @KafkaListener(autoStartup = "${kafka.historical.listener.enable}", topics = "${kafka.topic.full-group-list}",
             containerFactory = "timeGroupListenerContainerFactory")
     public void listen(@Payload Command command) {
+        if (OperationTypeUtil.isPayout(command)) {
+            return;
+        }
         log.info("TimeGroupListener command: {}", command);
         if (command != null && command.isSetCommandBody() && command.getCommandBody().isSetGroup()) {
             execCommand(command, timeGroupPoolImpl);

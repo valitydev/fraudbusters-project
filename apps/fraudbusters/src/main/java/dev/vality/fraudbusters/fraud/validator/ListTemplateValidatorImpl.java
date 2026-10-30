@@ -1,6 +1,8 @@
 package dev.vality.fraudbusters.fraud.validator;
 
 import dev.vality.damsel.fraudbusters.Template;
+import dev.vality.damsel.fraudbusters.OperationType;
+import dev.vality.fraudo.payout.validator.PayoutTemplateValidator;
 import dev.vality.damsel.fraudbusters.TemplateValidateError;
 import dev.vality.damsel.fraudbusters.ValidateTemplateResponse;
 import dev.vality.fraudbusters.fraud.FraudTemplateValidator;
@@ -33,7 +35,8 @@ public class ListTemplateValidatorImpl implements ListTemplateValidator {
     @Nullable
     private TemplateValidateError validateAndMap(Template template) {
         String templateString = new String(template.getTemplate(), StandardCharsets.UTF_8);
-        List<String> validate = validator.validate(templateString);
+        List<String> validate = template.getOperationType() == OperationType.payout
+                ? new PayoutTemplateValidator().validate(templateString) : validator.validate(templateString);
         if (!CollectionUtils.isEmpty(validate)) {
             return new TemplateValidateError()
                     .setId(template.getId())

@@ -30,7 +30,6 @@ public class WithdrawalEventListener {
             @Header(KafkaHeaders.OFFSET) Long offset) throws InterruptedException {
         try {
             log.info("Listen withdrawals size: {} partition: {} offset: {}", withdrawals.size(), partition, offset);
-            log.debug("Listen withdrawals: {}", withdrawals);
             repository.insertBatch(withdrawals);
             localResultStorage.clear();
         } catch (Exception e) {

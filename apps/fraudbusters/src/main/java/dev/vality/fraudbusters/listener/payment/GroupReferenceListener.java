@@ -1,6 +1,8 @@
 package dev.vality.fraudbusters.listener.payment;
 
 import dev.vality.damsel.fraudbusters.Command;
+import dev.vality.fraudbusters.fraud.payout.PayoutCommandHandler;
+import dev.vality.fraudbusters.util.OperationTypeUtil;
 import dev.vality.damsel.fraudbusters.GroupReference;
 import dev.vality.fraudbusters.listener.AbstractPoolCommandListenerExecutor;
 import dev.vality.fraudbusters.listener.CommandListener;
@@ -17,12 +19,17 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class GroupReferenceListener extends AbstractPoolCommandListenerExecutor implements CommandListener {
 
+    private final PayoutCommandHandler payoutCommandHandler;
     private final Pool<String> groupReferencePoolImpl;
 
     @Override
     @KafkaListener(topics = "${kafka.topic.group-reference}",
             containerFactory = "groupReferenceListenerContainerFactory")
     public void listen(@Payload Command command) {
+        if (OperationTypeUtil.isPayout(command)) {
+            payoutCommandHandler.handle(command);
+            return;
+        }
         log.info("GroupReferenceListener command: {}", command);
         if (command != null && command.isSetCommandBody() && command.getCommandBody().isSetGroupReference()) {
             GroupReference reference = command.getCommandBody().getGroupReference();

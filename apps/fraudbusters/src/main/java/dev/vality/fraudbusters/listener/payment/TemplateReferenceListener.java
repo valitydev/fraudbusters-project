@@ -1,6 +1,8 @@
 package dev.vality.fraudbusters.listener.payment;
 
 import dev.vality.damsel.fraudbusters.Command;
+import dev.vality.fraudbusters.fraud.payout.PayoutCommandHandler;
+import dev.vality.fraudbusters.util.OperationTypeUtil;
 import dev.vality.damsel.fraudbusters.TemplateReference;
 import dev.vality.fraudbusters.listener.AbstractPoolCommandListenerExecutor;
 import dev.vality.fraudbusters.listener.CommandListener;
@@ -17,11 +19,16 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TemplateReferenceListener extends AbstractPoolCommandListenerExecutor implements CommandListener {
 
+    private final PayoutCommandHandler payoutCommandHandler;
     private final Pool<String> referencePoolImpl;
 
     @Override
     @KafkaListener(topics = "${kafka.topic.reference}", containerFactory = "referenceListenerContainerFactory")
     public void listen(@Payload Command command) {
+        if (OperationTypeUtil.isPayout(command)) {
+            payoutCommandHandler.handle(command);
+            return;
+        }
         log.info("TemplateReferenceListener command: {}", command);
         if (command != null && command.isSetCommandBody() && command.getCommandBody().isSetReference()) {
             TemplateReference reference = command.getCommandBody().getReference();

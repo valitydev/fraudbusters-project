@@ -23,9 +23,9 @@ public class LogWithdrawalMapperDecorator implements Mapper<TimestampedChange, M
 
     @Override
     public Withdrawal map(TimestampedChange change, MachineEvent event) {
-        log.debug("Withdrawal map from change: {} event: {} ", change, event);
+        log.debug("Mapping withdrawal event: {}", event.getEventId());
         Withdrawal withdrawal = withdrawalMapper.map(change, event);
-        log.debug("Withdrawal map result: {}", withdrawal);
+        log.debug("Mapped withdrawal status: {}", withdrawal.getStatus());
         return withdrawal;
     }
 

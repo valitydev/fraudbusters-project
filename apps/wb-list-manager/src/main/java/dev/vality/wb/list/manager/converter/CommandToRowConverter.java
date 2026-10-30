@@ -23,6 +23,7 @@ public class CommandToRowConverter implements Converter<ChangeCommand, Row> {
         dev.vality.damsel.wb_list.Row commandRow = command.getRow();
         String key = KeyGenerator.generateKey(commandRow);
         row.setKey(key);
+        row.setPayout(commandRow.isSetId() && commandRow.getId().isSetPayoutId());
         row.setValue(initValue(commandRow));
         return row;
     }

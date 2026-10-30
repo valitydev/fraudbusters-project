@@ -10,7 +10,7 @@ import dev.vality.fraudbusters.service.dto.CascadingTemplateDto;
 import dev.vality.fraudbusters.stream.impl.RuleCheckingApplierImpl;
 import dev.vality.fraudbusters.util.CheckedResultFactory;
 import dev.vality.fraudbusters.util.CheckedResultModelUtil;
-import dev.vality.fraudo.FraudoPaymentParser;
+import dev.vality.fraudo.FraudoRulesParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ import static dev.vality.fraudbusters.util.ReferenceKeyGenerator.generateTemplat
 public class RuleCheckingServiceImpl implements RuleCheckingService {
 
     private final PaymentTemplateValidator paymentTemplateValidator;
-    private final FraudContextParser<FraudoPaymentParser.ParseContext> paymentContextParser;
+    private final FraudContextParser<FraudoRulesParser.ParseContext> paymentContextParser;
     private final RuleCheckingApplierImpl<PaymentModel> ruleCheckingApplier;
     private final HistoricalPool<List<String>> timeGroupPoolImpl;
     private final HistoricalPool<String> timeReferencePoolImpl;
@@ -41,7 +41,7 @@ public class RuleCheckingServiceImpl implements RuleCheckingService {
     public Map<String, CheckedResultModel> checkSingleRule(Map<String, PaymentModel> paymentModelMap,
                                                            String templateString) {
         validateTemplate(templateString);
-        final FraudoPaymentParser.ParseContext parseContext = paymentContextParser.parse(templateString);
+        final FraudoRulesParser.ParseContext parseContext = paymentContextParser.parse(templateString);
         return paymentModelMap.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -66,7 +66,7 @@ public class RuleCheckingServiceImpl implements RuleCheckingService {
 
     private CheckedResultModel checkWithinRuleset(PaymentModel paymentModel, CascadingTemplateDto dto) {
         log.debug("HistoricalTemplateVisitorImpl visit paymentModel: {}", paymentModel);
-        final FraudoPaymentParser.ParseContext parseContext = paymentContextParser.parse(dto.getTemplate());
+        final FraudoRulesParser.ParseContext parseContext = paymentContextParser.parse(dto.getTemplate());
         Long timestamp = dto.getTimestamp() == null ? paymentModel.getTimestamp() : dto.getTimestamp();
         String partyId = paymentModel.getPartyId();
         String partyShopKey = generateTemplateKey(partyId, paymentModel.getShopId());
@@ -99,7 +99,7 @@ public class RuleCheckingServiceImpl implements RuleCheckingService {
                                                                 List<String> notifications,
                                                                 String partyId,
                                                                 CascadingTemplateDto dto,
-                                                                FraudoPaymentParser.ParseContext parseContext) {
+                                                                FraudoRulesParser.ParseContext parseContext) {
         if (isSubstituteOnPartyLevel(partyId, dto)) {
             return applyExactRule(paymentModel, dto.getTemplate(), parseContext, notifications);
         }
@@ -111,7 +111,7 @@ public class RuleCheckingServiceImpl implements RuleCheckingService {
                                                                      List<String> notifications,
                                                                      String partyShopKey,
                                                                      CascadingTemplateDto dto,
-                                                                     FraudoPaymentParser.ParseContext parseContext) {
+                                                                     FraudoRulesParser.ParseContext parseContext) {
         if (isSubstituteOnPartyShopLevel(partyShopKey, dto)) {
             return applyExactRule(paymentModel, dto.getTemplate(), parseContext, notifications);
         }
@@ -132,7 +132,7 @@ public class RuleCheckingServiceImpl implements RuleCheckingService {
 
     private Optional<CheckedResultModel> applyExactRule(PaymentModel paymentModel,
                                                         String templateString,
-                                                        FraudoPaymentParser.ParseContext parseContext,
+                                                        FraudoRulesParser.ParseContext parseContext,
                                                         List<String> notifications) {
         Optional<CheckedResultModel> result =
                 ruleCheckingApplier.applyWithContext(paymentModel, templateString, parseContext);

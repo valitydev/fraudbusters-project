@@ -23,8 +23,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class UniqueValueAggregatorImpl implements UniqueValueAggregator<PaymentModel, PaymentCheckedField> {
 
-    private static final int CURRENT_ONE = 1;
-
     private final DatabasePaymentFieldResolver databasePaymentFieldResolver;
     private final PaymentRepository paymentRepository;
     private final TimeBoundaryService timeBoundaryService;
@@ -42,7 +40,7 @@ public class UniqueValueAggregatorImpl implements UniqueValueAggregator<PaymentM
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
             FieldModel resolve = databasePaymentFieldResolver.resolve(countField, paymentModel);
             if (Objects.isNull(resolve.getValue())) {
-                return CURRENT_ONE;
+                return CurrentPaymentContribution.count(paymentModel);
             }
             List<FieldModel> fieldModels = databasePaymentFieldResolver.resolveListFields(paymentModel, list);
             Integer uniqCountOperation = paymentRepository.uniqCountOperationWithGroupBy(
@@ -53,7 +51,7 @@ public class UniqueValueAggregatorImpl implements UniqueValueAggregator<PaymentM
                     timeBound.getRight().toEpochMilli(),
                     fieldModels
             );
-            return uniqCountOperation + CURRENT_ONE;
+            return uniqCountOperation + CurrentPaymentContribution.count(paymentModel);
         } catch (Exception e) {
             log.warn("UniqueValueAggregatorImpl error when getCount e: ", e);
             throw new RuleFunctionException(e);

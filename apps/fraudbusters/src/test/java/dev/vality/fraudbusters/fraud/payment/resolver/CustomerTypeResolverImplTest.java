@@ -4,8 +4,7 @@ import dev.vality.fraudbusters.factory.TestObjectsFactory;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.fraud.pool.CardTokenPool;
 import dev.vality.fraudbusters.util.ConditionTemplateFactory;
-import dev.vality.fraudo.model.TrustCondition;
-import dev.vality.fraudo.payment.resolver.CustomerTypeResolver;
+import dev.vality.fraudbusters.fraud.model.TrustCondition;
 import dev.vality.trusted.tokens.ConditionTemplate;
 import dev.vality.trusted.tokens.TrustedTokensSrv;
 import org.apache.thrift.TException;
@@ -27,7 +26,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class CustomerTypeResolverImplTest {
 
-    private CustomerTypeResolver<PaymentModel> customerTypeResolver;
+    private CustomerTypeResolverImpl customerTypeResolver;
 
     @Mock
     private CardTokenPool cardTokenPool;

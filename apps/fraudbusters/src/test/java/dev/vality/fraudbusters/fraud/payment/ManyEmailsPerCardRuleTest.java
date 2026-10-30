@@ -130,7 +130,8 @@ class ManyEmailsPerCardRuleTest {
                 unusedProxy(InListFinder.class),
                 new PaymentModelFieldResolver(),
                 new PaymentTypeResolverImpl(),
-                unusedProxy(CustomerTypeResolver.class)
+                unusedProxy(CustomerTypeResolver.class),
+                null
         );
     }
 

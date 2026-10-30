@@ -45,7 +45,8 @@ class FraudInspectorHandlerTest {
                 requestConverter,
                 templateVisitor,
                 kafkaFraudResultTemplate,
-                wbListServiceSrv
+                wbListServiceSrv,
+                null
         );
 
         when(wbListServiceSrv.isExist(any())).thenReturn(false);

@@ -26,7 +26,7 @@ public class WbListServiceHandler implements WbListServiceSrv.Iface {
         try {
             return getCascadeRow(row).isPresent();
         } catch (DbExecutionException e) {
-            log.error("WbListServiceHandler error when isExist row: {} e: ", row, e);
+            log.error("WbListServiceHandler error when isExist", e);
             throw new TException(e);
         }
     }
@@ -62,10 +62,10 @@ public class WbListServiceHandler implements WbListServiceSrv.Iface {
 
     @Override
     public Result getRowInfo(Row row) {
-        log.info("WbListServiceHandler getRowInfo row: {}", row);
+        log.debug("WbListServiceHandler getRowInfo");
         Optional<dev.vality.wb.list.manager.model.Row> result = getCascadeRow(row);
         if (result.isPresent() && row.getListType() == ListType.grey) {
-            log.info("WbListServiceHandler getRowInfo result: {} isPresent=true!", result);
+            log.debug("WbListServiceHandler count info is present");
             try {
                 CountInfoModel countInfoModel = objectMapper.readValue(result.get().getValue(), CountInfoModel.class);
                 return new Result().setRowInfo(RowInfo.count_info(new CountInfo()
@@ -74,14 +74,23 @@ public class WbListServiceHandler implements WbListServiceSrv.Iface {
                         .setStartCountTime(countInfoModel.getStartCountTime())
                 ));
             } catch (JacksonException e) {
-                log.error("Error when parse count info for row: {} e: ", row, e);
+                log.error("Error when parsing count info", e);
             }
         }
-        log.info("WbListServiceHandler getRowInfo row: {} result: {} not present!", row, result);
+        log.debug("WbListServiceHandler count info not present");
         return new Result();
     }
 
     private Optional<dev.vality.wb.list.manager.model.Row> getCascadeRow(Row row) {
+        if (row.isSetId() && row.getId().isSetPayoutId()) {
+            PayoutId id = row.getId().getPayoutId();
+            // Validate the full scope before attempting a global fallback.
+            KeyGenerator.generatePayoutKey(row.getListType(), row.getListName(), row.getValue(),
+                    id.getPartyId(), id.getWalletId());
+            return payoutRow(row, null, null)
+                    .or(() -> payoutRow(row, id.getPartyId(), null))
+                    .or(() -> payoutRow(row, id.getPartyId(), id.getWalletId()));
+        }
         if (row.isSetId() && row.getId().isSetPaymentId()) {
             PaymentId paymentId = row.getId().getPaymentId();
             return cascadeGetRow(row.getListType(), row.getListName(), row.getValue(), paymentId.getPartyId(),
@@ -90,6 +99,11 @@ public class WbListServiceHandler implements WbListServiceSrv.Iface {
             throw new IllegalStateException("P2P is not supported. Row: " + row);
         }
         return cascadeGetRow(row.list_type, row.list_name, row.value, row.getPartyId(), row.getShopId());
+    }
+
+    private Optional<dev.vality.wb.list.manager.model.Row> payoutRow(Row row, String party, String wallet) {
+        return listRepository.get(KeyGenerator.generatePayoutKey(row.getListType(), row.getListName(), row.getValue(),
+                party, wallet), true);
     }
 
     private Optional<dev.vality.wb.list.manager.model.Row> cascadeGetRow(ListType listType,

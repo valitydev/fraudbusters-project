@@ -11,5 +11,10 @@ public class Row {
 
     private String key;
     private String value;
+    private boolean payout;
+
+    public Row(String key, String value) {
+        this(key, value, false);
+    }
 
 }

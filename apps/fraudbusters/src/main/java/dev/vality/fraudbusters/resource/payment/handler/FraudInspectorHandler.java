@@ -10,6 +10,7 @@ import dev.vality.fraudbusters.domain.CheckedResultModel;
 import dev.vality.fraudbusters.domain.FraudRequest;
 import dev.vality.fraudbusters.domain.FraudResult;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.payout.PayoutInspectionService;
 import dev.vality.fraudbusters.stream.TemplateVisitor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,20 @@ public class FraudInspectorHandler implements InspectorProxySrv.Iface {
     private final TemplateVisitor<PaymentModel, CheckedResultModel> templateVisitor;
     private final KafkaTemplate<String, FraudResult> kafkaFraudResultTemplate;
     private final WbListServiceSrv.Iface wbListServiceSrv;
+    private final PayoutInspectionService payoutInspectionService;
+
+    @Override
+    public RiskScore inspectWithdrawal(WithdrawalContext context) throws InvalidRequest, TException {
+        try {
+            context.validate();
+            return checkedResultToRiskScoreConverter.convert(payoutInspectionService.inspect(context));
+        } catch (IllegalArgumentException e) {
+            throw new InvalidRequest().setErrors(java.util.List.of(e.getMessage()));
+        } catch (Exception e) {
+            throw new TException("Unable to inspect withdrawal", e);
+        }
+    }
+
 
     @Override
     public RiskScore inspectPayment(Context context) throws TException {
