@@ -30,3 +30,11 @@ properties:
     $ref: './WithdrawalStatus.yaml'
   error:
     $ref: './Error.yaml'
+  partyId:
+    description: Идентификатор Party, в рамках которой выполняется выплата
+    type: string
+  walletId:
+    description: Идентификатор кошелька выплаты
+    type: string
+  customer:
+    $ref: './Customer.yaml'
