@@ -37,10 +37,10 @@ public class IsTrustedTest extends AbstractPaymentTest {
     }
 
     @Test
-    void trustedWithWithdrawalsConditionsTest() {
+    void trustedWithPayoutsConditionsTest() {
         when(customerTypeResolver.isTrusted(any(), isNull(List.class), anyList()))
                 .thenReturn(true);
-        testIsTrusted("/rules/is_trusted_with_withdrawals_conditions.frd");
+        testIsTrusted("/rules/is_trusted_with_payouts_conditions.frd");
     }
 
     @Test
@@ -51,23 +51,23 @@ public class IsTrustedTest extends AbstractPaymentTest {
     }
 
     @Test
-    void trustedWithPaymentsAndWithdrawalSingleConditionsTest() {
+    void trustedWithPaymentsAndPayoutSingleConditionsTest() {
         when(customerTypeResolver.isTrusted(any(), anyList(), anyList()))
                 .thenReturn(true);
-        testIsTrusted("/rules/is_trusted_with_payments_and_withdrawals_single_conditions.frd");
+        testIsTrusted("/rules/is_trusted_with_payments_and_payouts_single_conditions.frd");
     }
 
     @Test
-    void trustedWithPaymentsAndWithdrawalTest() {
+    void trustedWithPaymentsAndPayoutTest() {
         when(customerTypeResolver.isTrusted(any(), anyList(), anyList()))
                 .thenReturn(true);
-        testIsTrusted("/rules/is_trusted_with_payments_and_withdrawals_conditions.frd");
+        testIsTrusted("/rules/is_trusted_with_payments_and_payouts_conditions.frd");
 
         ArgumentCaptor<PaymentModel> paymentModelCaptor = ArgumentCaptor.forClass(PaymentModel.class);
         ArgumentCaptor<List<TrustCondition>> paymentsCaptor = ArgumentCaptor.forClass((Class) List.class);
-        ArgumentCaptor<List<TrustCondition>> withdrawalsCaptor = ArgumentCaptor.forClass((Class) List.class);
+        ArgumentCaptor<List<TrustCondition>> payoutsCaptor = ArgumentCaptor.forClass((Class) List.class);
         verify(customerTypeResolver, times(1))
-                .isTrusted(paymentModelCaptor.capture(), paymentsCaptor.capture(), withdrawalsCaptor.capture());
+                .isTrusted(paymentModelCaptor.capture(), paymentsCaptor.capture(), payoutsCaptor.capture());
 
         assertEquals(1, paymentModelCaptor.getAllValues().size());
         assertNotNull(paymentModelCaptor.getValue());
@@ -75,10 +75,10 @@ public class IsTrustedTest extends AbstractPaymentTest {
         List<TrustCondition> payments = paymentsCaptor.getValue();
         assertTrustedCondition("RUB", 1, 1000, 10, payments.get(0));
         assertTrustedCondition("EUR", 2, 20, null, payments.get(1));
-        assertEquals(1, withdrawalsCaptor.getAllValues().size());
-        List<TrustCondition> withdrawals = withdrawalsCaptor.getValue();
-        assertTrustedCondition("USD", 3, 3000, 3, withdrawals.get(0));
-        assertTrustedCondition("CAD", 4, 4, null, withdrawals.get(1));
+        assertEquals(1, payoutsCaptor.getAllValues().size());
+        List<TrustCondition> payouts = payoutsCaptor.getValue();
+        assertTrustedCondition("USD", 3, 3000, 3, payouts.get(0));
+        assertTrustedCondition("CAD", 4, 4, null, payouts.get(1));
 
     }
 

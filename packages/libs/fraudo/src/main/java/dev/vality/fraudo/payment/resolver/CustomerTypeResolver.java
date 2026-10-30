@@ -10,6 +10,6 @@ public interface CustomerTypeResolver<T> {
 
     Boolean isTrusted(T model, String templateName);
 
-    Boolean isTrusted(T model, List<TrustCondition> paymentsConditions, List<TrustCondition> withdrawalsConditions);
+    Boolean isTrusted(T model, List<TrustCondition> paymentsConditions, List<TrustCondition> payoutsConditions);
 
 }

@@ -12,5 +12,5 @@ public interface IsTrustedFuncVisitor<T> {
 
     boolean visitCheckTrusted(T model,
                               List<TrustCondition> paymentsConditionsList,
-                              List<TrustCondition> withdrawalConditionsList);
+                              List<TrustCondition> payoutConditionsList);
 }

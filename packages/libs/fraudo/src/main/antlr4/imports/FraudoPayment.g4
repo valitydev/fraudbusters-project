@@ -61,16 +61,16 @@ is_recurrent
 is_trusted
  : 'isTrusted' LPAREN RPAREN                                                        #isTrusted
  | 'isTrusted' LPAREN STRING RPAREN                                                 #isTrustedTemplateName
- | 'isTrusted' LPAREN (payment_conditions | withdrawal_conditions) RPAREN           #isTrustedConditionsSingleList
- | 'isTrusted' LPAREN payment_conditions DELIMITER withdrawal_conditions RPAREN     #isTrustedPaymentsAndWithdrawalConditions
+ | 'isTrusted' LPAREN (payment_conditions | payout_conditions) RPAREN               #isTrustedConditionsSingleList
+ | 'isTrusted' LPAREN payment_conditions DELIMITER payout_conditions RPAREN         #isTrustedPaymentsAndPayoutConditions
  ;
 
 payment_conditions
  : 'paymentsConditions' LPAREN conditions_list RPAREN
  ;
 
-withdrawal_conditions
- : 'withdrawalsConditions' LPAREN conditions_list RPAREN
+payout_conditions
+ : 'payoutsConditions' LPAREN conditions_list RPAREN
  ;
 
 conditions_list

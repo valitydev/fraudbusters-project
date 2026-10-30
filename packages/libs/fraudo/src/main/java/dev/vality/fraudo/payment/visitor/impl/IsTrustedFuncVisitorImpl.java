@@ -25,8 +25,8 @@ public class IsTrustedFuncVisitorImpl<T> implements IsTrustedFuncVisitor<T> {
     @Override
     public boolean visitCheckTrusted(T model,
                                      List<TrustCondition> paymentsConditionsList,
-                                     List<TrustCondition> withdrawalConditionsList) {
-        return customerTypeResolver.isTrusted(model, paymentsConditionsList, withdrawalConditionsList);
+                                     List<TrustCondition> payoutConditionsList) {
+        return customerTypeResolver.isTrusted(model, paymentsConditionsList, payoutConditionsList);
     }
 
 }

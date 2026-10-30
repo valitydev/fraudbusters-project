@@ -101,7 +101,7 @@ rule: isTrusted(
         condition("RUB", 1, 1000, 10),
         condition("EUR", 2, 20)
     ),
-    withdrawalsConditions(
+    payoutsConditions(
         condition("USD", 3, 3000, 3)
     )
 ) -> accept;

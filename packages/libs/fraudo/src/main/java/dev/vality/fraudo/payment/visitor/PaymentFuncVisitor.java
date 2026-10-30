@@ -33,24 +33,24 @@ public class PaymentFuncVisitor<T> {
                     trustConditionConverter.convertToList(ctx.payment_conditions().conditions_list());
             return isTrustedFuncVisitor.visitCheckTrusted(model, paymentsConditions, null);
         }
-        if (ctx.withdrawal_conditions() != null && !ctx.withdrawal_conditions().isEmpty()) {
-            List<TrustCondition> withdrawalsConditions =
-                    trustConditionConverter.convertToList(ctx.withdrawal_conditions().conditions_list());
-            return isTrustedFuncVisitor.visitCheckTrusted(model, null, withdrawalsConditions);
+        if (ctx.payout_conditions() != null && !ctx.payout_conditions().isEmpty()) {
+            List<TrustCondition> payoutsConditions =
+                    trustConditionConverter.convertToList(ctx.payout_conditions().conditions_list());
+            return isTrustedFuncVisitor.visitCheckTrusted(model, null, payoutsConditions);
         }
         throw new NotValidContextException();
     }
 
-    public Object visitIsTrustedPaymentsAndWithdrawalConditions(
-            IsTrustedPaymentsAndWithdrawalConditionsContext ctx, T model) {
+    public Object visitIsTrustedPaymentsAndPayoutConditions(
+            IsTrustedPaymentsAndPayoutConditionsContext ctx, T model) {
         List<TrustCondition> paymentsConditions =
                 trustConditionConverter.convertToList(ctx.payment_conditions().conditions_list());
-        List<TrustCondition> withdrawalsConditions =
-                trustConditionConverter.convertToList(ctx.withdrawal_conditions().conditions_list());
+        List<TrustCondition> payoutsConditions =
+                trustConditionConverter.convertToList(ctx.payout_conditions().conditions_list());
         return isTrustedFuncVisitor.visitCheckTrusted(
                 model,
                 paymentsConditions,
-                withdrawalsConditions
+                payoutsConditions
         );
     }
 

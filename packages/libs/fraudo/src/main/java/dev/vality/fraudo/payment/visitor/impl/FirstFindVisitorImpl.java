@@ -400,8 +400,8 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBas
     }
 
     @Override
-    public Object visitIsTrustedPaymentsAndWithdrawalConditions(IsTrustedPaymentsAndWithdrawalConditionsContext ctx) {
-        return paymentFuncVisitor.visitIsTrustedPaymentsAndWithdrawalConditions(ctx, threadLocalModel.get());
+    public Object visitIsTrustedPaymentsAndPayoutConditions(IsTrustedPaymentsAndPayoutConditionsContext ctx) {
+        return paymentFuncVisitor.visitIsTrustedPaymentsAndPayoutConditions(ctx, threadLocalModel.get());
     }
 
     @Override
