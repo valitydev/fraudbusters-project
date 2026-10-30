@@ -6,6 +6,7 @@ import dev.vality.fraudo.bundle.FinderBundle;
 import dev.vality.fraudo.bundle.ResolverBundle;
 import dev.vality.fraudo.bundle.VisitorBundle;
 import dev.vality.fraudo.model.BaseModel;
+import dev.vality.fraudo.resolver.FieldResolver;
 import dev.vality.fraudo.payout.visitor.PayoutFuncVisitor;
 import dev.vality.fraudo.visitor.FirstFindRulesVisitor;
 import dev.vality.fraudo.payment.visitor.*;
@@ -39,12 +40,11 @@ public class FraudVisitorFactoryImpl implements FraudVisitorFactory {
                 new IsTrustedFuncVisitorImpl<>(resolverBundle.getCustomerTypeResolver());
         TrustConditionConverter trustConditionConverter = new TrustConditionConverter();
 
-        return new FirstFindRulesVisitor<T, U>(
-                new PaymentFuncVisitor<>(countVisitor, sumVisitor, customFuncVisitor),
+        return createRulesVisitor(
+                new PaymentFuncVisitor<>(countVisitor, sumVisitor, customFuncVisitor,
+                        isTrustedFuncVisitor, trustConditionConverter),
                 listVisitor,
-                isTrustedFuncVisitor,
                 resolverBundle.getFieldPairResolver(),
-                trustConditionConverter,
                 new PayoutFuncVisitor<>(
                         aggregatorBundle.getCountPayoutAggregator(),
                         aggregatorBundle.getSumPayoutAggregator(),
@@ -52,6 +52,15 @@ public class FraudVisitorFactoryImpl implements FraudVisitorFactory {
                         resolverBundle.getFieldPairResolver(),
                         resolverBundle.getGroupFieldsResolver(),
                         resolverBundle.getTimeWindowResolver()));
+    }
+
+    protected <T extends BaseModel, U> FirstFindRulesVisitor<T, U> createRulesVisitor(
+            PaymentFuncVisitor<T> paymentFuncVisitor,
+            ListVisitor<T> listVisitor,
+            FieldResolver<T, U> fieldResolver,
+            PayoutFuncVisitor<T, U> payoutFuncVisitor
+    ) {
+        return new FirstFindRulesVisitor<>(paymentFuncVisitor, listVisitor, fieldResolver, payoutFuncVisitor);
     }
 
 }

@@ -1,6 +1,5 @@
 package dev.vality.fraudo.visitor;
 
-import dev.vality.fraudo.converter.TrustConditionConverter;
 import dev.vality.fraudo.exception.NotImplementedOperatorException;
 import dev.vality.fraudo.model.BaseModel;
 import dev.vality.fraudo.payout.visitor.PayoutFuncVisitor;
@@ -15,28 +14,12 @@ public class FirstFindRulesVisitor<T extends BaseModel, U> extends FirstFindVisi
     private final PayoutFuncVisitor<T, U> payoutFuncVisitor;
 
     public FirstFindRulesVisitor(
-            CountVisitor<T> countVisitor,
-            SumVisitor<T> sumVisitor,
-            ListVisitor<T> listVisitor,
-            CustomFuncVisitor<T> customFuncVisitor,
-            IsTrustedFuncVisitor<T> isTrustedFuncVisitor,
-            FieldResolver<T, U> fieldResolver,
-            TrustConditionConverter trustConditionConverter,
-            PayoutFuncVisitor<T, U> payoutFuncVisitor
-    ) {
-        this(new PaymentFuncVisitor<>(countVisitor, sumVisitor, customFuncVisitor), listVisitor,
-                isTrustedFuncVisitor, fieldResolver, trustConditionConverter, payoutFuncVisitor);
-    }
-
-    public FirstFindRulesVisitor(
             PaymentFuncVisitor<T> paymentFuncVisitor,
             ListVisitor<T> listVisitor,
-            IsTrustedFuncVisitor<T> isTrustedFuncVisitor,
             FieldResolver<T, U> fieldResolver,
-            TrustConditionConverter trustConditionConverter,
             PayoutFuncVisitor<T, U> payoutFuncVisitor
     ) {
-        super(paymentFuncVisitor, listVisitor, isTrustedFuncVisitor, fieldResolver, trustConditionConverter);
+        super(paymentFuncVisitor, listVisitor, fieldResolver);
         this.payoutFuncVisitor = payoutFuncVisitor;
     }
 

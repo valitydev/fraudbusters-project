@@ -5,7 +5,6 @@ import dev.vality.fraudo.exception.FieldUnsetException;
 import dev.vality.fraudo.aggregator.UniqueValueAggregator;
 import dev.vality.fraudo.payout.aggregator.CountPayoutAggregator;
 import dev.vality.fraudo.payout.aggregator.SumPayoutAggregator;
-import dev.vality.fraudo.converter.TrustConditionConverter;
 import dev.vality.fraudo.model.BaseModel;
 import dev.vality.fraudo.payment.visitor.impl.FirstFindVisitorImpl;
 import dev.vality.fraudo.visitor.FirstFindRulesVisitor;
@@ -30,9 +29,8 @@ public class PayoutFailureTest extends AbstractPayoutTest {
     void missingFunctionVisitorTest(String function, boolean fullVisitor) throws Exception {
         var parseContext = getParseContext("/rules/payout/failure/" + function + ".frd");
         try (FirstFindVisitorImpl<BaseModel, String> visitor = fullVisitor
-                ? new FullRulesVisitor<>(null, null, null, null, null, fields, new TrustConditionConverter(), null)
-                : new FirstFindRulesVisitor<>(null, null, null, null, null, fields,
-                        new TrustConditionConverter(), null)) {
+                ? new FullRulesVisitor<>(null, null, fields, null)
+                : new FirstFindRulesVisitor<>(null, null, fields, null)) {
             assertStatus(ResultStatus.HIGH_RISK, visitor.visit(parseContext, model));
         }
         verifyNoInteractions(payouts, payoutSums, payoutUnique, payments, paymentSums, paymentUnique);

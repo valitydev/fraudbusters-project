@@ -1,95 +1,47 @@
 package dev.vality.fraudo.visitor;
 
-import dev.vality.fraudo.converter.TrustConditionConverter;
-import dev.vality.fraudo.exception.NotImplementedOperatorException;
+import dev.vality.fraudo.constant.ResultStatus;
+import dev.vality.fraudo.exception.UnknownResultException;
 import dev.vality.fraudo.model.BaseModel;
+import dev.vality.fraudo.model.ResultModel;
+import dev.vality.fraudo.model.RuleResult;
+import dev.vality.fraudo.payment.generator.RuleKeyGenerator;
+import dev.vality.fraudo.payment.visitor.ListVisitor;
+import dev.vality.fraudo.payment.visitor.PaymentFuncVisitor;
 import dev.vality.fraudo.payout.visitor.PayoutFuncVisitor;
-import dev.vality.fraudo.payment.visitor.*;
-import dev.vality.fraudo.payment.visitor.impl.FullVisitorImpl;
 import dev.vality.fraudo.resolver.FieldResolver;
 
-import static dev.vality.fraudo.FraudoRulesParser.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class FullRulesVisitor<T extends BaseModel, U> extends FullVisitorImpl<T, U> {
+import static dev.vality.fraudo.FraudoRulesParser.Fraud_ruleContext;
+import static dev.vality.fraudo.FraudoRulesParser.ParseContext;
 
-    private final PayoutFuncVisitor<T, U> payoutFuncVisitor;
+public class FullRulesVisitor<T extends BaseModel, U> extends FirstFindRulesVisitor<T, U> {
 
     public FullRulesVisitor(
-            CountVisitor<T> countVisitor,
-            SumVisitor<T> sumVisitor,
+            PaymentFuncVisitor<T> paymentFuncVisitor,
             ListVisitor<T> listVisitor,
-            CustomFuncVisitor<T> customFuncVisitor,
-            IsTrustedFuncVisitor<T> isTrustedFuncVisitor,
             FieldResolver<T, U> fieldResolver,
-            TrustConditionConverter trustConditionConverter,
             PayoutFuncVisitor<T, U> payoutFuncVisitor
     ) {
-        super(countVisitor, sumVisitor, listVisitor, customFuncVisitor, isTrustedFuncVisitor, fieldResolver,
-                trustConditionConverter);
-        this.payoutFuncVisitor = payoutFuncVisitor;
+        super(paymentFuncVisitor, listVisitor, fieldResolver, payoutFuncVisitor);
     }
 
     @Override
-    public Integer visitCount_payouts(Count_payoutsContext ctx) {
-        if (payoutFuncVisitor == null) {
-            throw new NotImplementedOperatorException("countPayouts");
+    public ResultModel visitParse(ParseContext ctx) {
+        List<RuleResult> results = new ArrayList<>();
+        for (int i = 0; i < ctx.fraud_rule().size(); i++) {
+            Fraud_ruleContext fraudRuleContext = ctx.fraud_rule().get(i);
+            ResultStatus result = (ResultStatus) visit(fraudRuleContext);
+            String key = RuleKeyGenerator.generateRuleKey(fraudRuleContext, i);
+            if (result == null) {
+                throw new UnknownResultException(fraudRuleContext.getText());
+            } else if (result != ResultStatus.NORMAL) {
+                results.add(new RuleResult(result, key));
+            }
         }
-        return (Integer) cacheFunction(
-                ctx.getText(), model -> payoutFuncVisitor.visitCountPayouts(ctx, model));
-    }
-
-    @Override
-    public Integer visitCount_payouts_success(Count_payouts_successContext ctx) {
-        if (payoutFuncVisitor == null) {
-            throw new NotImplementedOperatorException("countPayouts");
-        }
-        return (Integer) cacheFunction(
-                ctx.getText(), model -> payoutFuncVisitor.visitCountPayoutsSuccess(ctx, model));
-    }
-
-    @Override
-    public Integer visitCount_payouts_error(Count_payouts_errorContext ctx) {
-        if (payoutFuncVisitor == null) {
-            throw new NotImplementedOperatorException("countPayouts");
-        }
-        return (Integer) cacheFunction(
-                ctx.getText(), model -> payoutFuncVisitor.visitCountPayoutsError(ctx, model));
-    }
-
-    @Override
-    public Double visitSum_payouts(Sum_payoutsContext ctx) {
-        if (payoutFuncVisitor == null) {
-            throw new NotImplementedOperatorException("sumPayouts");
-        }
-        return (Double) cacheFunction(
-                ctx.getText(), model -> payoutFuncVisitor.visitSumPayouts(ctx, model));
-    }
-
-    @Override
-    public Double visitSum_payouts_success(Sum_payouts_successContext ctx) {
-        if (payoutFuncVisitor == null) {
-            throw new NotImplementedOperatorException("sumPayouts");
-        }
-        return (Double) cacheFunction(
-                ctx.getText(), model -> payoutFuncVisitor.visitSumPayoutsSuccess(ctx, model));
-    }
-
-    @Override
-    public Double visitSum_payouts_error(Sum_payouts_errorContext ctx) {
-        if (payoutFuncVisitor == null) {
-            throw new NotImplementedOperatorException("sumPayouts");
-        }
-        return (Double) cacheFunction(
-                ctx.getText(), model -> payoutFuncVisitor.visitSumPayoutsError(ctx, model));
-    }
-
-    @Override
-    public Integer visitUnique_payouts(Unique_payoutsContext ctx) {
-        if (payoutFuncVisitor == null) {
-            throw new NotImplementedOperatorException("uniquePayouts");
-        }
-        return (Integer) cacheFunction(
-                ctx.getText(), model -> payoutFuncVisitor.visitUniquePayouts(ctx, model));
+        return new ResultModel(results);
     }
 
 }

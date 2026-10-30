@@ -3,8 +3,8 @@ package dev.vality.fraudo.payment.visitor.impl;
 import dev.vality.fraudo.FraudoRulesBaseVisitor;
 import dev.vality.fraudo.FraudoRulesParser;
 import dev.vality.fraudo.constant.ResultStatus;
-import dev.vality.fraudo.converter.TrustConditionConverter;
 import dev.vality.fraudo.exception.NotImplementedOperatorException;
+import dev.vality.fraudo.exception.NotValidContextException;
 import dev.vality.fraudo.exception.UnknownResultException;
 import dev.vality.fraudo.model.BaseModel;
 import dev.vality.fraudo.model.ResultModel;
@@ -12,6 +12,7 @@ import dev.vality.fraudo.model.RuleResult;
 import dev.vality.fraudo.payment.generator.RuleKeyGenerator;
 import dev.vality.fraudo.payment.visitor.*;
 import dev.vality.fraudo.resolver.FieldResolver;
+import dev.vality.fraudo.utils.TextUtil;
 import dev.vality.fraudo.utils.key.generator.CountKeyGenerator;
 import dev.vality.fraudo.utils.key.generator.CountryKeyGenerator;
 import dev.vality.fraudo.utils.key.generator.SumKeyGenerator;
@@ -41,30 +42,6 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBas
     private final PaymentFuncVisitor<T> paymentFuncVisitor;
     private final ListVisitor<T> listVisitor;
     private final FieldResolver<T, U> fieldResolver;
-
-    public FirstFindVisitorImpl(
-            CountVisitor<T> countVisitor,
-            SumVisitor<T> sumVisitor,
-            ListVisitor<T> listVisitor,
-            CustomFuncVisitor<T> customFuncVisitor,
-            IsTrustedFuncVisitor<T> isTrustedFuncVisitor,
-            FieldResolver<T, U> fieldResolver,
-            TrustConditionConverter trustConditionConverter
-    ) {
-        this(new PaymentFuncVisitor<>(countVisitor, sumVisitor, customFuncVisitor), listVisitor,
-                isTrustedFuncVisitor, fieldResolver, trustConditionConverter);
-    }
-
-    public FirstFindVisitorImpl(
-            PaymentFuncVisitor<T> paymentFuncVisitor,
-            ListVisitor<T> listVisitor,
-            IsTrustedFuncVisitor<T> isTrustedFuncVisitor,
-            FieldResolver<T, U> fieldResolver,
-            TrustConditionConverter trustConditionConverter
-    ) {
-        this(paymentFuncVisitor.withTrustFunctions(isTrustedFuncVisitor, trustConditionConverter),
-                listVisitor, fieldResolver);
-    }
 
     @Override
     public void close() {

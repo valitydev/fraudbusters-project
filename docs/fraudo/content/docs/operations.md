@@ -26,7 +26,9 @@ category: operations
 Общие посетители `visitor.FirstFindRulesVisitor` и `visitor.FullRulesVisitor`
 исполняют функции платежей и выплат. Первый останавливается на первом решении,
 второй обходит все правила. `payout.visitor.PayoutFuncVisitor` отвечает только
-за функции истории выплат.
+за функции истории выплат. Прежний `payment.visitor.impl.FullVisitorImpl` заменён
+на `visitor.FullRulesVisitor`. Посетители принимают готовый `PaymentFuncVisitor`,
+который фабрика создаёт со всеми платёжными и trust-зависимостями.
 
 Для обоих типов операций используются общие реализации
 `resolver.impl.GroupFieldsResolverImpl` и `resolver.impl.TimeWindowResolverImpl`.
@@ -327,8 +329,9 @@ rule: sumPayouts("user_id", 24, hours, "party_id", "currency") > 100000 -> highR
 Область поиска задаётся явно группировками, без скрытого ограничения по Party.
 `customer_id` не используется в правилах и не подставляется вместо `user_id`.
 
-Для исполнения приложение передаёт отдельный `PayoutAggregator` в
-`AggregatorBundle`. Реализация агрегатора отвечает за чтение истории, исключение
+Для исполнения приложение передаёт в `AggregatorBundle` отдельные
+`CountPayoutAggregator`, `SumPayoutAggregator` и `UniqueValueAggregator` для выплат.
+Реализации агрегаторов отвечают за чтение истории, исключение
 повторных событий и обработку отсутствующих идентификаторов. Неподтверждённая
 текущая выплата не добавляется к завершённым операциям. Конвертации валют нет.
 Если агрегатор не подключён или чтение истории завершилось ошибкой, действует
