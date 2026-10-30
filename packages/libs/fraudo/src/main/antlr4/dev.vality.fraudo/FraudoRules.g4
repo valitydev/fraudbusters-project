@@ -22,13 +22,13 @@ relationalExpression
 
 integerExpression
     : count
+    | count_pending
+    | count_success
+    | count_error
     | count_payouts
     | count_payouts_success
     | count_payouts_error
     | unique_payouts
-    | count_pending
-    | count_success
-    | count_error
     | count_chargeback
     | count_refund
     | unique
@@ -38,11 +38,11 @@ integerExpression
 
 floatExpression
     : sum
+    | sum_success
+    | sum_error
     | sum_payouts
     | sum_payouts_success
     | sum_payouts_error
-    | sum_success
-    | sum_error
     | sum_chargeback
     | sum_refund
     | amount

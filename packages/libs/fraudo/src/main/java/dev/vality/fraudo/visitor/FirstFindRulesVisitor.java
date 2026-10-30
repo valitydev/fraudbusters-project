@@ -24,8 +24,19 @@ public class FirstFindRulesVisitor<T extends BaseModel, U> extends FirstFindVisi
             TrustConditionConverter trustConditionConverter,
             PayoutFuncVisitor<T, U> payoutFuncVisitor
     ) {
-        super(countVisitor, sumVisitor, listVisitor, customFuncVisitor, isTrustedFuncVisitor, fieldResolver,
-                trustConditionConverter);
+        this(new PaymentFuncVisitor<>(countVisitor, sumVisitor, customFuncVisitor), listVisitor,
+                isTrustedFuncVisitor, fieldResolver, trustConditionConverter, payoutFuncVisitor);
+    }
+
+    public FirstFindRulesVisitor(
+            PaymentFuncVisitor<T> paymentFuncVisitor,
+            ListVisitor<T> listVisitor,
+            IsTrustedFuncVisitor<T> isTrustedFuncVisitor,
+            FieldResolver<T, U> fieldResolver,
+            TrustConditionConverter trustConditionConverter,
+            PayoutFuncVisitor<T, U> payoutFuncVisitor
+    ) {
+        super(paymentFuncVisitor, listVisitor, isTrustedFuncVisitor, fieldResolver, trustConditionConverter);
         this.payoutFuncVisitor = payoutFuncVisitor;
     }
 

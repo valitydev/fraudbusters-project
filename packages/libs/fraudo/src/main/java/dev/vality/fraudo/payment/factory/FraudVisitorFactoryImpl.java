@@ -40,10 +40,8 @@ public class FraudVisitorFactoryImpl implements FraudVisitorFactory {
         TrustConditionConverter trustConditionConverter = new TrustConditionConverter();
 
         return new FirstFindRulesVisitor<T, U>(
-                countVisitor,
-                sumVisitor,
+                new PaymentFuncVisitor<>(countVisitor, sumVisitor, customFuncVisitor),
                 listVisitor,
-                customFuncVisitor,
                 isTrustedFuncVisitor,
                 resolverBundle.getFieldPairResolver(),
                 trustConditionConverter,
