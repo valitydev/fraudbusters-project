@@ -1,0 +1,1 @@
+rule: sumPayoutsError("user_id", 24) > 100.24 -> decline;

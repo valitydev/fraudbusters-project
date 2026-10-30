@@ -1,0 +1,1 @@
+rule: countPayouts("user_id", 48, 24, hours, "party_id", "wallet_id") > 0 -> accept;

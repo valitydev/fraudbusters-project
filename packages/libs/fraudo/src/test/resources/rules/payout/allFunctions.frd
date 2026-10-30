@@ -1,0 +1,7 @@
+rule: countPayouts("user_id", 24, hours, "party_id", "currency") = 2
+  AND countPayoutsSuccess("user_id", 24, hours, "party_id", "currency") = 1
+  AND countPayoutsError("user_id", 24, hours, "failed", "party_id", "currency") = 1
+  AND sumPayouts("user_id", 24, hours, "party_id", "currency") = 200
+  AND sumPayoutsSuccess("user_id", 24, hours, "party_id", "currency") = 100
+  AND sumPayoutsError("user_id", 24, hours, "failed", "party_id", "currency") = 100
+  AND uniquePayouts("user_id", "card_token", 24, hours, "party_id", "currency") = 2 -> decline;

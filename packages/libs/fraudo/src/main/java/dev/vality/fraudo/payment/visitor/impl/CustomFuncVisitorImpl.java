@@ -2,8 +2,8 @@ package dev.vality.fraudo.payment.visitor.impl;
 
 import dev.vality.fraudo.aggregator.UniqueValueAggregator;
 import dev.vality.fraudo.model.Pair;
-import dev.vality.fraudo.payment.resolver.PaymentGroupResolver;
-import dev.vality.fraudo.payment.resolver.PaymentTimeWindowResolver;
+import dev.vality.fraudo.resolver.impl.GroupFieldsResolverImpl;
+import dev.vality.fraudo.resolver.impl.TimeWindowResolverImpl;
 import dev.vality.fraudo.payment.resolver.PaymentTypeResolver;
 import dev.vality.fraudo.payment.visitor.CustomFuncVisitor;
 import dev.vality.fraudo.resolver.CountryResolver;
@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Random;
 
-import static dev.vality.fraudo.FraudoPaymentParser.*;
+import static dev.vality.fraudo.FraudoRulesParser.*;
 
 @RequiredArgsConstructor
 public class CustomFuncVisitorImpl<T, U> implements CustomFuncVisitor<T> {
@@ -21,8 +21,8 @@ public class CustomFuncVisitorImpl<T, U> implements CustomFuncVisitor<T> {
     private final UniqueValueAggregator<T, U> uniqueValueAggregator;
     private final CountryResolver<U> countryResolver;
     private final FieldResolver<T, U> fieldResolver;
-    private final PaymentGroupResolver<T, U> groupResolver;
-    private final PaymentTimeWindowResolver timeWindowResolver;
+    private final GroupFieldsResolverImpl<T, U> groupResolver;
+    private final TimeWindowResolverImpl timeWindowResolver;
     private final PaymentTypeResolver<T> paymentTypeResolver;
 
     @Override

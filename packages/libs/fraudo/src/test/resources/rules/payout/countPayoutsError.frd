@@ -1,0 +1,1 @@
+rule: countPayoutsError("user_id", 24) > 1 -> decline;

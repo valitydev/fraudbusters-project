@@ -8,8 +8,8 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.function.Function;
 
-import static dev.vality.fraudo.FraudoPaymentParser.Group_byContext;
-import static dev.vality.fraudo.FraudoPaymentParser.Time_windowContext;
+import static dev.vality.fraudo.FraudoRulesParser.Group_byContext;
+import static dev.vality.fraudo.FraudoRulesParser.Time_windowContext;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommonKeyGenerator {

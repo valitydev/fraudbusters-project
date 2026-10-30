@@ -1,16 +1,14 @@
 package dev.vality.fraudo.payment.visitor.impl;
 
-import dev.vality.fraudo.FraudoPaymentBaseVisitor;
-import dev.vality.fraudo.FraudoPaymentParser;
+import dev.vality.fraudo.FraudoRulesBaseVisitor;
+import dev.vality.fraudo.FraudoRulesParser;
 import dev.vality.fraudo.constant.ResultStatus;
-import dev.vality.fraudo.converter.TrustConditionConverter;
 import dev.vality.fraudo.exception.NotImplementedOperatorException;
 import dev.vality.fraudo.exception.NotValidContextException;
 import dev.vality.fraudo.exception.UnknownResultException;
 import dev.vality.fraudo.model.BaseModel;
 import dev.vality.fraudo.model.ResultModel;
 import dev.vality.fraudo.model.RuleResult;
-import dev.vality.fraudo.model.TrustCondition;
 import dev.vality.fraudo.payment.generator.RuleKeyGenerator;
 import dev.vality.fraudo.payment.visitor.*;
 import dev.vality.fraudo.resolver.FieldResolver;
@@ -28,25 +26,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
-import static dev.vality.fraudo.FraudoPaymentParser.*;
+import static dev.vality.fraudo.FraudoRulesParser.*;
 
 @Slf4j
 @RequiredArgsConstructor
-public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentBaseVisitor<Object>
+public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBaseVisitor<Object>
         implements TemplateVisitor<T, ResultModel> {
 
     public static final String UNKNOWN = "UNKNOWN";
     private ThreadLocal<Map<String, Object>> localFuncCache = ThreadLocal.withInitial(HashMap::new);
     private ThreadLocal<T> threadLocalModel = new ThreadLocal<>();
 
-    private final CountVisitor<T> countVisitor;
-    private final SumVisitor<T> sumVisitor;
+    private final PaymentFuncVisitor<T> paymentFuncVisitor;
     private final ListVisitor<T> listVisitor;
-    private final CustomFuncVisitor<T> customFuncVisitor;
-    private final IsTrustedFuncVisitor<T> isTrustedFuncVisitor;
     private final FieldResolver<T, U> fieldResolver;
-    private final TrustConditionConverter trustConditionConverter;
 
     @Override
     public void close() {
@@ -262,13 +257,13 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
         String key = UniqueKeyGenerator.generate(ctx, fieldResolver::resolveName);
         return (Integer) localFuncCache.get().computeIfAbsent(
                 key,
-                s -> customFuncVisitor.visitUnique(ctx, threadLocalModel.get())
+                s -> paymentFuncVisitor.visitUnique(ctx, threadLocalModel.get())
         );
     }
 
     @Override
     public Boolean visitLike(LikeContext ctx) {
-        return customFuncVisitor.visitLike(ctx, threadLocalModel.get());
+        return paymentFuncVisitor.visitLike(ctx, threadLocalModel.get());
     }
 
     @Override
@@ -276,7 +271,7 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
         String key = CountryKeyGenerator.generate(ctx);
         return (String) localFuncCache.get().computeIfAbsent(
                 key,
-                s -> customFuncVisitor.visitCountryBy(ctx, threadLocalModel.get())
+                s -> paymentFuncVisitor.visitCountryBy(ctx, threadLocalModel.get())
         );
     }
 
@@ -285,7 +280,7 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
         String key = CountKeyGenerator.generate(ctx, fieldResolver::resolveName);
         return (Integer) localFuncCache.get().computeIfAbsent(
                 key,
-                s -> countVisitor.visitCount(ctx, threadLocalModel.get())
+                s -> paymentFuncVisitor.visitCount(ctx, threadLocalModel.get())
         );
     }
 
@@ -294,7 +289,7 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
         String key = CountKeyGenerator.generateSuccessKey(ctx, fieldResolver::resolveName);
         return (Integer) localFuncCache.get().computeIfAbsent(
                 key,
-                s -> countVisitor.visitCountSuccess(ctx, threadLocalModel.get())
+                s -> paymentFuncVisitor.visitCountSuccess(ctx, threadLocalModel.get())
         );
     }
 
@@ -303,7 +298,7 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
         String key = CountKeyGenerator.generatePendingKey(ctx, fieldResolver::resolveName);
         return (Integer) localFuncCache.get().computeIfAbsent(
                 key,
-                s -> countVisitor.visitCountPending(ctx, threadLocalModel.get())
+                s -> paymentFuncVisitor.visitCountPending(ctx, threadLocalModel.get())
         );
     }
 
@@ -312,7 +307,7 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
         String key = CountKeyGenerator.generateErrorKey(ctx, fieldResolver::resolveName);
         return (Integer) localFuncCache.get().computeIfAbsent(
                 key,
-                s -> countVisitor.visitCountError(ctx, threadLocalModel.get())
+                s -> paymentFuncVisitor.visitCountError(ctx, threadLocalModel.get())
         );
     }
 
@@ -321,7 +316,7 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
         String key = CountKeyGenerator.generateChargebackKey(ctx, fieldResolver::resolveName);
         return (Integer) localFuncCache.get().computeIfAbsent(
                 key,
-                s -> countVisitor.visitCountChargeback(ctx, threadLocalModel.get())
+                s -> paymentFuncVisitor.visitCountChargeback(ctx, threadLocalModel.get())
         );
     }
 
@@ -330,7 +325,7 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
         String key = CountKeyGenerator.generateRefundKey(ctx, fieldResolver::resolveName);
         return (Integer) localFuncCache.get().computeIfAbsent(
                 key,
-                s -> countVisitor.visitCountRefund(ctx, threadLocalModel.get())
+                s -> paymentFuncVisitor.visitCountRefund(ctx, threadLocalModel.get())
         );
     }
 
@@ -339,7 +334,7 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
         String key = SumKeyGenerator.generate(ctx, fieldResolver::resolveName);
         return (Double) localFuncCache.get().computeIfAbsent(
                 key,
-                s -> sumVisitor.visitSum(ctx, threadLocalModel.get())
+                s -> paymentFuncVisitor.visitSum(ctx, threadLocalModel.get())
         );
     }
 
@@ -348,7 +343,7 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
         String key = SumKeyGenerator.generateSuccessKey(ctx, fieldResolver::resolveName);
         return (Double) localFuncCache.get().computeIfAbsent(
                 key,
-                s -> sumVisitor.visitSumSuccess(ctx, threadLocalModel.get())
+                s -> paymentFuncVisitor.visitSumSuccess(ctx, threadLocalModel.get())
         );
     }
 
@@ -357,7 +352,7 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
         String key = SumKeyGenerator.generateErrorKey(ctx, fieldResolver::resolveName);
         return (Double) localFuncCache.get().computeIfAbsent(
                 key,
-                s -> sumVisitor.visitSumError(ctx, threadLocalModel.get())
+                s -> paymentFuncVisitor.visitSumError(ctx, threadLocalModel.get())
         );
     }
 
@@ -366,7 +361,7 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
         String key = SumKeyGenerator.generateChargebackKey(ctx, fieldResolver::resolveName);
         return (Double) localFuncCache.get().computeIfAbsent(
                 key,
-                s -> sumVisitor.visitSumChargeback(ctx, threadLocalModel.get())
+                s -> paymentFuncVisitor.visitSumChargeback(ctx, threadLocalModel.get())
         );
     }
 
@@ -375,60 +370,32 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
         String key = SumKeyGenerator.generateRefundKey(ctx, fieldResolver::resolveName);
         return (Double) localFuncCache.get().computeIfAbsent(
                 key,
-                s -> sumVisitor.visitSumRefund(ctx, threadLocalModel.get())
+                s -> paymentFuncVisitor.visitSumRefund(ctx, threadLocalModel.get())
         );
     }
 
     @Override
     public Boolean visitIs_mobile(Is_mobileContext ctx) {
-        return customFuncVisitor.visitCheckMobile(ctx, threadLocalModel.get());
+        return paymentFuncVisitor.visitCheckMobile(ctx, threadLocalModel.get());
     }
 
     @Override
     public Boolean visitIs_recurrent(Is_recurrentContext ctx) {
-        return customFuncVisitor.visitCheckRecurrent(ctx, threadLocalModel.get());
+        return paymentFuncVisitor.visitCheckRecurrent(ctx, threadLocalModel.get());
     }
 
     @Override
     public Object visitIsTrusted(IsTrustedContext ctx) {
-        return isTrustedFuncVisitor.visitCheckTrusted(threadLocalModel.get());
+        return paymentFuncVisitor.visitIsTrusted(ctx, threadLocalModel.get());
     }
 
     @Override
     public Object visitIsTrustedTemplateName(IsTrustedTemplateNameContext ctx) {
-        return isTrustedFuncVisitor.visitCheckTrusted(threadLocalModel.get(), TextUtil.safeGetText(ctx.STRING()));
+        return paymentFuncVisitor.visitIsTrustedTemplateName(ctx, threadLocalModel.get());
     }
 
     @Override
-    public Object visitIsTrustedConditionsSingleList(IsTrustedConditionsSingleListContext ctx) {
-        if (ctx.payment_conditions() != null && !ctx.payment_conditions().isEmpty()) {
-            List<TrustCondition> paymentsConditions =
-                    trustConditionConverter.convertToList(ctx.payment_conditions().conditions_list());
-            return isTrustedFuncVisitor.visitCheckTrusted(threadLocalModel.get(), paymentsConditions, null);
-        }
-        if (ctx.withdrawal_conditions() != null && !ctx.withdrawal_conditions().isEmpty()) {
-            List<TrustCondition> withdrawalsConditions =
-                    trustConditionConverter.convertToList(ctx.withdrawal_conditions().conditions_list());
-            return isTrustedFuncVisitor.visitCheckTrusted(threadLocalModel.get(), null, withdrawalsConditions);
-        }
-        throw new NotValidContextException();
-    }
-
-    @Override
-    public Object visitIsTrustedPaymentsAndWithdrawalConditions(IsTrustedPaymentsAndWithdrawalConditionsContext ctx) {
-        List<TrustCondition> paymentsConditions =
-                trustConditionConverter.convertToList(ctx.payment_conditions().conditions_list());
-        List<TrustCondition> withdrawalsConditions =
-                trustConditionConverter.convertToList(ctx.withdrawal_conditions().conditions_list());
-        return isTrustedFuncVisitor.visitCheckTrusted(
-                threadLocalModel.get(),
-                paymentsConditions,
-                withdrawalsConditions
-        );
-    }
-
-    @Override
-    public String visitCard_category(FraudoPaymentParser.Card_categoryContext ctx) {
+    public String visitCard_category(FraudoRulesParser.Card_categoryContext ctx) {
         return threadLocalModel.get().getCardCategory() != null ? threadLocalModel.get().getCardCategory() : UNKNOWN;
     }
 
@@ -438,12 +405,17 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoPaymentB
     }
 
     @Override
-    public String visitUser_id(FraudoPaymentParser.User_idContext ctx) {
+    public String visitUser_id(FraudoRulesParser.User_idContext ctx) {
         return threadLocalModel.get().getUserId() != null ? threadLocalModel.get().getUserId() : UNKNOWN;
     }
 
     @Override
     public Integer visitRand(RandContext ctx) {
-        return customFuncVisitor.visitRand(ctx, threadLocalModel.get());
+        return paymentFuncVisitor.visitRand(ctx, threadLocalModel.get());
     }
+
+    protected Object cacheFunction(String key, Function<T, ?> function) {
+        return localFuncCache.get().computeIfAbsent(key, ignored -> function.apply(threadLocalModel.get()));
+    }
+
 }

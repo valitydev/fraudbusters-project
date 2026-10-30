@@ -1,0 +1,89 @@
+package dev.vality.fraudo.visitor;
+
+import dev.vality.fraudo.exception.NotImplementedOperatorException;
+import dev.vality.fraudo.model.BaseModel;
+import dev.vality.fraudo.payout.visitor.PayoutFuncVisitor;
+import dev.vality.fraudo.payment.visitor.*;
+import dev.vality.fraudo.payment.visitor.impl.FirstFindVisitorImpl;
+import dev.vality.fraudo.resolver.FieldResolver;
+
+import static dev.vality.fraudo.FraudoRulesParser.*;
+
+public class FirstFindRulesVisitor<T extends BaseModel, U> extends FirstFindVisitorImpl<T, U> {
+
+    private final PayoutFuncVisitor<T, U> payoutFuncVisitor;
+
+    public FirstFindRulesVisitor(
+            PaymentFuncVisitor<T> paymentFuncVisitor,
+            ListVisitor<T> listVisitor,
+            FieldResolver<T, U> fieldResolver,
+            PayoutFuncVisitor<T, U> payoutFuncVisitor
+    ) {
+        super(paymentFuncVisitor, listVisitor, fieldResolver);
+        this.payoutFuncVisitor = payoutFuncVisitor;
+    }
+
+    @Override
+    public Integer visitCount_payouts(Count_payoutsContext ctx) {
+        if (payoutFuncVisitor == null) {
+            throw new NotImplementedOperatorException("countPayouts");
+        }
+        return (Integer) cacheFunction(
+                ctx.getText(), model -> payoutFuncVisitor.visitCountPayouts(ctx, model));
+    }
+
+    @Override
+    public Integer visitCount_payouts_success(Count_payouts_successContext ctx) {
+        if (payoutFuncVisitor == null) {
+            throw new NotImplementedOperatorException("countPayouts");
+        }
+        return (Integer) cacheFunction(
+                ctx.getText(), model -> payoutFuncVisitor.visitCountPayoutsSuccess(ctx, model));
+    }
+
+    @Override
+    public Integer visitCount_payouts_error(Count_payouts_errorContext ctx) {
+        if (payoutFuncVisitor == null) {
+            throw new NotImplementedOperatorException("countPayouts");
+        }
+        return (Integer) cacheFunction(
+                ctx.getText(), model -> payoutFuncVisitor.visitCountPayoutsError(ctx, model));
+    }
+
+    @Override
+    public Double visitSum_payouts(Sum_payoutsContext ctx) {
+        if (payoutFuncVisitor == null) {
+            throw new NotImplementedOperatorException("sumPayouts");
+        }
+        return (Double) cacheFunction(
+                ctx.getText(), model -> payoutFuncVisitor.visitSumPayouts(ctx, model));
+    }
+
+    @Override
+    public Double visitSum_payouts_success(Sum_payouts_successContext ctx) {
+        if (payoutFuncVisitor == null) {
+            throw new NotImplementedOperatorException("sumPayouts");
+        }
+        return (Double) cacheFunction(
+                ctx.getText(), model -> payoutFuncVisitor.visitSumPayoutsSuccess(ctx, model));
+    }
+
+    @Override
+    public Double visitSum_payouts_error(Sum_payouts_errorContext ctx) {
+        if (payoutFuncVisitor == null) {
+            throw new NotImplementedOperatorException("sumPayouts");
+        }
+        return (Double) cacheFunction(
+                ctx.getText(), model -> payoutFuncVisitor.visitSumPayoutsError(ctx, model));
+    }
+
+    @Override
+    public Integer visitUnique_payouts(Unique_payoutsContext ctx) {
+        if (payoutFuncVisitor == null) {
+            throw new NotImplementedOperatorException("uniquePayouts");
+        }
+        return (Integer) cacheFunction(
+                ctx.getText(), model -> payoutFuncVisitor.visitUniquePayouts(ctx, model));
+    }
+
+}

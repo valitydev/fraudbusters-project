@@ -1,0 +1,1 @@
+rule: sumPayoutsSuccess("user_id", 30, calendar_days, "party_id", "currency") > 100.24 -> decline;
