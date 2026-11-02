@@ -18,9 +18,12 @@ public class HistoryKeyGenerator {
 
     private static final TimeWindowResolverImpl TIME_WINDOW_RESOLVER = new TimeWindowResolverImpl();
 
-    public static <U> HistoryCacheKey<U> generate(String function, Time_windowContext timeWindow,
-                                                Group_byContext groupBy, List<TerminalNode> fields,
-                                                TerminalNode errorCode, Function<String, U> resolve) {
+    public static <U> HistoryCacheKey<U> generate(String function,
+                                                  Time_windowContext timeWindow,
+                                                  Group_byContext groupBy,
+                                                  List<TerminalNode> fields,
+                                                  TerminalNode errorCode,
+                                                  Function<String, U> resolve) {
         var window = TIME_WINDOW_RESOLVER.resolve(timeWindow);
         List<U> resolvedFields = resolveFields(fields, resolve);
         List<U> groups = groupBy == null || groupBy.string_list() == null ? List.of()
@@ -38,6 +41,8 @@ public class HistoryKeyGenerator {
     }
 
     private static <U> List<U> resolveFields(List<TerminalNode> fields, Function<String, U> resolve) {
-        return fields.stream().map(field -> resolve.apply(TextUtil.safeGetText(field))).toList();
+        return fields.stream()
+                .map(field -> resolve.apply(TextUtil.safeGetText(field)))
+                .toList();
     }
 }
