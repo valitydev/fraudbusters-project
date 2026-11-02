@@ -1,0 +1,15 @@
+rule: countPayouts("user_id", 24, hours) = 1 AND countPayouts("card_token", 24, hours) = 2 -> notify;
+rule: countPayouts("user_id", 24, days) = 3 AND countPayouts("user_id", 48, 24, hours) = 4
+      AND countPayouts("user_id", 48, 12, hours) = 23 AND countPayouts("user_id", 48, hours) = 24 -> notify;
+rule: countPayouts("user_id", 24, hours, "party_id") = 5 AND countPayouts("user_id", 24, hours, "wallet_id") = 6 -> notify;
+rule: countPayouts("user_id", 24, hours, "party_id", "currency") = 7 AND countPayouts("user_id", 24, hours, "currency", "party_id") = 8 -> notify;
+rule: countPayoutsSuccess("user_id", 24, hours) = 9 AND countPayoutsError("user_id", 24, hours) = 10 -> notify;
+rule: countPayoutsError("user_id", 24, hours, "error-a") = 11 AND countPayoutsError("user_id", 24, hours, "error-b") = 12 -> notify;
+rule: sumPayouts("user_id", 24, hours) = 13 AND sumPayoutsSuccess("user_id", 24, hours) = 14
+      AND sumPayoutsError("user_id", 24, hours) = 15 AND sumPayoutsError("user_id", 24, hours, "failed") = 16
+      AND sumPayoutsError("user_id", 24, hours, "other") = 22 -> notify;
+rule: uniquePayouts("user_id", "card_token", 24, hours) = 17 AND uniquePayouts("card_token", "user_id", 24, hours) = 18
+      AND uniquePayouts("user_id", "currency", 24, hours) = 19
+      AND uniquePayouts("user_id", "card_token", 24, days) = 20
+      AND uniquePayouts("user_id", "card_token", 24, hours, "party_id") = 21 -> notify;
+rule: 1 = 1 -> accept;

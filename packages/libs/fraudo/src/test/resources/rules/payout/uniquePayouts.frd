@@ -1,0 +1,1 @@
+rule: uniquePayouts("user_id", "card_token", 24, hours, "party_id", "currency") > 1 -> decline;

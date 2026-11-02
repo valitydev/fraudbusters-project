@@ -39,9 +39,9 @@ class ClientIdentityTest extends AbstractPaymentTest {
 
     @Test
     void customerIdIsNotALanguageFunction() {
-        var lexer = new FraudoPaymentLexer(org.antlr.v4.runtime.CharStreams.fromString(
+        var lexer = new FraudoRulesLexer(org.antlr.v4.runtime.CharStreams.fromString(
                 "rule: customerId() = \"synthetic-customer\" -> accept;"));
-        var parser = new FraudoPaymentParser(new org.antlr.v4.runtime.CommonTokenStream(lexer));
+        var parser = new FraudoRulesParser(new org.antlr.v4.runtime.CommonTokenStream(lexer));
         parser.removeErrorListeners();
         parser.parse();
         assertTrue(parser.getNumberOfSyntaxErrors() > 0);

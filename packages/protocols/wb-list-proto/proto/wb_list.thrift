@@ -94,6 +94,14 @@ union IdInfo {
 
     // DEPRECATED and may not be supported
     2: P2pId p2p_id
+    // Отдельное пространство списков выплат, включая глобальные списки и уровень Party.
+    3: PayoutId payout_id
+}
+
+struct PayoutId {
+    // Оба поля отсутствуют для глобальных списков выплат.
+    1: optional ID party_id
+    2: optional ID wallet_id
 }
 
 struct PaymentId {

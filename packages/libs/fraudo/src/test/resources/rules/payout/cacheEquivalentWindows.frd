@@ -1,0 +1,2 @@
+rule: countPayouts("user_id", 24) > 0
+      AND countPayouts("user_id", 24, hours) > 0 -> decline;

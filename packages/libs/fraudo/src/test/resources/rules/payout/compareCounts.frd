@@ -1,0 +1,3 @@
+rule: countPayoutsSuccess("user_id", 24, hours, "party_id")
+  > countSuccess("user_id", 24, hours, "party_id") -> highRisk;
+rule: 1 = 1 -> accept;

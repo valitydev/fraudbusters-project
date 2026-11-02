@@ -1,0 +1,1 @@
+rule: sumPayoutsError("user_id", 24, hours) > 0 -> accept catch: highRisk;

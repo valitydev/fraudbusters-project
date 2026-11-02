@@ -1,0 +1,1 @@
+rule: countPayouts("user_id", 24, hours, "missing_field") > 0 -> accept catch: highRisk;

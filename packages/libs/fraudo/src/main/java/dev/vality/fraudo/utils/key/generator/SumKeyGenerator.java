@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.function.Function;
 
-import static dev.vality.fraudo.FraudoPaymentParser.*;
+import static dev.vality.fraudo.FraudoRulesParser.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SumKeyGenerator {

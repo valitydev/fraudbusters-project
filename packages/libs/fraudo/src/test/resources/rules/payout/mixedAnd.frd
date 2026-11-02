@@ -1,0 +1,3 @@
+rule: countSuccess("user_id", 30, days, "party_id") = 0
+  AND countPayoutsSuccess("user_id", 24, hours, "party_id") > 3 -> decline;
+rule: 1 = 1 -> accept;

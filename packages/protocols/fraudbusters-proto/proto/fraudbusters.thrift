@@ -19,6 +19,12 @@ enum CommandType {
     DELETE
 }
 
+// Отсутствующий тип в существующих шаблонах, группах и привязках означает payment.
+enum OperationType {
+    payment = 0
+    payout = 1
+}
+
 union CommandBody {
     1: Template template;
     2: TemplateReference reference;
@@ -49,6 +55,7 @@ struct Template {
     1: required ID id
     // Описание правил на языке fraudo
     2: required binary template
+    3: optional OperationType operation_type
 }
 
 // Модель связки шаблона с проверяемым субъектом
@@ -59,9 +66,12 @@ struct TemplateReference {
     2: optional ID shop_id
     // Идентификатор привязываемого шаблона
     3: required ID template_id
-    // Признак глобальности (при значении true поля party_id и shop_id игнорируются)
+    // Признак глобальности (при true party_id, shop_id и wallet_id игнорируются, тип операции сохраняется)
     // DEPRECATED
     4: required bool is_global = false
+    5: optional OperationType operation_type
+    // Для payout используется wallet_id, для payment — shop_id. Одновременно не задаются.
+    6: optional WalletID wallet_id
 }
 
 // P2P is DEPRECATED and may not be supported
@@ -84,6 +94,9 @@ struct GroupReference {
     2: optional ID shop_id
     // Идентификатор привязываемого шаблона
     3: required ID group_id
+    4: optional OperationType operation_type
+    // Для payout используется wallet_id, для payment — shop_id. Одновременно не задаются.
+    5: optional WalletID wallet_id
 }
 
 // P2P is DEPRECATED and may not be supported
@@ -101,6 +114,7 @@ struct Group {
     1: required ID group_id
     // Идентификаторы шаблонов входящих в группу
     2: required list<PriorityId> template_ids
+    3: optional OperationType operation_type
 }
 
 // Модель приоритезированного идентификатора
@@ -246,6 +260,10 @@ struct Withdrawal {
     6:  required Account account
     7:  optional Error error
     8:  optional ProviderInfo provider_info
+    9:  optional ID party_id
+    10: optional WalletID wallet_id
+    // customer_id сохраняется как информация; правила используют user_id без подстановки customer_id.
+    11: optional ClientInfo client_info
 }
 
 union Resource {

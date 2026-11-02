@@ -1,0 +1,2 @@
+rule: countPayoutsError("user_id", 24, hours, "failed", "party_id") > 0 -> accept catch: notify;
+rule: countPayoutsError("user_id", 24, hours, "failed", "party_id") > 0 -> decline;

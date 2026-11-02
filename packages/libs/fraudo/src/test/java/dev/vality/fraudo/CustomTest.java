@@ -1,6 +1,6 @@
 package dev.vality.fraudo;
 
-import dev.vality.fraudo.FraudoPaymentParser.ParseContext;
+import dev.vality.fraudo.FraudoRulesParser.ParseContext;
 import dev.vality.fraudo.constant.ResultStatus;
 import dev.vality.fraudo.exception.UnknownResultException;
 import dev.vality.fraudo.model.ResultModel;
@@ -205,7 +205,8 @@ public class CustomTest extends AbstractPaymentTest {
                 .thenThrow(new UnknownResultException("as"));
         ParseContext parseContext = getParseContext(resourceAsStream);
         ResultModel result = invokeParse(parseContext);
-        assertEquals(ResultStatus.DECLINE, ResultUtils.findFirstNotNotifyStatus(result).get().getResultStatus());
+        assertEquals(ResultStatus.HIGH_RISK, ResultUtils.findFirstNotNotifyStatus(result).get().getResultStatus());
+        verify(uniqueValueAggregator).countUniqueValue(any(), any(), any(), any(), any());
     }
 
     @Test

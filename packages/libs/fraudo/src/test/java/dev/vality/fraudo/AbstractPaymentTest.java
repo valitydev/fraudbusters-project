@@ -1,6 +1,6 @@
 package dev.vality.fraudo;
 
-import dev.vality.fraudo.FraudoPaymentParser.ParseContext;
+import dev.vality.fraudo.FraudoRulesParser.ParseContext;
 import dev.vality.fraudo.aggregator.UniqueValueAggregator;
 import dev.vality.fraudo.bundle.AggregatorBundle;
 import dev.vality.fraudo.bundle.FinderBundle;
@@ -8,15 +8,15 @@ import dev.vality.fraudo.bundle.ResolverBundle;
 import dev.vality.fraudo.bundle.VisitorBundle;
 import dev.vality.fraudo.finder.InListFinder;
 import dev.vality.fraudo.model.ResultModel;
-import dev.vality.fraudo.FraudoPaymentParser;
-import dev.vality.fraudo.FraudoPaymentLexer;
+import dev.vality.fraudo.FraudoRulesParser;
+import dev.vality.fraudo.FraudoRulesLexer;
 import dev.vality.fraudo.payment.aggregator.CountPaymentAggregator;
 import dev.vality.fraudo.payment.aggregator.SumPaymentAggregator;
 import dev.vality.fraudo.payment.factory.FraudVisitorFactoryImpl;
 import dev.vality.fraudo.payment.factory.FullVisitorFactoryImpl;
 import dev.vality.fraudo.payment.resolver.CustomerTypeResolver;
-import dev.vality.fraudo.payment.resolver.PaymentGroupResolver;
-import dev.vality.fraudo.payment.resolver.PaymentTimeWindowResolver;
+import dev.vality.fraudo.resolver.impl.GroupFieldsResolverImpl;
+import dev.vality.fraudo.resolver.impl.TimeWindowResolverImpl;
 import dev.vality.fraudo.payment.resolver.PaymentTypeResolver;
 import dev.vality.fraudo.resolver.CountryResolver;
 import dev.vality.fraudo.resolver.FieldResolver;
@@ -46,15 +46,15 @@ public class AbstractPaymentTest {
     @Mock
     InListFinder<PaymentModel, PaymentCheckedField> inListFinder;
     @Mock
-    PaymentTimeWindowResolver timeWindowResolver;
+    TimeWindowResolverImpl timeWindowResolver;
     @Mock
     PaymentTypeResolver<PaymentModel> paymentModelPaymentTypeResolver;
     @Mock
     CustomerTypeResolver<PaymentModel> customerTypeResolver;
 
     private final FieldResolver<PaymentModel, PaymentCheckedField> fieldResolver = new PaymentModelFieldResolver();
-    private final PaymentGroupResolver<PaymentModel, PaymentCheckedField> paymentGroupResolver =
-            new PaymentGroupResolver<>(fieldResolver);
+    private final GroupFieldsResolverImpl<PaymentModel, PaymentCheckedField> groupFieldsResolver =
+            new GroupFieldsResolverImpl<>(fieldResolver);
 
     ResultModel parseAndVisit(InputStream resourceAsStream) throws IOException {
         ParseContext parse = getParseContext(resourceAsStream);
@@ -84,11 +84,11 @@ public class AbstractPaymentTest {
         var aggregatorBundle = new AggregatorBundle<>(
                 countPaymentAggregator,
                 sumPaymentAggregator,
-                uniqueValueAggregator);
+                uniqueValueAggregator, null, null, null);
         var resolverBundle = new ResolverBundle<>(
                 countryResolver,
                 fieldResolver,
-                paymentGroupResolver,
+                groupFieldsResolver,
                 timeWindowResolver,
                 paymentModelPaymentTypeResolver,
                 customerTypeResolver);
@@ -97,8 +97,8 @@ public class AbstractPaymentTest {
     }
 
     ParseContext getParseContext(InputStream resourceAsStream) throws IOException {
-        FraudoPaymentLexer lexer = new FraudoPaymentLexer(new ANTLRInputStream(resourceAsStream));
-        FraudoPaymentParser parser = new FraudoPaymentParser(new CommonTokenStream(lexer));
+        FraudoRulesLexer lexer = new FraudoRulesLexer(new ANTLRInputStream(resourceAsStream));
+        FraudoRulesParser parser = new FraudoRulesParser(new CommonTokenStream(lexer));
         return parser.parse();
     }
 

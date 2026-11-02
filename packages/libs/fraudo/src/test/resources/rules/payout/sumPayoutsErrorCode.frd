@@ -1,0 +1,1 @@
+rule: sumPayoutsError("user_id", 48, 24, hours, "failed", "party_id", "currency") > 100.24 -> decline;
