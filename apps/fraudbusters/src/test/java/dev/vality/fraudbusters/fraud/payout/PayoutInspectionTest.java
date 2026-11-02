@@ -14,6 +14,9 @@ import dev.vality.fraudbusters.config.payout.PayoutFraudoConfig;
 import dev.vality.fraudbusters.converter.CheckedResultToRiskScoreConverter;
 import dev.vality.fraudbusters.converter.WithdrawalContextToModelConverter;
 import dev.vality.fraudbusters.fraud.payment.PaymentContextParserImpl;
+import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudo.payment.aggregator.CountPaymentAggregator;
 import dev.vality.fraudbusters.fraud.payment.resolver.PaymentModelFieldResolver;
 import dev.vality.fraudbusters.listener.payment.TemplateListener;
 import dev.vality.fraudbusters.pool.PoolImpl;
@@ -130,6 +133,30 @@ class PayoutInspectionTest {
         group.setTemplateIds(List.of(new PriorityId(1, "duplicate"), new PriorityId(2, "duplicate")));
         assertThrows(IllegalArgumentException.class, () -> commands.handle(create(CommandBody.group(group))));
         assertEquals(List.of("old"), pools.getGroups().get("group"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void mixedHistoryCachesRemainSeparateAndAreClearedBetweenInspections() {
+        CountPaymentAggregator<PaymentModel, PaymentCheckedField> payments = mock(CountPaymentAggregator.class);
+        var visitor = new PayoutFraudoConfig().payoutRuleVisitor(payments, null, null, null, null,
+                new PaymentModelFieldResolver(), payouts);
+        final var service = new PayoutInspectionService(pools, visitor, new CheckedResultFactory(), converter);
+        template("mixed", """
+                rule: countSuccess("user_id",24,hours)=1
+                  AND countPayoutsSuccess("user_id",24,hours)=3
+                  AND countSuccess("user_id",24,hours)=1
+                  AND countPayoutsSuccess("user_id",24,hours)=3 -> decline;
+                """);
+        reference("mixed", "synthetic-party", "synthetic-wallet");
+        when(payments.countSuccess(eq(USER_ID), any(), any(), anyList())).thenReturn(1);
+        when(payouts.countSuccess(eq(USER_ID), any(), any(), anyList())).thenReturn(3);
+        assertEquals(RiskScore.fatal, risk.convert(service.inspect(context())));
+        verify(payments).countSuccess(eq(USER_ID), any(), any(), anyList());
+        verify(payouts).countSuccess(eq(USER_ID), any(), any(), anyList());
+        assertEquals(RiskScore.fatal, risk.convert(service.inspect(context())));
+        verify(payments, times(2)).countSuccess(eq(USER_ID), any(), any(), anyList());
+        verify(payouts, times(2)).countSuccess(eq(USER_ID), any(), any(), anyList());
     }
 
     private void template(String id, String source) {

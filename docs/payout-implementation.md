@@ -1,7 +1,8 @@
 # Реализация инспекции выплат
 
 Ветка `ft/XYZ-598/fraudo-withdrawall-impl` основана на
-`ft/XYZ-598/fraudo-withdrawall`. Используется существующий
+`ft/XYZ-598/fraudo-withdrawall` (финальные изменения после review: `9913262c`).
+Используется существующий
 `proxy_inspector.InspectorProxy.InspectWithdrawal` из Damsel
 `ft/XYZ-599/inspector-payout` (коммит `dfd92e7`).
 
@@ -100,3 +101,9 @@
 Также выполнены 47 CI-тестов, root `npm run check` и 10 UI-тестов.
 Стандартная production-сборка UI останавливается при недоступности Google Fonts;
 компиляция с `--optimization=false` проходит. Код UI не изменялся.
+
+Обновление после финального review языка использует типизированные ключи
+`HistoryCacheKey` и фабричный `FirstFindRulesWithPayoutVisitor`. Сервис сохраняет
+зависимость от `FirstFindVisitorImpl`, возвращаемого фабрикой, и не обращается
+к внутренним ключам кэша. Дополнительно проверены независимость платежных и
+выплатных агрегатов в одном правиле и очистка кэша между инспекциями.
