@@ -17,7 +17,7 @@ import java.util.List;
 import static dev.vality.fraudo.FraudoRulesParser.Fraud_ruleContext;
 import static dev.vality.fraudo.FraudoRulesParser.ParseContext;
 
-public class FullRulesVisitor<T extends BaseModel, U> extends FirstFindRulesVisitor<T, U> {
+public class FullRulesVisitor<T extends BaseModel, U> extends FirstFindRulesWithPayoutVisitor<T, U> {
 
     public FullRulesVisitor(
             PaymentFuncVisitor<T> paymentFuncVisitor,
@@ -31,8 +31,9 @@ public class FullRulesVisitor<T extends BaseModel, U> extends FirstFindRulesVisi
     @Override
     public ResultModel visitParse(ParseContext ctx) {
         List<RuleResult> results = new ArrayList<>();
-        for (int i = 0; i < ctx.fraud_rule().size(); i++) {
-            Fraud_ruleContext fraudRuleContext = ctx.fraud_rule().get(i);
+        List<Fraud_ruleContext> rules = ctx.fraud_rule();
+        for (int i = 0; i < rules.size(); i++) {
+            Fraud_ruleContext fraudRuleContext = rules.get(i);
             ResultStatus result = (ResultStatus) visit(fraudRuleContext);
             String key = RuleKeyGenerator.generateRuleKey(fraudRuleContext, i);
             if (result == null) {

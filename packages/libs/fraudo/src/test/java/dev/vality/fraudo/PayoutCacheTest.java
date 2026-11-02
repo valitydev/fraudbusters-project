@@ -29,10 +29,10 @@ public class PayoutCacheTest extends AbstractPayoutTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
-    void doesNotNormalizeEquivalentTimeWindowSyntax(boolean fullVisitor) throws Exception {
+    void normalizesEquivalentTimeWindowSyntax(boolean fullVisitor) throws Exception {
         when(payouts.count("user_id", model, window, List.of())).thenReturn(1);
         assertStatus(ResultStatus.DECLINE, evaluate("/rules/payout/cacheEquivalentWindows.frd", fullVisitor));
-        verify(payouts, times(2)).count("user_id", model, window, List.of());
+        verify(payouts).count("user_id", model, window, List.of());
     }
 
     @ParameterizedTest

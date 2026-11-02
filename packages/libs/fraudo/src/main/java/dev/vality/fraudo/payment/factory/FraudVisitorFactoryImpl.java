@@ -7,7 +7,7 @@ import dev.vality.fraudo.bundle.VisitorBundle;
 import dev.vality.fraudo.model.BaseModel;
 import dev.vality.fraudo.resolver.FieldResolver;
 import dev.vality.fraudo.payout.visitor.PayoutFuncVisitor;
-import dev.vality.fraudo.visitor.FirstFindRulesVisitor;
+import dev.vality.fraudo.visitor.FirstFindRulesWithPayoutVisitor;
 import dev.vality.fraudo.payment.visitor.*;
 import dev.vality.fraudo.payment.visitor.impl.*;
 
@@ -52,13 +52,13 @@ public class FraudVisitorFactoryImpl implements FraudVisitorFactory {
                         resolverBundle.getTimeWindowResolver()));
     }
 
-    protected <T extends BaseModel, U> FirstFindRulesVisitor<T, U> createRulesVisitor(
+    protected <T extends BaseModel, U> FirstFindRulesWithPayoutVisitor<T, U> createRulesVisitor(
             PaymentFuncVisitor<T> paymentFuncVisitor,
             ListVisitor<T> listVisitor,
             FieldResolver<T, U> fieldResolver,
             PayoutFuncVisitor<T, U> payoutFuncVisitor
     ) {
-        return new FirstFindRulesVisitor<>(paymentFuncVisitor, listVisitor, fieldResolver, payoutFuncVisitor);
+        return new FirstFindRulesWithPayoutVisitor<>(paymentFuncVisitor, listVisitor, fieldResolver, payoutFuncVisitor);
     }
 
 }

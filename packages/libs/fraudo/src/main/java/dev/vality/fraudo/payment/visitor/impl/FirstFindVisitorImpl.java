@@ -13,10 +13,8 @@ import dev.vality.fraudo.payment.generator.RuleKeyGenerator;
 import dev.vality.fraudo.payment.visitor.*;
 import dev.vality.fraudo.resolver.FieldResolver;
 import dev.vality.fraudo.utils.TextUtil;
-import dev.vality.fraudo.utils.key.generator.CountKeyGenerator;
 import dev.vality.fraudo.utils.key.generator.CountryKeyGenerator;
-import dev.vality.fraudo.utils.key.generator.SumKeyGenerator;
-import dev.vality.fraudo.utils.key.generator.UniqueKeyGenerator;
+import dev.vality.fraudo.utils.key.generator.HistoryKeyGenerator;
 import dev.vality.fraudo.visitor.TemplateVisitor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +27,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static dev.vality.fraudo.FraudoRulesParser.*;
+import static dev.vality.fraudo.constant.HistoryFunction.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -36,7 +35,7 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBas
         implements TemplateVisitor<T, ResultModel> {
 
     public static final String UNKNOWN = "UNKNOWN";
-    private ThreadLocal<Map<String, Object>> localFuncCache = ThreadLocal.withInitial(HashMap::new);
+    private ThreadLocal<Map<Object, Object>> localFuncCache = ThreadLocal.withInitial(HashMap::new);
     private ThreadLocal<T> threadLocalModel = new ThreadLocal<>();
 
     private final PaymentFuncVisitor<T> paymentFuncVisitor;
@@ -254,7 +253,8 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBas
 
     @Override
     public Integer visitUnique(UniqueContext ctx) {
-        String key = UniqueKeyGenerator.generate(ctx, fieldResolver::resolveName);
+        var key = HistoryKeyGenerator.generate(UNIQUE, ctx.time_window(), ctx.group_by(),
+                ctx.STRING(), null, fieldResolver::resolveName);
         return (Integer) localFuncCache.get().computeIfAbsent(
                 key,
                 s -> paymentFuncVisitor.visitUnique(ctx, threadLocalModel.get())
@@ -277,7 +277,8 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBas
 
     @Override
     public Integer visitCount(CountContext ctx) {
-        String key = CountKeyGenerator.generate(ctx, fieldResolver::resolveName);
+        var key = HistoryKeyGenerator.generate(COUNT, ctx.time_window(), ctx.group_by(),
+                List.of(ctx.STRING()), null, fieldResolver::resolveName);
         return (Integer) localFuncCache.get().computeIfAbsent(
                 key,
                 s -> paymentFuncVisitor.visitCount(ctx, threadLocalModel.get())
@@ -286,7 +287,8 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBas
 
     @Override
     public Integer visitCount_success(Count_successContext ctx) {
-        String key = CountKeyGenerator.generateSuccessKey(ctx, fieldResolver::resolveName);
+        var key = HistoryKeyGenerator.generate(COUNT_SUCCESS, ctx.time_window(), ctx.group_by(),
+                List.of(ctx.STRING()), null, fieldResolver::resolveName);
         return (Integer) localFuncCache.get().computeIfAbsent(
                 key,
                 s -> paymentFuncVisitor.visitCountSuccess(ctx, threadLocalModel.get())
@@ -295,7 +297,8 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBas
 
     @Override
     public Integer visitCount_pending(Count_pendingContext ctx) {
-        String key = CountKeyGenerator.generatePendingKey(ctx, fieldResolver::resolveName);
+        var key = HistoryKeyGenerator.generate(COUNT_PENDING, ctx.time_window(), ctx.group_by(),
+                List.of(ctx.STRING()), null, fieldResolver::resolveName);
         return (Integer) localFuncCache.get().computeIfAbsent(
                 key,
                 s -> paymentFuncVisitor.visitCountPending(ctx, threadLocalModel.get())
@@ -304,7 +307,8 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBas
 
     @Override
     public Integer visitCount_error(Count_errorContext ctx) {
-        String key = CountKeyGenerator.generateErrorKey(ctx, fieldResolver::resolveName);
+        var key = HistoryKeyGenerator.generate(COUNT_ERROR, ctx.time_window(), ctx.group_by(),
+                List.of(ctx.STRING(0)), ctx.STRING().size() == 2 ? ctx.STRING(1) : null, fieldResolver::resolveName);
         return (Integer) localFuncCache.get().computeIfAbsent(
                 key,
                 s -> paymentFuncVisitor.visitCountError(ctx, threadLocalModel.get())
@@ -313,7 +317,8 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBas
 
     @Override
     public Integer visitCount_chargeback(Count_chargebackContext ctx) {
-        String key = CountKeyGenerator.generateChargebackKey(ctx, fieldResolver::resolveName);
+        var key = HistoryKeyGenerator.generate(COUNT_CHARGEBACK, ctx.time_window(), ctx.group_by(),
+                List.of(ctx.STRING()), null, fieldResolver::resolveName);
         return (Integer) localFuncCache.get().computeIfAbsent(
                 key,
                 s -> paymentFuncVisitor.visitCountChargeback(ctx, threadLocalModel.get())
@@ -322,7 +327,8 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBas
 
     @Override
     public Integer visitCount_refund(Count_refundContext ctx) {
-        String key = CountKeyGenerator.generateRefundKey(ctx, fieldResolver::resolveName);
+        var key = HistoryKeyGenerator.generate(COUNT_REFUND, ctx.time_window(), ctx.group_by(),
+                List.of(ctx.STRING()), null, fieldResolver::resolveName);
         return (Integer) localFuncCache.get().computeIfAbsent(
                 key,
                 s -> paymentFuncVisitor.visitCountRefund(ctx, threadLocalModel.get())
@@ -331,7 +337,8 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBas
 
     @Override
     public Double visitSum(SumContext ctx) {
-        String key = SumKeyGenerator.generate(ctx, fieldResolver::resolveName);
+        var key = HistoryKeyGenerator.generate(SUM, ctx.time_window(), ctx.group_by(),
+                List.of(ctx.STRING()), null, fieldResolver::resolveName);
         return (Double) localFuncCache.get().computeIfAbsent(
                 key,
                 s -> paymentFuncVisitor.visitSum(ctx, threadLocalModel.get())
@@ -340,7 +347,8 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBas
 
     @Override
     public Double visitSum_success(Sum_successContext ctx) {
-        String key = SumKeyGenerator.generateSuccessKey(ctx, fieldResolver::resolveName);
+        var key = HistoryKeyGenerator.generate(SUM_SUCCESS, ctx.time_window(), ctx.group_by(),
+                List.of(ctx.STRING()), null, fieldResolver::resolveName);
         return (Double) localFuncCache.get().computeIfAbsent(
                 key,
                 s -> paymentFuncVisitor.visitSumSuccess(ctx, threadLocalModel.get())
@@ -349,7 +357,8 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBas
 
     @Override
     public Double visitSum_error(Sum_errorContext ctx) {
-        String key = SumKeyGenerator.generateErrorKey(ctx, fieldResolver::resolveName);
+        var key = HistoryKeyGenerator.generate(SUM_ERROR, ctx.time_window(), ctx.group_by(),
+                List.of(ctx.STRING(0)), ctx.STRING().size() == 2 ? ctx.STRING(1) : null, fieldResolver::resolveName);
         return (Double) localFuncCache.get().computeIfAbsent(
                 key,
                 s -> paymentFuncVisitor.visitSumError(ctx, threadLocalModel.get())
@@ -358,7 +367,8 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBas
 
     @Override
     public Double visitSum_chargeback(Sum_chargebackContext ctx) {
-        String key = SumKeyGenerator.generateChargebackKey(ctx, fieldResolver::resolveName);
+        var key = HistoryKeyGenerator.generate(SUM_CHARGEBACK, ctx.time_window(), ctx.group_by(),
+                List.of(ctx.STRING()), null, fieldResolver::resolveName);
         return (Double) localFuncCache.get().computeIfAbsent(
                 key,
                 s -> paymentFuncVisitor.visitSumChargeback(ctx, threadLocalModel.get())
@@ -367,7 +377,8 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBas
 
     @Override
     public Double visitSum_refund(Sum_refundContext ctx) {
-        String key = SumKeyGenerator.generateRefundKey(ctx, fieldResolver::resolveName);
+        var key = HistoryKeyGenerator.generate(SUM_REFUND, ctx.time_window(), ctx.group_by(),
+                List.of(ctx.STRING()), null, fieldResolver::resolveName);
         return (Double) localFuncCache.get().computeIfAbsent(
                 key,
                 s -> paymentFuncVisitor.visitSumRefund(ctx, threadLocalModel.get())
@@ -415,6 +426,10 @@ public class FirstFindVisitorImpl<T extends BaseModel, U> extends FraudoRulesBas
     }
 
     protected Object cacheFunction(String key, Function<T, ?> function) {
+        return cacheFunction((Object) key, function);
+    }
+
+    protected Object cacheFunction(Object key, Function<T, ?> function) {
         return localFuncCache.get().computeIfAbsent(key, ignored -> function.apply(threadLocalModel.get()));
     }
 
