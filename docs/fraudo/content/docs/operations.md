@@ -23,7 +23,7 @@ category: operations
 `FraudoRulesLexer` и `FraudoRulesBaseVisitor`. При обновлении Fraudo сервисам нужно
 заменить ссылки на прежние классы `FraudoPayment*` новыми именами `FraudoRules*`.
 
-Общие посетители `visitor.FirstFindRulesVisitor` и `visitor.FullRulesVisitor`
+Общие посетители `visitor.FirstFindRulesWithPayoutVisitor` и `visitor.FullRulesVisitor`
 исполняют функции платежей и выплат. Первый останавливается на первом решении,
 второй обходит все правила. `payout.visitor.PayoutFuncVisitor` отвечает только
 за функции истории выплат. Прежний `payment.visitor.impl.FullVisitorImpl` заменён

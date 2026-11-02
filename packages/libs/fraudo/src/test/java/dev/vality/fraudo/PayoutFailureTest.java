@@ -7,7 +7,7 @@ import dev.vality.fraudo.payout.aggregator.CountPayoutAggregator;
 import dev.vality.fraudo.payout.aggregator.SumPayoutAggregator;
 import dev.vality.fraudo.model.BaseModel;
 import dev.vality.fraudo.payment.visitor.impl.FirstFindVisitorImpl;
-import dev.vality.fraudo.visitor.FirstFindRulesVisitor;
+import dev.vality.fraudo.visitor.FirstFindRulesWithPayoutVisitor;
 import dev.vality.fraudo.visitor.FullRulesVisitor;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -30,7 +30,7 @@ public class PayoutFailureTest extends AbstractPayoutTest {
         var parseContext = getParseContext("/rules/payout/failure/" + function + ".frd");
         try (FirstFindVisitorImpl<BaseModel, String> visitor = fullVisitor
                 ? new FullRulesVisitor<>(null, null, fields, null)
-                : new FirstFindRulesVisitor<>(null, null, fields, null)) {
+                : new FirstFindRulesWithPayoutVisitor<>(null, null, fields, null)) {
             assertStatus(ResultStatus.HIGH_RISK, visitor.visit(parseContext, model));
         }
         verifyNoInteractions(payouts, payoutSums, payoutUnique, payments, paymentSums, paymentUnique);
