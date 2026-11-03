@@ -7,12 +7,14 @@ import dev.vality.fraudbusters.pool.Pool;
 import dev.vality.fraudbusters.stream.TemplateVisitor;
 import dev.vality.fraudbusters.util.ReferenceKeyGenerator;
 import dev.vality.fraudo.constant.ResultStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 /** Payment visitor stays the default for consumers that inject the visitor by type. */
+@Slf4j
 @Primary
 @Component
 public class TemplateVisitorImpl implements TemplateVisitor<PaymentModel, CheckedResultModel> {
@@ -28,6 +30,7 @@ public class TemplateVisitorImpl implements TemplateVisitor<PaymentModel, Checke
 
     @Override
     public CheckedResultModel visit(PaymentModel model) {
+        log.debug("TemplateVisitorImpl visit paymentModel: {}", model);
         String partyId = model.getPartyId();
         String partyShopKey = ReferenceKeyGenerator.generateTemplateKey(partyId, model.getShopId());
         return cascade.apply(List.of(

@@ -20,7 +20,7 @@ public class ListRepository implements CrudRepository<Row, String> {
     @Override
     public void create(Row row) {
         try {
-            log.debug("Creating list row in {}", table);
+            log.info("ListRepository create in row: {}", row);
             jdbcTemplate.update("""
                     INSERT INTO %s(id, value) VALUES(?,?) ON CONFLICT (id) DO UPDATE
                     SET value = ?
@@ -34,7 +34,7 @@ public class ListRepository implements CrudRepository<Row, String> {
     @Override
     public void remove(Row row) {
         try {
-            log.debug("Removing list row from {}", table);
+            log.info("ListRepository remove from row: {}", row);
             jdbcTemplate.update("DELETE FROM " + table + " WHERE id = ?", row.getKey());
         } catch (Exception e) {
             log.error("Exception in ListRepository when remove e: ", e);
@@ -45,7 +45,7 @@ public class ListRepository implements CrudRepository<Row, String> {
     @Override
     public Optional<Row> get(String key) {
         try {
-            log.debug("Reading list row from {}", table);
+            log.info("ListRepository select from row by key: {}", key);
             String value = jdbcTemplate.queryForObject("SELECT value FROM " + table + " WHERE id = ?",
                     new Object[] {key}, String.class);
             return value != null

@@ -38,7 +38,7 @@ public class WbListErrorRowsCorrectionStreamFactory {
             StreamsBuilder builder = new StreamsBuilder();
             builder.stream(resultTopic, Consumed.with(Serdes.String(), eventSerde))
                     .filter((s, event) -> isCreateCommandWithEmptyListName(event))
-                    .peek((s, event) -> log.debug("Correcting command with empty list_name"))
+                    .peek((s, changeCommand) -> log.info("Command with empty list_name: {}", changeCommand))
                     .mapValues(this::invertCommandToDelete)
                     .to(readTopic, Produced.with(Serdes.String(), commandSerde));
             return new KafkaStreams(builder.build(), streamsConfiguration);

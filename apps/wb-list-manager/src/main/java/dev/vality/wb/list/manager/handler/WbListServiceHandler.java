@@ -26,7 +26,7 @@ public class WbListServiceHandler implements WbListServiceSrv.Iface {
         try {
             return getCascadeRow(row).isPresent();
         } catch (DbExecutionException e) {
-            log.error("WbListServiceHandler error when isExist", e);
+            log.error("WbListServiceHandler error when isExist row: {} e: ", row, e);
             throw new TException(e);
         }
     }
@@ -62,10 +62,10 @@ public class WbListServiceHandler implements WbListServiceSrv.Iface {
 
     @Override
     public Result getRowInfo(Row row) {
-        log.debug("WbListServiceHandler getRowInfo");
+        log.info("WbListServiceHandler getRowInfo row: {}", row);
         Optional<dev.vality.wb.list.manager.model.Row> result = getCascadeRow(row);
         if (result.isPresent() && row.getListType() == ListType.grey) {
-            log.debug("WbListServiceHandler count info is present");
+            log.info("WbListServiceHandler getRowInfo result: {} isPresent=true!", result);
             try {
                 CountInfoModel countInfoModel = objectMapper.readValue(result.get().getValue(), CountInfoModel.class);
                 return new Result().setRowInfo(RowInfo.count_info(new CountInfo()
@@ -74,10 +74,10 @@ public class WbListServiceHandler implements WbListServiceSrv.Iface {
                         .setStartCountTime(countInfoModel.getStartCountTime())
                 ));
             } catch (JacksonException e) {
-                log.error("Error when parsing count info", e);
+                log.error("Error when parse count info for row: {} e: ", row, e);
             }
         }
-        log.debug("WbListServiceHandler count info not present");
+        log.info("WbListServiceHandler getRowInfo row: {} result: {} not present!", row, result);
         return new Result();
     }
 

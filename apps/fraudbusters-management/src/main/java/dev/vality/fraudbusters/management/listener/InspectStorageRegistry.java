@@ -6,12 +6,14 @@ import dev.vality.damsel.wb_list.Event;
 import dev.vality.damsel.wb_list.Row;
 import dev.vality.fraudbusters.management.exception.UnknownEventException;
 import dev.vality.fraudbusters.management.utils.OperationTypeUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class InspectStorageRegistry {
 
@@ -39,6 +41,7 @@ public class InspectStorageRegistry {
         if (row.getId().isSetPayoutId()) {
             return get(OperationType.payout);
         }
+        log.error("Unknown event when wbListEventListener listen event: {}", event);
         throw new UnknownEventException(
                 String.format("Unknown event when wbListEventListener listen event: %s", event));
     }

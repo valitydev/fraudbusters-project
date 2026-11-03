@@ -37,7 +37,7 @@ public class WithdrawalRepositoryImpl implements Repository<Withdrawal> {
     @Override
     public void insertBatch(List<Withdrawal> batch) {
         if (batch != null && !batch.isEmpty()) {
-            log.debug("insertBatch withdrawal count: {}", batch.size());
+            log.debug("insertBatch batch withdrawals: {}", batch);
             jdbcTemplate.batchUpdate(INSERT, new WithdrawalBatchPreparedStatementSetter(batch));
         }
     }
