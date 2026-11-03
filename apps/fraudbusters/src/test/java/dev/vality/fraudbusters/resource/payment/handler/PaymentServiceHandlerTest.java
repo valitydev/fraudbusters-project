@@ -1,14 +1,20 @@
 package dev.vality.fraudbusters.resource.payment.handler;
 
+import dev.vality.damsel.fraudbusters.OperationType;
 import dev.vality.damsel.fraudbusters.Template;
 import dev.vality.damsel.fraudbusters.ValidateTemplateResponse;
+import dev.vality.fraudbusters.config.payout.PayoutFraudoConfig;
+import dev.vality.fraudbusters.fraud.InspectStorageRegistry;
+import dev.vality.fraudbusters.fraud.payment.PaymentInspectStorage;
 import dev.vality.fraudbusters.fraud.payment.validator.PaymentTemplateValidator;
+import dev.vality.fraudbusters.fraud.payout.PayoutInspectStorage;
 import dev.vality.fraudbusters.fraud.validator.ListTemplateValidatorImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,7 +23,10 @@ class PaymentServiceHandlerTest {
 
     PaymentServiceHandler paymentServiceHandler =
             new PaymentServiceHandler(
-                    new ListTemplateValidatorImpl(new PaymentTemplateValidator()),
+                    new ListTemplateValidatorImpl(new InspectStorageRegistry(List.of(
+                            new PaymentInspectStorage(null, null, null, null, new PaymentTemplateValidator()),
+                            new PayoutInspectStorage(null, null, null, null,
+                                    new PayoutFraudoConfig().payoutTemplateValidator())))),
                     null, null, null, null, null
             );
 
@@ -52,6 +61,16 @@ class PaymentServiceHandlerTest {
         ValidateTemplateResponse validateTemplateResponse = paymentServiceHandler.validateCompilationTemplate(list);
         assertNotNull(validateTemplateResponse.getErrors());
         assertEquals(errorTemplId, validateTemplateResponse.getErrors().get(0).id);
+    }
+
+    @Test
+    void validateCompilationTemplateUsesValidatorOfOperationType() throws TException {
+        List<Template> list = List.of(
+                createTemplate("payment", "rule:1=1->3ds;"),
+                createTemplate("payout", "rule:1=1->3ds;").setOperationType(OperationType.payout));
+        ValidateTemplateResponse validateTemplateResponse = paymentServiceHandler.validateCompilationTemplate(list);
+        assertEquals(1, validateTemplateResponse.getErrors().size());
+        assertEquals("payout", validateTemplateResponse.getErrors().get(0).getId());
     }
 
     private Template createTemplate(String id, String template) {

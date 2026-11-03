@@ -1,7 +1,10 @@
 package dev.vality.fraudbusters.config.payment;
 
+import dev.vality.fraudbusters.fraud.FraudTemplateValidator;
+import dev.vality.fraudbusters.fraud.InspectStorage;
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.payment.PaymentInspectStorage;
 import dev.vality.fraudbusters.pool.Pool;
 import dev.vality.fraudbusters.pool.PoolImpl;
 import dev.vality.fraudbusters.stream.impl.RuleApplierImpl;
@@ -42,6 +45,17 @@ public class PaymentPoolConfig {
             Pool<ParserRuleContext> templatePoolImpl,
             CheckedResultFactory checkedResultFactory) {
         return new RuleApplierImpl<>(paymentRuleVisitor, templatePoolImpl, checkedResultFactory);
+    }
+
+    @Bean
+    public InspectStorage paymentInspectStorage(
+            Pool<ParserRuleContext> templatePoolImpl,
+            Pool<List<String>> groupPoolImpl,
+            Pool<String> referencePoolImpl,
+            Pool<String> groupReferencePoolImpl,
+            FraudTemplateValidator paymentTemplateValidator) {
+        return new PaymentInspectStorage(templatePoolImpl, groupPoolImpl, referencePoolImpl, groupReferencePoolImpl,
+                paymentTemplateValidator);
     }
 
 }

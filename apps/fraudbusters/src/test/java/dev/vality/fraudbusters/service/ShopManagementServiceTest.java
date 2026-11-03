@@ -5,6 +5,7 @@ import dev.vality.damsel.fraudbusters.ReferenceInfo;
 import dev.vality.fraudbusters.config.RestTemplateConfig;
 import dev.vality.fraudbusters.config.payment.PaymentPoolConfig;
 import dev.vality.fraudbusters.config.properties.DefaultTemplateProperties;
+import dev.vality.fraudbusters.fraud.FraudTemplateValidator;
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.pool.Pool;
@@ -56,6 +57,8 @@ public class ShopManagementServiceTest {
     private FirstFindVisitorImpl<PaymentModel, PaymentCheckedField> firstFindVisitor;
     @MockitoBean
     private CheckedResultFactory checkedResultFactory;
+    @MockitoBean
+    private FraudTemplateValidator paymentTemplateValidator;
 
     @Test
     public void testCreateDefaultReference() {

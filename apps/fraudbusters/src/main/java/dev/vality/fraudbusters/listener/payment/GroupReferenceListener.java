@@ -1,13 +1,11 @@
 package dev.vality.fraudbusters.listener.payment;
 
 import dev.vality.damsel.fraudbusters.Command;
-import dev.vality.fraudbusters.fraud.payout.PayoutCommandHandler;
-import dev.vality.fraudbusters.util.OperationTypeUtil;
 import dev.vality.damsel.fraudbusters.GroupReference;
+import dev.vality.fraudbusters.fraud.InspectStorage;
+import dev.vality.fraudbusters.fraud.InspectStorageRegistry;
 import dev.vality.fraudbusters.listener.AbstractPoolCommandListenerExecutor;
 import dev.vality.fraudbusters.listener.CommandListener;
-import dev.vality.fraudbusters.pool.Pool;
-import dev.vality.fraudbusters.util.ReferenceKeyGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -19,23 +17,18 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class GroupReferenceListener extends AbstractPoolCommandListenerExecutor implements CommandListener {
 
-    private final PayoutCommandHandler payoutCommandHandler;
-    private final Pool<String> groupReferencePoolImpl;
+    private final InspectStorageRegistry inspectStorageRegistry;
 
     @Override
     @KafkaListener(topics = "${kafka.topic.group-reference}",
             containerFactory = "groupReferenceListenerContainerFactory")
     public void listen(@Payload Command command) {
-        if (OperationTypeUtil.isPayout(command)) {
-            payoutCommandHandler.handle(command);
-            return;
-        }
         log.info("GroupReferenceListener command: {}", command);
         if (command != null && command.isSetCommandBody() && command.getCommandBody().isSetGroupReference()) {
             GroupReference reference = command.getCommandBody().getGroupReference();
-            String key = ReferenceKeyGenerator.generateTemplateKeyByList(reference.getPartyId(), reference.getShopId());
-            GroupReference groupReference = command.getCommandBody().getGroupReference();
-            execCommand(command, key, groupReferencePoolImpl, groupReference::getGroupId);
+            InspectStorage storage = inspectStorageRegistry.get(command);
+            String key = storage.groupReferenceKey(reference);
+            execCommand(command, key, storage.getGroupReferencePool(), reference::getGroupId);
         }
     }
 

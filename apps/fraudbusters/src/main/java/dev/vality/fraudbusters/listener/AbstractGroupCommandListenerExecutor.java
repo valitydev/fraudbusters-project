@@ -26,6 +26,8 @@ public class AbstractGroupCommandListenerExecutor {
         List<String> sortedListTemplates = group.template_ids.stream()
                 .sorted(Comparator.comparing(PriorityId::getPriority))
                 .map(PriorityId::getId)
+                // A repeated template is kept at its highest priority: applying it again cannot change the result.
+                .distinct()
                 .collect(Collectors.toList());
         pool.add(group.getGroupId(), sortedListTemplates);
     }

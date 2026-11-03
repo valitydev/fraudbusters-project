@@ -1,13 +1,11 @@
 package dev.vality.fraudbusters.listener.payment;
 
 import dev.vality.damsel.fraudbusters.Command;
-import dev.vality.fraudbusters.fraud.payout.PayoutCommandHandler;
-import dev.vality.fraudbusters.util.OperationTypeUtil;
 import dev.vality.damsel.fraudbusters.TemplateReference;
+import dev.vality.fraudbusters.fraud.InspectStorage;
+import dev.vality.fraudbusters.fraud.InspectStorageRegistry;
 import dev.vality.fraudbusters.listener.AbstractPoolCommandListenerExecutor;
 import dev.vality.fraudbusters.listener.CommandListener;
-import dev.vality.fraudbusters.pool.Pool;
-import dev.vality.fraudbusters.util.ReferenceKeyGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -19,22 +17,17 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TemplateReferenceListener extends AbstractPoolCommandListenerExecutor implements CommandListener {
 
-    private final PayoutCommandHandler payoutCommandHandler;
-    private final Pool<String> referencePoolImpl;
+    private final InspectStorageRegistry inspectStorageRegistry;
 
     @Override
     @KafkaListener(topics = "${kafka.topic.reference}", containerFactory = "referenceListenerContainerFactory")
     public void listen(@Payload Command command) {
-        if (OperationTypeUtil.isPayout(command)) {
-            payoutCommandHandler.handle(command);
-            return;
-        }
         log.info("TemplateReferenceListener command: {}", command);
         if (command != null && command.isSetCommandBody() && command.getCommandBody().isSetReference()) {
             TemplateReference reference = command.getCommandBody().getReference();
-            String key = ReferenceKeyGenerator.generateTemplateKey(reference);
-            TemplateReference templateReference = command.getCommandBody().getReference();
-            execCommand(command, key, referencePoolImpl, templateReference::getTemplateId);
+            InspectStorage storage = inspectStorageRegistry.get(command);
+            String key = storage.referenceKey(reference);
+            execCommand(command, key, storage.getReferencePool(), reference::getTemplateId);
         }
     }
 

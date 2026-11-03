@@ -9,8 +9,13 @@ public final class OperationTypeUtil {
     }
 
     public static boolean isPayout(Command command) {
+        return resolve(command) == OperationType.payout;
+    }
+
+    /** A missing operation type keeps its historical meaning: payment. */
+    public static OperationType resolve(Command command) {
         if (command == null || !command.isSetCommandBody()) {
-            return false;
+            return OperationType.payment;
         }
         var body = command.getCommandBody();
         OperationType type = null;
@@ -29,6 +34,6 @@ public final class OperationTypeUtil {
                 throw new IllegalArgumentException("wallet_id is not supported for payments");
             }
         }
-        return type == OperationType.payout;
+        return type == null ? OperationType.payment : type;
     }
 }

@@ -1,5 +1,6 @@
 package dev.vality.fraudbusters.config.payout;
 
+import dev.vality.fraudbusters.fraud.FraudTemplateValidator;
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.fraud.payout.PayoutAggregators;
@@ -13,6 +14,7 @@ import dev.vality.fraudo.payment.aggregator.CountPaymentAggregator;
 import dev.vality.fraudo.payment.aggregator.SumPaymentAggregator;
 import dev.vality.fraudo.payment.factory.FraudVisitorFactoryImpl;
 import dev.vality.fraudo.payment.visitor.impl.FirstFindVisitorImpl;
+import dev.vality.fraudo.payout.validator.PayoutTemplateValidator;
 import dev.vality.fraudo.resolver.CountryResolver;
 import dev.vality.fraudo.resolver.FieldResolver;
 import dev.vality.fraudo.resolver.impl.GroupFieldsResolverImpl;
@@ -38,6 +40,11 @@ public class PayoutFraudoConfig {
                 new GroupFieldsResolverImpl<>(paymentModelFieldResolver), new TimeWindowResolverImpl(), null, null);
         return new FraudVisitorFactoryImpl().createVisitor(
                 new VisitorBundle<>(aggregators, resolvers, new FinderBundle<>(payoutInListFinder)));
+    }
+
+    @Bean
+    public FraudTemplateValidator payoutTemplateValidator() {
+        return new PayoutTemplateValidator()::validate;
     }
 
 }

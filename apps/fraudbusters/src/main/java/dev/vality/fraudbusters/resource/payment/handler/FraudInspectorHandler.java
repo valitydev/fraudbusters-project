@@ -6,11 +6,11 @@ import dev.vality.damsel.proxy_inspector.*;
 import dev.vality.damsel.wb_list.*;
 import dev.vality.fraudbusters.converter.CheckedResultToRiskScoreConverter;
 import dev.vality.fraudbusters.converter.ContextToFraudRequestConverter;
+import dev.vality.fraudbusters.converter.WithdrawalContextToModelConverter;
 import dev.vality.fraudbusters.domain.CheckedResultModel;
 import dev.vality.fraudbusters.domain.FraudRequest;
 import dev.vality.fraudbusters.domain.FraudResult;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
-import dev.vality.fraudbusters.fraud.payout.PayoutInspectionService;
 import dev.vality.fraudbusters.stream.TemplateVisitor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,13 +27,15 @@ public class FraudInspectorHandler implements InspectorProxySrv.Iface {
     private final TemplateVisitor<PaymentModel, CheckedResultModel> templateVisitor;
     private final KafkaTemplate<String, FraudResult> kafkaFraudResultTemplate;
     private final WbListServiceSrv.Iface wbListServiceSrv;
-    private final PayoutInspectionService payoutInspectionService;
+    private final WithdrawalContextToModelConverter withdrawalContextToModelConverter;
+    private final TemplateVisitor<PaymentModel, CheckedResultModel> payoutTemplateVisitor;
 
     @Override
     public RiskScore inspectWithdrawal(WithdrawalContext context) throws InvalidRequest, TException {
         try {
             context.validate();
-            return checkedResultToRiskScoreConverter.convert(payoutInspectionService.inspect(context));
+            PaymentModel model = withdrawalContextToModelConverter.convert(context);
+            return checkedResultToRiskScoreConverter.convert(payoutTemplateVisitor.visit(model));
         } catch (IllegalArgumentException e) {
             throw new InvalidRequest().setErrors(java.util.List.of(e.getMessage()));
         } catch (Exception e) {
