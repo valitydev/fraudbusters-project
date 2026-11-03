@@ -35,6 +35,9 @@ public class ListRepositoryTest {
     @Autowired
     private ListRepository listRepository;
 
+    @Autowired
+    private ListRepository payoutListRepository;
+
     @Container
     static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer<>("postgres:14-alpine");
 
@@ -52,13 +55,13 @@ public class ListRepositoryTest {
 
     @Test
     void paymentAndPayoutRowsWithSameKeyRemainIndependent() {
-        listRepository.create(new Row(KEY, "payment", false));
-        listRepository.create(new Row(KEY, "payout", true));
-        listRepository.create(new Row(KEY, "updated-payout", true));
+        listRepository.create(new Row(KEY, "payment"));
+        payoutListRepository.create(new Row(KEY, "payout"));
+        payoutListRepository.create(new Row(KEY, "updated-payout"));
         assertEquals("payment", listRepository.get(KEY).orElseThrow().getValue());
-        assertEquals("updated-payout", listRepository.get(KEY, true).orElseThrow().getValue());
-        listRepository.remove(new Row(KEY, "updated-payout", true));
-        assertTrue(listRepository.get(KEY, true).isEmpty());
+        assertEquals("updated-payout", payoutListRepository.get(KEY).orElseThrow().getValue());
+        payoutListRepository.remove(new Row(KEY, "updated-payout"));
+        assertTrue(payoutListRepository.get(KEY).isEmpty());
         assertEquals("payment", listRepository.get(KEY).orElseThrow().getValue());
     }
 

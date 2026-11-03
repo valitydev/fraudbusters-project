@@ -1,10 +1,8 @@
 package dev.vality.fraudbusters.management.listener.payment;
 
 import dev.vality.damsel.fraudbusters.Command;
-import dev.vality.fraudbusters.management.dao.payout.PayoutConfigurationDao;
-import dev.vality.fraudbusters.management.converter.CommandToTemplateModelConverter;
-import dev.vality.fraudbusters.management.dao.TemplateDao;
 import dev.vality.fraudbusters.management.listener.CommandListener;
+import dev.vality.fraudbusters.management.listener.InspectStorageRegistry;
 import dev.vality.fraudbusters.management.service.iface.AuditService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,21 +14,14 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PaymentTemplateListener extends CommandListener {
 
-    private final PayoutConfigurationDao payoutConfigurationDao;
-    private final TemplateDao paymentTemplateDao;
-    private final CommandToTemplateModelConverter converter;
+    private final InspectStorageRegistry inspectStorageRegistry;
     private final AuditService auditService;
 
     @KafkaListener(topics = "${kafka.topic.fraudbusters.payment.template}",
             containerFactory = "kafkaTemplateListenerContainerFactory")
     public void listen(Command command) {
-        if (PayoutConfigurationDao.supports(command)) {
-            payoutConfigurationDao.apply(command);
-            auditService.logCommand(command);
-            return;
-        }
         log.info("PaymentTemplateListener event: {}", command);
-        handle(command, converter, paymentTemplateDao::insert, paymentTemplateDao::remove);
+        handle(command, inspectStorageRegistry.get(command).templates());
         auditService.logCommand(command);
     }
 

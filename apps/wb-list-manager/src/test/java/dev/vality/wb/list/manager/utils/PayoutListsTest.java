@@ -7,6 +7,9 @@ import dev.vality.damsel.wb_list.PayoutId;
 import dev.vality.damsel.wb_list.Row;
 import dev.vality.wb.list.manager.handler.WbListServiceHandler;
 import dev.vality.wb.list.manager.repository.ListRepository;
+import dev.vality.wb.list.manager.storage.ListStorageRegistry;
+import dev.vality.wb.list.manager.storage.PaymentListStorage;
+import dev.vality.wb.list.manager.storage.PayoutListStorage;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -18,12 +21,19 @@ import static org.mockito.Mockito.*;
 
 class PayoutListsTest {
 
+    private final ListRepository paymentRepository = mock(ListRepository.class);
+    private final ListRepository payoutRepository = mock(ListRepository.class);
+    private final PaymentListStorage paymentStorage = new PaymentListStorage(paymentRepository);
+    private final PayoutListStorage payoutStorage = new PayoutListStorage(payoutRepository);
+    private final WbListServiceHandler handler = new WbListServiceHandler(
+            new ListStorageRegistry(paymentStorage, payoutStorage), JsonMapper.builder().build());
+
     @Test
     void legacyPaymentKeysAreUnchangedAndPayoutScopesAreUnambiguous() {
         Row row = row().setId(IdInfo.payment_id(new PaymentId().setPartyId("party").setShopId("shop")));
-        assertEquals("party_shop_black_USER_ID_synthetic-user", KeyGenerator.generateKey(row));
-        row.setId(IdInfo.payout_id(new PayoutId().setPartyId("party").setWalletId("wallet")));
-        assertNotEquals(KeyGenerator.generateKey(row),
+        assertEquals("party_shop_black_USER_ID_synthetic-user", paymentStorage.key(row));
+        Row payoutRow = row().setId(IdInfo.payout_id(new PayoutId().setPartyId("party").setWalletId("wallet")));
+        assertNotEquals(payoutStorage.key(payoutRow),
                 KeyGenerator.generatePayoutKey(ListType.black, "USER_ID", "synthetic-user", "party_wallet", null));
         assertNotEquals(KeyGenerator.generatePayoutKey(ListType.black, "USER_ID", "synthetic-user", "a_b", "c"),
                 KeyGenerator.generatePayoutKey(ListType.black, "USER_ID", "synthetic-user", "a", "b_c"));
@@ -31,32 +41,29 @@ class PayoutListsTest {
 
     @Test
     void payoutFallbackNeverQueriesPaymentStorage() throws Exception {
-        var repository = mock(ListRepository.class);
-        var handler = new WbListServiceHandler(repository, JsonMapper.builder().build());
         Row row = row().setId(IdInfo.payout_id(new PayoutId().setPartyId("party").setWalletId("wallet")));
-        when(repository.get(anyString(), eq(true))).thenReturn(Optional.empty());
+        when(payoutRepository.get(anyString())).thenReturn(Optional.empty());
         assertFalse(handler.isExist(row));
-        verify(repository, never()).get(anyString());
-        verify(repository).get(KeyGenerator.generatePayoutKey(ListType.black, "USER_ID", "synthetic-user",
-                null, null), true);
-        verify(repository).get(KeyGenerator.generatePayoutKey(ListType.black, "USER_ID", "synthetic-user",
-                "party", null), true);
-        verify(repository).get(KeyGenerator.generatePayoutKey(ListType.black, "USER_ID", "synthetic-user",
-                "party", "wallet"), true);
+        verifyNoInteractions(paymentRepository);
+        verify(payoutRepository).get(KeyGenerator.generatePayoutKey(ListType.black, "USER_ID", "synthetic-user",
+                null, null));
+        verify(payoutRepository).get(KeyGenerator.generatePayoutKey(ListType.black, "USER_ID", "synthetic-user",
+                "party", null));
+        verify(payoutRepository).get(KeyGenerator.generatePayoutKey(ListType.black, "USER_ID", "synthetic-user",
+                "party", "wallet"));
     }
 
     @Test
     void globalPayoutListMatchesAndWalletWithoutPartyIsRejected() throws Exception {
-        var repository = mock(ListRepository.class);
-        var handler = new WbListServiceHandler(repository, JsonMapper.builder().build());
         Row row = row().setId(IdInfo.payout_id(new PayoutId()));
-        String global = KeyGenerator.generateKey(row);
-        when(repository.get(global, true)).thenReturn(Optional.of(
-                new dev.vality.wb.list.manager.model.Row(global, "synthetic-user", true)));
+        String global = payoutStorage.key(row);
+        when(payoutRepository.get(global)).thenReturn(Optional.of(
+                new dev.vality.wb.list.manager.model.Row(global, "synthetic-user")));
         assertTrue(handler.isExist(row));
-        verify(repository, times(1)).get(global, true);
+        verify(payoutRepository, times(1)).get(anyString());
         row.setId(IdInfo.payout_id(new PayoutId().setWalletId("wallet")));
         assertThrows(IllegalArgumentException.class, () -> handler.isExist(row));
+        verify(payoutRepository, times(1)).get(anyString());
     }
 
     private Row row() {

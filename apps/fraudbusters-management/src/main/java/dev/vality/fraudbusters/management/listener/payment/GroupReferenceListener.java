@@ -1,10 +1,8 @@
 package dev.vality.fraudbusters.management.listener.payment;
 
 import dev.vality.damsel.fraudbusters.Command;
-import dev.vality.fraudbusters.management.dao.payout.PayoutConfigurationDao;
-import dev.vality.fraudbusters.management.converter.payment.CommandToPaymentGroupReferenceModelConverter;
-import dev.vality.fraudbusters.management.dao.payment.group.PaymentGroupReferenceDao;
 import dev.vality.fraudbusters.management.listener.CommandListener;
+import dev.vality.fraudbusters.management.listener.InspectStorageRegistry;
 import dev.vality.fraudbusters.management.service.iface.AuditService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,22 +14,15 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class GroupReferenceListener extends CommandListener {
 
-    private final PayoutConfigurationDao payoutConfigurationDao;
-    private final PaymentGroupReferenceDao groupReferenceDao;
-    private final CommandToPaymentGroupReferenceModelConverter groupReferenceModelConverter;
+    private final InspectStorageRegistry inspectStorageRegistry;
     private final AuditService auditService;
 
     @KafkaListener(topics = "${kafka.topic.fraudbusters.payment.group.reference}",
             containerFactory = "kafkaGroupReferenceListenerContainerFactory")
     public void listen(Command command) {
-        if (PayoutConfigurationDao.supports(command)) {
-            payoutConfigurationDao.apply(command);
-            auditService.logCommand(command);
-            return;
-        }
         log.info("GroupReferenceListener command: {}", command);
         if (command.getCommandBody().isSetGroupReference()) {
-            handle(command, groupReferenceModelConverter, groupReferenceDao::insert, groupReferenceDao::remove);
+            handle(command, inspectStorageRegistry.get(command).groupReferences());
             auditService.logCommand(command);
         } else {
             log.warn("Unknown reference in command in ReferenceListener! command: {}", command);

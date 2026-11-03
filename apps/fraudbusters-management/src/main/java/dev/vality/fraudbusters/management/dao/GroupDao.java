@@ -5,13 +5,9 @@ import org.codehaus.commons.nullanalysis.Nullable;
 
 import java.util.List;
 
-public interface GroupDao {
-
-    void insert(GroupModel groupModel);
+public interface GroupDao extends CommandDao<GroupModel> {
 
     void remove(String id);
-
-    void remove(GroupModel groupModel);
 
     @Nullable
     GroupModel getById(String id);

@@ -6,25 +6,25 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/** Rows of one list table; the table name comes from configuration, never from a request. */
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class ListRepository implements CrudRepository<Row, String> {
 
     private final JdbcTemplate jdbcTemplate;
+    private final String table;
 
     @Override
     public void create(Row row) {
         try {
-            log.debug("Creating list row, payout: {}", row.isPayout());
+            log.debug("Creating list row in {}", table);
             jdbcTemplate.update("""
                     INSERT INTO %s(id, value) VALUES(?,?) ON CONFLICT (id) DO UPDATE
                     SET value = ?
-                    """.formatted(table(row.isPayout())), row.getKey(), row.getValue(), row.getValue());
+                    """.formatted(table), row.getKey(), row.getValue(), row.getValue());
         } catch (Exception e) {
             log.error("Exception in ListRepository when create e: ", e);
             throw new DbExecutionException();
@@ -34,8 +34,8 @@ public class ListRepository implements CrudRepository<Row, String> {
     @Override
     public void remove(Row row) {
         try {
-            log.debug("Removing list row, payout: {}", row.isPayout());
-            jdbcTemplate.update("DELETE FROM " + table(row.isPayout()) + " WHERE id = ?", row.getKey());
+            log.debug("Removing list row from {}", table);
+            jdbcTemplate.update("DELETE FROM " + table + " WHERE id = ?", row.getKey());
         } catch (Exception e) {
             log.error("Exception in ListRepository when remove e: ", e);
             throw new DbExecutionException(e);
@@ -44,16 +44,12 @@ public class ListRepository implements CrudRepository<Row, String> {
 
     @Override
     public Optional<Row> get(String key) {
-        return get(key, false);
-    }
-
-    public Optional<Row> get(String key, boolean payout) {
         try {
-            log.debug("Reading list row, payout: {}", payout);
-            String value = jdbcTemplate.queryForObject("SELECT value FROM " + table(payout) + " WHERE id = ?",
+            log.debug("Reading list row from {}", table);
+            String value = jdbcTemplate.queryForObject("SELECT value FROM " + table + " WHERE id = ?",
                     new Object[] {key}, String.class);
             return value != null
-                    ? Optional.of(new Row(key, value, payout))
+                    ? Optional.of(new Row(key, value))
                     : Optional.empty();
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
@@ -63,7 +59,4 @@ public class ListRepository implements CrudRepository<Row, String> {
         }
     }
 
-    private String table(boolean payout) {
-        return payout ? "wb_list.payout_row" : "wb_list.row";
-    }
 }
