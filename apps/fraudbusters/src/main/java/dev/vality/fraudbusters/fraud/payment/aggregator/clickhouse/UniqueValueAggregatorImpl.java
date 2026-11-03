@@ -5,7 +5,7 @@ import dev.vality.fraudbusters.domain.TimeBound;
 import dev.vality.fraudbusters.exception.RuleFunctionException;
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
-import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.model.OperationModel;
 import dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver;
 import dev.vality.fraudbusters.repository.PaymentRepository;
 import dev.vality.fraudbusters.service.TimeBoundaryService;
@@ -21,7 +21,8 @@ import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
-public class UniqueValueAggregatorImpl implements UniqueValueAggregator<PaymentModel, PaymentCheckedField> {
+public class UniqueValueAggregatorImpl<T extends OperationModel>
+        implements UniqueValueAggregator<T, PaymentCheckedField> {
 
     private final DatabasePaymentFieldResolver databasePaymentFieldResolver;
     private final PaymentRepository paymentRepository;
@@ -31,7 +32,7 @@ public class UniqueValueAggregatorImpl implements UniqueValueAggregator<PaymentM
     @BasicMetric("countUniqueValueWindowed")
     public Integer countUniqueValue(
             PaymentCheckedField countField,
-            PaymentModel paymentModel,
+            T paymentModel,
             PaymentCheckedField onField,
             TimeWindow timeWindow,
             List<PaymentCheckedField> list) {

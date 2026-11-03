@@ -3,8 +3,19 @@ package dev.vality.fraudbusters.config.payout;
 import dev.vality.fraudbusters.fraud.FraudTemplateValidator;
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.model.PayoutModel;
+import dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.CountAggregatorImpl;
+import dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.SumAggregatorImpl;
+import dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.UniqueValueAggregatorImpl;
+import dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver;
 import dev.vality.fraudbusters.fraud.payout.PayoutAggregators;
 import dev.vality.fraudbusters.fraud.payout.PayoutInListFinder;
+import dev.vality.fraudbusters.fraud.payout.PayoutModelFieldResolver;
+import dev.vality.fraudbusters.repository.PaymentRepository;
+import dev.vality.fraudbusters.repository.clickhouse.impl.ChargebackRepository;
+import dev.vality.fraudbusters.repository.clickhouse.impl.PayoutHistoryRepository;
+import dev.vality.fraudbusters.repository.clickhouse.impl.RefundRepository;
+import dev.vality.fraudbusters.service.TimeBoundaryService;
 import dev.vality.fraudo.aggregator.UniqueValueAggregator;
 import dev.vality.fraudo.bundle.AggregatorBundle;
 import dev.vality.fraudo.bundle.FinderBundle;
@@ -26,18 +37,66 @@ import org.springframework.context.annotation.Configuration;
 public class PayoutFraudoConfig {
 
     @Bean
-    public FirstFindVisitorImpl<PaymentModel, PaymentCheckedField> payoutRuleVisitor(
-            CountPaymentAggregator<PaymentModel, PaymentCheckedField> countAggregator,
-            SumPaymentAggregator<PaymentModel, PaymentCheckedField> sumAggregator,
-            UniqueValueAggregator<PaymentModel, PaymentCheckedField> uniqueValueAggregator,
+    public CountPaymentAggregator<PayoutModel, PaymentCheckedField> payoutRulesCountAggregator(
+            PaymentRepository paymentRepository,
+            RefundRepository refundRepository,
+            ChargebackRepository chargebackRepository,
+            DatabasePaymentFieldResolver databasePaymentFieldResolver,
+            TimeBoundaryService timeBoundaryService) {
+        return new CountAggregatorImpl<>(databasePaymentFieldResolver, paymentRepository, refundRepository,
+                chargebackRepository, timeBoundaryService);
+    }
+
+    @Bean
+    public SumPaymentAggregator<PayoutModel, PaymentCheckedField> payoutRulesSumAggregator(
+            PaymentRepository paymentRepository,
+            RefundRepository refundRepository,
+            ChargebackRepository chargebackRepository,
+            DatabasePaymentFieldResolver databasePaymentFieldResolver,
+            TimeBoundaryService timeBoundaryService) {
+        return new SumAggregatorImpl<>(databasePaymentFieldResolver, paymentRepository, refundRepository,
+                chargebackRepository, timeBoundaryService);
+    }
+
+    @Bean
+    public UniqueValueAggregator<PayoutModel, PaymentCheckedField> payoutRulesUniqueValueAggregator(
+            PaymentRepository paymentRepository,
+            DatabasePaymentFieldResolver databasePaymentFieldResolver,
+            TimeBoundaryService timeBoundaryService) {
+        return new UniqueValueAggregatorImpl<>(databasePaymentFieldResolver, paymentRepository, timeBoundaryService);
+    }
+
+    @Bean
+    public PayoutAggregators<PayoutModel> payoutRulesPayoutAggregators(PayoutHistoryRepository repository,
+                                                                       TimeBoundaryService timeBoundaryService) {
+        return new PayoutAggregators<>(repository, timeBoundaryService);
+    }
+
+    @Bean
+    public PayoutAggregators<PaymentModel> paymentRulesPayoutAggregators(PayoutHistoryRepository repository,
+                                                                         TimeBoundaryService timeBoundaryService) {
+        return new PayoutAggregators<>(repository, timeBoundaryService);
+    }
+
+    @Bean
+    public FieldResolver<PayoutModel, PaymentCheckedField> payoutModelFieldResolver() {
+        return new PayoutModelFieldResolver();
+    }
+
+    @Bean
+    public FirstFindVisitorImpl<PayoutModel, PaymentCheckedField> payoutRuleVisitor(
+            CountPaymentAggregator<PayoutModel, PaymentCheckedField> payoutRulesCountAggregator,
+            SumPaymentAggregator<PayoutModel, PaymentCheckedField> payoutRulesSumAggregator,
+            UniqueValueAggregator<PayoutModel, PaymentCheckedField> payoutRulesUniqueValueAggregator,
             CountryResolver<PaymentCheckedField> countryResolver,
             PayoutInListFinder payoutInListFinder,
-            FieldResolver<PaymentModel, PaymentCheckedField> paymentModelFieldResolver,
-            PayoutAggregators payoutAggregators) {
-        var aggregators = new AggregatorBundle<>(countAggregator, sumAggregator, uniqueValueAggregator,
-                payoutAggregators, payoutAggregators, payoutAggregators);
-        var resolvers = new ResolverBundle<>(countryResolver, paymentModelFieldResolver,
-                new GroupFieldsResolverImpl<>(paymentModelFieldResolver), new TimeWindowResolverImpl(), null, null);
+            FieldResolver<PayoutModel, PaymentCheckedField> payoutModelFieldResolver,
+            PayoutAggregators<PayoutModel> payoutRulesPayoutAggregators) {
+        var aggregators = new AggregatorBundle<>(payoutRulesCountAggregator, payoutRulesSumAggregator,
+                payoutRulesUniqueValueAggregator, payoutRulesPayoutAggregators, payoutRulesPayoutAggregators,
+                payoutRulesPayoutAggregators);
+        var resolvers = new ResolverBundle<>(countryResolver, payoutModelFieldResolver,
+                new GroupFieldsResolverImpl<>(payoutModelFieldResolver), new TimeWindowResolverImpl(), null, null);
         return new FraudVisitorFactoryImpl().createVisitor(
                 new VisitorBundle<>(aggregators, resolvers, new FinderBundle<>(payoutInListFinder)));
     }

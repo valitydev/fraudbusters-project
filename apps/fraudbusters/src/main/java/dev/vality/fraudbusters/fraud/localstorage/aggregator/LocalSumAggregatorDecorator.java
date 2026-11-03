@@ -24,7 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LocalSumAggregatorDecorator implements SumPaymentAggregator<PaymentModel, PaymentCheckedField> {
 
-    private final SumAggregatorImpl sumAggregatorImpl;
+    private final SumAggregatorImpl<PaymentModel> sumAggregatorImpl;
     private final LocalPaymentFieldResolver localPaymentFieldResolver;
     private final LocalResultStorageRepository localStorageRepository;
     private final TimeBoundaryService timeBoundaryService;

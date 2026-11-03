@@ -2,7 +2,8 @@ package dev.vality.fraudbusters.fraud.payout;
 
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
-import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.model.OperationModel;
+import dev.vality.fraudbusters.fraud.model.PayoutModel;
 import dev.vality.fraudo.exception.UnresolvableFieldException;
 
 /** Column names are selected exclusively from this whitelist, never from rule text. */
@@ -32,11 +33,11 @@ public final class PayoutFields {
         };
     }
 
-    public static FieldModel resolve(PaymentCheckedField field, PaymentModel model) {
+    public static FieldModel resolve(PaymentCheckedField field, OperationModel model) {
         Object value = switch (field) {
             case USER_ID -> model.getUserId();
             case PARTY_ID -> model.getPartyId();
-            case WALLET_ID -> model.getWalletId();
+            case WALLET_ID -> model instanceof PayoutModel payout ? payout.getWalletId() : null;
             case CURRENCY -> model.getCurrency();
             case CARD_TOKEN -> model.getCardToken();
             case BIN -> model.getBin();

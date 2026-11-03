@@ -1,8 +1,6 @@
 package dev.vality.fraudbusters.fraud;
 
-import dev.vality.damsel.fraudbusters.Command;
 import dev.vality.damsel.fraudbusters.OperationType;
-import dev.vality.fraudbusters.util.OperationTypeUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.EnumMap;
@@ -21,10 +19,6 @@ public class InspectStorageRegistry {
                         "Duplicate inspect storage for operation type " + storage.getOperationType());
             }
         }
-    }
-
-    public InspectStorage get(Command command) {
-        return get(OperationTypeUtil.resolve(command));
     }
 
     /** A missing operation type keeps its historical meaning: payment. */

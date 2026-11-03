@@ -6,6 +6,7 @@ import dev.vality.fraudbusters.converter.CheckedResultToRiskScoreConverter;
 import dev.vality.fraudbusters.converter.ContextToFraudRequestConverter;
 import dev.vality.fraudbusters.converter.WithdrawalContextToModelConverter;
 import dev.vality.fraudbusters.domain.FraudResult;
+import dev.vality.fraudbusters.domain.PayoutResult;
 import dev.vality.fraudbusters.resource.payment.handler.FraudInspectorHandler;
 import dev.vality.fraudbusters.stream.impl.PayoutTemplateVisitorImpl;
 import dev.vality.fraudbusters.stream.impl.TemplateVisitorImpl;
@@ -20,6 +21,9 @@ public class PaymentResourceConfig {
     @Value("${kafka.topic.result}")
     private String resultTopic;
 
+    @Value("${kafka.topic.payout-result}")
+    private String payoutResultTopic;
+
     @Bean
     public InspectorProxySrv.Iface fraudInspectorHandler(
             KafkaTemplate<String, FraudResult> kafkaFraudResultTemplate,
@@ -28,7 +32,8 @@ public class PaymentResourceConfig {
             TemplateVisitorImpl templateVisitor,
             WbListServiceSrv.Iface wbListServiceSrv,
             WithdrawalContextToModelConverter withdrawalContextToModelConverter,
-            PayoutTemplateVisitorImpl payoutTemplateVisitor) {
+            PayoutTemplateVisitorImpl payoutTemplateVisitor,
+            KafkaTemplate<String, PayoutResult> kafkaPayoutResultTemplate) {
         return new FraudInspectorHandler(
                 resultTopic,
                 checkedResultToRiskScoreConverter,
@@ -37,7 +42,9 @@ public class PaymentResourceConfig {
                 kafkaFraudResultTemplate,
                 wbListServiceSrv,
                 withdrawalContextToModelConverter,
-                payoutTemplateVisitor
+                payoutTemplateVisitor,
+                payoutResultTopic,
+                kafkaPayoutResultTemplate
         );
     }
 

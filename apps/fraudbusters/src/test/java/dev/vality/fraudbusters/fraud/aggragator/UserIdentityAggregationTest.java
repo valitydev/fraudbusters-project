@@ -12,6 +12,7 @@ import dev.vality.fraudbusters.fraud.localstorage.aggregator.LocalSumAggregatorD
 import dev.vality.fraudbusters.fraud.localstorage.aggregator.LocalUniqueValueAggregatorDecorator;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.model.PayoutModel;
 import dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.CountAggregatorImpl;
 import dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.SumAggregatorImpl;
 import dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.UniqueValueAggregatorImpl;
@@ -124,11 +125,13 @@ class UserIdentityAggregationTest {
 
     @Test
     void inspectingPayoutDoesNotAddItToPaymentHistory() {
-        PaymentModel model = model();
-        model.setOperationType(dev.vality.damsel.fraudbusters.OperationType.payout);
-        var counts = new CountAggregatorImpl(resolver, payments, refunds, chargebacks, boundaries);
-        var sums = new SumAggregatorImpl(resolver, payments, refunds, chargebacks, boundaries);
-        final var unique = new UniqueValueAggregatorImpl(resolver, payments, boundaries);
+        PayoutModel model = new PayoutModel();
+        model.setCustomerId("synthetic-customer");
+        model.setUserId("Synthetic-User");
+        model.setAmount(100L);
+        var counts = new CountAggregatorImpl<PayoutModel>(resolver, payments, refunds, chargebacks, boundaries);
+        var sums = new SumAggregatorImpl<PayoutModel>(resolver, payments, refunds, chargebacks, boundaries);
+        final var unique = new UniqueValueAggregatorImpl<PayoutModel>(resolver, payments, boundaries);
         assertEquals(0, counts.count(USER_ID, model, window, List.of()));
         assertEquals(0, counts.countError(USER_ID, model, window, List.of()));
         assertEquals(0.0, sums.sum(USER_ID, model, window, List.of()));

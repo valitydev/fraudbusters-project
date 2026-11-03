@@ -7,6 +7,10 @@ import dev.vality.fraudbusters.listener.payment.GroupListener;
 import dev.vality.fraudbusters.listener.payment.GroupReferenceListener;
 import dev.vality.fraudbusters.listener.payment.TemplateListener;
 import dev.vality.fraudbusters.listener.payment.TemplateReferenceListener;
+import dev.vality.fraudbusters.listener.payout.PayoutGroupListener;
+import dev.vality.fraudbusters.listener.payout.PayoutGroupReferenceListener;
+import dev.vality.fraudbusters.listener.payout.PayoutTemplateListener;
+import dev.vality.fraudbusters.listener.payout.PayoutTemplateReferenceListener;
 import dev.vality.fraudbusters.pool.Pool;
 import dev.vality.fraudbusters.service.PoolMonitoringService;
 import dev.vality.fraudbusters.stream.StreamManager;
@@ -34,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class StartupListener implements ApplicationListener<ContextRefreshedEvent> {
 
-    private static final int COUNT_PRELOAD_TASKS = 4;
+    private static final int COUNT_PRELOAD_TASKS = 8;
 
     private final StreamManager streamManager;
 
@@ -47,6 +51,16 @@ public class StartupListener implements ApplicationListener<ContextRefreshedEven
     private final GroupListener groupListener;
     private final GroupReferenceListener groupReferenceListener;
     private final TemplateReferenceListener templateReferenceListener;
+
+    private final ConsumerFactory<String, Command> payoutTemplateListenerFactory;
+    private final ConsumerFactory<String, Command> payoutGroupListenerFactory;
+    private final ConsumerFactory<String, Command> payoutReferenceListenerFactory;
+    private final ConsumerFactory<String, Command> payoutGroupReferenceListenerFactory;
+
+    private final PayoutTemplateListener payoutTemplateListener;
+    private final PayoutGroupListener payoutGroupListener;
+    private final PayoutTemplateReferenceListener payoutTemplateReferenceListener;
+    private final PayoutGroupReferenceListener payoutGroupReferenceListener;
 
     private final ConsumerFactory<String, Command> timeTemplateListenerFactory;
     private final ConsumerFactory<String, Command> timeGroupListenerFactory;
@@ -133,6 +147,30 @@ public class StartupListener implements ApplicationListener<ContextRefreshedEven
                                     groupReferenceListenerFactory,
                                     kafkaTopics.getGroupReference(),
                                     groupReferenceListener
+                            ),
+                            () -> waitPreLoad(
+                                    latch,
+                                    payoutTemplateListenerFactory,
+                                    kafkaTopics.getPayoutTemplate(),
+                                    payoutTemplateListener
+                            ),
+                            () -> waitPreLoad(
+                                    latch,
+                                    payoutReferenceListenerFactory,
+                                    kafkaTopics.getPayoutReference(),
+                                    payoutTemplateReferenceListener
+                            ),
+                            () -> waitPreLoad(
+                                    latch,
+                                    payoutGroupListenerFactory,
+                                    kafkaTopics.getPayoutGroupList(),
+                                    payoutGroupListener
+                            ),
+                            () -> waitPreLoad(
+                                    latch,
+                                    payoutGroupReferenceListenerFactory,
+                                    kafkaTopics.getPayoutGroupReference(),
+                                    payoutGroupReferenceListener
                             )
                     )
             );

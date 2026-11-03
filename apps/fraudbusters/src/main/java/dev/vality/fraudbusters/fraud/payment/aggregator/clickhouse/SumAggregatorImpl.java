@@ -6,7 +6,7 @@ import dev.vality.fraudbusters.exception.RuleFunctionException;
 import dev.vality.fraudbusters.fraud.AggregateGroupingFunction;
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
-import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.model.OperationModel;
 import dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver;
 import dev.vality.fraudbusters.repository.AggregationRepository;
 import dev.vality.fraudbusters.repository.PaymentRepository;
@@ -24,7 +24,7 @@ import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
-public class SumAggregatorImpl implements SumPaymentAggregator<PaymentModel, PaymentCheckedField> {
+public class SumAggregatorImpl<T extends OperationModel> implements SumPaymentAggregator<T, PaymentCheckedField> {
 
     private final DatabasePaymentFieldResolver databasePaymentFieldResolver;
     private final PaymentRepository paymentRepository;
@@ -36,7 +36,7 @@ public class SumAggregatorImpl implements SumPaymentAggregator<PaymentModel, Pay
     @BasicMetric("sum")
     public Double sum(
             PaymentCheckedField checkedField,
-            PaymentModel paymentModel,
+            T paymentModel,
             TimeWindow timeWindow,
             List<PaymentCheckedField> list) {
         return getSum(checkedField, paymentModel, timeWindow, list, paymentRepository::sumOperationByFieldWithGroupBy);
@@ -46,7 +46,7 @@ public class SumAggregatorImpl implements SumPaymentAggregator<PaymentModel, Pay
     @BasicMetric("sumSuccess")
     public Double sumSuccess(
             PaymentCheckedField checkedField,
-            PaymentModel paymentModel,
+            T paymentModel,
             TimeWindow timeWindow,
             List<PaymentCheckedField> list) {
         return getSum(checkedField, paymentModel, timeWindow, list, paymentRepository::sumOperationSuccessWithGroupBy,
@@ -56,7 +56,7 @@ public class SumAggregatorImpl implements SumPaymentAggregator<PaymentModel, Pay
     @Override
     @BasicMetric("sumError")
     public Double sumError(
-            PaymentCheckedField checkedField, PaymentModel paymentModel, TimeWindow timeWindow, String errorCode,
+            PaymentCheckedField checkedField, T paymentModel, TimeWindow timeWindow, String errorCode,
             List<PaymentCheckedField> list) {
         try {
             Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
@@ -90,7 +90,7 @@ public class SumAggregatorImpl implements SumPaymentAggregator<PaymentModel, Pay
 
     @Override
     public Double sumError(PaymentCheckedField checkedField,
-                           PaymentModel paymentModel,
+                           T paymentModel,
                            TimeWindow timeWindow,
                            List<PaymentCheckedField> list) {
         try {
@@ -125,7 +125,7 @@ public class SumAggregatorImpl implements SumPaymentAggregator<PaymentModel, Pay
     @Override
     public Double sumChargeback(
             PaymentCheckedField checkedField,
-            PaymentModel paymentModel,
+            T paymentModel,
             TimeWindow timeWindow,
             List<PaymentCheckedField> list) {
         return getSum(
@@ -141,7 +141,7 @@ public class SumAggregatorImpl implements SumPaymentAggregator<PaymentModel, Pay
     @Override
     public Double sumRefund(
             PaymentCheckedField checkedField,
-            PaymentModel paymentModel,
+            T paymentModel,
             TimeWindow timeWindow,
             List<PaymentCheckedField> list) {
         return getSum(
@@ -157,7 +157,7 @@ public class SumAggregatorImpl implements SumPaymentAggregator<PaymentModel, Pay
     @NotNull
     private Double getSum(
             PaymentCheckedField checkedField,
-            PaymentModel paymentModel,
+            T paymentModel,
             TimeWindow timeWindow,
             List<PaymentCheckedField> list,
             AggregateGroupingFunction<String, Object, Long, Long, List<FieldModel>, Long> aggregateFunction) {
@@ -168,7 +168,7 @@ public class SumAggregatorImpl implements SumPaymentAggregator<PaymentModel, Pay
     @BasicMetric("getSumWindowed")
     private Double getSum(
             PaymentCheckedField checkedField,
-            PaymentModel paymentModel,
+            T paymentModel,
             TimeWindow timeWindow,
             List<PaymentCheckedField> list,
             AggregateGroupingFunction<String, Object, Long, Long, List<FieldModel>, Long> aggregateFunction,

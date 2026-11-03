@@ -4,19 +4,21 @@ import dev.vality.fraudbusters.constant.EventField;
 import dev.vality.fraudbusters.exception.UnknownFieldException;
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
+import dev.vality.fraudbusters.fraud.model.OperationModel;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class DatabasePaymentFieldResolver {
 
     @NotNull
-    public List<FieldModel> resolveListFields(PaymentModel model, List<PaymentCheckedField> list) {
+    public List<FieldModel> resolveListFields(OperationModel model, List<PaymentCheckedField> list) {
         if (list != null) {
             return list.stream()
                     .map(field -> resolve(field, model))
@@ -25,7 +27,7 @@ public class DatabasePaymentFieldResolver {
         return new ArrayList<>();
     }
 
-    public FieldModel resolve(PaymentCheckedField field, PaymentModel model) {
+    public FieldModel resolve(PaymentCheckedField field, OperationModel model) {
         if (field == null) {
             throw new UnknownFieldException();
         }
@@ -36,11 +38,14 @@ public class DatabasePaymentFieldResolver {
             case FINGERPRINT -> new FieldModel(EventField.fingerprint.name(), model.getFingerprint());
             case USER_ID -> new FieldModel(EventField.userId.name(), model.getUserId());
             case PARTY_ID -> new FieldModel(EventField.partyId.name(), model.getPartyId());
-            case SHOP_ID -> new FieldModel(EventField.shopId.name(), model.getShopId());
+            case SHOP_ID -> new FieldModel(EventField.shopId.name(),
+                    payment(model).map(PaymentModel::getShopId).orElse(null));
             case CARD_TOKEN -> new FieldModel(EventField.cardToken.name(), model.getCardToken());
             case LAST_DIGITS -> new FieldModel(EventField.lastDigits.name(), model.getLastDigits());
-            case MOBILE -> new FieldModel(EventField.mobile.name(), model.isMobile());
-            case RECURRENT -> new FieldModel(EventField.recurrent.name(), model.isRecurrent());
+            case MOBILE -> new FieldModel(EventField.mobile.name(),
+                    payment(model).map(PaymentModel::isMobile).orElse(false));
+            case RECURRENT -> new FieldModel(EventField.recurrent.name(),
+                    payment(model).map(PaymentModel::isRecurrent).orElse(false));
             case CURRENCY -> new FieldModel(EventField.currency.name(), model.getCurrency());
             case PHONE -> new FieldModel(EventField.phone.name(), model.getPhone());
             case COUNTRY_BANK -> new FieldModel(EventField.bankCountry.name(), model.getBinCountryCode());
@@ -67,6 +72,11 @@ public class DatabasePaymentFieldResolver {
             case RECURRENT -> EventField.recurrent.name();
             default -> throw new UnknownFieldException();
         };
+    }
+
+    /** Payment-only fields are absent when payment history is queried for another operation. */
+    private Optional<PaymentModel> payment(OperationModel model) {
+        return model instanceof PaymentModel payment ? Optional.of(payment) : Optional.empty();
     }
 
 }

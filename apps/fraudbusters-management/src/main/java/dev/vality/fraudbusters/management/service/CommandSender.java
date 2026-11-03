@@ -1,7 +1,6 @@
 package dev.vality.fraudbusters.management.service;
 
 import dev.vality.damsel.fraudbusters.Command;
-import dev.vality.fraudbusters.management.utils.PayoutCommandKey;
 import dev.vality.fraudbusters.management.exception.KafkaProduceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +17,7 @@ public class CommandSender {
 
     public String send(String topicName, Command command, String key) {
         try {
-            kafkaTemplate.send(topicName, PayoutCommandKey.forCommand(command, key), command).get();
+            kafkaTemplate.send(topicName, key, command).get();
         } catch (InterruptedException e) {
             log.error("InterruptedException command: {} e: ", command, e);
             Thread.currentThread().interrupt();

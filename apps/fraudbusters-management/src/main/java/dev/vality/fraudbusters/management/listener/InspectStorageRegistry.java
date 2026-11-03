@@ -1,11 +1,9 @@
 package dev.vality.fraudbusters.management.listener;
 
-import dev.vality.damsel.fraudbusters.Command;
 import dev.vality.damsel.fraudbusters.OperationType;
 import dev.vality.damsel.wb_list.Event;
 import dev.vality.damsel.wb_list.Row;
 import dev.vality.fraudbusters.management.exception.UnknownEventException;
-import dev.vality.fraudbusters.management.utils.OperationTypeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -26,10 +24,6 @@ public class InspectStorageRegistry {
                         "Duplicate inspect storage for operation type " + storage.operationType());
             }
         }
-    }
-
-    public InspectStorage get(Command command) {
-        return get(OperationTypeUtil.resolve(command));
     }
 
     /** A list row without an identifier keeps its historical meaning: payment. */

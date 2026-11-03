@@ -8,24 +8,21 @@ import dev.vality.fraudbusters.stream.TemplateVisitor;
 import dev.vality.fraudbusters.util.ReferenceKeyGenerator;
 import dev.vality.fraudo.constant.ResultStatus;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-/** Payment visitor stays the default for consumers that inject the visitor by type. */
 @Slf4j
-@Primary
 @Component
 public class TemplateVisitorImpl implements TemplateVisitor<PaymentModel, CheckedResultModel> {
 
-    private final RuleCascade cascade;
+    private final RuleCascade<PaymentModel> cascade;
 
     public TemplateVisitorImpl(RuleApplierImpl<PaymentModel> ruleApplier,
                                Pool<List<String>> groupPoolImpl,
                                Pool<String> referencePoolImpl,
                                Pool<String> groupReferencePoolImpl) {
-        cascade = new RuleCascade(ruleApplier, groupPoolImpl, referencePoolImpl, groupReferencePoolImpl);
+        cascade = new RuleCascade<>(ruleApplier, groupPoolImpl, referencePoolImpl, groupReferencePoolImpl);
     }
 
     @Override

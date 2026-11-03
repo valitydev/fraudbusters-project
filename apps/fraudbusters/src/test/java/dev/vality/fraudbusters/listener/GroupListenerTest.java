@@ -1,7 +1,6 @@
 package dev.vality.fraudbusters.listener;
 
 import dev.vality.damsel.fraudbusters.PriorityId;
-import dev.vality.fraudbusters.fraud.InspectStorageRegistry;
 import dev.vality.fraudbusters.fraud.payment.PaymentInspectStorage;
 import dev.vality.fraudbusters.listener.payment.GroupListener;
 import dev.vality.fraudbusters.pool.Pool;
@@ -25,8 +24,7 @@ public class GroupListenerTest {
     @BeforeEach
     public void init() {
         groupPoolImpl = new PoolImpl<>("group");
-        groupListener = new GroupListener(new InspectStorageRegistry(List.of(
-                new PaymentInspectStorage(null, groupPoolImpl, null, null, null))));
+        groupListener = new GroupListener(new PaymentInspectStorage(null, groupPoolImpl, null, null, null));
     }
 
     @Test

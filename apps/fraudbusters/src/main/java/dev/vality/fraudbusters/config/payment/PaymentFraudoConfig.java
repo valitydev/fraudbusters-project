@@ -51,7 +51,7 @@ public class PaymentFraudoConfig {
             ChargebackRepository chargebackRepository,
             DatabasePaymentFieldResolver databasePaymentFieldResolver,
             TimeBoundaryService timeBoundaryService) {
-        return new CountAggregatorImpl(
+        return new CountAggregatorImpl<>(
                 databasePaymentFieldResolver,
                 paymentRepository,
                 refundRepository,
@@ -67,7 +67,7 @@ public class PaymentFraudoConfig {
             ChargebackRepository chargebackRepository,
             DatabasePaymentFieldResolver databasePaymentFieldResolver,
             TimeBoundaryService timeBoundaryService) {
-        return new SumAggregatorImpl(
+        return new SumAggregatorImpl<>(
                 databasePaymentFieldResolver,
                 paymentRepository,
                 refundRepository,
@@ -81,7 +81,7 @@ public class PaymentFraudoConfig {
             PaymentRepository paymentRepository,
             DatabasePaymentFieldResolver databasePaymentFieldResolver,
             TimeBoundaryService timeBoundaryService) {
-        return new UniqueValueAggregatorImpl(databasePaymentFieldResolver, paymentRepository, timeBoundaryService);
+        return new UniqueValueAggregatorImpl<>(databasePaymentFieldResolver, paymentRepository, timeBoundaryService);
     }
 
     @Bean
@@ -118,10 +118,10 @@ public class PaymentFraudoConfig {
             FieldResolver<PaymentModel, PaymentCheckedField> paymentModelFieldResolver,
             PaymentTypeResolver<PaymentModel> paymentTypeResolver,
             CustomerTypeResolver<PaymentModel> customerTypeResolver,
-            PayoutAggregators payoutAggregators) {
+            PayoutAggregators<PaymentModel> paymentRulesPayoutAggregators) {
         AggregatorBundle<PaymentModel, PaymentCheckedField> aggregatorBundle =
                 new AggregatorBundle<>(countAggregator, sumAggregator, uniqueValueAggregator,
-                        payoutAggregators, payoutAggregators, payoutAggregators);
+                        paymentRulesPayoutAggregators, paymentRulesPayoutAggregators, paymentRulesPayoutAggregators);
         ResolverBundle<PaymentModel, PaymentCheckedField> resolverBundle = new ResolverBundle<>(
                 countryResolver,
                 paymentModelFieldResolver,
@@ -145,7 +145,7 @@ public class PaymentFraudoConfig {
             LocalPaymentFieldResolver localPaymentFieldResolver,
             TimeBoundaryService timeBoundaryService) {
 
-        CountAggregatorImpl countAggregatorDecorator = new CountAggregatorImpl(
+        CountAggregatorImpl<PaymentModel> countAggregatorDecorator = new CountAggregatorImpl<>(
                 databasePaymentFieldResolver,
                 paymentRepositoryImpl,
                 refundRepository,
@@ -170,7 +170,7 @@ public class PaymentFraudoConfig {
             LocalPaymentFieldResolver localPaymentFieldResolver,
             TimeBoundaryService timeBoundaryService) {
 
-        SumAggregatorImpl sumAggregator = new SumAggregatorImpl(
+        SumAggregatorImpl<PaymentModel> sumAggregator = new SumAggregatorImpl<>(
                 databasePaymentFieldResolver,
                 paymentRepositoryImpl,
                 refundRepository,
@@ -192,8 +192,9 @@ public class PaymentFraudoConfig {
             DatabasePaymentFieldResolver databasePaymentFieldResolver,
             LocalPaymentFieldResolver localPaymentFieldResolver,
             TimeBoundaryService timeBoundaryService) {
-        UniqueValueAggregatorImpl uniqueValueAggregator =
-                new UniqueValueAggregatorImpl(databasePaymentFieldResolver, fraudResultRepository, timeBoundaryService);
+        UniqueValueAggregatorImpl<PaymentModel> uniqueValueAggregator =
+                new UniqueValueAggregatorImpl<>(databasePaymentFieldResolver, fraudResultRepository,
+                        timeBoundaryService);
 
         return new LocalUniqueValueAggregatorDecorator(
                 uniqueValueAggregator,
@@ -213,10 +214,10 @@ public class PaymentFraudoConfig {
             FieldResolver<PaymentModel, PaymentCheckedField> paymentModelFieldResolver,
             PaymentTypeResolver<PaymentModel> paymentTypeResolver,
             CustomerTypeResolver<PaymentModel> customerTypeResolver,
-            PayoutAggregators payoutAggregators) {
+            PayoutAggregators<PaymentModel> paymentRulesPayoutAggregators) {
         AggregatorBundle<PaymentModel, PaymentCheckedField> aggregatorBundle =
                 new AggregatorBundle<>(countResultAggregator, sumResultAggregator, uniqueValueResultAggregator,
-                        payoutAggregators, payoutAggregators, payoutAggregators);
+                        paymentRulesPayoutAggregators, paymentRulesPayoutAggregators, paymentRulesPayoutAggregators);
         ResolverBundle<PaymentModel, PaymentCheckedField> resolverBundle = new ResolverBundle<>(
                 countryResolver,
                 paymentModelFieldResolver,

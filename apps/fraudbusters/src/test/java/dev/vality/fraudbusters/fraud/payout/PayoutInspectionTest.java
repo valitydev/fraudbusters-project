@@ -14,17 +14,18 @@ import dev.vality.fraudbusters.config.payout.PayoutFraudoConfig;
 import dev.vality.fraudbusters.converter.CheckedResultToRiskScoreConverter;
 import dev.vality.fraudbusters.converter.WithdrawalContextToModelConverter;
 import dev.vality.fraudbusters.domain.CheckedResultModel;
-import dev.vality.fraudbusters.fraud.InspectStorageRegistry;
+import dev.vality.fraudbusters.domain.PayoutResult;
+import dev.vality.fraudbusters.fraud.InspectStorage;
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
-import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.model.PayoutModel;
 import dev.vality.fraudbusters.fraud.payment.PaymentContextParserImpl;
 import dev.vality.fraudbusters.fraud.payment.PaymentInspectStorage;
-import dev.vality.fraudbusters.fraud.payment.resolver.PaymentModelFieldResolver;
 import dev.vality.fraudbusters.fraud.payment.validator.PaymentTemplateValidator;
-import dev.vality.fraudbusters.listener.payment.GroupListener;
-import dev.vality.fraudbusters.listener.payment.GroupReferenceListener;
 import dev.vality.fraudbusters.listener.payment.TemplateListener;
-import dev.vality.fraudbusters.listener.payment.TemplateReferenceListener;
+import dev.vality.fraudbusters.listener.payout.PayoutGroupListener;
+import dev.vality.fraudbusters.listener.payout.PayoutGroupReferenceListener;
+import dev.vality.fraudbusters.listener.payout.PayoutTemplateListener;
+import dev.vality.fraudbusters.listener.payout.PayoutTemplateReferenceListener;
 import dev.vality.fraudbusters.pool.Pool;
 import dev.vality.fraudbusters.pool.PoolImpl;
 import dev.vality.fraudbusters.stream.impl.PayoutTemplateVisitorImpl;
@@ -33,6 +34,7 @@ import dev.vality.fraudbusters.util.CheckedResultFactory;
 import dev.vality.fraudo.payment.aggregator.CountPaymentAggregator;
 import dev.vality.fraudo.payment.visitor.impl.FirstFindVisitorImpl;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -51,32 +53,43 @@ class PayoutInspectionTest {
     private final Pool<List<String>> payoutGroups = new PoolImpl<>("payout-group");
     private final Pool<String> payoutReferences = new PoolImpl<>("payout-reference");
     private final Pool<String> payoutGroupReferences = new PoolImpl<>("payout-group-reference");
-    private final InspectStorageRegistry registry = new InspectStorageRegistry(List.of(
-            new PaymentInspectStorage(paymentTemplates, new PoolImpl<>("group"), new PoolImpl<>("reference"),
-                    new PoolImpl<>("group-reference"), new PaymentTemplateValidator()),
-            new PayoutInspectStorage(payoutTemplates, payoutGroups, payoutReferences, payoutGroupReferences,
-                    new PayoutFraudoConfig().payoutTemplateValidator())));
-    private final TemplateListener templateListener = new TemplateListener(parser, registry);
-    private final GroupListener groupListener = new GroupListener(registry);
-    private final TemplateReferenceListener referenceListener = new TemplateReferenceListener(registry);
-    private final GroupReferenceListener groupReferenceListener = new GroupReferenceListener(registry);
-    private final PayoutAggregators payouts = mock(PayoutAggregators.class);
+    private final InspectStorage paymentStorage = new PaymentInspectStorage(paymentTemplates,
+            new PoolImpl<>("group"), new PoolImpl<>("reference"), new PoolImpl<>("group-reference"),
+            new PaymentTemplateValidator());
+    private final InspectStorage payoutStorage = new PayoutInspectStorage(payoutTemplates, payoutGroups,
+            payoutReferences, payoutGroupReferences, new PayoutFraudoConfig().payoutTemplateValidator());
+    private final TemplateListener paymentTemplateListener = new TemplateListener(parser, paymentStorage);
+    private final PayoutTemplateListener templateListener = new PayoutTemplateListener(parser, payoutStorage);
+    private final PayoutGroupListener groupListener = new PayoutGroupListener(payoutStorage);
+    private final PayoutTemplateReferenceListener referenceListener =
+            new PayoutTemplateReferenceListener(payoutStorage);
+    private final PayoutGroupReferenceListener groupReferenceListener =
+            new PayoutGroupReferenceListener(payoutStorage);
+    @SuppressWarnings("unchecked")
+    private final PayoutAggregators<PayoutModel> payouts = mock(PayoutAggregators.class);
     private final WithdrawalContextToModelConverter converter = new WithdrawalContextToModelConverter();
     private final PayoutTemplateVisitorImpl inspector = inspector(new PayoutFraudoConfig().payoutRuleVisitor(
-            null, null, null, null, null, new PaymentModelFieldResolver(), payouts));
+            null, null, null, null, null, new PayoutModelFieldResolver(), payouts));
     private final CheckedResultToRiskScoreConverter risk = new CheckedResultToRiskScoreConverter();
 
     @Test
-    void damselMethodUsesPayoutInspectionWithoutPublishingPaymentResults() throws Exception {
-        var producer = mock(org.springframework.kafka.core.KafkaTemplate.class);
+    @SuppressWarnings("unchecked")
+    void damselMethodPublishesPayoutResultsToTheirOwnTopic() throws Exception {
+        var paymentProducer = mock(KafkaTemplate.class);
+        KafkaTemplate<String, PayoutResult> payoutProducer = mock(KafkaTemplate.class);
         var handler = new dev.vality.fraudbusters.resource.payment.handler.FraudInspectorHandler(
-                "unused", risk, null, null, producer, null, converter, inspector);
+                "unused", risk, null, null, paymentProducer, null, converter, inspector, "payout-result",
+                payoutProducer);
         assertEquals(RiskScore.high, handler.inspectWithdrawal(context()));
         template("global", "rule:1=1->decline;");
         handle(create(CommandBody.reference(new TemplateReference().setTemplateId("global")
                 .setIsGlobal(true).setOperationType(OperationType.payout))));
         assertEquals(RiskScore.fatal, handler.inspectWithdrawal(context()));
-        verifyNoInteractions(producer);
+        verifyNoInteractions(paymentProducer);
+        var result = org.mockito.ArgumentCaptor.forClass(PayoutResult.class);
+        verify(payoutProducer, times(2)).send(eq("payout-result"), eq("synthetic-withdrawal"), result.capture());
+        assertEquals("synthetic-wallet", result.getValue().getPayoutModel().getWalletId());
+        assertEquals("global", result.getValue().getResultModel().getCheckedTemplate());
     }
 
     @Test
@@ -84,9 +97,8 @@ class PayoutInspectionTest {
         var context = context();
         var model = converter.convert(context);
         assertNull(model.getUserId());
-        assertNull(model.getShopId());
         assertEquals("synthetic-wallet", model.getWalletId());
-        assertEquals(OperationType.payout, model.getOperationType());
+        assertEquals("synthetic-withdrawal", model.getWithdrawalId());
         assertEquals(RiskScore.high, risk.convert(inspect(context)));
     }
 
@@ -147,7 +159,7 @@ class PayoutInspectionTest {
 
     @Test
     void payoutCommandsDoNotChangePaymentTemplatesAndInvalidTemplatesAreRejected() {
-        handle(create(CommandBody.template(new Template().setId("shared-id")
+        paymentTemplateListener.listen(create(CommandBody.template(new Template().setId("shared-id")
                 .setTemplate(bytes("rule:1=1->accept;")))));
         var original = paymentTemplates.get("shared-id");
         assertNotNull(original);
@@ -165,9 +177,9 @@ class PayoutInspectionTest {
     @Test
     @SuppressWarnings("unchecked")
     void mixedHistoryCachesRemainSeparateAndAreClearedBetweenInspections() {
-        CountPaymentAggregator<PaymentModel, PaymentCheckedField> payments = mock(CountPaymentAggregator.class);
+        CountPaymentAggregator<PayoutModel, PaymentCheckedField> payments = mock(CountPaymentAggregator.class);
         var visitor = new PayoutFraudoConfig().payoutRuleVisitor(payments, null, null, null, null,
-                new PaymentModelFieldResolver(), payouts);
+                new PayoutModelFieldResolver(), payouts);
         final var service = inspector(visitor);
         template("mixed", """
                 rule: countSuccess("user_id",24,hours)=1
@@ -186,7 +198,7 @@ class PayoutInspectionTest {
         verify(payouts, times(2)).countSuccess(eq(USER_ID), any(), any(), anyList());
     }
 
-    private PayoutTemplateVisitorImpl inspector(FirstFindVisitorImpl<PaymentModel, PaymentCheckedField> visitor) {
+    private PayoutTemplateVisitorImpl inspector(FirstFindVisitorImpl<PayoutModel, PaymentCheckedField> visitor) {
         return new PayoutTemplateVisitorImpl(
                 new NotifyingRuleApplierImpl<>(visitor, payoutTemplates, new CheckedResultFactory()),
                 payoutGroups, payoutReferences, payoutGroupReferences);
@@ -200,7 +212,20 @@ class PayoutInspectionTest {
         return visitor.visit(converter.convert(context));
     }
 
-    /** Routes a command to the listener of its Kafka topic. */
+    @Test
+    void topicDefinesTheOperationTypeAndForeignCommandsAreSkipped() {
+        templateListener.listen(create(CommandBody.template(new Template().setId("untyped")
+                .setTemplate(bytes("rule:1=1->decline;")))));
+        assertNotNull(payoutTemplates.get("untyped"));
+        assertNull(paymentTemplates.get("untyped"));
+
+        paymentTemplateListener.listen(create(CommandBody.template(new Template().setId("misrouted")
+                .setOperationType(OperationType.payout).setTemplate(bytes("rule:1=1->decline;")))));
+        assertNull(paymentTemplates.get("misrouted"));
+        assertNull(payoutTemplates.get("misrouted"));
+    }
+
+    /** Routes a payout command to the listener of its payout Kafka topic. */
     private void handle(Command command) {
         var body = command.getCommandBody();
         if (body.isSetTemplate()) {

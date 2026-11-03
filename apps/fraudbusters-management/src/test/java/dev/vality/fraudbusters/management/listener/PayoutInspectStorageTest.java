@@ -19,10 +19,12 @@ import dev.vality.fraudbusters.management.dao.payout.PayoutGroupReferenceDao;
 import dev.vality.fraudbusters.management.dao.payout.PayoutListDao;
 import dev.vality.fraudbusters.management.dao.payout.PayoutReferenceDao;
 import dev.vality.fraudbusters.management.dao.payout.PayoutTemplateDao;
-import dev.vality.fraudbusters.management.listener.payment.GroupReferenceListener;
-import dev.vality.fraudbusters.management.listener.payment.PaymentGroupListener;
 import dev.vality.fraudbusters.management.listener.payment.PaymentTemplateListener;
 import dev.vality.fraudbusters.management.listener.payment.ReferenceListener;
+import dev.vality.fraudbusters.management.listener.payout.PayoutGroupListener;
+import dev.vality.fraudbusters.management.listener.payout.PayoutGroupReferenceListener;
+import dev.vality.fraudbusters.management.listener.payout.PayoutReferenceListener;
+import dev.vality.fraudbusters.management.listener.payout.PayoutTemplateListener;
 import dev.vality.fraudbusters.management.service.iface.AuditService;
 import dev.vality.fraudbusters.management.utils.RowUtilsService;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,10 +64,12 @@ class PayoutInspectStorageTest {
 
     private JdbcTemplate jdbc;
     private InspectStorage payment;
-    private PaymentTemplateListener templateListener;
-    private PaymentGroupListener groupListener;
-    private ReferenceListener referenceListener;
-    private GroupReferenceListener groupReferenceListener;
+    private PaymentTemplateListener paymentTemplateListener;
+    private ReferenceListener paymentReferenceListener;
+    private PayoutTemplateListener templateListener;
+    private PayoutGroupListener groupListener;
+    private PayoutReferenceListener referenceListener;
+    private PayoutGroupReferenceListener groupReferenceListener;
     private WbListEventListener listListener;
 
     @BeforeEach
@@ -84,13 +88,14 @@ class PayoutInspectStorageTest {
                 ModelProjection.of(new CommandToPayoutGroupReferenceModelConverter(), payoutGroupReferenceDao),
                 ModelProjection.ofList(new EventToPayoutListRecordConverter(
                         new RowUtilsService(JsonMapper.builder().build())), payoutListDao));
-        var registry = new InspectStorageRegistry(List.of(payment, payout));
         AuditService audit = mock(AuditService.class);
-        templateListener = new PaymentTemplateListener(registry, audit);
-        groupListener = new PaymentGroupListener(registry, audit);
-        referenceListener = new ReferenceListener(registry, audit);
-        groupReferenceListener = new GroupReferenceListener(registry, audit);
-        listListener = new WbListEventListener(registry, audit);
+        paymentTemplateListener = new PaymentTemplateListener(payment, audit);
+        paymentReferenceListener = new ReferenceListener(payment, audit);
+        templateListener = new PayoutTemplateListener(payout, audit);
+        groupListener = new PayoutGroupListener(payout, audit);
+        referenceListener = new PayoutReferenceListener(payout, audit);
+        groupReferenceListener = new PayoutGroupReferenceListener(payout, audit);
+        listListener = new WbListEventListener(new InspectStorageRegistry(List.of(payment, payout)), audit);
     }
 
     @Test
@@ -108,8 +113,14 @@ class PayoutInspectStorageTest {
 
         template.unsetOperationType();
         templateListener.listen(command);
-        verify(payment.templates()).create(command);
-        assertEquals(0, count("af.payout_template"));
+        assertEquals(1, count("af.payout_template"));
+        verifyNoInteractions(payment.templates());
+
+        template.setId("misrouted").setOperationType(OperationType.payout);
+        paymentTemplateListener.listen(command);
+        verifyNoInteractions(payment.templates());
+        assertEquals(0, jdbc.queryForObject(
+                "SELECT count(*) FROM af.payout_template WHERE id = 'misrouted'", Integer.class));
     }
 
     @Test
@@ -156,6 +167,8 @@ class PayoutInspectStorageTest {
                         .setPartyId("synthetic-party").setShopId("synthetic-shop")))));
         assertThrows(IllegalArgumentException.class, () -> referenceListener.listen(create(CommandBody.reference(
                 new TemplateReference().setTemplateId("t").setWalletId("synthetic-wallet")))));
+        paymentReferenceListener.listen(create(CommandBody.reference(new TemplateReference().setTemplateId("t")
+                .setOperationType(OperationType.payout).setPartyId("synthetic-party"))));
         assertEquals(0, count("af.payout_reference"));
         verifyNoInteractions(payment.references());
     }

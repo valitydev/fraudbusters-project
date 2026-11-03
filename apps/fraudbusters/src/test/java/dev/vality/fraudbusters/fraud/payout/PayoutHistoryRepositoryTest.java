@@ -1,7 +1,7 @@
 package dev.vality.fraudbusters.fraud.payout;
 
 import dev.vality.fraudbusters.extension.ClickHouseContainerExtension;
-import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.model.PayoutModel;
 import dev.vality.fraudbusters.repository.clickhouse.impl.PayoutHistoryRepository;
 import dev.vality.fraudbusters.service.TimeBoundaryServiceImpl;
 import dev.vality.fraudo.model.TimeWindow;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class PayoutHistoryRepositoryTest {
 
     private JdbcTemplate jdbc;
-    private PayoutAggregators aggregates;
+    private PayoutAggregators<PayoutModel> aggregates;
     private final TimeWindow window = TimeWindow.builder().start(24).timeUnit("hours").build();
     private final long timestamp = Instant.parse("2026-01-01T12:00:00Z").toEpochMilli();
 
@@ -31,7 +31,7 @@ class PayoutHistoryRepositoryTest {
         jdbc = new JdbcTemplate(new ClickHouseDataSource("jdbc:clickhouse://localhost:" +
                 ClickHouseContainerExtension.CLICKHOUSE_CONTAINER.getFirstMappedPort() + "/default"));
         jdbc.execute("TRUNCATE TABLE fraud.withdrawal");
-        aggregates = new PayoutAggregators(new PayoutHistoryRepository(new NamedParameterJdbcTemplate(jdbc)),
+        aggregates = new PayoutAggregators<>(new PayoutHistoryRepository(new NamedParameterJdbcTemplate(jdbc)),
                 new TimeBoundaryServiceImpl());
     }
 
@@ -97,8 +97,8 @@ class PayoutHistoryRepositoryTest {
         assertEquals(1, aggregates.count(USER_ID, model(), window, List.of(PARTY_ID, WALLET_ID)));
     }
 
-    private PaymentModel model() {
-        var model = new PaymentModel();
+    private PayoutModel model() {
+        var model = new PayoutModel();
         model.setUserId("synthetic-user");
         model.setPartyId("party");
         model.setWalletId("wallet");

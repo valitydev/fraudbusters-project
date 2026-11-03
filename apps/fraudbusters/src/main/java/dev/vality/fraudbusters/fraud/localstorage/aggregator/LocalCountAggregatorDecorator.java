@@ -24,7 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LocalCountAggregatorDecorator implements CountPaymentAggregator<PaymentModel, PaymentCheckedField> {
 
-    private final CountAggregatorImpl countAggregator;
+    private final CountAggregatorImpl<PaymentModel> countAggregator;
     private final LocalPaymentFieldResolver localPaymentFieldResolver;
     private final LocalResultStorageRepository localStorageRepository;
     private final TimeBoundaryService timeBoundaryService;

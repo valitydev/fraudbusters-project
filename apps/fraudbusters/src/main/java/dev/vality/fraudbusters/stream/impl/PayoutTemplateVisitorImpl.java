@@ -1,7 +1,7 @@
 package dev.vality.fraudbusters.stream.impl;
 
 import dev.vality.fraudbusters.domain.CheckedResultModel;
-import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.model.PayoutModel;
 import dev.vality.fraudbusters.fraud.payout.PayoutScope;
 import dev.vality.fraudbusters.pool.Pool;
 import dev.vality.fraudbusters.stream.RuleApplier;
@@ -13,20 +13,20 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 
 @Component
-public class PayoutTemplateVisitorImpl implements TemplateVisitor<PaymentModel, CheckedResultModel> {
+public class PayoutTemplateVisitorImpl implements TemplateVisitor<PayoutModel, CheckedResultModel> {
 
-    private final RuleCascade cascade;
+    private final RuleCascade<PayoutModel> cascade;
 
-    public PayoutTemplateVisitorImpl(RuleApplier<PaymentModel> payoutRuleApplier,
+    public PayoutTemplateVisitorImpl(RuleApplier<PayoutModel> payoutRuleApplier,
                                      Pool<List<String>> payoutGroupPoolImpl,
                                      Pool<String> payoutReferencePoolImpl,
                                      Pool<String> payoutGroupReferencePoolImpl) {
-        cascade = new RuleCascade(payoutRuleApplier, payoutGroupPoolImpl, payoutReferencePoolImpl,
+        cascade = new RuleCascade<>(payoutRuleApplier, payoutGroupPoolImpl, payoutReferencePoolImpl,
                 payoutGroupReferencePoolImpl);
     }
 
     @Override
-    public CheckedResultModel visit(PaymentModel model) {
+    public CheckedResultModel visit(PayoutModel model) {
         if (!StringUtils.hasText(model.getPartyId()) || !StringUtils.hasText(model.getWalletId())) {
             throw new IllegalArgumentException("party_id and wallet_id are required for withdrawal inspection");
         }

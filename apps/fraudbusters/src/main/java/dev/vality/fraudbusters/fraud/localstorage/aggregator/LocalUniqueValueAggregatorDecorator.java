@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LocalUniqueValueAggregatorDecorator implements UniqueValueAggregator<PaymentModel, PaymentCheckedField> {
 
-    private final UniqueValueAggregatorImpl uniqueValueAggregator;
+    private final UniqueValueAggregatorImpl<PaymentModel> uniqueValueAggregator;
     private final LocalPaymentFieldResolver localPaymentFieldResolver;
     private final LocalResultStorageRepository localStorageRepository;
     private final TimeBoundaryService timeBoundaryService;

@@ -6,7 +6,7 @@ import dev.vality.fraudbusters.exception.RuleFunctionException;
 import dev.vality.fraudbusters.fraud.AggregateGroupingFunction;
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
-import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.model.OperationModel;
 import dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver;
 import dev.vality.fraudbusters.repository.AggregationRepository;
 import dev.vality.fraudbusters.repository.PaymentRepository;
@@ -24,7 +24,7 @@ import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
-public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel, PaymentCheckedField> {
+public class CountAggregatorImpl<T extends OperationModel> implements CountPaymentAggregator<T, PaymentCheckedField> {
 
     private final DatabasePaymentFieldResolver databasePaymentFieldResolver;
     private final PaymentRepository paymentRepository;
@@ -36,7 +36,7 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
     @BasicMetric("count")
     public Integer count(
             PaymentCheckedField checkedField,
-            PaymentModel paymentModel,
+            T paymentModel,
             TimeWindow timeWindow,
             List<PaymentCheckedField> list) {
         return getCount(
@@ -52,7 +52,7 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
     @BasicMetric("countSuccess")
     public Integer countSuccess(
             PaymentCheckedField checkedField,
-            PaymentModel paymentModel,
+            T paymentModel,
             TimeWindow timeWindow,
             List<PaymentCheckedField> list) {
         return getCount(
@@ -68,7 +68,7 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
     @Override
     @BasicMetric("countError")
     public Integer countError(
-            PaymentCheckedField checkedField, PaymentModel paymentModel, TimeWindow timeWindow,
+            PaymentCheckedField checkedField, T paymentModel, TimeWindow timeWindow,
             String errorCode, List<PaymentCheckedField> list) {
         try {
             Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
@@ -102,7 +102,7 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
 
     @Override
     public Integer countError(PaymentCheckedField checkedField,
-                              PaymentModel paymentModel,
+                              T paymentModel,
                               TimeWindow timeWindow,
                               List<PaymentCheckedField> list) {
         try {
@@ -135,7 +135,7 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
     }
 
     @Override
-    public Integer countPending(PaymentCheckedField checkedField, PaymentModel paymentModel, TimeWindow timeWindow,
+    public Integer countPending(PaymentCheckedField checkedField, T paymentModel, TimeWindow timeWindow,
                                 List<PaymentCheckedField> list) {
         Integer countFinished = count(checkedField, paymentModel, timeWindow, list);
         return getCount(
@@ -151,7 +151,7 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
     @BasicMetric("countChargeback")
     public Integer countChargeback(
             PaymentCheckedField paymentCheckedField,
-            PaymentModel paymentModel,
+            T paymentModel,
             TimeWindow timeWindow,
             List<PaymentCheckedField> list) {
         return getCount(
@@ -168,7 +168,7 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
     @BasicMetric("countRefund")
     public Integer countRefund(
             PaymentCheckedField paymentCheckedField,
-            PaymentModel paymentModel,
+            T paymentModel,
             TimeWindow timeWindow,
             List<PaymentCheckedField> list) {
         return getCount(
@@ -184,7 +184,7 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
     @NotNull
     private Integer getCount(
             PaymentCheckedField checkedField,
-            PaymentModel paymentModel,
+            T paymentModel,
             TimeWindow timeWindow,
             List<PaymentCheckedField> list,
             AggregateGroupingFunction<String, Object, Long, Long, List<FieldModel>, Integer> aggregateFunction) {
@@ -194,7 +194,7 @@ public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel,
     @NotNull
     private Integer getCount(
             PaymentCheckedField checkedField,
-            PaymentModel paymentModel,
+            T paymentModel,
             TimeWindow timeWindow,
             List<PaymentCheckedField> list,
             AggregateGroupingFunction<String, Object, Long, Long, List<FieldModel>, Integer> aggregateFunction,

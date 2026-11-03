@@ -90,6 +90,16 @@ services:
       group_list && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
       --partitions 1 --replication-factor 1  --config cleanup.policy=compact --topic
       group_reference && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      --partitions 1 --replication-factor 1  --config cleanup.policy=compact --topic
+      payout_template && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      --partitions 1 --replication-factor 1  --config cleanup.policy=compact --topic
+      payout_template_reference && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      --partitions 1 --replication-factor 1  --config cleanup.policy=compact --topic
+      payout_group_list && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      --partitions 1 --replication-factor 1  --config cleanup.policy=compact --topic
+      payout_group_reference && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      --partitions 1 --replication-factor 1 --topic payout_result && kafka-topics --create
+      --if-not-exists --zookeeper zookeeper:2181
       --partitions 1 --replication-factor 1 --topic wb-list-candidate && kafka-topics
       --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor
       1 --topic mg-event && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
@@ -387,6 +397,10 @@ services:
       kafka.topic.fraudbusters.payment.reference: template_reference
       kafka.topic.fraudbusters.payment.group.list: group_list
       kafka.topic.fraudbusters.payment.group.reference: group_reference
+      kafka.topic.fraudbusters.payout.template: payout_template
+      kafka.topic.fraudbusters.payout.reference: payout_template_reference
+      kafka.topic.fraudbusters.payout.group.list: payout_group_list
+      kafka.topic.fraudbusters.payout.group.reference: payout_group_reference
       spring.datasource.url: jdbc:postgresql://postgres-fb:5432/fraudbusters
       logging.config: ./tmp/logback-test.xml
       management.metrics.binders.jvm.enabled: 'false'

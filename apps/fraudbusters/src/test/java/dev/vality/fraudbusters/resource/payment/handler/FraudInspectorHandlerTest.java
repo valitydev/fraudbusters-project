@@ -47,6 +47,8 @@ class FraudInspectorHandlerTest {
                 kafkaFraudResultTemplate,
                 wbListServiceSrv,
                 null,
+                null,
+                null,
                 null
         );
 

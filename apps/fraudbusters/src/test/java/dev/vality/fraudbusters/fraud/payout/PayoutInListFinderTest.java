@@ -2,7 +2,7 @@ package dev.vality.fraudbusters.fraud.payout;
 
 import dev.vality.damsel.wb_list.Row;
 import dev.vality.damsel.wb_list.WbListServiceSrv;
-import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.model.PayoutModel;
 import dev.vality.fraudo.model.Pair;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -20,7 +20,7 @@ class PayoutInListFinderTest {
     void namedListsUseTheirNameAndPayoutIdentity() throws Exception {
         var lists = mock(WbListServiceSrv.Iface.class);
         final var finder = new PayoutInListFinder(lists, null);
-        var model = new PaymentModel();
+        var model = new PayoutModel();
         model.setPartyId("synthetic-party");
         model.setWalletId("synthetic-wallet");
         when(lists.isAnyExist(anyList())).thenReturn(true);
@@ -40,7 +40,7 @@ class PayoutInListFinderTest {
         var lists = mock(WbListServiceSrv.Iface.class);
         var history = mock(dev.vality.fraudbusters.repository.clickhouse.impl.PayoutHistoryRepository.class);
         final var finder = new PayoutInListFinder(lists, history);
-        var model = new PaymentModel();
+        var model = new PayoutModel();
         model.setTimestamp(java.time.Instant.parse("2026-01-01T12:00:00Z").toEpochMilli());
         var info = new dev.vality.damsel.wb_list.CountInfo().setCount(1)
                 .setTimeToLive("2026-01-02T12:00:00Z");

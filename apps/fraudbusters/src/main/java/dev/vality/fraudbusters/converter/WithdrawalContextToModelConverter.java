@@ -1,18 +1,18 @@
 package dev.vality.fraudbusters.converter;
 
 import dev.vality.damsel.proxy_inspector.WithdrawalContext;
-import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.model.PayoutModel;
 import dev.vality.fraudbusters.util.TimestampUtil;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class WithdrawalContextToModelConverter implements Converter<WithdrawalContext, PaymentModel> {
+public class WithdrawalContextToModelConverter implements Converter<WithdrawalContext, PayoutModel> {
 
     @Override
-    public PaymentModel convert(WithdrawalContext context) {
-        PaymentModel model = new PaymentModel();
-        model.setOperationType(dev.vality.damsel.fraudbusters.OperationType.payout);
+    public PayoutModel convert(WithdrawalContext context) {
+        PayoutModel model = new PayoutModel();
+        model.setWithdrawalId(context.getWithdrawalId());
         model.setPartyId(context.getParty().getPartyRef().getId());
         model.setWalletId(context.getWalletRef().getId());
         var withdrawal = context.getWithdrawal();

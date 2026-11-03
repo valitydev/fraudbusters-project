@@ -66,6 +66,12 @@ kafka:
         group:
           list: "group"
           reference: "group_reference"
+      payout:
+        template: "payout_template"
+        reference: "payout_template_reference"
+        group:
+          list: "payout_group_list"
+          reference: "payout_group_reference"
       unknown-initiating-entity: unknown_initiating_entity
 
 service:
