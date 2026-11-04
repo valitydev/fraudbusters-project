@@ -7,7 +7,7 @@ import dev.vality.fraudbusters.config.properties.ClickhouseProperties;
 import dev.vality.fraudbusters.constant.EventField;
 import dev.vality.fraudbusters.converter.FraudResultToEventConverter;
 import dev.vality.fraudbusters.extension.ClickHouseContainerExtension;
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver;
@@ -88,13 +88,13 @@ public class PaymentRepositoryTest {
     public void countOperationByEmailTestWithGroupBy() throws SQLException {
         PaymentModel paymentModel = createFraudModelSecond();
 
-        FieldModel email = databasePaymentFieldResolver.resolve(PaymentCheckedField.EMAIL, paymentModel);
+        FieldModel email = databasePaymentFieldResolver.resolve(CheckedField.EMAIL, paymentModel);
         int count = paymentRepository.countOperationByFieldWithGroupBy(EventField.email.name(), email.getValue(),
                 1588761200000L, 1588761209000L, List.of()
         );
         assertEquals(2, count);
 
-        FieldModel resolve = databasePaymentFieldResolver.resolve(PaymentCheckedField.PARTY_ID, paymentModel);
+        FieldModel resolve = databasePaymentFieldResolver.resolve(CheckedField.PARTY_ID, paymentModel);
         count = paymentRepository.countOperationByFieldWithGroupBy(EventField.email.name(), email.getValue(),
                 1588761200000L, 1588761209000L, List.of(resolve)
         );
@@ -115,14 +115,14 @@ public class PaymentRepositoryTest {
     public void countOperationByPhoneTestWithGroupBy() throws SQLException {
         PaymentModel paymentModel = createFraudModelSecond();
 
-        FieldModel fieldModel = databasePaymentFieldResolver.resolve(PaymentCheckedField.PHONE, paymentModel);
+        FieldModel fieldModel = databasePaymentFieldResolver.resolve(CheckedField.PHONE, paymentModel);
         int count = paymentRepository.countOperationByFieldWithGroupBy(EventField.phone.name(), fieldModel.getValue(),
                 1588761200000L, 1588761209000L, List.of()
         );
 
         assertEquals(2, count);
 
-        FieldModel resolve = databasePaymentFieldResolver.resolve(PaymentCheckedField.PARTY_ID, paymentModel);
+        FieldModel resolve = databasePaymentFieldResolver.resolve(CheckedField.PARTY_ID, paymentModel);
         count = paymentRepository.countOperationByFieldWithGroupBy(EventField.phone.name(), fieldModel.getValue(),
                 1588761200000L, 1588761209000L, List.of(resolve)
         );
@@ -192,7 +192,7 @@ public class PaymentRepositoryTest {
         );
         assertEquals(Integer.valueOf(2), sum);
 
-        FieldModel resolve = databasePaymentFieldResolver.resolve(PaymentCheckedField.PARTY_ID, paymentModel);
+        FieldModel resolve = databasePaymentFieldResolver.resolve(CheckedField.PARTY_ID, paymentModel);
         sum = paymentRepository.uniqCountOperationWithGroupBy(EventField.email.name(), EMAIL + SUFIX,
                 EventField.fingerprint.name(), FROM, TO, List.of(resolve)
         );

@@ -2,7 +2,7 @@ package dev.vality.fraudbusters.fraud.payment.resolver;
 
 import dev.vality.fraudbusters.constant.EventField;
 import dev.vality.fraudbusters.exception.UnknownFieldException;
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.OperationModel;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class DatabasePaymentFieldResolver {
 
     @NotNull
-    public List<FieldModel> resolveListFields(OperationModel model, List<PaymentCheckedField> list) {
+    public List<FieldModel> resolveListFields(OperationModel model, List<CheckedField> list) {
         if (list != null) {
             return list.stream()
                     .map(field -> resolve(field, model))
@@ -27,7 +27,7 @@ public class DatabasePaymentFieldResolver {
         return new ArrayList<>();
     }
 
-    public FieldModel resolve(PaymentCheckedField field, OperationModel model) {
+    public FieldModel resolve(CheckedField field, OperationModel model) {
         if (field == null) {
             throw new UnknownFieldException();
         }
@@ -53,7 +53,7 @@ public class DatabasePaymentFieldResolver {
         };
     }
 
-    public String resolve(PaymentCheckedField field) {
+    public String resolve(CheckedField field) {
         if (field == null) {
             throw new UnknownFieldException();
         }

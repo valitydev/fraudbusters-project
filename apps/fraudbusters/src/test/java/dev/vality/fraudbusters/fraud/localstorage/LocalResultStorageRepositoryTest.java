@@ -2,7 +2,7 @@ package dev.vality.fraudbusters.fraud.localstorage;
 
 import dev.vality.damsel.fraudbusters.PaymentStatus;
 import dev.vality.fraudbusters.domain.CheckedPayment;
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.filter.PaymentFieldValueFilter;
 import dev.vality.fraudbusters.fraud.filter.PaymentFieldValueResolver;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
@@ -46,13 +46,13 @@ class LocalResultStorageRepositoryTest {
     @Test
     void shouldApplyMainFieldFilterToGeneralAggregations() {
         assertEquals(4, repository.countOperationByFieldWithGroupBy(
-                PaymentCheckedField.CARD_TOKEN.name(), TOKEN, FROM, TO, List.of()));
+                CheckedField.CARD_TOKEN.name(), TOKEN, FROM, TO, List.of()));
         assertEquals(100L, repository.sumOperationByFieldWithGroupBy(
-                PaymentCheckedField.CARD_TOKEN.name(), TOKEN, FROM, TO, List.of()));
+                CheckedField.CARD_TOKEN.name(), TOKEN, FROM, TO, List.of()));
         assertEquals(2, repository.uniqCountOperationWithGroupBy(
-                PaymentCheckedField.CARD_TOKEN.name(),
+                CheckedField.CARD_TOKEN.name(),
                 TOKEN,
-                PaymentCheckedField.EMAIL.name(),
+                CheckedField.EMAIL.name(),
                 FROM,
                 TO,
                 List.of()
@@ -61,7 +61,7 @@ class LocalResultStorageRepositoryTest {
 
     @Test
     void shouldApplyMainFieldFilterToStatusCounts() {
-        String fieldName = PaymentCheckedField.CARD_TOKEN.name();
+        String fieldName = CheckedField.CARD_TOKEN.name();
 
         assertEquals(1, repository.countOperationSuccessWithGroupBy(
                 fieldName, TOKEN, FROM, TO, List.of()));
@@ -75,7 +75,7 @@ class LocalResultStorageRepositoryTest {
 
     @Test
     void shouldApplyMainFieldFilterToStatusSums() {
-        String fieldName = PaymentCheckedField.CARD_TOKEN.name();
+        String fieldName = CheckedField.CARD_TOKEN.name();
 
         assertEquals(10L, repository.sumOperationSuccessWithGroupBy(
                 fieldName, TOKEN, FROM, TO, List.of()));
@@ -93,9 +93,9 @@ class LocalResultStorageRepositoryTest {
         payment.setCardToken(TOKEN);
 
         List<FieldModel> clickHouseFields =
-                resolver.resolveListFields(payment, List.of(PaymentCheckedField.CARD_TOKEN));
+                resolver.resolveListFields(payment, List.of(CheckedField.CARD_TOKEN));
         List<FieldModel> localFields =
-                localResolver.resolveListFields(payment, List.of(PaymentCheckedField.CARD_TOKEN));
+                localResolver.resolveListFields(payment, List.of(CheckedField.CARD_TOKEN));
 
         assertEquals("cardToken", clickHouseFields.get(0).getName());
         assertEquals("CARD_TOKEN", localFields.get(0).getName());

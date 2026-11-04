@@ -3,7 +3,7 @@ package dev.vality.fraudbusters.fraud.resolver;
 import dev.vality.columbus.ColumbusServiceSrv;
 import dev.vality.fraudbusters.config.CachingConfig;
 import dev.vality.fraudbusters.constant.ClickhouseUtilsValue;
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.payment.CountryByIpResolver;
 import dev.vality.fraudbusters.fraud.payment.resolver.CountryResolverImpl;
 import org.apache.thrift.TException;
@@ -46,21 +46,21 @@ public class CountryResolverImplTest {
     @Test
     void resolveCountryUnknownLocationTest() throws TException {
         Mockito.when(geoIpServiceSrv.getLocationIsoCode(IP)).thenReturn(null);
-        String result = countryResolver.resolveCountry(PaymentCheckedField.IP, IP);
+        String result = countryResolver.resolveCountry(CheckedField.IP, IP);
         assertEquals(result, ClickhouseUtilsValue.UNKNOWN);
     }
 
     @Test
     void resolveCountryExceptionInvocationTest() throws TException {
         Mockito.when(geoIpServiceSrv.getLocationIsoCode(IP)).thenThrow(new TException());
-        String result = countryResolver.resolveCountry(PaymentCheckedField.IP, IP);
+        String result = countryResolver.resolveCountry(CheckedField.IP, IP);
         assertEquals(result, ClickhouseUtilsValue.UNKNOWN);
     }
 
     @Test
     void resolveCountry() throws TException {
         Mockito.when(geoIpServiceSrv.getLocationIsoCode(IP)).thenReturn(COUNTRY_GEO_ISO_CODE);
-        String country = countryResolver.resolveCountry(PaymentCheckedField.IP, IP);
+        String country = countryResolver.resolveCountry(CheckedField.IP, IP);
         assertEquals(COUNTRY_GEO_ISO_CODE, country);
     }
 
@@ -68,8 +68,8 @@ public class CountryResolverImplTest {
     void resolveCountryWithCache() throws TException {
         Mockito.when(geoIpServiceSrv.getLocationIsoCode(IP)).thenReturn(COUNTRY_GEO_ISO_CODE);
 
-        String firstResult = countryResolver.resolveCountry(PaymentCheckedField.IP, IP);
-        String secondResult = countryResolver.resolveCountry(PaymentCheckedField.IP, IP);
+        String firstResult = countryResolver.resolveCountry(CheckedField.IP, IP);
+        String secondResult = countryResolver.resolveCountry(CheckedField.IP, IP);
 
         verify(geoIpServiceSrv, times(1)).getLocationIsoCode(IP);
         assertEquals(COUNTRY_GEO_ISO_CODE, firstResult);

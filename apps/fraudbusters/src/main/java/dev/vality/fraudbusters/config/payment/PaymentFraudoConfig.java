@@ -1,7 +1,7 @@
 package dev.vality.fraudbusters.config.payment;
 
 import dev.vality.damsel.wb_list.WbListServiceSrv;
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.localstorage.LocalPaymentFieldResolver;
 import dev.vality.fraudbusters.fraud.localstorage.LocalResultStorageRepository;
 import dev.vality.fraudbusters.fraud.localstorage.aggregator.LocalCountAggregatorDecorator;
@@ -45,7 +45,7 @@ import org.springframework.context.annotation.Configuration;
 public class PaymentFraudoConfig {
 
     @Bean
-    public CountPaymentAggregator<PaymentModel, PaymentCheckedField> countAggregator(
+    public CountPaymentAggregator<PaymentModel, CheckedField> countAggregator(
             PaymentRepository paymentRepository,
             RefundRepository refundRepository,
             ChargebackRepository chargebackRepository,
@@ -61,7 +61,7 @@ public class PaymentFraudoConfig {
     }
 
     @Bean
-    public SumPaymentAggregator<PaymentModel, PaymentCheckedField> sumAggregator(
+    public SumPaymentAggregator<PaymentModel, CheckedField> sumAggregator(
             PaymentRepository paymentRepository,
             RefundRepository refundRepository,
             ChargebackRepository chargebackRepository,
@@ -77,7 +77,7 @@ public class PaymentFraudoConfig {
     }
 
     @Bean
-    public UniqueValueAggregator<PaymentModel, PaymentCheckedField> uniqueValueAggregator(
+    public UniqueValueAggregator<PaymentModel, CheckedField> uniqueValueAggregator(
             PaymentRepository paymentRepository,
             DatabasePaymentFieldResolver databasePaymentFieldResolver,
             TimeBoundaryService timeBoundaryService) {
@@ -85,12 +85,12 @@ public class PaymentFraudoConfig {
     }
 
     @Bean
-    public CountryResolver<PaymentCheckedField> countryResolver(CountryByIpResolver countryByIpResolver) {
+    public CountryResolver<CheckedField> countryResolver(CountryByIpResolver countryByIpResolver) {
         return new CountryResolverImpl(countryByIpResolver);
     }
 
     @Bean
-    public FieldResolver<PaymentModel, PaymentCheckedField> paymentModelFieldResolver() {
+    public FieldResolver<PaymentModel, CheckedField> paymentModelFieldResolver() {
         return new PaymentModelFieldResolver();
     }
 
@@ -101,7 +101,7 @@ public class PaymentFraudoConfig {
     }
 
     @Bean
-    public InListFinder<PaymentModel, PaymentCheckedField> paymentInListFinder(
+    public InListFinder<PaymentModel, CheckedField> paymentInListFinder(
             WbListServiceSrv.Iface wbListServiceSrv,
             PaymentRepository paymentRepository,
             DatabasePaymentFieldResolver databasePaymentFieldResolver) {
@@ -109,20 +109,21 @@ public class PaymentFraudoConfig {
     }
 
     @Bean
-    public FirstFindVisitorImpl<PaymentModel, PaymentCheckedField> paymentRuleVisitor(
-            CountPaymentAggregator<PaymentModel, PaymentCheckedField> countAggregator,
-            SumPaymentAggregator<PaymentModel, PaymentCheckedField> sumAggregator,
-            UniqueValueAggregator<PaymentModel, PaymentCheckedField> uniqueValueAggregator,
-            CountryResolver<PaymentCheckedField> countryResolver,
-            InListFinder<PaymentModel, PaymentCheckedField> paymentInListFinder,
-            FieldResolver<PaymentModel, PaymentCheckedField> paymentModelFieldResolver,
+    public FirstFindVisitorImpl<PaymentModel, CheckedField> paymentRuleVisitor(
+            CountPaymentAggregator<PaymentModel, CheckedField> countAggregator,
+            SumPaymentAggregator<PaymentModel, CheckedField> sumAggregator,
+            UniqueValueAggregator<PaymentModel, CheckedField> uniqueValueAggregator,
+            CountryResolver<CheckedField> countryResolver,
+            InListFinder<PaymentModel, CheckedField> paymentInListFinder,
+            FieldResolver<PaymentModel, CheckedField> paymentModelFieldResolver,
             PaymentTypeResolver<PaymentModel> paymentTypeResolver,
             CustomerTypeResolver<PaymentModel> customerTypeResolver,
-            PayoutAggregators<PaymentModel> paymentRulesPayoutAggregators) {
-        AggregatorBundle<PaymentModel, PaymentCheckedField> aggregatorBundle =
+            PayoutAggregators<PaymentModel> payoutHistoryAggregatorsForPayments) {
+        AggregatorBundle<PaymentModel, CheckedField> aggregatorBundle =
                 new AggregatorBundle<>(countAggregator, sumAggregator, uniqueValueAggregator,
-                        paymentRulesPayoutAggregators, paymentRulesPayoutAggregators, paymentRulesPayoutAggregators);
-        ResolverBundle<PaymentModel, PaymentCheckedField> resolverBundle = new ResolverBundle<>(
+                        payoutHistoryAggregatorsForPayments, payoutHistoryAggregatorsForPayments,
+                        payoutHistoryAggregatorsForPayments);
+        ResolverBundle<PaymentModel, CheckedField> resolverBundle = new ResolverBundle<>(
                 countryResolver,
                 paymentModelFieldResolver,
                 new GroupFieldsResolverImpl<>(paymentModelFieldResolver),
@@ -130,13 +131,13 @@ public class PaymentFraudoConfig {
                 paymentTypeResolver,
                 customerTypeResolver
         );
-        FinderBundle<PaymentModel, PaymentCheckedField> finderBundle = new FinderBundle<>(paymentInListFinder);
+        FinderBundle<PaymentModel, CheckedField> finderBundle = new FinderBundle<>(paymentInListFinder);
         return new FraudVisitorFactoryImpl()
                 .createVisitor(new VisitorBundle<>(aggregatorBundle, resolverBundle, finderBundle));
     }
 
     @Bean
-    public CountPaymentAggregator<PaymentModel, PaymentCheckedField> countResultAggregator(
+    public CountPaymentAggregator<PaymentModel, CheckedField> countResultAggregator(
             LocalResultStorageRepository localResultStorageRepository,
             PaymentRepository paymentRepositoryImpl,
             RefundRepository refundRepository,
@@ -161,7 +162,7 @@ public class PaymentFraudoConfig {
     }
 
     @Bean
-    public SumPaymentAggregator<PaymentModel, PaymentCheckedField> sumResultAggregator(
+    public SumPaymentAggregator<PaymentModel, CheckedField> sumResultAggregator(
             LocalResultStorageRepository localResultStorageRepository,
             PaymentRepository paymentRepositoryImpl,
             RefundRepository refundRepository,
@@ -186,7 +187,7 @@ public class PaymentFraudoConfig {
     }
 
     @Bean
-    public UniqueValueAggregator<PaymentModel, PaymentCheckedField> uniqueValueResultAggregator(
+    public UniqueValueAggregator<PaymentModel, CheckedField> uniqueValueResultAggregator(
             LocalResultStorageRepository localResultStorageRepository,
             PaymentRepository fraudResultRepository,
             DatabasePaymentFieldResolver databasePaymentFieldResolver,
@@ -205,20 +206,21 @@ public class PaymentFraudoConfig {
     }
 
     @Bean
-    public FirstFindVisitorImpl<PaymentModel, PaymentCheckedField> fullPaymentRuleVisitor(
-            CountPaymentAggregator<PaymentModel, PaymentCheckedField> countResultAggregator,
-            SumPaymentAggregator<PaymentModel, PaymentCheckedField> sumResultAggregator,
-            UniqueValueAggregator<PaymentModel, PaymentCheckedField> uniqueValueResultAggregator,
-            CountryResolver<PaymentCheckedField> countryResolver,
-            InListFinder<PaymentModel, PaymentCheckedField> paymentInListFinder,
-            FieldResolver<PaymentModel, PaymentCheckedField> paymentModelFieldResolver,
+    public FirstFindVisitorImpl<PaymentModel, CheckedField> fullPaymentRuleVisitor(
+            CountPaymentAggregator<PaymentModel, CheckedField> countResultAggregator,
+            SumPaymentAggregator<PaymentModel, CheckedField> sumResultAggregator,
+            UniqueValueAggregator<PaymentModel, CheckedField> uniqueValueResultAggregator,
+            CountryResolver<CheckedField> countryResolver,
+            InListFinder<PaymentModel, CheckedField> paymentInListFinder,
+            FieldResolver<PaymentModel, CheckedField> paymentModelFieldResolver,
             PaymentTypeResolver<PaymentModel> paymentTypeResolver,
             CustomerTypeResolver<PaymentModel> customerTypeResolver,
-            PayoutAggregators<PaymentModel> paymentRulesPayoutAggregators) {
-        AggregatorBundle<PaymentModel, PaymentCheckedField> aggregatorBundle =
+            PayoutAggregators<PaymentModel> payoutHistoryAggregatorsForPayments) {
+        AggregatorBundle<PaymentModel, CheckedField> aggregatorBundle =
                 new AggregatorBundle<>(countResultAggregator, sumResultAggregator, uniqueValueResultAggregator,
-                        paymentRulesPayoutAggregators, paymentRulesPayoutAggregators, paymentRulesPayoutAggregators);
-        ResolverBundle<PaymentModel, PaymentCheckedField> resolverBundle = new ResolverBundle<>(
+                        payoutHistoryAggregatorsForPayments, payoutHistoryAggregatorsForPayments,
+                        payoutHistoryAggregatorsForPayments);
+        ResolverBundle<PaymentModel, CheckedField> resolverBundle = new ResolverBundle<>(
                 countryResolver,
                 paymentModelFieldResolver,
                 new GroupFieldsResolverImpl<>(paymentModelFieldResolver),
@@ -226,7 +228,7 @@ public class PaymentFraudoConfig {
                 paymentTypeResolver,
                 customerTypeResolver
         );
-        FinderBundle<PaymentModel, PaymentCheckedField> finderBundle = new FinderBundle<>(paymentInListFinder);
+        FinderBundle<PaymentModel, CheckedField> finderBundle = new FinderBundle<>(paymentInListFinder);
         return new FullVisitorFactoryImpl()
                 .createVisitor(new VisitorBundle<>(aggregatorBundle, resolverBundle, finderBundle));
     }

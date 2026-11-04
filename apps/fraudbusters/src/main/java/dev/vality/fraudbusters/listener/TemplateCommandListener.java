@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public abstract class TemplateCommandListener extends AbstractPoolCommandListenerExecutor implements CommandListener {
 
-    private final FraudContextParser<FraudoRulesParser.ParseContext> paymentContextParser;
+    private final FraudContextParser<FraudoRulesParser.ParseContext> rulesContextParser;
     private final InspectStorage storage;
 
     protected void handle(Command command) {
@@ -36,7 +36,7 @@ public abstract class TemplateCommandListener extends AbstractPoolCommandListene
         String templateString = new String(template.getTemplate(), StandardCharsets.UTF_8);
         log.info("TemplateListener templateString: {}", templateString);
         storage.validateTemplate(template.getId(), templateString);
-        return paymentContextParser.parse(templateString);
+        return rulesContextParser.parse(templateString);
     }
 
 }

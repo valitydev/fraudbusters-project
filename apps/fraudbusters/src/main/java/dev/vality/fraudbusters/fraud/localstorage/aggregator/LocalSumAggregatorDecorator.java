@@ -3,7 +3,7 @@ package dev.vality.fraudbusters.fraud.localstorage.aggregator;
 import dev.vality.fraudbusters.domain.TimeBound;
 import dev.vality.fraudbusters.exception.RuleFunctionException;
 import dev.vality.fraudbusters.fraud.AggregateGroupingFunction;
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.localstorage.LocalPaymentFieldResolver;
 import dev.vality.fraudbusters.fraud.localstorage.LocalResultStorageRepository;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
@@ -22,7 +22,7 @@ import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
-public class LocalSumAggregatorDecorator implements SumPaymentAggregator<PaymentModel, PaymentCheckedField> {
+public class LocalSumAggregatorDecorator implements SumPaymentAggregator<PaymentModel, CheckedField> {
 
     private final SumAggregatorImpl<PaymentModel> sumAggregatorImpl;
     private final LocalPaymentFieldResolver localPaymentFieldResolver;
@@ -31,13 +31,13 @@ public class LocalSumAggregatorDecorator implements SumPaymentAggregator<Payment
 
     @Override
     public Double sum(
-            PaymentCheckedField checkedField,
+            CheckedField checkedField,
             PaymentModel paymentModel,
             TimeWindow timeWindow,
-            List<PaymentCheckedField> list) {
+            List<CheckedField> list) {
         Double sum = sumAggregatorImpl.sum(checkedField, paymentModel, timeWindow, list);
         FieldModel resolve = localPaymentFieldResolver.resolve(checkedField, paymentModel);
-        Instant now = TimestampUtil.instantFromPaymentModel(paymentModel);
+        Instant now = TimestampUtil.instantFromModel(paymentModel);
         TimeBound timeBound = timeBoundaryService.getBoundary(now, timeWindow);
         List<FieldModel> eventFields = localPaymentFieldResolver.resolveListFields(paymentModel, list);
         Long localSum = localStorageRepository.sumOperationByFieldWithGroupBy(
@@ -54,10 +54,10 @@ public class LocalSumAggregatorDecorator implements SumPaymentAggregator<Payment
 
     @Override
     public Double sumSuccess(
-            PaymentCheckedField checkedField,
+            CheckedField checkedField,
             PaymentModel paymentModel,
             TimeWindow timeWindow,
-            List<PaymentCheckedField> list) {
+            List<CheckedField> list) {
         Double sumSuccess = sumAggregatorImpl.sumSuccess(checkedField, paymentModel, timeWindow, list);
         Double resultCount = getSum(
                 checkedField,
@@ -71,14 +71,14 @@ public class LocalSumAggregatorDecorator implements SumPaymentAggregator<Payment
     }
 
     @Override
-    public Double sumError(PaymentCheckedField checkedField,
+    public Double sumError(CheckedField checkedField,
                            PaymentModel paymentModel,
                            TimeWindow timeWindow,
                            String errorCode,
-                           List<PaymentCheckedField> list) {
+                           List<CheckedField> list) {
         try {
             Double sumError = sumAggregatorImpl.sumError(checkedField, paymentModel, timeWindow, errorCode, list);
-            Instant now = TimestampUtil.instantFromPaymentModel(paymentModel);
+            Instant now = TimestampUtil.instantFromModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(now, timeWindow);
             FieldModel resolve = localPaymentFieldResolver.resolve(checkedField, paymentModel);
             List<FieldModel> eventFields = localPaymentFieldResolver.resolveListFields(paymentModel, list);
@@ -105,13 +105,13 @@ public class LocalSumAggregatorDecorator implements SumPaymentAggregator<Payment
     }
 
     @Override
-    public Double sumError(PaymentCheckedField checkedField,
+    public Double sumError(CheckedField checkedField,
                            PaymentModel paymentModel,
                            TimeWindow timeWindow,
-                           List<PaymentCheckedField> list) {
+                           List<CheckedField> list) {
         try {
             Double sumError = sumAggregatorImpl.sumError(checkedField, paymentModel, timeWindow, list);
-            Instant now = TimestampUtil.instantFromPaymentModel(paymentModel);
+            Instant now = TimestampUtil.instantFromModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(now, timeWindow);
             FieldModel resolve = localPaymentFieldResolver.resolve(checkedField, paymentModel);
             List<FieldModel> eventFields = localPaymentFieldResolver.resolveListFields(paymentModel, list);
@@ -138,42 +138,42 @@ public class LocalSumAggregatorDecorator implements SumPaymentAggregator<Payment
 
     @Override
     public Double sumChargeback(
-            PaymentCheckedField checkedField,
+            CheckedField checkedField,
             PaymentModel paymentModel,
             TimeWindow timeWindow,
-            List<PaymentCheckedField> list) {
+            List<CheckedField> list) {
         return sumAggregatorImpl.sumChargeback(checkedField, paymentModel, timeWindow, list);
     }
 
     @Override
     public Double sumRefund(
-            PaymentCheckedField checkedField,
+            CheckedField checkedField,
             PaymentModel paymentModel,
             TimeWindow timeWindow,
-            List<PaymentCheckedField> list) {
+            List<CheckedField> list) {
         return sumAggregatorImpl.sumRefund(checkedField, paymentModel, timeWindow, list);
     }
 
     @NotNull
     private Double getSum(
-            PaymentCheckedField checkedField,
+            CheckedField checkedField,
             PaymentModel paymentModel,
             TimeWindow timeWindow,
-            List<PaymentCheckedField> list,
+            List<CheckedField> list,
             AggregateGroupingFunction<String, Object, Long, Long, List<FieldModel>, Long> aggregateFunction) {
         return getSum(checkedField, paymentModel, timeWindow, list, aggregateFunction, true);
     }
 
     @NotNull
     private Double getSum(
-            PaymentCheckedField checkedField,
+            CheckedField checkedField,
             PaymentModel paymentModel,
             TimeWindow timeWindow,
-            List<PaymentCheckedField> list,
+            List<CheckedField> list,
             AggregateGroupingFunction<String, Object, Long, Long, List<FieldModel>, Long> aggregateFunction,
             boolean withCurrent) {
         try {
-            Instant now = TimestampUtil.instantFromPaymentModel(paymentModel);
+            Instant now = TimestampUtil.instantFromModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(now, timeWindow);
             FieldModel resolve = localPaymentFieldResolver.resolve(checkedField, paymentModel);
             List<FieldModel> eventFields = localPaymentFieldResolver.resolveListFields(paymentModel, list);

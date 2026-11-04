@@ -2,7 +2,7 @@ package dev.vality.fraudbusters.fraud.localstorage.aggregator;
 
 import dev.vality.fraudbusters.domain.TimeBound;
 import dev.vality.fraudbusters.exception.RuleFunctionException;
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.localstorage.LocalPaymentFieldResolver;
 import dev.vality.fraudbusters.fraud.localstorage.LocalResultStorageRepository;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
@@ -20,7 +20,7 @@ import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
-public class LocalUniqueValueAggregatorDecorator implements UniqueValueAggregator<PaymentModel, PaymentCheckedField> {
+public class LocalUniqueValueAggregatorDecorator implements UniqueValueAggregator<PaymentModel, CheckedField> {
 
     private final UniqueValueAggregatorImpl<PaymentModel> uniqueValueAggregator;
     private final LocalPaymentFieldResolver localPaymentFieldResolver;
@@ -29,14 +29,14 @@ public class LocalUniqueValueAggregatorDecorator implements UniqueValueAggregato
 
     @Override
     public Integer countUniqueValue(
-            PaymentCheckedField countField,
+            CheckedField countField,
             PaymentModel paymentModel,
-            PaymentCheckedField onField,
+            CheckedField onField,
             TimeWindow timeWindow,
-            List<PaymentCheckedField> list) {
+            List<CheckedField> list) {
         try {
             Integer uniq = uniqueValueAggregator.countUniqueValue(countField, paymentModel, onField, timeWindow, list);
-            Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
+            Instant timestamp = TimestampUtil.instantFromModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
             FieldModel resolve = localPaymentFieldResolver.resolve(countField, paymentModel);
             List<FieldModel> fieldModels = localPaymentFieldResolver.resolveListFields(paymentModel, list);

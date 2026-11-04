@@ -9,7 +9,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 
-import static dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.USER_ID;
+import static dev.vality.fraudbusters.fraud.constant.CheckedField.USER_ID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;

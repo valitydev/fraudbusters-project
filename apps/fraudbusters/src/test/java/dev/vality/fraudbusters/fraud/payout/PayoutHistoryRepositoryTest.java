@@ -15,7 +15,7 @@ import ru.yandex.clickhouse.ClickHouseDataSource;
 import java.time.Instant;
 import java.util.List;
 
-import static dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.*;
+import static dev.vality.fraudbusters.fraud.constant.CheckedField.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(ClickHouseContainerExtension.class)

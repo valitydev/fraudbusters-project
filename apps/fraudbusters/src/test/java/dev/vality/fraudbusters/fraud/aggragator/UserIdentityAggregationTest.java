@@ -1,7 +1,7 @@
 package dev.vality.fraudbusters.fraud.aggragator;
 
 import dev.vality.fraudbusters.domain.CheckedPayment;
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.filter.PaymentFieldValueFilter;
 import dev.vality.fraudbusters.fraud.filter.PaymentFieldValueResolver;
 import dev.vality.fraudbusters.fraud.localstorage.LocalPaymentFieldResolver;
@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.*;
+import static dev.vality.fraudbusters.fraud.constant.CheckedField.*;
 import static dev.vality.fraudo.constant.TimeUnit.MINUTES;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;

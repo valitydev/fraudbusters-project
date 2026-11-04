@@ -42,7 +42,7 @@ class RuleCheckingServiceImplTest {
     private PaymentTemplateValidator paymentTemplateValidator;
 
     @MockitoBean
-    private FraudContextParser<FraudoRulesParser.ParseContext> paymentContextParser;
+    private FraudContextParser<FraudoRulesParser.ParseContext> rulesContextParser;
 
     @MockitoBean
     private RuleCheckingApplierImpl<PaymentModel> ruleCheckingApplier;
@@ -92,7 +92,7 @@ class RuleCheckingServiceImplTest {
         CheckedResultModel firstResultModel = createCheckedResultModel(ResultStatus.ACCEPT);
         CheckedResultModel secondResultModel = createCheckedResultModel(ResultStatus.DECLINE);
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
-        when(paymentContextParser.parse(anyString())).thenReturn(context);
+        when(rulesContextParser.parse(anyString())).thenReturn(context);
         when(ruleCheckingApplier
                 .applyWithContext(any(PaymentModel.class), anyString(), any(FraudoRulesParser.ParseContext.class))
         )
@@ -124,7 +124,7 @@ class RuleCheckingServiceImplTest {
 
         verify(paymentTemplateValidator, times(1))
                 .validate(validatorTemplateStringCaptor.capture());
-        verify(paymentContextParser, times(1))
+        verify(rulesContextParser, times(1))
                 .parse(contextParserTemplateStringCaptor.capture());
         verify(ruleCheckingApplier, times(2))
                 .applyWithContext(
@@ -174,7 +174,7 @@ class RuleCheckingServiceImplTest {
         PaymentModel paymentModel = createPaymentModel(ThreadLocalRandom.current().nextLong(), TIMESTAMP);
 
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
-        when(paymentContextParser.parse(anyString())).thenReturn(context);
+        when(rulesContextParser.parse(anyString())).thenReturn(context);
         //group template by party
         when(timeGroupReferencePoolImpl.get(PARTY_ID, TIMESTAMP)).thenReturn(GROUP_REF_PARTY_LEVEL);
         when(timeGroupPoolImpl.get(GROUP_REF_PARTY_LEVEL, TIMESTAMP)).thenReturn(GROUP_PARTY_TEMPLATE);
@@ -192,7 +192,7 @@ class RuleCheckingServiceImplTest {
         CheckedResultModel expected = createCheckedResultModel(GROUP_PARTY_TEMPLATE.get(0), ResultStatus.ACCEPT);
         assertEquals(expected, actual.get(transactionId));
         verify(paymentTemplateValidator, times(1)).validate(anyString());
-        verify(paymentContextParser, times(1)).parse(anyString());
+        verify(rulesContextParser, times(1)).parse(anyString());
         verify(timeGroupReferencePoolImpl, times(1)).get(anyString(), anyLong());
         verify(timeGroupPoolImpl, times(1)).get(anyString(), anyLong());
         verify(ruleCheckingApplier, times(1))
@@ -207,7 +207,7 @@ class RuleCheckingServiceImplTest {
         FraudoRulesParser.ParseContext context = new FraudoRulesParser.ParseContext(null, 0);
 
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
-        when(paymentContextParser.parse(anyString())).thenReturn(context);
+        when(rulesContextParser.parse(anyString())).thenReturn(context);
         //group template by party
         when(timeGroupReferencePoolImpl.get(PARTY_ID, TIMESTAMP)).thenReturn(GROUP_REF_PARTY);
         when(timeGroupPoolImpl.get(GROUP_REF_PARTY, TIMESTAMP)).thenReturn(GROUP_PARTY_TEMPLATE);
@@ -232,7 +232,7 @@ class RuleCheckingServiceImplTest {
         expected.getResultModel().setNotificationsRule(List.of(GROUP_REF_PARTY_LEVEL));
         assertEquals(expected, actual.get(transactionId));
         verify(paymentTemplateValidator, times(1)).validate(anyString());
-        verify(paymentContextParser, times(1)).parse(anyString());
+        verify(rulesContextParser, times(1)).parse(anyString());
         verify(timeGroupReferencePoolImpl, times(2)).get(anyString(), anyLong());
         verify(timeGroupPoolImpl, times(2)).get(anyString(), anyLong());
         verify(ruleCheckingApplier, times(2))
@@ -249,7 +249,7 @@ class RuleCheckingServiceImplTest {
         FraudoRulesParser.ParseContext context = new FraudoRulesParser.ParseContext(null, 0);
 
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
-        when(paymentContextParser.parse(anyString())).thenReturn(context);
+        when(rulesContextParser.parse(anyString())).thenReturn(context);
         //group template by party
         when(timeGroupReferencePoolImpl.get(differentPartyId, TIMESTAMP)).thenReturn(GROUP_REF_PARTY);
         when(timeGroupPoolImpl.get(GROUP_REF_PARTY, TIMESTAMP)).thenReturn(GROUP_PARTY_TEMPLATE);
@@ -283,7 +283,7 @@ class RuleCheckingServiceImplTest {
         ));
         assertEquals(expected, actual.get(transactionId));
         verify(paymentTemplateValidator, times(1)).validate(anyString());
-        verify(paymentContextParser, times(1)).parse(anyString());
+        verify(rulesContextParser, times(1)).parse(anyString());
         verify(timeReferencePoolImpl, times(1)).get(anyString(), anyLong());
         verify(ruleCheckingApplier, times(1))
                 .apply(any(PaymentModel.class), anyString(), anyLong());
@@ -305,7 +305,7 @@ class RuleCheckingServiceImplTest {
         FraudoRulesParser.ParseContext context = new FraudoRulesParser.ParseContext(null, 0);
 
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
-        when(paymentContextParser.parse(anyString())).thenReturn(context);
+        when(rulesContextParser.parse(anyString())).thenReturn(context);
         //group template by party
         when(timeGroupReferencePoolImpl.get(differentPartyId, TIMESTAMP)).thenReturn(GROUP_REF_PARTY);
         when(timeGroupPoolImpl.get(GROUP_REF_PARTY, TIMESTAMP)).thenReturn(GROUP_PARTY_TEMPLATE);
@@ -345,7 +345,7 @@ class RuleCheckingServiceImplTest {
         ));
         assertEquals(expected, actual.get(transactionId));
         verify(paymentTemplateValidator, times(1)).validate(anyString());
-        verify(paymentContextParser, times(1)).parse(anyString());
+        verify(rulesContextParser, times(1)).parse(anyString());
         verify(timeReferencePoolImpl, times(2)).get(anyString(), anyLong());
         verify(ruleCheckingApplier, times(2))
                 .apply(any(PaymentModel.class), anyString(), anyLong());
@@ -363,7 +363,7 @@ class RuleCheckingServiceImplTest {
         FraudoRulesParser.ParseContext context = new FraudoRulesParser.ParseContext(null, 0);
 
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
-        when(paymentContextParser.parse(anyString())).thenReturn(context);
+        when(rulesContextParser.parse(anyString())).thenReturn(context);
         //group template by party
         when(timeGroupReferencePoolImpl.get(PARTY_ID, TIMESTAMP)).thenReturn(GROUP_REF_PARTY);
         when(timeGroupPoolImpl.get(GROUP_REF_PARTY, TIMESTAMP)).thenReturn(GROUP_PARTY_TEMPLATE);
@@ -392,7 +392,7 @@ class RuleCheckingServiceImplTest {
         expected.getResultModel().setNotificationsRule(List.of(GROUP_REF_PARTY_LEVEL, GROUP_REF_SHOP_LEVEL));
         assertEquals(expected, actual.get(transactionId));
         verify(paymentTemplateValidator, times(1)).validate(anyString());
-        verify(paymentContextParser, times(1)).parse(anyString());
+        verify(rulesContextParser, times(1)).parse(anyString());
         verify(timeGroupReferencePoolImpl, times(2)).get(anyString(), anyLong());
         verify(timeGroupPoolImpl, times(2)).get(anyString(), anyLong());
         verify(ruleCheckingApplier, times(2))
@@ -409,7 +409,7 @@ class RuleCheckingServiceImplTest {
         FraudoRulesParser.ParseContext context = new FraudoRulesParser.ParseContext(null, 0);
 
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
-        when(paymentContextParser.parse(anyString())).thenReturn(context);
+        when(rulesContextParser.parse(anyString())).thenReturn(context);
         //group template by party
         when(timeGroupReferencePoolImpl.get(PARTY_ID, TIMESTAMP)).thenReturn(GROUP_REF_PARTY);
         when(timeGroupPoolImpl.get(GROUP_REF_PARTY, TIMESTAMP)).thenReturn(GROUP_PARTY_TEMPLATE);
@@ -447,7 +447,7 @@ class RuleCheckingServiceImplTest {
         ));
         assertEquals(expected, actual.get(transactionId));
         verify(paymentTemplateValidator, times(1)).validate(anyString());
-        verify(paymentContextParser, times(1)).parse(anyString());
+        verify(rulesContextParser, times(1)).parse(anyString());
         verify(timeGroupReferencePoolImpl, times(2)).get(anyString(), anyLong());
         verify(timeGroupPoolImpl, times(2)).get(anyString(), anyLong());
         verify(ruleCheckingApplier, times(2))
@@ -470,7 +470,7 @@ class RuleCheckingServiceImplTest {
         FraudoRulesParser.ParseContext context = new FraudoRulesParser.ParseContext(null, 0);
 
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
-        when(paymentContextParser.parse(anyString())).thenReturn(context);
+        when(rulesContextParser.parse(anyString())).thenReturn(context);
         //group template by party
         when(timeGroupReferencePoolImpl.get(differentPartyId, TIMESTAMP)).thenReturn(GROUP_REF_PARTY);
         when(timeGroupPoolImpl.get(GROUP_REF_PARTY, TIMESTAMP)).thenReturn(GROUP_PARTY_TEMPLATE);
@@ -515,7 +515,7 @@ class RuleCheckingServiceImplTest {
                 createCheckedResultModel(TEMPLATE, null, null, notifications);
         assertEquals(defaultResult, actual.get(transactionId));
         verify(paymentTemplateValidator, times(1)).validate(anyString());
-        verify(paymentContextParser, times(1)).parse(anyString());
+        verify(rulesContextParser, times(1)).parse(anyString());
         verify(timeReferencePoolImpl, times(2)).get(anyString(), anyLong());
         verify(ruleCheckingApplier, times(2))
                 .apply(any(PaymentModel.class), anyString(), anyLong());
@@ -538,7 +538,7 @@ class RuleCheckingServiceImplTest {
         FraudoRulesParser.ParseContext context = new FraudoRulesParser.ParseContext(null, 0);
 
         when(paymentTemplateValidator.validate(anyString())).thenReturn(new ArrayList<>());
-        when(paymentContextParser.parse(anyString())).thenReturn(context);
+        when(rulesContextParser.parse(anyString())).thenReturn(context);
         //group template by party
         when(timeGroupReferencePoolImpl.get(differentPartyId, differentTimestamp)).thenReturn(GROUP_REF_PARTY);
         when(timeGroupPoolImpl.get(GROUP_REF_PARTY, differentTimestamp)).thenReturn(GROUP_PARTY_TEMPLATE);
@@ -583,7 +583,7 @@ class RuleCheckingServiceImplTest {
                 createCheckedResultModel(TEMPLATE, null, null, notifications);
         assertEquals(defaultResult, actual.get(transactionId));
         verify(paymentTemplateValidator, times(1)).validate(anyString());
-        verify(paymentContextParser, times(1)).parse(anyString());
+        verify(rulesContextParser, times(1)).parse(anyString());
         verify(timeReferencePoolImpl, times(2)).get(anyString(), anyLong());
         verify(ruleCheckingApplier, times(2))
                 .apply(any(PaymentModel.class), anyString(), anyLong());

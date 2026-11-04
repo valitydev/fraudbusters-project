@@ -16,9 +16,9 @@ import dev.vality.fraudbusters.converter.WithdrawalContextToModelConverter;
 import dev.vality.fraudbusters.domain.CheckedResultModel;
 import dev.vality.fraudbusters.domain.PayoutResult;
 import dev.vality.fraudbusters.fraud.InspectStorage;
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.model.PayoutModel;
-import dev.vality.fraudbusters.fraud.payment.PaymentContextParserImpl;
+import dev.vality.fraudbusters.fraud.RulesContextParserImpl;
 import dev.vality.fraudbusters.fraud.payment.PaymentInspectStorage;
 import dev.vality.fraudbusters.fraud.payment.validator.PaymentTemplateValidator;
 import dev.vality.fraudbusters.listener.payment.TemplateListener;
@@ -40,14 +40,14 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.USER_ID;
+import static dev.vality.fraudbusters.fraud.constant.CheckedField.USER_ID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 class PayoutInspectionTest {
 
-    private final PaymentContextParserImpl parser = new PaymentContextParserImpl();
+    private final RulesContextParserImpl parser = new RulesContextParserImpl();
     private final Pool<ParserRuleContext> paymentTemplates = new PoolImpl<>("template");
     private final Pool<ParserRuleContext> payoutTemplates = new PoolImpl<>("payout-template");
     private final Pool<List<String>> payoutGroups = new PoolImpl<>("payout-group");
@@ -177,7 +177,7 @@ class PayoutInspectionTest {
     @Test
     @SuppressWarnings("unchecked")
     void mixedHistoryCachesRemainSeparateAndAreClearedBetweenInspections() {
-        CountPaymentAggregator<PayoutModel, PaymentCheckedField> payments = mock(CountPaymentAggregator.class);
+        CountPaymentAggregator<PayoutModel, CheckedField> payments = mock(CountPaymentAggregator.class);
         var visitor = new PayoutFraudoConfig().payoutRuleVisitor(payments, null, null, null, null,
                 new PayoutModelFieldResolver(), payouts);
         final var service = inspector(visitor);
@@ -198,7 +198,7 @@ class PayoutInspectionTest {
         verify(payouts, times(2)).countSuccess(eq(USER_ID), any(), any(), anyList());
     }
 
-    private PayoutTemplateVisitorImpl inspector(FirstFindVisitorImpl<PayoutModel, PaymentCheckedField> visitor) {
+    private PayoutTemplateVisitorImpl inspector(FirstFindVisitorImpl<PayoutModel, CheckedField> visitor) {
         return new PayoutTemplateVisitorImpl(
                 new NotifyingRuleApplierImpl<>(visitor, payoutTemplates, new CheckedResultFactory()),
                 payoutGroups, payoutReferences, payoutGroupReferences);

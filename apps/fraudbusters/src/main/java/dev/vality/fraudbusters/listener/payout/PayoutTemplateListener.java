@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class PayoutTemplateListener extends TemplateCommandListener {
 
-    public PayoutTemplateListener(FraudContextParser<FraudoRulesParser.ParseContext> paymentContextParser,
+    public PayoutTemplateListener(FraudContextParser<FraudoRulesParser.ParseContext> rulesContextParser,
                                   InspectStorage payoutInspectStorage) {
-        super(paymentContextParser, payoutInspectStorage);
+        super(rulesContextParser, payoutInspectStorage);
     }
 
     @Override

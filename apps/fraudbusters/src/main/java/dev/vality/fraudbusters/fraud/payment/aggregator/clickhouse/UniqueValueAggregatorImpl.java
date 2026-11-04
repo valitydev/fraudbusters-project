@@ -3,7 +3,7 @@ package dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse;
 import dev.vality.fraudbusters.aspect.BasicMetric;
 import dev.vality.fraudbusters.domain.TimeBound;
 import dev.vality.fraudbusters.exception.RuleFunctionException;
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.OperationModel;
 import dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver;
@@ -22,7 +22,7 @@ import java.util.Objects;
 @Slf4j
 @RequiredArgsConstructor
 public class UniqueValueAggregatorImpl<T extends OperationModel>
-        implements UniqueValueAggregator<T, PaymentCheckedField> {
+        implements UniqueValueAggregator<T, CheckedField> {
 
     private final DatabasePaymentFieldResolver databasePaymentFieldResolver;
     private final PaymentRepository paymentRepository;
@@ -31,13 +31,13 @@ public class UniqueValueAggregatorImpl<T extends OperationModel>
     @Override
     @BasicMetric("countUniqueValueWindowed")
     public Integer countUniqueValue(
-            PaymentCheckedField countField,
+            CheckedField countField,
             T paymentModel,
-            PaymentCheckedField onField,
+            CheckedField onField,
             TimeWindow timeWindow,
-            List<PaymentCheckedField> list) {
+            List<CheckedField> list) {
         try {
-            Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
+            Instant timestamp = TimestampUtil.instantFromModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
             FieldModel resolve = databasePaymentFieldResolver.resolve(countField, paymentModel);
             if (Objects.isNull(resolve.getValue())) {

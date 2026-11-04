@@ -30,7 +30,7 @@ import static dev.vality.fraudbusters.util.ReferenceKeyGenerator.generateTemplat
 public class RuleCheckingServiceImpl implements RuleCheckingService {
 
     private final PaymentTemplateValidator paymentTemplateValidator;
-    private final FraudContextParser<FraudoRulesParser.ParseContext> paymentContextParser;
+    private final FraudContextParser<FraudoRulesParser.ParseContext> rulesContextParser;
     private final RuleCheckingApplierImpl<PaymentModel> ruleCheckingApplier;
     private final HistoricalPool<List<String>> timeGroupPoolImpl;
     private final HistoricalPool<String> timeReferencePoolImpl;
@@ -41,7 +41,7 @@ public class RuleCheckingServiceImpl implements RuleCheckingService {
     public Map<String, CheckedResultModel> checkSingleRule(Map<String, PaymentModel> paymentModelMap,
                                                            String templateString) {
         validateTemplate(templateString);
-        final FraudoRulesParser.ParseContext parseContext = paymentContextParser.parse(templateString);
+        final FraudoRulesParser.ParseContext parseContext = rulesContextParser.parse(templateString);
         return paymentModelMap.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -66,7 +66,7 @@ public class RuleCheckingServiceImpl implements RuleCheckingService {
 
     private CheckedResultModel checkWithinRuleset(PaymentModel paymentModel, CascadingTemplateDto dto) {
         log.debug("HistoricalTemplateVisitorImpl visit paymentModel: {}", paymentModel);
-        final FraudoRulesParser.ParseContext parseContext = paymentContextParser.parse(dto.getTemplate());
+        final FraudoRulesParser.ParseContext parseContext = rulesContextParser.parse(dto.getTemplate());
         Long timestamp = dto.getTimestamp() == null ? paymentModel.getTimestamp() : dto.getTimestamp();
         String partyId = paymentModel.getPartyId();
         String partyShopKey = generateTemplateKey(partyId, paymentModel.getShopId());

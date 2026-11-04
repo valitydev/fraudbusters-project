@@ -1,6 +1,6 @@
 package dev.vality.fraudbusters;
 
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.stream.StreamManager;
 import dev.vality.fraudo.payment.visitor.impl.FirstFindVisitorImpl;
@@ -22,8 +22,8 @@ import javax.annotation.PreDestroy;
 public class FraudBustersApplication extends SpringApplication {
 
     private final KafkaListenerEndpointRegistry registry;
-    private final FirstFindVisitorImpl<PaymentModel, PaymentCheckedField> paymentRuleVisitor;
-    private final FirstFindVisitorImpl<PaymentModel, PaymentCheckedField> fullPaymentRuleVisitor;
+    private final FirstFindVisitorImpl<PaymentModel, CheckedField> paymentRuleVisitor;
+    private final FirstFindVisitorImpl<PaymentModel, CheckedField> fullPaymentRuleVisitor;
     private final StreamManager streamManager;
 
     public static void main(String[] args) {

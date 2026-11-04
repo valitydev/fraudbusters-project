@@ -3,7 +3,7 @@ package dev.vality.fraudbusters.fraud.constant;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum PaymentCheckedField {
+public enum CheckedField {
 
     EMAIL("email"),
     IP("ip"),
@@ -23,21 +23,21 @@ public enum PaymentCheckedField {
     PHONE("phone"),
     MASKED_PAN("masked_pan");
 
-    private static final Map<String, PaymentCheckedField> VALUE_MAP = new HashMap<>();
+    private static final Map<String, CheckedField> VALUE_MAP = new HashMap<>();
 
     static {
-        for (PaymentCheckedField value : PaymentCheckedField.values()) {
+        for (CheckedField value : CheckedField.values()) {
             VALUE_MAP.put(value.value, value);
         }
     }
 
     private final String value;
 
-    PaymentCheckedField(String value) {
+    CheckedField(String value) {
         this.value = value;
     }
 
-    public static PaymentCheckedField getByValue(String value) {
+    public static CheckedField getByValue(String value) {
         return VALUE_MAP.get(value);
     }
 

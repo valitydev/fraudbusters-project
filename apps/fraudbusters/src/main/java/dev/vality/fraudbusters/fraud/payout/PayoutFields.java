@@ -1,6 +1,6 @@
 package dev.vality.fraudbusters.fraud.payout;
 
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.OperationModel;
 import dev.vality.fraudbusters.fraud.model.PayoutModel;
@@ -12,7 +12,7 @@ public final class PayoutFields {
     private PayoutFields() {
     }
 
-    public static String column(PaymentCheckedField field) {
+    public static String column(CheckedField field) {
         if (field == null) {
             throw new UnresolvableFieldException("null");
         }
@@ -33,7 +33,7 @@ public final class PayoutFields {
         };
     }
 
-    public static FieldModel resolve(PaymentCheckedField field, OperationModel model) {
+    public static FieldModel resolve(CheckedField field, OperationModel model) {
         Object value = switch (field) {
             case USER_ID -> model.getUserId();
             case PARTY_ID -> model.getPartyId();

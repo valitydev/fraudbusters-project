@@ -4,7 +4,7 @@ import dev.vality.fraudbusters.aspect.BasicMetric;
 import dev.vality.fraudbusters.domain.TimeBound;
 import dev.vality.fraudbusters.exception.RuleFunctionException;
 import dev.vality.fraudbusters.fraud.AggregateGroupingFunction;
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.OperationModel;
 import dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver;
@@ -24,7 +24,7 @@ import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
-public class SumAggregatorImpl<T extends OperationModel> implements SumPaymentAggregator<T, PaymentCheckedField> {
+public class SumAggregatorImpl<T extends OperationModel> implements SumPaymentAggregator<T, CheckedField> {
 
     private final DatabasePaymentFieldResolver databasePaymentFieldResolver;
     private final PaymentRepository paymentRepository;
@@ -35,20 +35,20 @@ public class SumAggregatorImpl<T extends OperationModel> implements SumPaymentAg
     @Override
     @BasicMetric("sum")
     public Double sum(
-            PaymentCheckedField checkedField,
+            CheckedField checkedField,
             T paymentModel,
             TimeWindow timeWindow,
-            List<PaymentCheckedField> list) {
+            List<CheckedField> list) {
         return getSum(checkedField, paymentModel, timeWindow, list, paymentRepository::sumOperationByFieldWithGroupBy);
     }
 
     @Override
     @BasicMetric("sumSuccess")
     public Double sumSuccess(
-            PaymentCheckedField checkedField,
+            CheckedField checkedField,
             T paymentModel,
             TimeWindow timeWindow,
-            List<PaymentCheckedField> list) {
+            List<CheckedField> list) {
         return getSum(checkedField, paymentModel, timeWindow, list, paymentRepository::sumOperationSuccessWithGroupBy,
                 false);
     }
@@ -56,10 +56,10 @@ public class SumAggregatorImpl<T extends OperationModel> implements SumPaymentAg
     @Override
     @BasicMetric("sumError")
     public Double sumError(
-            PaymentCheckedField checkedField, T paymentModel, TimeWindow timeWindow, String errorCode,
-            List<PaymentCheckedField> list) {
+            CheckedField checkedField, T paymentModel, TimeWindow timeWindow, String errorCode,
+            List<CheckedField> list) {
         try {
-            Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
+            Instant timestamp = TimestampUtil.instantFromModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
             FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel);
             if (Objects.isNull(resolve.getValue())) {
@@ -89,12 +89,12 @@ public class SumAggregatorImpl<T extends OperationModel> implements SumPaymentAg
     }
 
     @Override
-    public Double sumError(PaymentCheckedField checkedField,
+    public Double sumError(CheckedField checkedField,
                            T paymentModel,
                            TimeWindow timeWindow,
-                           List<PaymentCheckedField> list) {
+                           List<CheckedField> list) {
         try {
-            Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
+            Instant timestamp = TimestampUtil.instantFromModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
             FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel);
             if (Objects.isNull(resolve.getValue())) {
@@ -124,10 +124,10 @@ public class SumAggregatorImpl<T extends OperationModel> implements SumPaymentAg
 
     @Override
     public Double sumChargeback(
-            PaymentCheckedField checkedField,
+            CheckedField checkedField,
             T paymentModel,
             TimeWindow timeWindow,
-            List<PaymentCheckedField> list) {
+            List<CheckedField> list) {
         return getSum(
                 checkedField,
                 paymentModel,
@@ -140,10 +140,10 @@ public class SumAggregatorImpl<T extends OperationModel> implements SumPaymentAg
 
     @Override
     public Double sumRefund(
-            PaymentCheckedField checkedField,
+            CheckedField checkedField,
             T paymentModel,
             TimeWindow timeWindow,
-            List<PaymentCheckedField> list) {
+            List<CheckedField> list) {
         return getSum(
                 checkedField,
                 paymentModel,
@@ -156,10 +156,10 @@ public class SumAggregatorImpl<T extends OperationModel> implements SumPaymentAg
 
     @NotNull
     private Double getSum(
-            PaymentCheckedField checkedField,
+            CheckedField checkedField,
             T paymentModel,
             TimeWindow timeWindow,
-            List<PaymentCheckedField> list,
+            List<CheckedField> list,
             AggregateGroupingFunction<String, Object, Long, Long, List<FieldModel>, Long> aggregateFunction) {
         return getSum(checkedField, paymentModel, timeWindow, list, aggregateFunction, true);
     }
@@ -167,14 +167,14 @@ public class SumAggregatorImpl<T extends OperationModel> implements SumPaymentAg
     @NotNull
     @BasicMetric("getSumWindowed")
     private Double getSum(
-            PaymentCheckedField checkedField,
+            CheckedField checkedField,
             T paymentModel,
             TimeWindow timeWindow,
-            List<PaymentCheckedField> list,
+            List<CheckedField> list,
             AggregateGroupingFunction<String, Object, Long, Long, List<FieldModel>, Long> aggregateFunction,
             boolean withCurrent) {
         try {
-            Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
+            Instant timestamp = TimestampUtil.instantFromModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
             FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel);
             if (Objects.isNull(resolve.getValue())) {

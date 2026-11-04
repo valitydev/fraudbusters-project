@@ -4,7 +4,7 @@ import dev.vality.damsel.wb_list.*;
 import dev.vality.fraudbusters.aspect.BasicMetric;
 import dev.vality.fraudbusters.constant.EventField;
 import dev.vality.fraudbusters.exception.RuleFunctionException;
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
-public class PaymentInListFinderImpl implements InListFinder<PaymentModel, PaymentCheckedField> {
+public class PaymentInListFinderImpl implements InListFinder<PaymentModel, CheckedField> {
 
     private static final int CURRENT_ONE = 1;
     private static final String LIST_ERROR_LOG = "InListFinderImpl error when findInList e: ";
@@ -35,19 +35,19 @@ public class PaymentInListFinderImpl implements InListFinder<PaymentModel, Payme
 
     @Override
     @BasicMetric("findInBlackList")
-    public Boolean findInBlackList(List<Pair<PaymentCheckedField, String>> fields, PaymentModel model) {
+    public Boolean findInBlackList(List<Pair<CheckedField, String>> fields, PaymentModel model) {
         return checkInList(fields, model, ListType.black);
     }
 
     @Override
     @BasicMetric("findInWhiteList")
-    public Boolean findInWhiteList(List<Pair<PaymentCheckedField, String>> fields, PaymentModel model) {
+    public Boolean findInWhiteList(List<Pair<CheckedField, String>> fields, PaymentModel model) {
         return checkInList(fields, model, ListType.white);
     }
 
     @Override
     @BasicMetric("findInGreyList")
-    public Boolean findInGreyList(List<Pair<PaymentCheckedField, String>> fields, PaymentModel model) {
+    public Boolean findInGreyList(List<Pair<CheckedField, String>> fields, PaymentModel model) {
         try {
             return fields.stream()
                     .anyMatch(entry ->
@@ -59,7 +59,7 @@ public class PaymentInListFinderImpl implements InListFinder<PaymentModel, Payme
         }
     }
 
-    private Boolean findInList(String partyId, String shopId, PaymentCheckedField field, String value) {
+    private Boolean findInList(String partyId, String shopId, CheckedField field, String value) {
         try {
             if (StringUtils.hasLength(value)) {
                 Row row = createRow(ListType.grey, partyId, shopId, field, value);
@@ -78,7 +78,7 @@ public class PaymentInListFinderImpl implements InListFinder<PaymentModel, Payme
 
     @Override
     @BasicMetric("findInNamingList")
-    public Boolean findInList(String name, List<Pair<PaymentCheckedField, String>> fields, PaymentModel model) {
+    public Boolean findInList(String name, List<Pair<CheckedField, String>> fields, PaymentModel model) {
         return checkInList(fields, model, ListType.naming);
     }
 
@@ -116,7 +116,7 @@ public class PaymentInListFinderImpl implements InListFinder<PaymentModel, Payme
     }
 
     @NotNull
-    private Boolean checkInList(List<Pair<PaymentCheckedField, String>> fields, PaymentModel model, ListType white) {
+    private Boolean checkInList(List<Pair<CheckedField, String>> fields, PaymentModel model, ListType white) {
         try {
             String partyId = model.getPartyId();
             String shopId = model.getShopId();
@@ -134,7 +134,7 @@ public class PaymentInListFinderImpl implements InListFinder<PaymentModel, Payme
         }
     }
 
-    private Row createRow(ListType listType, String partyId, String shopId, PaymentCheckedField field, String value) {
+    private Row createRow(ListType listType, String partyId, String shopId, CheckedField field, String value) {
         return new Row()
                 .setId(IdInfo.payment_id(new PaymentId()
                         .setPartyId(partyId)

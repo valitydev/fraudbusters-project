@@ -28,7 +28,7 @@ public class TimestampUtil {
         return TimestampUtil.generateTimestampNowMillis(instant);
     }
 
-    public static Instant instantFromPaymentModel(OperationModel paymentModel) {
+    public static Instant instantFromModel(OperationModel paymentModel) {
         return paymentModel.getTimestamp() != null ? Instant.ofEpochMilli(paymentModel.getTimestamp()) : Instant.now();
     }
 

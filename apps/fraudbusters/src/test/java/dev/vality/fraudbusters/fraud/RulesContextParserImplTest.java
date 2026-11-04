@@ -1,14 +1,14 @@
 package dev.vality.fraudbusters.fraud;
 
-import dev.vality.fraudbusters.fraud.payment.PaymentContextParserImpl;
+import dev.vality.fraudbusters.fraud.RulesContextParserImpl;
 import dev.vality.fraudo.FraudoRulesParser;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class PaymentContextParserImplTest {
+public class RulesContextParserImplTest {
 
-    private FraudContextParser<FraudoRulesParser.ParseContext> fraudContextParser = new PaymentContextParserImpl();
+    private FraudContextParser<FraudoRulesParser.ParseContext> fraudContextParser = new RulesContextParserImpl();
 
     @Test
     public void parse() {

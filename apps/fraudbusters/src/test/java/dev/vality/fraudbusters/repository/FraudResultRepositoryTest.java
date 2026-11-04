@@ -8,7 +8,7 @@ import dev.vality.fraudbusters.constant.EventField;
 import dev.vality.fraudbusters.converter.FraudResultToEventConverter;
 import dev.vality.fraudbusters.domain.*;
 import dev.vality.fraudbusters.extension.ClickHouseContainerExtension;
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver;
@@ -152,7 +152,7 @@ public class FraudResultRepositoryTest {
         Long to = now.toEpochMilli();
         Long from = now.minus(10L, ChronoUnit.MINUTES).toEpochMilli();
 
-        FieldModel email = databasePaymentFieldResolver.resolve(PaymentCheckedField.EMAIL, paymentModel);
+        FieldModel email = databasePaymentFieldResolver.resolve(CheckedField.EMAIL, paymentModel);
         int count = fraudResultRepository.countOperationByFieldWithGroupBy(EventField.email.name(),
                 email.getValue(),
                 from,
@@ -169,7 +169,7 @@ public class FraudResultRepositoryTest {
         );
         assertEquals(1, count);
 
-        FieldModel resolve = databasePaymentFieldResolver.resolve(PaymentCheckedField.PARTY_ID, paymentModel);
+        FieldModel resolve = databasePaymentFieldResolver.resolve(CheckedField.PARTY_ID, paymentModel);
         count = fraudResultRepository.countOperationByFieldWithGroupBy(EventField.email.name(),
                 email.getValue(),
                 from,
@@ -265,7 +265,7 @@ public class FraudResultRepositoryTest {
         );
         assertEquals(Integer.valueOf(2), sum);
 
-        FieldModel resolve = databasePaymentFieldResolver.resolve(PaymentCheckedField.PARTY_ID, paymentModel);
+        FieldModel resolve = databasePaymentFieldResolver.resolve(CheckedField.PARTY_ID, paymentModel);
         sum = fraudResultRepository.uniqCountOperationWithGroupBy(EventField.email.name(),
                 BeanUtil.EMAIL,
                 EventField.fingerprint.name(),

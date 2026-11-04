@@ -7,7 +7,7 @@ import dev.vality.damsel.wb_list.Row;
 import dev.vality.damsel.wb_list.WbListServiceSrv;
 import dev.vality.fraudbusters.domain.TimeBound;
 import dev.vality.fraudbusters.exception.RuleFunctionException;
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.PayoutModel;
 import dev.vality.fraudbusters.repository.clickhouse.impl.PayoutHistoryRepository;
@@ -24,28 +24,28 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class PayoutInListFinder implements InListFinder<PayoutModel, PaymentCheckedField> {
+public class PayoutInListFinder implements InListFinder<PayoutModel, CheckedField> {
 
     private final WbListServiceSrv.Iface lists;
     private final PayoutHistoryRepository history;
 
     @Override
-    public Boolean findInBlackList(List<Pair<PaymentCheckedField, String>> fields, PayoutModel model) {
+    public Boolean findInBlackList(List<Pair<CheckedField, String>> fields, PayoutModel model) {
         return check(fields, model, ListType.black);
     }
 
     @Override
-    public Boolean findInWhiteList(List<Pair<PaymentCheckedField, String>> fields, PayoutModel model) {
+    public Boolean findInWhiteList(List<Pair<CheckedField, String>> fields, PayoutModel model) {
         return check(fields, model, ListType.white);
     }
 
     @Override
-    public Boolean findInList(String name, List<Pair<PaymentCheckedField, String>> fields, PayoutModel model) {
+    public Boolean findInList(String name, List<Pair<CheckedField, String>> fields, PayoutModel model) {
         return check(fields, model, ListType.naming, name);
     }
 
     @Override
-    public Boolean findInGreyList(List<Pair<PaymentCheckedField, String>> fields, PayoutModel model) {
+    public Boolean findInGreyList(List<Pair<CheckedField, String>> fields, PayoutModel model) {
         try {
             for (var field : fields) {
                 if (field.getFirst() == null || !StringUtils.hasText(field.getSecond())) {
@@ -59,17 +59,17 @@ public class PayoutInListFinder implements InListFinder<PayoutModel, PaymentChec
                 Instant from = info.isSetStartCountTime()
                         ? TimestampUtil.parseInstantFromString(info.getStartCountTime()) : Instant.EPOCH;
                 Instant to = TimestampUtil.parseInstantFromString(info.getTimeToLive());
-                Instant now = TimestampUtil.instantFromPaymentModel(model);
+                Instant now = TimestampUtil.instantFromModel(model);
                 if (from.isAfter(now) || !to.isAfter(now) || !from.isBefore(to)) {
                     continue;
                 }
                 List<FieldModel> filters = new ArrayList<>();
                 filters.add(new FieldModel(PayoutFields.column(field.getFirst()), field.getSecond()));
                 if (StringUtils.hasText(model.getPartyId())) {
-                    filters.add(PayoutFields.resolve(PaymentCheckedField.PARTY_ID, model));
+                    filters.add(PayoutFields.resolve(CheckedField.PARTY_ID, model));
                 }
                 if (StringUtils.hasText(model.getWalletId())) {
-                    filters.add(PayoutFields.resolve(PaymentCheckedField.WALLET_ID, model));
+                    filters.add(PayoutFields.resolve(CheckedField.WALLET_ID, model));
                 }
                 double count = history.aggregate("count()", filters,
                         TimeBound.builder().left(from).right(now).build(), null, null);
@@ -83,11 +83,11 @@ public class PayoutInListFinder implements InListFinder<PayoutModel, PaymentChec
         }
     }
 
-    private boolean check(List<Pair<PaymentCheckedField, String>> fields, PayoutModel model, ListType type) {
+    private boolean check(List<Pair<CheckedField, String>> fields, PayoutModel model, ListType type) {
         return check(fields, model, type, null);
     }
 
-    private boolean check(List<Pair<PaymentCheckedField, String>> fields, PayoutModel model,
+    private boolean check(List<Pair<CheckedField, String>> fields, PayoutModel model,
                           ListType type, String name) {
         try {
             List<Row> rows = fields.stream()
@@ -102,7 +102,7 @@ public class PayoutInListFinder implements InListFinder<PayoutModel, PaymentChec
         }
     }
 
-    private Row row(ListType type, Pair<PaymentCheckedField, String> field, PayoutModel model) {
+    private Row row(ListType type, Pair<CheckedField, String> field, PayoutModel model) {
         PayoutFields.column(field.getFirst());
         return new Row().setId(IdInfo.payout_id(new PayoutId()
                         .setPartyId(model.getPartyId()).setWalletId(model.getWalletId())))

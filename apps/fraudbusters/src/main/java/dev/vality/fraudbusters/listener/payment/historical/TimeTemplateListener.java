@@ -26,7 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TimeTemplateListener extends AbstractTimePoolCommandListenerExecutor implements CommandListener {
 
-    private final FraudContextParser<FraudoRulesParser.ParseContext> paymentContextParser;
+    private final FraudContextParser<FraudoRulesParser.ParseContext> rulesContextParser;
     private final PaymentTemplateValidator paymentTemplateValidator;
     private final HistoricalPool<ParserRuleContext> timeTemplateTimePoolImpl;
 
@@ -51,7 +51,7 @@ public class TimeTemplateListener extends AbstractTimePoolCommandListenerExecuto
                     template.getId(),
                     timestamp,
                     timeTemplateTimePoolImpl,
-                    paymentContextParser::parse,
+                    rulesContextParser::parse,
                     templateString
             );
         }

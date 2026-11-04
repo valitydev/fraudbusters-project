@@ -1,6 +1,5 @@
-package dev.vality.fraudbusters.fraud.payment;
+package dev.vality.fraudbusters.fraud;
 
-import dev.vality.fraudbusters.fraud.FraudContextParser;
 import dev.vality.fraudo.FraudoRulesLexer;
 import dev.vality.fraudo.FraudoRulesParser;
 import org.antlr.v4.runtime.CharStreams;
@@ -8,7 +7,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PaymentContextParserImpl implements FraudContextParser<FraudoRulesParser.ParseContext> {
+public class RulesContextParserImpl implements FraudContextParser<FraudoRulesParser.ParseContext> {
 
     @Override
     public FraudoRulesParser.ParseContext parse(String template) {

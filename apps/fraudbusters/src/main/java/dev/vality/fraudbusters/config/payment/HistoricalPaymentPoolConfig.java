@@ -1,6 +1,6 @@
 package dev.vality.fraudbusters.config.payment;
 
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.pool.HistoricalPool;
 import dev.vality.fraudbusters.pool.HistoricalPoolImpl;
@@ -39,7 +39,7 @@ public class HistoricalPaymentPoolConfig {
 
     @Bean
     public FullRuleApplierImpl fullRuleApplier(
-            FirstFindVisitorImpl<PaymentModel, PaymentCheckedField> fullPaymentRuleVisitor,
+            FirstFindVisitorImpl<PaymentModel, CheckedField> fullPaymentRuleVisitor,
             HistoricalPool<ParserRuleContext> templatePoolImpl,
             CheckedResultFactory checkedResultFactory) {
         return new FullRuleApplierImpl(fullPaymentRuleVisitor, templatePoolImpl, checkedResultFactory);
@@ -47,7 +47,7 @@ public class HistoricalPaymentPoolConfig {
 
     @Bean
     public RuleCheckingApplierImpl<PaymentModel> ruleCheckingApplier(
-            FirstFindVisitorImpl<PaymentModel, PaymentCheckedField> paymentRuleVisitor,
+            FirstFindVisitorImpl<PaymentModel, CheckedField> paymentRuleVisitor,
             HistoricalPool<ParserRuleContext> timeTemplatePoolImpl,
             CheckedResultFactory checkedResultFactory) {
         return new RuleCheckingApplierImpl<>(paymentRuleVisitor, timeTemplatePoolImpl, checkedResultFactory);

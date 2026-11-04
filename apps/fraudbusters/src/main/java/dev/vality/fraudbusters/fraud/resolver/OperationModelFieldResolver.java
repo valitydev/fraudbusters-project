@@ -1,17 +1,17 @@
 package dev.vality.fraudbusters.fraud.resolver;
 
-import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
+import dev.vality.fraudbusters.fraud.constant.CheckedField;
 import dev.vality.fraudbusters.fraud.model.OperationModel;
 import dev.vality.fraudo.exception.UnresolvableFieldException;
 import dev.vality.fraudo.resolver.FieldResolver;
 
 /** Resolves rule fields that every operation has; subclasses add the fields of their own operation. */
 public abstract class OperationModelFieldResolver<T extends OperationModel>
-        implements FieldResolver<T, PaymentCheckedField> {
+        implements FieldResolver<T, CheckedField> {
 
     @Override
     public String resolveValue(String fieldName, T model) {
-        PaymentCheckedField field = resolveName(fieldName);
+        CheckedField field = resolveName(fieldName);
         return switch (field) {
             case BIN -> model.getBin();
             case IP -> model.getIp();
@@ -30,11 +30,11 @@ public abstract class OperationModelFieldResolver<T extends OperationModel>
     }
 
     @Override
-    public PaymentCheckedField resolveName(String fieldName) {
-        return PaymentCheckedField.getByValue(fieldName);
+    public CheckedField resolveName(String fieldName) {
+        return CheckedField.getByValue(fieldName);
     }
 
-    protected String resolveOperationValue(PaymentCheckedField field, String fieldName, T model) {
+    protected String resolveOperationValue(CheckedField field, String fieldName, T model) {
         throw new UnresolvableFieldException(fieldName);
     }
 
