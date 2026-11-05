@@ -13,7 +13,7 @@ final class CurrentPaymentContribution {
         return model instanceof PaymentModel ? 1 : 0;
     }
 
-    static long amount(OperationModel model) {
+    static long getAmount(OperationModel model) {
         return count(model) == 0 || model.getAmount() == null ? 0 : model.getAmount();
     }
 }

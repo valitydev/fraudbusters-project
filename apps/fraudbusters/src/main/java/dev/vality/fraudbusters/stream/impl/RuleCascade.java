@@ -24,20 +24,20 @@ public class RuleCascade<T extends BaseModel> {
     private final Pool<String> references;
     private final Pool<String> groupReferences;
 
-    public Supplier<Optional<CheckedResultModel>> template(T model, String referenceKey) {
+    public Supplier<Optional<CheckedResultModel>> applyTemplate(T model, String referenceKey) {
         return () -> ruleApplier.apply(model, references.get(referenceKey));
     }
 
-    public Supplier<Optional<CheckedResultModel>> group(T model, String groupReferenceKey) {
+    public Supplier<Optional<CheckedResultModel>> applyGroup(T model, String groupReferenceKey) {
         return () -> ruleApplier.applyForAny(model, groups.get(groupReferences.get(groupReferenceKey)));
     }
 
     public CheckedResultModel apply(List<Supplier<Optional<CheckedResultModel>>> steps, ResultStatus defaultStatus) {
         return CheckedResultModelUtil.findFirstDecision(steps)
-                .orElseGet(() -> defaultResult(defaultStatus));
+                .orElseGet(() -> createDefaultResult(defaultStatus));
     }
 
-    private CheckedResultModel defaultResult(ResultStatus status) {
+    private CheckedResultModel createDefaultResult(ResultStatus status) {
         ConcreteResultModel result = new ConcreteResultModel();
         result.setResultStatus(status);
         CheckedResultModel checked = new CheckedResultModel();

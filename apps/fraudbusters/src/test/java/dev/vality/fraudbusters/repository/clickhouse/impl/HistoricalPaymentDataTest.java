@@ -86,10 +86,10 @@ class HistoricalPaymentDataTest {
         model.setCardToken(rows.get(0).getCardToken());
         var window = dev.vality.fraudo.model.TimeWindow.builder().start(120)
                 .timeUnit(dev.vality.fraudo.constant.TimeUnit.MINUTES).build();
-        var user = dev.vality.fraudbusters.fraud.constant.CheckedField.USER_ID;
-        var party = dev.vality.fraudbusters.fraud.constant.CheckedField.PARTY_ID;
-        final var shop = dev.vality.fraudbusters.fraud.constant.CheckedField.SHOP_ID;
-        final var card = dev.vality.fraudbusters.fraud.constant.CheckedField.CARD_TOKEN;
+        var user = dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.USER_ID;
+        var party = dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.PARTY_ID;
+        final var shop = dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.SHOP_ID;
+        final var card = dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.CARD_TOKEN;
         assertEquals(3, counts.countSuccess(user, model, window, List.of()));
         assertEquals(1100.0, sums.sumSuccess(user, model, window, List.of()));
         assertEquals(2, counts.countSuccess(user, model, window, List.of(party)));

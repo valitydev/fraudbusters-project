@@ -25,9 +25,9 @@ public interface InspectStorage {
 
     Pool<String> getGroupReferencePool();
 
-    String referenceKey(TemplateReference reference);
+    String generateReferenceKey(TemplateReference reference);
 
-    String groupReferenceKey(GroupReference reference);
+    String generateGroupReferenceKey(GroupReference reference);
 
     FraudTemplateValidator getTemplateValidator();
 

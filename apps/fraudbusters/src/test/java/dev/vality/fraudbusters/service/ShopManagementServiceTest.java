@@ -6,7 +6,7 @@ import dev.vality.fraudbusters.config.RestTemplateConfig;
 import dev.vality.fraudbusters.config.payment.PaymentPoolConfig;
 import dev.vality.fraudbusters.config.properties.DefaultTemplateProperties;
 import dev.vality.fraudbusters.fraud.FraudTemplateValidator;
-import dev.vality.fraudbusters.fraud.constant.CheckedField;
+import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.pool.Pool;
 import dev.vality.fraudbusters.repository.clickhouse.impl.AggregationGeneralRepositoryImpl;
@@ -54,7 +54,7 @@ public class ShopManagementServiceTest {
     @Autowired
     private Pool<String> groupReferencePoolImpl;
     @MockitoBean
-    private FirstFindVisitorImpl<PaymentModel, CheckedField> firstFindVisitor;
+    private FirstFindVisitorImpl<PaymentModel, PaymentCheckedField> firstFindVisitor;
     @MockitoBean
     private CheckedResultFactory checkedResultFactory;
     @MockitoBean

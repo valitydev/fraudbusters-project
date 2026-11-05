@@ -3,7 +3,7 @@ package dev.vality.fraudbusters.fraud.localstorage.aggregator;
 import dev.vality.fraudbusters.domain.TimeBound;
 import dev.vality.fraudbusters.exception.RuleFunctionException;
 import dev.vality.fraudbusters.fraud.AggregateGroupingFunction;
-import dev.vality.fraudbusters.fraud.constant.CheckedField;
+import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.localstorage.LocalPaymentFieldResolver;
 import dev.vality.fraudbusters.fraud.localstorage.LocalResultStorageRepository;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
@@ -22,19 +22,19 @@ import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
-public class LocalCountAggregatorDecorator implements CountPaymentAggregator<PaymentModel, CheckedField> {
+public class LocalCountAggregatorDecorator implements CountPaymentAggregator<PaymentModel, PaymentCheckedField> {
 
-    private final CountAggregatorImpl<PaymentModel> countAggregator;
+    private final CountAggregatorImpl<PaymentModel, PaymentCheckedField> countAggregator;
     private final LocalPaymentFieldResolver localPaymentFieldResolver;
     private final LocalResultStorageRepository localStorageRepository;
     private final TimeBoundaryService timeBoundaryService;
 
     @Override
     public Integer count(
-            CheckedField checkedField,
+            PaymentCheckedField checkedField,
             PaymentModel paymentModel,
             TimeWindow timeWindow,
-            List<CheckedField> list) {
+            List<PaymentCheckedField> list) {
         Integer count = countAggregator.count(checkedField, paymentModel, timeWindow, list);
         FieldModel resolve = localPaymentFieldResolver.resolve(checkedField, paymentModel);
         Instant timestamp = TimestampUtil.instantFromModel(paymentModel);
@@ -50,10 +50,10 @@ public class LocalCountAggregatorDecorator implements CountPaymentAggregator<Pay
 
     @Override
     public Integer countSuccess(
-            CheckedField checkedField,
+            PaymentCheckedField checkedField,
             PaymentModel paymentModel,
             TimeWindow timeWindow,
-            List<CheckedField> list) {
+            List<PaymentCheckedField> list) {
         Integer countError = countAggregator.countSuccess(checkedField, paymentModel, timeWindow, list);
         Integer resultCount = getCount(
                 checkedField,
@@ -68,8 +68,8 @@ public class LocalCountAggregatorDecorator implements CountPaymentAggregator<Pay
 
     @Override
     public Integer countError(
-            CheckedField checkedField, PaymentModel paymentModel, TimeWindow timeWindow,
-            String errorCode, List<CheckedField> list) {
+            PaymentCheckedField checkedField, PaymentModel paymentModel, TimeWindow timeWindow,
+            String errorCode, List<PaymentCheckedField> list) {
         try {
             Integer countError = countAggregator.countError(checkedField, paymentModel, timeWindow, errorCode, list);
             Instant timestamp = TimestampUtil.instantFromModel(paymentModel);
@@ -99,8 +99,8 @@ public class LocalCountAggregatorDecorator implements CountPaymentAggregator<Pay
     }
 
     @Override
-    public Integer countError(CheckedField paymentCheckedField, PaymentModel paymentModel, TimeWindow timeWindow,
-                              List<CheckedField> list) {
+    public Integer countError(PaymentCheckedField paymentCheckedField, PaymentModel paymentModel, TimeWindow timeWindow,
+                              List<PaymentCheckedField> list) {
         try {
             Integer countError = countAggregator.countError(paymentCheckedField, paymentModel, timeWindow, list);
             Instant timestamp = TimestampUtil.instantFromModel(paymentModel);
@@ -129,8 +129,8 @@ public class LocalCountAggregatorDecorator implements CountPaymentAggregator<Pay
     }
 
     @Override
-    public Integer countPending(CheckedField checkedField, PaymentModel paymentModel, TimeWindow timeWindow,
-                                List<CheckedField> list) {
+    public Integer countPending(PaymentCheckedField checkedField, PaymentModel paymentModel, TimeWindow timeWindow,
+                                List<PaymentCheckedField> list) {
         Integer countFinished = countAggregator.count(checkedField, paymentModel, timeWindow, list);
         Integer resultCount = getCount(
                 checkedField,
@@ -145,28 +145,28 @@ public class LocalCountAggregatorDecorator implements CountPaymentAggregator<Pay
 
     @Override
     public Integer countChargeback(
-            CheckedField checkedField,
+            PaymentCheckedField checkedField,
             PaymentModel model,
             TimeWindow timeWindow,
-            List<CheckedField> fields) {
+            List<PaymentCheckedField> fields) {
         return countAggregator.countChargeback(checkedField, model, timeWindow, fields);
     }
 
     @Override
     public Integer countRefund(
-            CheckedField checkedField,
+            PaymentCheckedField checkedField,
             PaymentModel model,
             TimeWindow timeWindow,
-            List<CheckedField> fields) {
+            List<PaymentCheckedField> fields) {
         return countAggregator.countRefund(checkedField, model, timeWindow, fields);
     }
 
     @NotNull
     private Integer getCount(
-            CheckedField checkedField,
+            PaymentCheckedField checkedField,
             PaymentModel paymentModel,
             TimeWindow timeWindow,
-            List<CheckedField> list,
+            List<PaymentCheckedField> list,
             AggregateGroupingFunction<String, Object, Long, Long, List<FieldModel>, Integer> aggregateFunction) {
         try {
             Instant timestamp = TimestampUtil.instantFromModel(paymentModel);

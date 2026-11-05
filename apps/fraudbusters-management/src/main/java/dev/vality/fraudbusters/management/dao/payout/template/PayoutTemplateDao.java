@@ -1,4 +1,4 @@
-package dev.vality.fraudbusters.management.dao.payout;
+package dev.vality.fraudbusters.management.dao.payout.template;
 
 import dev.vality.fraudbusters.management.dao.AbstractDao;
 import dev.vality.fraudbusters.management.dao.CommandDao;

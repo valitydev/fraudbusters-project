@@ -16,24 +16,24 @@ public class PaymentListStorage implements ListStorage {
     private final ListRepository repository;
 
     @Override
-    public String key(Row row) {
-        return KeyGenerator.generateKey(row.getListType(), row.getListName(), row.getValue(), partyId(row),
-                shopId(row));
+    public String generateKey(Row row) {
+        return KeyGenerator.generateKey(row.getListType(), row.getListName(), row.getValue(), getPartyId(row),
+                getShopId(row));
     }
 
     @Override
-    public List<String> cascadeKeys(Row row) {
+    public List<String> generateCascadeKeys(Row row) {
         return List.of(
                 KeyGenerator.generateKey(row.getListType(), row.getListName(), row.getValue()),
-                KeyGenerator.generateKey(row.getListType(), row.getListName(), row.getValue(), partyId(row)),
-                key(row));
+                KeyGenerator.generateKey(row.getListType(), row.getListName(), row.getValue(), getPartyId(row)),
+                generateKey(row));
     }
 
-    private String partyId(Row row) {
+    private String getPartyId(Row row) {
         return row.isSetId() ? row.getId().getPaymentId().getPartyId() : row.getPartyId();
     }
 
-    private String shopId(Row row) {
+    private String getShopId(Row row) {
         return row.isSetId() ? row.getId().getPaymentId().getShopId() : row.getShopId();
     }
 

@@ -1,18 +1,35 @@
 package dev.vality.fraudbusters.fraud.payment.resolver;
 
-import dev.vality.fraudbusters.fraud.constant.CheckedField;
+import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
-import dev.vality.fraudbusters.fraud.resolver.OperationModelFieldResolver;
 import dev.vality.fraudo.exception.UnresolvableFieldException;
+import dev.vality.fraudo.resolver.FieldResolver;
 
-public class PaymentModelFieldResolver extends OperationModelFieldResolver<PaymentModel> {
+public class PaymentModelFieldResolver implements FieldResolver<PaymentModel, PaymentCheckedField> {
 
     @Override
-    protected String resolveOperationValue(CheckedField field, String fieldName, PaymentModel paymentModel) {
-        if (field == CheckedField.SHOP_ID) {
-            return paymentModel.getShopId();
-        }
-        throw new UnresolvableFieldException(fieldName);
+    public String resolveValue(String fieldName, PaymentModel paymentModel) {
+        return switch (resolveName(fieldName)) {
+            case BIN -> paymentModel.getBin();
+            case IP -> paymentModel.getIp();
+            case FINGERPRINT -> paymentModel.getFingerprint();
+            case USER_ID -> paymentModel.getUserId();
+            case EMAIL -> paymentModel.getEmail();
+            case PHONE -> paymentModel.getPhone();
+            case COUNTRY_BANK -> paymentModel.getBinCountryCode();
+            case CARD_TOKEN -> paymentModel.getCardToken();
+            case LAST_DIGITS -> paymentModel.getLastDigits();
+            case PARTY_ID -> paymentModel.getPartyId();
+            case SHOP_ID -> paymentModel.getShopId();
+            case CURRENCY -> paymentModel.getCurrency();
+            case MASKED_PAN -> paymentModel.getBin() + paymentModel.getLastDigits();
+            default -> throw new UnresolvableFieldException(fieldName);
+        };
+    }
+
+    @Override
+    public PaymentCheckedField resolveName(String fieldName) {
+        return PaymentCheckedField.getByValue(fieldName);
     }
 
 }

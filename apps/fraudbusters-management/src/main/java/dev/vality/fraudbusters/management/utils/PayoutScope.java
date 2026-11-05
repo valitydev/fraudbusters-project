@@ -8,12 +8,12 @@ public final class PayoutScope {
     private PayoutScope() {
     }
 
-    public static String identity(String value) {
+    public static String normalizeId(String value) {
         return value == null ? "" : value;
     }
 
-    public static void validate(String shopId, String partyId, String walletId) {
-        if (StringUtils.hasText(shopId) || StringUtils.hasText(walletId) && !StringUtils.hasText(partyId)) {
+    public static void validate(String partyId, String walletId) {
+        if (StringUtils.hasText(walletId) && !StringUtils.hasText(partyId)) {
             throw new IllegalArgumentException("Invalid payout scope");
         }
     }

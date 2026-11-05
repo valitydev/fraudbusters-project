@@ -64,7 +64,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class RuleCheckingServiceIntegrationTest {
 
     @MockitoBean
-    private dev.vality.fraudbusters.fraud.payout.PayoutAggregators payoutAggregators;
+    private dev.vality.fraudbusters.fraud.payout.aggregator.clickhouse.PayoutAggregators payoutAggregators;
 
     @MockitoBean
     private RefundRepository refundRepository;

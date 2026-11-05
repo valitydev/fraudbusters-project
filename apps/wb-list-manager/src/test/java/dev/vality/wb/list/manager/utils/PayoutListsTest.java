@@ -30,10 +30,10 @@ class PayoutListsTest {
 
     @Test
     void legacyPaymentKeysAreUnchangedAndPayoutScopesAreUnambiguous() {
-        Row row = row().setId(IdInfo.payment_id(new PaymentId().setPartyId("party").setShopId("shop")));
-        assertEquals("party_shop_black_USER_ID_synthetic-user", paymentStorage.key(row));
-        Row payoutRow = row().setId(IdInfo.payout_id(new PayoutId().setPartyId("party").setWalletId("wallet")));
-        assertNotEquals(payoutStorage.key(payoutRow),
+        Row row = createRow().setId(IdInfo.payment_id(new PaymentId().setPartyId("party").setShopId("shop")));
+        assertEquals("party_shop_black_USER_ID_synthetic-user", paymentStorage.generateKey(row));
+        Row payoutRow = createRow().setId(IdInfo.payout_id(new PayoutId().setPartyId("party").setWalletId("wallet")));
+        assertNotEquals(payoutStorage.generateKey(payoutRow),
                 KeyGenerator.generatePayoutKey(ListType.black, "USER_ID", "synthetic-user", "party_wallet", null));
         assertNotEquals(KeyGenerator.generatePayoutKey(ListType.black, "USER_ID", "synthetic-user", "a_b", "c"),
                 KeyGenerator.generatePayoutKey(ListType.black, "USER_ID", "synthetic-user", "a", "b_c"));
@@ -41,7 +41,7 @@ class PayoutListsTest {
 
     @Test
     void payoutFallbackNeverQueriesPaymentStorage() throws Exception {
-        Row row = row().setId(IdInfo.payout_id(new PayoutId().setPartyId("party").setWalletId("wallet")));
+        Row row = createRow().setId(IdInfo.payout_id(new PayoutId().setPartyId("party").setWalletId("wallet")));
         when(payoutRepository.get(anyString())).thenReturn(Optional.empty());
         assertFalse(handler.isExist(row));
         verifyNoInteractions(paymentRepository);
@@ -55,8 +55,8 @@ class PayoutListsTest {
 
     @Test
     void globalPayoutListMatchesAndWalletWithoutPartyIsRejected() throws Exception {
-        Row row = row().setId(IdInfo.payout_id(new PayoutId()));
-        String global = payoutStorage.key(row);
+        Row row = createRow().setId(IdInfo.payout_id(new PayoutId()));
+        String global = payoutStorage.generateKey(row);
         when(payoutRepository.get(global)).thenReturn(Optional.of(
                 new dev.vality.wb.list.manager.model.Row(global, "synthetic-user")));
         assertTrue(handler.isExist(row));
@@ -66,7 +66,7 @@ class PayoutListsTest {
         verify(payoutRepository, times(1)).get(anyString());
     }
 
-    private Row row() {
+    private Row createRow() {
         return new Row().setListType(ListType.black).setListName("USER_ID").setValue("synthetic-user");
     }
 }

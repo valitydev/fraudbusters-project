@@ -1,7 +1,6 @@
 package dev.vality.fraudbusters.listener.payment.historical;
 
 import dev.vality.damsel.fraudbusters.Command;
-import dev.vality.fraudbusters.util.OperationTypeUtil;
 import dev.vality.damsel.fraudbusters.CommandType;
 import dev.vality.damsel.fraudbusters.Template;
 import dev.vality.fraudbusters.fraud.FraudContextParser;
@@ -34,9 +33,6 @@ public class TimeTemplateListener extends AbstractTimePoolCommandListenerExecuto
     @KafkaListener(autoStartup = "${kafka.historical.listener.enable}", topics = "${kafka.topic.full-template}",
             containerFactory = "timeTemplateListenerContainerFactory")
     public void listen(@Payload Command command) {
-        if (OperationTypeUtil.isPayout(command)) {
-            return;
-        }
         log.info("TimeTemplateListener command: {}", command);
         if (command != null && command.isSetCommandBody() && command.getCommandBody().isSetTemplate()) {
             Template template = command.getCommandBody().getTemplate();

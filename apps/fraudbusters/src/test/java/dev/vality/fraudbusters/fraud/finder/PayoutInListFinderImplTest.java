@@ -1,25 +1,28 @@
-package dev.vality.fraudbusters.fraud.payout;
+package dev.vality.fraudbusters.fraud.finder;
 
 import dev.vality.damsel.wb_list.Row;
 import dev.vality.damsel.wb_list.WbListServiceSrv;
 import dev.vality.fraudbusters.fraud.model.PayoutModel;
+import dev.vality.fraudbusters.fraud.payout.finder.PayoutInListFinderImpl;
+import dev.vality.fraudbusters.util.BeanUtil;
 import dev.vality.fraudo.model.Pair;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 
-import static dev.vality.fraudbusters.fraud.constant.CheckedField.USER_ID;
+import static dev.vality.fraudbusters.fraud.constant.PayoutCheckedField.CARD_TOKEN;
+import static dev.vality.fraudbusters.fraud.constant.PayoutCheckedField.USER_ID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
-class PayoutInListFinderTest {
+class PayoutInListFinderImplTest {
 
     @Test
     void namedListsUseTheirNameAndPayoutIdentity() throws Exception {
         var lists = mock(WbListServiceSrv.Iface.class);
-        final var finder = new PayoutInListFinder(lists, null);
+        final var finder = new PayoutInListFinderImpl(lists, null, BeanUtil.createPayoutFieldsInPayoutHistory());
         var model = new PayoutModel();
         model.setPartyId("synthetic-party");
         model.setWalletId("synthetic-wallet");
@@ -39,14 +42,14 @@ class PayoutInListFinderTest {
     void greyListSupportsAnOmittedStartTime() throws Exception {
         var lists = mock(WbListServiceSrv.Iface.class);
         var history = mock(dev.vality.fraudbusters.repository.clickhouse.impl.PayoutHistoryRepository.class);
-        final var finder = new PayoutInListFinder(lists, history);
+        final var finder = new PayoutInListFinderImpl(lists, history, BeanUtil.createPayoutFieldsInPayoutHistory());
         var model = new PayoutModel();
         model.setTimestamp(java.time.Instant.parse("2026-01-01T12:00:00Z").toEpochMilli());
         var info = new dev.vality.damsel.wb_list.CountInfo().setCount(1)
                 .setTimeToLive("2026-01-02T12:00:00Z");
         when(lists.getRowInfo(any())).thenReturn(new dev.vality.damsel.wb_list.Result()
                 .setRowInfo(dev.vality.damsel.wb_list.RowInfo.count_info(info)));
-        assertTrue(finder.findInGreyList(List.of(new Pair<>(USER_ID, "synthetic-user")), model));
+        assertTrue(finder.findInGreyList(List.of(new Pair<>(CARD_TOKEN, "synthetic-card")), model));
         var bound = ArgumentCaptor.forClass(dev.vality.fraudbusters.domain.TimeBound.class);
         verify(history).aggregate(eq("count()"), anyList(), bound.capture(), isNull(), isNull());
         assertEquals(java.time.Instant.EPOCH, bound.getValue().getLeft());

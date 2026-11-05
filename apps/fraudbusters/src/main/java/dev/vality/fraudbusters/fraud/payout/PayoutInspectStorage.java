@@ -7,6 +7,7 @@ import dev.vality.fraudbusters.constant.TemplateLevel;
 import dev.vality.fraudbusters.fraud.FraudTemplateValidator;
 import dev.vality.fraudbusters.fraud.InspectStorage;
 import dev.vality.fraudbusters.pool.Pool;
+import dev.vality.fraudbusters.util.PayoutScope;
 import lombok.RequiredArgsConstructor;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.springframework.util.StringUtils;
@@ -54,20 +55,18 @@ public class PayoutInspectStorage implements InspectStorage {
     }
 
     @Override
-    public String referenceKey(TemplateReference reference) {
+    public String generateReferenceKey(TemplateReference reference) {
         if (reference.isIsGlobal()) {
             return PayoutScope.GLOBAL;
         }
-        PayoutScope.validate(reference.getShopId(), reference.getPartyId(), reference.getWalletId());
         return !StringUtils.hasText(reference.getPartyId()) && !StringUtils.hasText(reference.getWalletId())
                 ? TemplateLevel.DEFAULT.name()
-                : PayoutScope.key(reference.getPartyId(), reference.getWalletId());
+                : PayoutScope.generateKey(reference.getPartyId(), reference.getWalletId());
     }
 
     @Override
-    public String groupReferenceKey(GroupReference reference) {
-        PayoutScope.validate(reference.getShopId(), reference.getPartyId(), reference.getWalletId());
-        return PayoutScope.key(reference.getPartyId(), reference.getWalletId());
+    public String generateGroupReferenceKey(GroupReference reference) {
+        return PayoutScope.generateKey(reference.getPartyId(), reference.getWalletId());
     }
 
     @Override

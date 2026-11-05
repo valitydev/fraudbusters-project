@@ -115,9 +115,10 @@ public class PayoutFailureTest extends AbstractPayoutTest {
     }
 
     static Stream<Arguments> retries() {
-        return functions().flatMap(arguments -> Stream.of(
-                Arguments.of(arguments.get()[0], arguments.get()[1], false),
-                Arguments.of(arguments.get()[0], arguments.get()[1], true)));
+        return functions()
+                .flatMap(arguments -> Stream.of(
+                        Arguments.of(arguments.get()[0], arguments.get()[1], false),
+                        Arguments.of(arguments.get()[0], arguments.get()[1], true)));
     }
 
     @ParameterizedTest

@@ -4,7 +4,7 @@ import dev.vality.damsel.wb_list.CountInfo;
 import dev.vality.damsel.wb_list.Result;
 import dev.vality.damsel.wb_list.RowInfo;
 import dev.vality.damsel.wb_list.WbListServiceSrv;
-import dev.vality.fraudbusters.fraud.constant.CheckedField;
+import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.fraud.payment.finder.PaymentInListFinderImpl;
 import dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver;
@@ -33,7 +33,7 @@ public class InGreyListFinderImplTest {
     private static final String SHOP_ID = "shopId";
     private static final String VALUE = "1234123";
 
-    private InListFinder<PaymentModel, CheckedField> inGreyListFinder;
+    private InListFinder<PaymentModel, PaymentCheckedField> inGreyListFinder;
 
     @Mock
     private WbListServiceSrv.Iface wbListServiceSrv;
@@ -54,7 +54,7 @@ public class InGreyListFinderImplTest {
         paymentModel.setPartyId(PARTY_ID);
         paymentModel.setShopId(SHOP_ID);
         Boolean inList = inGreyListFinder.findInGreyList(
-                List.of(new Pair<>(CheckedField.CARD_TOKEN, VALUE)),
+                List.of(new Pair<>(PaymentCheckedField.CARD_TOKEN, VALUE)),
                 paymentModel
         );
 
@@ -71,14 +71,14 @@ public class InGreyListFinderImplTest {
         when(analyticRepository.countOperationByFieldWithGroupBy(any(), any(), any(), any(), any())).thenReturn(6);
 
         inList = inGreyListFinder.findInGreyList(
-                List.of(new Pair<>(CheckedField.CARD_TOKEN, VALUE)),
+                List.of(new Pair<>(PaymentCheckedField.CARD_TOKEN, VALUE)),
                 paymentModel
         );
         assertFalse(inList);
 
         when(analyticRepository.countOperationByFieldWithGroupBy(any(), any(), any(), any(), any())).thenReturn(4);
         inList = inGreyListFinder.findInGreyList(
-                List.of(new Pair<>(CheckedField.CARD_TOKEN, VALUE)),
+                List.of(new Pair<>(PaymentCheckedField.CARD_TOKEN, VALUE)),
                 paymentModel
         );
         assertTrue(inList);
@@ -99,7 +99,7 @@ public class InGreyListFinderImplTest {
         paymentModel.setPartyId(PARTY_ID);
         paymentModel.setShopId(SHOP_ID);
         Boolean inList = inGreyListFinder.findInGreyList(
-                List.of(new Pair<>(CheckedField.CARD_TOKEN, VALUE)),
+                List.of(new Pair<>(PaymentCheckedField.CARD_TOKEN, VALUE)),
                 paymentModel
         );
 

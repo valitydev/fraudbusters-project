@@ -83,7 +83,7 @@ public class WbListServiceHandler implements WbListServiceSrv.Iface {
 
     private Optional<dev.vality.wb.list.manager.model.Row> getCascadeRow(Row row) {
         ListStorage storage = listStorageRegistry.get(row);
-        return storage.cascadeKeys(row).stream()
+        return storage.generateCascadeKeys(row).stream()
                 .map(key -> storage.getRepository().get(key))
                 .flatMap(Optional::stream)
                 .findFirst();

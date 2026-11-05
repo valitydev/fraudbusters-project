@@ -2,7 +2,7 @@ package dev.vality.fraudbusters.config.payment;
 
 import dev.vality.fraudbusters.fraud.FraudTemplateValidator;
 import dev.vality.fraudbusters.fraud.InspectStorage;
-import dev.vality.fraudbusters.fraud.constant.CheckedField;
+import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.fraud.payment.PaymentInspectStorage;
 import dev.vality.fraudbusters.pool.Pool;
@@ -41,7 +41,7 @@ public class PaymentPoolConfig {
 
     @Bean
     public RuleApplierImpl<PaymentModel> ruleApplier(
-            FirstFindVisitorImpl<PaymentModel, CheckedField> paymentRuleVisitor,
+            FirstFindVisitorImpl<PaymentModel, PaymentCheckedField> paymentRuleVisitor,
             Pool<ParserRuleContext> templatePoolImpl,
             CheckedResultFactory checkedResultFactory) {
         return new RuleApplierImpl<>(paymentRuleVisitor, templatePoolImpl, checkedResultFactory);

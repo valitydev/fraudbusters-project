@@ -31,11 +31,11 @@ public class TemplateVisitorImpl implements TemplateVisitor<PaymentModel, Checke
         String partyId = model.getPartyId();
         String partyShopKey = ReferenceKeyGenerator.generateTemplateKey(partyId, model.getShopId());
         return cascade.apply(List.of(
-                cascade.template(model, TemplateLevel.GLOBAL.name()),
-                cascade.group(model, partyId),
-                cascade.group(model, partyShopKey),
-                cascade.template(model, partyId),
-                cascade.template(model, partyShopKey)
+                cascade.applyTemplate(model, TemplateLevel.GLOBAL.name()),
+                cascade.applyGroup(model, partyId),
+                cascade.applyGroup(model, partyShopKey),
+                cascade.applyTemplate(model, partyId),
+                cascade.applyTemplate(model, partyShopKey)
         ), ResultStatus.THREE_DS);
     }
 }

@@ -1,7 +1,7 @@
 package dev.vality.fraudbusters.fraud.filter;
 
 import dev.vality.fraudbusters.domain.CheckedPayment;
-import dev.vality.fraudbusters.fraud.constant.CheckedField;
+import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -10,7 +10,7 @@ import java.util.Optional;
 public class PaymentFieldValueResolver {
 
     public Optional<String> resolve(String fieldName, CheckedPayment checkedPayment) {
-        CheckedField byValue = CheckedField.valueOf(fieldName);
+        PaymentCheckedField byValue = PaymentCheckedField.valueOf(fieldName);
         return switch (byValue) {
             case IP -> Optional.of(checkedPayment.getIp());
             case BIN -> Optional.of(checkedPayment.getBin());

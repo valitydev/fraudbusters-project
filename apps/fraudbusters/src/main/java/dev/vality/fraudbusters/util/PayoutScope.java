@@ -1,4 +1,4 @@
-package dev.vality.fraudbusters.fraud.payout;
+package dev.vality.fraudbusters.util;
 
 import org.springframework.util.StringUtils;
 
@@ -9,7 +9,7 @@ public final class PayoutScope {
     private PayoutScope() {
     }
 
-    public static String key(String partyId, String walletId) {
+    public static String generateKey(String partyId, String walletId) {
         if (!StringUtils.hasText(partyId)) {
             if (StringUtils.hasText(walletId)) {
                 throw new IllegalArgumentException("wallet_id requires party_id");
@@ -18,12 +18,5 @@ public final class PayoutScope {
         }
         String party = "party:" + partyId.length() + ":" + partyId;
         return StringUtils.hasText(walletId) ? party + ":wallet:" + walletId.length() + ":" + walletId : party;
-    }
-
-    public static void validate(String shopId, String partyId, String walletId) {
-        if (StringUtils.hasText(shopId)) {
-            throw new IllegalArgumentException("shop_id is not supported for payouts");
-        }
-        key(partyId, walletId);
     }
 }

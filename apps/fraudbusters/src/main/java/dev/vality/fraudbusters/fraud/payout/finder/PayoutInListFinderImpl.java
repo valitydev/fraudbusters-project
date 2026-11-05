@@ -1,4 +1,4 @@
-package dev.vality.fraudbusters.fraud.payout;
+package dev.vality.fraudbusters.fraud.payout.finder;
 
 import dev.vality.damsel.wb_list.IdInfo;
 import dev.vality.damsel.wb_list.ListType;
@@ -7,51 +7,51 @@ import dev.vality.damsel.wb_list.Row;
 import dev.vality.damsel.wb_list.WbListServiceSrv;
 import dev.vality.fraudbusters.domain.TimeBound;
 import dev.vality.fraudbusters.exception.RuleFunctionException;
-import dev.vality.fraudbusters.fraud.constant.CheckedField;
+import dev.vality.fraudbusters.fraud.constant.PayoutCheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.PayoutModel;
+import dev.vality.fraudbusters.fraud.resolver.HistoryFieldResolver;
 import dev.vality.fraudbusters.repository.clickhouse.impl.PayoutHistoryRepository;
 import dev.vality.fraudbusters.util.TimestampUtil;
 import dev.vality.fraudo.finder.InListFinder;
 import dev.vality.fraudo.model.Pair;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
 @RequiredArgsConstructor
-public class PayoutInListFinder implements InListFinder<PayoutModel, CheckedField> {
+public class PayoutInListFinderImpl implements InListFinder<PayoutModel, PayoutCheckedField> {
 
     private final WbListServiceSrv.Iface lists;
     private final PayoutHistoryRepository history;
+    private final HistoryFieldResolver<PayoutModel, PayoutCheckedField> historyFieldResolver;
 
     @Override
-    public Boolean findInBlackList(List<Pair<CheckedField, String>> fields, PayoutModel model) {
-        return check(fields, model, ListType.black);
+    public Boolean findInBlackList(List<Pair<PayoutCheckedField, String>> fields, PayoutModel model) {
+        return isInList(fields, model, ListType.black);
     }
 
     @Override
-    public Boolean findInWhiteList(List<Pair<CheckedField, String>> fields, PayoutModel model) {
-        return check(fields, model, ListType.white);
+    public Boolean findInWhiteList(List<Pair<PayoutCheckedField, String>> fields, PayoutModel model) {
+        return isInList(fields, model, ListType.white);
     }
 
     @Override
-    public Boolean findInList(String name, List<Pair<CheckedField, String>> fields, PayoutModel model) {
-        return check(fields, model, ListType.naming, name);
+    public Boolean findInList(String name, List<Pair<PayoutCheckedField, String>> fields, PayoutModel model) {
+        return isInList(fields, model, ListType.naming, name);
     }
 
     @Override
-    public Boolean findInGreyList(List<Pair<CheckedField, String>> fields, PayoutModel model) {
+    public Boolean findInGreyList(List<Pair<PayoutCheckedField, String>> fields, PayoutModel model) {
         try {
             for (var field : fields) {
                 if (field.getFirst() == null || !StringUtils.hasText(field.getSecond())) {
                     continue;
                 }
-                var result = lists.getRowInfo(row(ListType.grey, field, model));
+                var result = lists.getRowInfo(createRow(ListType.grey, field, model));
                 if (!result.isSetRowInfo() || !result.getRowInfo().isSetCountInfo()) {
                     continue;
                 }
@@ -64,12 +64,12 @@ public class PayoutInListFinder implements InListFinder<PayoutModel, CheckedFiel
                     continue;
                 }
                 List<FieldModel> filters = new ArrayList<>();
-                filters.add(new FieldModel(PayoutFields.column(field.getFirst()), field.getSecond()));
+                filters.add(new FieldModel(historyFieldResolver.resolve(field.getFirst()), field.getSecond()));
                 if (StringUtils.hasText(model.getPartyId())) {
-                    filters.add(PayoutFields.resolve(CheckedField.PARTY_ID, model));
+                    filters.add(historyFieldResolver.resolve(PayoutCheckedField.PARTY_ID, model));
                 }
                 if (StringUtils.hasText(model.getWalletId())) {
-                    filters.add(PayoutFields.resolve(CheckedField.WALLET_ID, model));
+                    filters.add(historyFieldResolver.resolve(PayoutCheckedField.WALLET_ID, model));
                 }
                 double count = history.aggregate("count()", filters,
                         TimeBound.builder().left(from).right(now).build(), null, null);
@@ -83,27 +83,27 @@ public class PayoutInListFinder implements InListFinder<PayoutModel, CheckedFiel
         }
     }
 
-    private boolean check(List<Pair<CheckedField, String>> fields, PayoutModel model, ListType type) {
-        return check(fields, model, type, null);
+    private boolean isInList(List<Pair<PayoutCheckedField, String>> fields, PayoutModel model, ListType type) {
+        return isInList(fields, model, type, null);
     }
 
-    private boolean check(List<Pair<CheckedField, String>> fields, PayoutModel model,
-                          ListType type, String name) {
+    private boolean isInList(List<Pair<PayoutCheckedField, String>> fields, PayoutModel model,
+                             ListType type, String name) {
         try {
             List<Row> rows = fields.stream()
                     .filter(field -> field.getFirst() != null && StringUtils.hasText(field.getSecond()))
                     .map(field -> {
-                        Row row = row(type, field, model);
+                        Row row = createRow(type, field, model);
                         return name == null ? row : row.setListName(name);
-                    }).toList();
+                    })
+                    .toList();
             return !rows.isEmpty() && lists.isAnyExist(rows);
         } catch (Exception e) {
             throw new RuleFunctionException(e);
         }
     }
 
-    private Row row(ListType type, Pair<CheckedField, String> field, PayoutModel model) {
-        PayoutFields.column(field.getFirst());
+    private Row createRow(ListType type, Pair<PayoutCheckedField, String> field, PayoutModel model) {
         return new Row().setId(IdInfo.payout_id(new PayoutId()
                         .setPartyId(model.getPartyId()).setWalletId(model.getWalletId())))
                 .setListType(type).setListName(field.getFirst().name()).setValue(field.getSecond());

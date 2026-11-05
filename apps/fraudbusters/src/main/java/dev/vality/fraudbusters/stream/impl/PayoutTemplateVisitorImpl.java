@@ -2,7 +2,7 @@ package dev.vality.fraudbusters.stream.impl;
 
 import dev.vality.fraudbusters.domain.CheckedResultModel;
 import dev.vality.fraudbusters.fraud.model.PayoutModel;
-import dev.vality.fraudbusters.fraud.payout.PayoutScope;
+import dev.vality.fraudbusters.util.PayoutScope;
 import dev.vality.fraudbusters.pool.Pool;
 import dev.vality.fraudbusters.stream.RuleApplier;
 import dev.vality.fraudbusters.stream.TemplateVisitor;
@@ -30,15 +30,15 @@ public class PayoutTemplateVisitorImpl implements TemplateVisitor<PayoutModel, C
         if (!StringUtils.hasText(model.getPartyId()) || !StringUtils.hasText(model.getWalletId())) {
             throw new IllegalArgumentException("party_id and wallet_id are required for withdrawal inspection");
         }
-        String partyKey = PayoutScope.key(model.getPartyId(), null);
-        String walletKey = PayoutScope.key(model.getPartyId(), model.getWalletId());
+        String partyKey = PayoutScope.generateKey(model.getPartyId(), null);
+        String walletKey = PayoutScope.generateKey(model.getPartyId(), model.getWalletId());
         return cascade.apply(List.of(
-                cascade.template(model, PayoutScope.GLOBAL),
-                cascade.group(model, PayoutScope.GLOBAL),
-                cascade.group(model, partyKey),
-                cascade.group(model, walletKey),
-                cascade.template(model, partyKey),
-                cascade.template(model, walletKey)
+                cascade.applyTemplate(model, PayoutScope.GLOBAL),
+                cascade.applyGroup(model, PayoutScope.GLOBAL),
+                cascade.applyGroup(model, partyKey),
+                cascade.applyGroup(model, walletKey),
+                cascade.applyTemplate(model, partyKey),
+                cascade.applyTemplate(model, walletKey)
         ), ResultStatus.HIGH_RISK);
     }
 }

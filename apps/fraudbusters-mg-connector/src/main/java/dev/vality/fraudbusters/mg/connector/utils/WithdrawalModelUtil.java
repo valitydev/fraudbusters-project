@@ -1,5 +1,6 @@
 package dev.vality.fraudbusters.mg.connector.utils;
 
+import dev.vality.damsel.fraudbusters.ClientInfo;
 import dev.vality.damsel.fraudbusters.Error;
 import dev.vality.damsel.fraudbusters.ProviderInfo;
 import dev.vality.fistful.base.Failure;
@@ -30,6 +31,27 @@ public class WithdrawalModelUtil {
                     .setCountry(destinationState.getResource().getBankCard().getBankCard().getIssuerCountry().name());
         }
         return providerInfo;
+    }
+
+    public static ClientInfo initClientInfo(WithdrawalState withdrawalState) {
+        if (!withdrawalState.isSetContactInfo() && !withdrawalState.isSetClientInfo()
+                && !withdrawalState.isSetClientIdentity()) {
+            return null;
+        }
+        ClientInfo clientInfo = new ClientInfo();
+        if (withdrawalState.isSetContactInfo()) {
+            clientInfo.setEmail(withdrawalState.getContactInfo().getEmail());
+            clientInfo.setPhone(withdrawalState.getContactInfo().getPhoneNumber());
+        }
+        if (withdrawalState.isSetClientInfo()) {
+            clientInfo.setIp(withdrawalState.getClientInfo().getIpAddress());
+            clientInfo.setFingerprint(withdrawalState.getClientInfo().getFingerprint());
+        }
+        if (withdrawalState.isSetClientIdentity()) {
+            clientInfo.setCustomerId(withdrawalState.getClientIdentity().getCustomerId());
+            clientInfo.setUserId(withdrawalState.getClientIdentity().getUserId());
+        }
+        return clientInfo;
     }
 
     public static Error initError(StatusChange statusChange) {

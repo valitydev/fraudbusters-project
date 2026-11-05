@@ -1,4 +1,4 @@
-package dev.vality.fraudbusters.management.dao.payout;
+package dev.vality.fraudbusters.management.dao.payout.wblist;
 
 import dev.vality.fraudbusters.management.dao.AbstractDao;
 import dev.vality.fraudbusters.management.dao.CdDao;
@@ -32,10 +32,10 @@ public class PayoutListDao extends AbstractDao implements CdDao<PayoutListRecord
     public void removeRecord(PayoutListRecord listRecord) {
         execute(getDslContext()
                 .delete(PAYOUT_LIST_RECORD)
-                .where(byKey(listRecord)));
+                .where(buildKeyCondition(listRecord)));
     }
 
-    private Condition byKey(PayoutListRecord listRecord) {
+    private Condition buildKeyCondition(PayoutListRecord listRecord) {
         return PAYOUT_LIST_RECORD.PARTY_ID.eq(listRecord.getPartyId())
                 .and(PAYOUT_LIST_RECORD.WALLET_ID.eq(listRecord.getWalletId()))
                 .and(PAYOUT_LIST_RECORD.LIST_TYPE.eq(listRecord.getListType()))

@@ -9,6 +9,7 @@ import dev.vality.fraudbusters.fraud.payment.PaymentInspectStorage;
 import dev.vality.fraudbusters.fraud.payment.validator.PaymentTemplateValidator;
 import dev.vality.fraudbusters.fraud.payout.PayoutInspectStorage;
 import dev.vality.fraudbusters.fraud.validator.ListTemplateValidatorImpl;
+import dev.vality.fraudbusters.util.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ class PaymentServiceHandlerTest {
                     new ListTemplateValidatorImpl(new InspectStorageRegistry(List.of(
                             new PaymentInspectStorage(null, null, null, null, new PaymentTemplateValidator()),
                             new PayoutInspectStorage(null, null, null, null,
-                                    new PayoutFraudoConfig().payoutTemplateValidator())))),
+                                    BeanUtil.createPayoutTemplateValidator())))),
                     null, null, null, null, null
             );
 

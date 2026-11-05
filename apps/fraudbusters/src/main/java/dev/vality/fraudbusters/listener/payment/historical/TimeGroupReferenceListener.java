@@ -1,7 +1,6 @@
 package dev.vality.fraudbusters.listener.payment.historical;
 
 import dev.vality.damsel.fraudbusters.Command;
-import dev.vality.fraudbusters.util.OperationTypeUtil;
 import dev.vality.damsel.fraudbusters.GroupReference;
 import dev.vality.fraudbusters.listener.CommandListener;
 import dev.vality.fraudbusters.pool.HistoricalPool;
@@ -25,9 +24,6 @@ public class TimeGroupReferenceListener extends AbstractTimePoolCommandListenerE
             topics = "${kafka.topic.full-group-reference}",
             containerFactory = "timeGroupReferenceListenerContainerFactory")
     public void listen(@Payload Command command) {
-        if (OperationTypeUtil.isPayout(command)) {
-            return;
-        }
         log.info("TimeGroupReferenceListener command: {}", command);
         if (command != null && command.isSetCommandBody() && command.getCommandBody().isSetGroupReference()) {
             GroupReference reference = command.getCommandBody().getGroupReference();

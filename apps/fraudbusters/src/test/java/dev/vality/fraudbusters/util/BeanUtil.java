@@ -8,10 +8,17 @@ import dev.vality.damsel.proxy_inspector.InvoicePayment;
 import dev.vality.damsel.proxy_inspector.Party;
 import dev.vality.damsel.proxy_inspector.Shop;
 import dev.vality.damsel.proxy_inspector.*;
+import dev.vality.fraudbusters.config.payout.PayoutFraudoConfig;
 import dev.vality.fraudbusters.constant.ClickhouseUtilsValue;
 import dev.vality.fraudbusters.domain.CheckedPayment;
 import dev.vality.fraudbusters.domain.TimeProperties;
+import dev.vality.fraudbusters.fraud.FraudTemplateValidator;
+import dev.vality.fraudbusters.fraud.constant.PayoutCheckedField;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.model.PayoutModel;
+import dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver;
+import dev.vality.fraudbusters.fraud.payout.resolver.PayoutModelFieldResolver;
+import dev.vality.fraudbusters.fraud.resolver.HistoryFieldResolverImpl;
 import dev.vality.geck.common.util.TypeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -417,5 +424,21 @@ public class BeanUtil {
                 .setEmail(EMAIL)
                 .setFingerprint("fingerprint")
                 .setIp("123.123.123.123");
+    }
+
+    public static HistoryFieldResolverImpl<PayoutModel, PayoutCheckedField> createPayoutFieldsInPaymentHistory() {
+        return new PayoutFraudoConfig().payoutFieldsInPaymentHistory(new DatabasePaymentFieldResolver(),
+                new PayoutModelFieldResolver());
+    }
+
+    public static HistoryFieldResolverImpl<PayoutModel, PayoutCheckedField> createPayoutFieldsInPayoutHistory() {
+        return new PayoutFraudoConfig().payoutFieldsInPayoutHistory(new PayoutModelFieldResolver());
+    }
+
+    public static FraudTemplateValidator createPayoutTemplateValidator() {
+        // Validation only asks which fields have a country, so no geo lookup is needed.
+        var config = new PayoutFraudoConfig();
+        return config.payoutTemplateValidator(config.payoutCountryResolver(null),
+                createPayoutFieldsInPaymentHistory(), createPayoutFieldsInPayoutHistory());
     }
 }

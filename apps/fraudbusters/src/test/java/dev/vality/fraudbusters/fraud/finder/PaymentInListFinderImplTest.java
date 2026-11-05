@@ -3,7 +3,7 @@ package dev.vality.fraudbusters.fraud.finder;
 import dev.vality.damsel.wb_list.ListNotFound;
 import dev.vality.damsel.wb_list.WbListServiceSrv;
 import dev.vality.fraudbusters.exception.RuleFunctionException;
-import dev.vality.fraudbusters.fraud.constant.CheckedField;
+import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.fraud.payment.finder.PaymentInListFinderImpl;
 import dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver;
@@ -32,7 +32,7 @@ class PaymentInListFinderImplTest {
     public static final String PARTY_ID = "partyId";
     public static final String SHOP_ID = "shopId";
     public static final String VALUE = "value";
-    private InListFinder<PaymentModel, CheckedField> listFinder;
+    private InListFinder<PaymentModel, PaymentCheckedField> listFinder;
 
     @Mock
     private WbListServiceSrv.Iface wbListServiceSrv;
@@ -52,8 +52,8 @@ class PaymentInListFinderImplTest {
         PaymentModel paymentModel = new PaymentModel();
         paymentModel.setPartyId(PARTY_ID);
         paymentModel.setShopId(SHOP_ID);
-        Pair<CheckedField, String> field = new Pair<>(CheckedField.IP, VALUE);
-        List<Pair<CheckedField, String>> fields = List.of(field);
+        Pair<PaymentCheckedField, String> field = new Pair<>(PaymentCheckedField.IP, VALUE);
+        List<Pair<PaymentCheckedField, String>> fields = List.of(field);
         Boolean isInList = listFinder.findInBlackList(fields, paymentModel);
         assertTrue(isInList);
     }
@@ -63,10 +63,10 @@ class PaymentInListFinderImplTest {
         PaymentModel paymentModel = new PaymentModel();
         paymentModel.setPartyId(PARTY_ID);
         paymentModel.setShopId(SHOP_ID);
-        Boolean isInList = listFinder.findInBlackList(List.of(new Pair<>(CheckedField.IP, null)), paymentModel);
+        Boolean isInList = listFinder.findInBlackList(List.of(new Pair<>(PaymentCheckedField.IP, null)), paymentModel);
         assertFalse(isInList);
 
-        isInList = listFinder.findInBlackList(List.of(new Pair<>(CheckedField.IP, "")), paymentModel);
+        isInList = listFinder.findInBlackList(List.of(new Pair<>(PaymentCheckedField.IP, "")), paymentModel);
         assertFalse(isInList);
         verify(wbListServiceSrv, times(0)).isAnyExist(anyList());
     }
@@ -77,8 +77,8 @@ class PaymentInListFinderImplTest {
         PaymentModel paymentModel = new PaymentModel();
         paymentModel.setPartyId(PARTY_ID);
         paymentModel.setShopId(SHOP_ID);
-        Pair<CheckedField, String> field = new Pair<>(CheckedField.IP, VALUE);
-        List<Pair<CheckedField, String>> fields = List.of(field);
+        Pair<PaymentCheckedField, String> field = new Pair<>(PaymentCheckedField.IP, VALUE);
+        List<Pair<PaymentCheckedField, String>> fields = List.of(field);
         assertThrows(RuleFunctionException.class, () -> listFinder.findInBlackList(fields, paymentModel));
 
     }
@@ -89,8 +89,8 @@ class PaymentInListFinderImplTest {
         PaymentModel paymentModel = new PaymentModel();
         paymentModel.setPartyId(PARTY_ID);
         paymentModel.setShopId(SHOP_ID);
-        Pair<CheckedField, String> field = new Pair<>(CheckedField.MASKED_PAN, VALUE);
-        List<Pair<CheckedField, String>> fields = List.of(field);
+        Pair<PaymentCheckedField, String> field = new Pair<>(PaymentCheckedField.MASKED_PAN, VALUE);
+        List<Pair<PaymentCheckedField, String>> fields = List.of(field);
         Boolean isInList = listFinder.findInBlackList(fields, paymentModel);
         assertTrue(isInList);
     }

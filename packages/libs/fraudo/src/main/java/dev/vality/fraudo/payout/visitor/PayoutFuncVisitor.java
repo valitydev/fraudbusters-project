@@ -22,7 +22,7 @@ public class PayoutFuncVisitor<T, U> {
     private final GroupFieldsResolverImpl<T, U> groupResolver;
     private final TimeWindowResolverImpl timeWindowResolver;
 
-    private <A> A aggregator(A aggregator) {
+    private <A> A requireAggregator(A aggregator) {
         if (aggregator == null) {
             throw new NotImplementedOperatorException("payout history");
         }
@@ -30,55 +30,55 @@ public class PayoutFuncVisitor<T, U> {
     }
 
     public Integer visitCountPayouts(Count_payoutsContext ctx, T model) {
-        return aggregator(countPayoutAggregator).count(
+        return requireAggregator(countPayoutAggregator).count(
                 fieldResolver.resolveName(TextUtil.safeGetText(ctx.STRING())), model,
                 timeWindowResolver.resolve(ctx.time_window()), groupResolver.resolve(ctx.group_by()));
     }
 
     public Integer visitCountPayoutsSuccess(Count_payouts_successContext ctx, T model) {
-        return aggregator(countPayoutAggregator).countSuccess(
+        return requireAggregator(countPayoutAggregator).countSuccess(
                 fieldResolver.resolveName(TextUtil.safeGetText(ctx.STRING())), model,
                 timeWindowResolver.resolve(ctx.time_window()), groupResolver.resolve(ctx.group_by()));
     }
 
     public Integer visitCountPayoutsError(Count_payouts_errorContext ctx, T model) {
         if (ctx.STRING().size() == 2) {
-            return aggregator(countPayoutAggregator).countError(
+            return requireAggregator(countPayoutAggregator).countError(
                     fieldResolver.resolveName(TextUtil.safeGetText(ctx.STRING(0))), model,
                     timeWindowResolver.resolve(ctx.time_window()), TextUtil.safeGetText(ctx.STRING(1)),
                     groupResolver.resolve(ctx.group_by()));
         }
-        return aggregator(countPayoutAggregator).countError(
+        return requireAggregator(countPayoutAggregator).countError(
                 fieldResolver.resolveName(TextUtil.safeGetText(ctx.STRING(0))), model,
                 timeWindowResolver.resolve(ctx.time_window()), groupResolver.resolve(ctx.group_by()));
     }
 
     public Double visitSumPayouts(Sum_payoutsContext ctx, T model) {
-        return aggregator(sumPayoutAggregator).sum(
+        return requireAggregator(sumPayoutAggregator).sum(
                 fieldResolver.resolveName(TextUtil.safeGetText(ctx.STRING())), model,
                 timeWindowResolver.resolve(ctx.time_window()), groupResolver.resolve(ctx.group_by()));
     }
 
     public Double visitSumPayoutsSuccess(Sum_payouts_successContext ctx, T model) {
-        return aggregator(sumPayoutAggregator).sumSuccess(
+        return requireAggregator(sumPayoutAggregator).sumSuccess(
                 fieldResolver.resolveName(TextUtil.safeGetText(ctx.STRING())), model,
                 timeWindowResolver.resolve(ctx.time_window()), groupResolver.resolve(ctx.group_by()));
     }
 
     public Double visitSumPayoutsError(Sum_payouts_errorContext ctx, T model) {
         if (ctx.STRING().size() == 2) {
-            return aggregator(sumPayoutAggregator).sumError(
+            return requireAggregator(sumPayoutAggregator).sumError(
                     fieldResolver.resolveName(TextUtil.safeGetText(ctx.STRING(0))), model,
                     timeWindowResolver.resolve(ctx.time_window()), TextUtil.safeGetText(ctx.STRING(1)),
                     groupResolver.resolve(ctx.group_by()));
         }
-        return aggregator(sumPayoutAggregator).sumError(
+        return requireAggregator(sumPayoutAggregator).sumError(
                 fieldResolver.resolveName(TextUtil.safeGetText(ctx.STRING(0))), model,
                 timeWindowResolver.resolve(ctx.time_window()), groupResolver.resolve(ctx.group_by()));
     }
 
     public Integer visitUniquePayouts(Unique_payoutsContext ctx, T model) {
-        return aggregator(uniquePayoutValueAggregator).countUniqueValue(
+        return requireAggregator(uniquePayoutValueAggregator).countUniqueValue(
                 fieldResolver.resolveName(TextUtil.safeGetText(ctx.STRING(0))), model,
                 fieldResolver.resolveName(TextUtil.safeGetText(ctx.STRING(1))),
                 timeWindowResolver.resolve(ctx.time_window()), groupResolver.resolve(ctx.group_by()));

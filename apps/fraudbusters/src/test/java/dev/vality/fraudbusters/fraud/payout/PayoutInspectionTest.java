@@ -16,11 +16,13 @@ import dev.vality.fraudbusters.converter.WithdrawalContextToModelConverter;
 import dev.vality.fraudbusters.domain.CheckedResultModel;
 import dev.vality.fraudbusters.domain.PayoutResult;
 import dev.vality.fraudbusters.fraud.InspectStorage;
-import dev.vality.fraudbusters.fraud.constant.CheckedField;
+import dev.vality.fraudbusters.fraud.constant.PayoutCheckedField;
 import dev.vality.fraudbusters.fraud.model.PayoutModel;
 import dev.vality.fraudbusters.fraud.RulesContextParserImpl;
 import dev.vality.fraudbusters.fraud.payment.PaymentInspectStorage;
 import dev.vality.fraudbusters.fraud.payment.validator.PaymentTemplateValidator;
+import dev.vality.fraudbusters.fraud.payout.aggregator.clickhouse.PayoutAggregators;
+import dev.vality.fraudbusters.fraud.payout.resolver.PayoutModelFieldResolver;
 import dev.vality.fraudbusters.listener.payment.TemplateListener;
 import dev.vality.fraudbusters.listener.payout.PayoutGroupListener;
 import dev.vality.fraudbusters.listener.payout.PayoutGroupReferenceListener;
@@ -30,17 +32,21 @@ import dev.vality.fraudbusters.pool.Pool;
 import dev.vality.fraudbusters.pool.PoolImpl;
 import dev.vality.fraudbusters.stream.impl.PayoutTemplateVisitorImpl;
 import dev.vality.fraudbusters.stream.impl.NotifyingRuleApplierImpl;
+import dev.vality.fraudbusters.util.BeanUtil;
 import dev.vality.fraudbusters.util.CheckedResultFactory;
 import dev.vality.fraudo.payment.aggregator.CountPaymentAggregator;
 import dev.vality.fraudo.payment.visitor.impl.FirstFindVisitorImpl;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static dev.vality.fraudbusters.fraud.constant.CheckedField.USER_ID;
+import static dev.vality.fraudbusters.fraud.constant.PayoutCheckedField.CARD_TOKEN;
+import static dev.vality.fraudbusters.fraud.constant.PayoutCheckedField.USER_ID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -57,7 +63,7 @@ class PayoutInspectionTest {
             new PoolImpl<>("group"), new PoolImpl<>("reference"), new PoolImpl<>("group-reference"),
             new PaymentTemplateValidator());
     private final InspectStorage payoutStorage = new PayoutInspectStorage(payoutTemplates, payoutGroups,
-            payoutReferences, payoutGroupReferences, new PayoutFraudoConfig().payoutTemplateValidator());
+            payoutReferences, payoutGroupReferences, BeanUtil.createPayoutTemplateValidator());
     private final TemplateListener paymentTemplateListener = new TemplateListener(parser, paymentStorage);
     private final PayoutTemplateListener templateListener = new PayoutTemplateListener(parser, payoutStorage);
     private final PayoutGroupListener groupListener = new PayoutGroupListener(payoutStorage);
@@ -66,9 +72,9 @@ class PayoutInspectionTest {
     private final PayoutGroupReferenceListener groupReferenceListener =
             new PayoutGroupReferenceListener(payoutStorage);
     @SuppressWarnings("unchecked")
-    private final PayoutAggregators<PayoutModel> payouts = mock(PayoutAggregators.class);
+    private final PayoutAggregators<PayoutModel, PayoutCheckedField> payouts = mock(PayoutAggregators.class);
     private final WithdrawalContextToModelConverter converter = new WithdrawalContextToModelConverter();
-    private final PayoutTemplateVisitorImpl inspector = inspector(new PayoutFraudoConfig().payoutRuleVisitor(
+    private final PayoutTemplateVisitorImpl inspector = createInspector(new PayoutFraudoConfig().payoutRuleVisitor(
             null, null, null, null, null, new PayoutModelFieldResolver(), payouts));
     private final CheckedResultToRiskScoreConverter risk = new CheckedResultToRiskScoreConverter();
 
@@ -81,8 +87,8 @@ class PayoutInspectionTest {
                 "unused", risk, null, null, paymentProducer, null, converter, inspector, "payout-result",
                 payoutProducer);
         assertEquals(RiskScore.high, handler.inspectWithdrawal(context()));
-        template("global", "rule:1=1->decline;");
-        handle(create(CommandBody.reference(new TemplateReference().setTemplateId("global")
+        publishTemplate("global", "rule:1=1->decline;");
+        handle(createCommand(CommandBody.reference(new TemplateReference().setTemplateId("global")
                 .setIsGlobal(true).setOperationType(OperationType.payout))));
         assertEquals(RiskScore.fatal, handler.inspectWithdrawal(context()));
         verifyNoInteractions(paymentProducer);
@@ -104,11 +110,11 @@ class PayoutInspectionTest {
 
     @Test
     void walletRuleCanQueryPayoutHistory() {
-        template("shared-id", "rule:countPayoutsSuccess(\"user_id\",24,hours,\"party_id\")>2->decline;");
-        reference("shared-id", "synthetic-party", "synthetic-wallet");
-        when(payouts.countSuccess(eq(USER_ID), any(), any(), anyList())).thenReturn(3);
+        publishTemplate("shared-id", "rule:countPayoutsSuccess(\"card_token\",24,hours,\"party_id\")>2->decline;");
+        publishReference("shared-id", "synthetic-party", "synthetic-wallet");
+        when(payouts.countSuccess(eq(CARD_TOKEN), any(), any(), anyList())).thenReturn(3);
         assertEquals(RiskScore.fatal, risk.convert(inspect(context())));
-        verify(payouts).countSuccess(eq(USER_ID), any(), any(), anyList());
+        verify(payouts).countSuccess(eq(CARD_TOKEN), any(), any(), anyList());
         handle(new Command().setCommandType(CommandType.DELETE).setCommandBody(CommandBody.template(
                 new Template().setId("shared-id").setOperationType(OperationType.payout))));
         assertEquals(RiskScore.high, risk.convert(inspect(context())));
@@ -116,12 +122,12 @@ class PayoutInspectionTest {
 
     @Test
     void notificationsContinueToLaterRulesAndMapToLowWhenAlone() {
-        template("global", "rule:1=1->notify;");
-        handle(create(CommandBody.reference(new TemplateReference().setTemplateId("global")
+        publishTemplate("global", "rule:1=1->notify;");
+        handle(createCommand(CommandBody.reference(new TemplateReference().setTemplateId("global")
                 .setIsGlobal(true).setOperationType(OperationType.payout))));
         assertEquals(RiskScore.low, risk.convert(inspect(context())));
-        template("wallet", "rule:1=1->highRisk;");
-        reference("wallet", "synthetic-party", "synthetic-wallet");
+        publishTemplate("wallet", "rule:1=1->highRisk;");
+        publishReference("wallet", "synthetic-party", "synthetic-wallet");
         var checked = inspect(context());
         assertEquals(RiskScore.high, risk.convert(checked));
         assertFalse(checked.getResultModel().getNotificationsRule().isEmpty());
@@ -129,12 +135,12 @@ class PayoutInspectionTest {
 
     @Test
     void groupNotificationsAreKeptWithTheLaterDecision() {
-        template("notify", "rule:notify_rule:1=1->notify;");
-        template("decline", "rule:1=1->decline;");
-        handle(create(CommandBody.group(new Group().setGroupId("group")
+        publishTemplate("notify", "rule:notify_rule:1=1->notify;");
+        publishTemplate("decline", "rule:1=1->decline;");
+        handle(createCommand(CommandBody.group(new Group().setGroupId("group")
                 .setOperationType(OperationType.payout).setTemplateIds(List.of(
                         new PriorityId(1, "notify"), new PriorityId(2, "decline"))))));
-        handle(create(CommandBody.group_reference(new GroupReference().setGroupId("group")
+        handle(createCommand(CommandBody.group_reference(new GroupReference().setGroupId("group")
                 .setPartyId("synthetic-party").setOperationType(OperationType.payout))));
         var checked = inspect(context());
         assertEquals(RiskScore.fatal, risk.convert(checked));
@@ -144,61 +150,74 @@ class PayoutInspectionTest {
 
     @Test
     void groupsAreOrderedAndGlobalRulesTakePrecedence() {
-        template("accept", "rule:1=1->accept;");
-        template("decline", "rule:1=1->decline;");
-        handle(create(CommandBody.group(new Group().setGroupId("group")
+        publishTemplate("accept", "rule:1=1->accept;");
+        publishTemplate("decline", "rule:1=1->decline;");
+        handle(createCommand(CommandBody.group(new Group().setGroupId("group")
                 .setOperationType(OperationType.payout).setTemplateIds(List.of(
                         new PriorityId(2, "decline"), new PriorityId(1, "accept"))))));
-        handle(create(CommandBody.group_reference(new GroupReference().setGroupId("group")
+        handle(createCommand(CommandBody.group_reference(new GroupReference().setGroupId("group")
                 .setPartyId("synthetic-party").setOperationType(OperationType.payout))));
         assertEquals(RiskScore.low, risk.convert(inspect(context())));
-        handle(create(CommandBody.reference(new TemplateReference().setTemplateId("decline")
+        handle(createCommand(CommandBody.reference(new TemplateReference().setTemplateId("decline")
                 .setIsGlobal(true).setOperationType(OperationType.payout))));
         assertEquals(RiskScore.fatal, risk.convert(inspect(context())));
     }
 
     @Test
     void payoutCommandsDoNotChangePaymentTemplatesAndInvalidTemplatesAreRejected() {
-        paymentTemplateListener.listen(create(CommandBody.template(new Template().setId("shared-id")
-                .setTemplate(bytes("rule:1=1->accept;")))));
+        paymentTemplateListener.listen(createCommand(CommandBody.template(new Template().setId("shared-id")
+                .setTemplate(toBytes("rule:1=1->accept;")))));
         var original = paymentTemplates.get("shared-id");
         assertNotNull(original);
         assertNull(payoutTemplates.get("shared-id"));
-        template("shared-id", "rule:1=1->decline;");
+        publishTemplate("shared-id", "rule:1=1->decline;");
         assertSame(original, paymentTemplates.get("shared-id"));
         assertNotNull(payoutTemplates.get("shared-id"));
-        assertThrows(IllegalArgumentException.class, () -> template("invalid", "rule:1=1->3ds;"));
+        assertThrows(IllegalArgumentException.class, () -> publishTemplate("invalid", "rule:1=1->3ds;"));
         assertNull(payoutTemplates.get("invalid"));
-        assertThrows(IllegalArgumentException.class, () -> handle(create(CommandBody.reference(
+        assertThrows(IllegalArgumentException.class, () -> handle(createCommand(CommandBody.reference(
                 new TemplateReference().setTemplateId("shared-id").setOperationType(OperationType.payout)
-                        .setPartyId("synthetic-party").setShopId("synthetic-shop")))));
+                        .setWalletId("synthetic-wallet")))));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "rule:in(\"shop_id\",\"shop\")->decline;",
+            "rule:count(\"wallet_id\",24,hours)>0->decline;",
+            "rule:countPayouts(\"masked_pan\",24,hours)>0->decline;",
+            "rule:countPayouts(\"card_token\",24,hours,\"masked_pan\")>0->decline;",
+            "rule:inGreyList(\"masked_pan\")->decline;",
+            "rule:countryBy(\"email\")=\"RUS\"->decline;"})
+    void fieldsWithoutDataForPayoutsAreRejected(String rule) {
+        assertThrows(IllegalArgumentException.class, () -> publishTemplate("unsupported-field", rule));
+        assertNull(payoutTemplates.get("unsupported-field"));
     }
 
     @Test
     @SuppressWarnings("unchecked")
     void mixedHistoryCachesRemainSeparateAndAreClearedBetweenInspections() {
-        CountPaymentAggregator<PayoutModel, CheckedField> payments = mock(CountPaymentAggregator.class);
+        CountPaymentAggregator<PayoutModel, PayoutCheckedField> payments = mock(CountPaymentAggregator.class);
         var visitor = new PayoutFraudoConfig().payoutRuleVisitor(payments, null, null, null, null,
                 new PayoutModelFieldResolver(), payouts);
-        final var service = inspector(visitor);
-        template("mixed", """
+        final var service = createInspector(visitor);
+        publishTemplate("mixed", """
                 rule: countSuccess("user_id",24,hours)=1
-                  AND countPayoutsSuccess("user_id",24,hours)=3
+                  AND countPayoutsSuccess("card_token",24,hours)=3
                   AND countSuccess("user_id",24,hours)=1
-                  AND countPayoutsSuccess("user_id",24,hours)=3 -> decline;
+                  AND countPayoutsSuccess("card_token",24,hours)=3 -> decline;
                 """);
-        reference("mixed", "synthetic-party", "synthetic-wallet");
+        publishReference("mixed", "synthetic-party", "synthetic-wallet");
         when(payments.countSuccess(eq(USER_ID), any(), any(), anyList())).thenReturn(1);
-        when(payouts.countSuccess(eq(USER_ID), any(), any(), anyList())).thenReturn(3);
+        when(payouts.countSuccess(eq(CARD_TOKEN), any(), any(), anyList())).thenReturn(3);
         assertEquals(RiskScore.fatal, risk.convert(inspect(service, context())));
         verify(payments).countSuccess(eq(USER_ID), any(), any(), anyList());
-        verify(payouts).countSuccess(eq(USER_ID), any(), any(), anyList());
+        verify(payouts).countSuccess(eq(CARD_TOKEN), any(), any(), anyList());
         assertEquals(RiskScore.fatal, risk.convert(inspect(service, context())));
         verify(payments, times(2)).countSuccess(eq(USER_ID), any(), any(), anyList());
-        verify(payouts, times(2)).countSuccess(eq(USER_ID), any(), any(), anyList());
+        verify(payouts, times(2)).countSuccess(eq(CARD_TOKEN), any(), any(), anyList());
     }
 
-    private PayoutTemplateVisitorImpl inspector(FirstFindVisitorImpl<PayoutModel, CheckedField> visitor) {
+    private PayoutTemplateVisitorImpl createInspector(FirstFindVisitorImpl<PayoutModel, PayoutCheckedField> visitor) {
         return new PayoutTemplateVisitorImpl(
                 new NotifyingRuleApplierImpl<>(visitor, payoutTemplates, new CheckedResultFactory()),
                 payoutGroups, payoutReferences, payoutGroupReferences);
@@ -213,16 +232,11 @@ class PayoutInspectionTest {
     }
 
     @Test
-    void topicDefinesTheOperationTypeAndForeignCommandsAreSkipped() {
-        templateListener.listen(create(CommandBody.template(new Template().setId("untyped")
-                .setTemplate(bytes("rule:1=1->decline;")))));
+    void topicDefinesTheOperationType() {
+        templateListener.listen(createCommand(CommandBody.template(new Template().setId("untyped")
+                .setTemplate(toBytes("rule:1=1->decline;")))));
         assertNotNull(payoutTemplates.get("untyped"));
         assertNull(paymentTemplates.get("untyped"));
-
-        paymentTemplateListener.listen(create(CommandBody.template(new Template().setId("misrouted")
-                .setOperationType(OperationType.payout).setTemplate(bytes("rule:1=1->decline;")))));
-        assertNull(paymentTemplates.get("misrouted"));
-        assertNull(payoutTemplates.get("misrouted"));
     }
 
     /** Routes a payout command to the listener of its payout Kafka topic. */
@@ -239,21 +253,21 @@ class PayoutInspectionTest {
         }
     }
 
-    private void template(String id, String source) {
-        handle(create(CommandBody.template(new Template().setId(id).setTemplate(bytes(source))
+    private void publishTemplate(String id, String source) {
+        handle(createCommand(CommandBody.template(new Template().setId(id).setTemplate(toBytes(source))
                 .setOperationType(OperationType.payout))));
     }
 
-    private void reference(String id, String party, String wallet) {
-        handle(create(CommandBody.reference(new TemplateReference().setTemplateId(id)
+    private void publishReference(String id, String party, String wallet) {
+        handle(createCommand(CommandBody.reference(new TemplateReference().setTemplateId(id)
                 .setPartyId(party).setWalletId(wallet).setOperationType(OperationType.payout))));
     }
 
-    private Command create(CommandBody body) {
+    private Command createCommand(CommandBody body) {
         return new Command().setCommandType(CommandType.CREATE).setCommandBody(body);
     }
 
-    private byte[] bytes(String value) {
+    private byte[] toBytes(String value) {
         return value.getBytes(StandardCharsets.UTF_8);
     }
 

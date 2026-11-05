@@ -20,10 +20,10 @@ public class EventToPayoutListRecordConverter implements Converter<Event, Payout
     public PayoutListRecord convert(Event event) {
         Row row = event.getRow();
         PayoutId id = row.getId().getPayoutId();
-        PayoutScope.validate(null, id.getPartyId(), id.getWalletId());
+        PayoutScope.validate(id.getPartyId(), id.getWalletId());
         PayoutListRecord record = new PayoutListRecord();
-        record.setPartyId(PayoutScope.identity(id.getPartyId()));
-        record.setWalletId(PayoutScope.identity(id.getWalletId()));
+        record.setPartyId(PayoutScope.normalizeId(id.getPartyId()));
+        record.setWalletId(PayoutScope.normalizeId(id.getWalletId()));
         record.setListType(rowUtilsService.initListType(row));
         record.setListName(row.getListName());
         record.setValue(row.getValue());

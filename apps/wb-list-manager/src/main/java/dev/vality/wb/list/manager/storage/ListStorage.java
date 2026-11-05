@@ -10,9 +10,9 @@ public interface ListStorage {
 
     ListRepository getRepository();
 
-    String key(Row row);
+    String generateKey(Row row);
 
     /** Keys from the widest scope to the narrowest; the first stored row applies. */
-    List<String> cascadeKeys(Row row);
+    List<String> generateCascadeKeys(Row row);
 
 }

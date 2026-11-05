@@ -19,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 import org.springframework.kafka.core.KafkaTemplate;
 
+import java.util.List;
+
 @Slf4j
 @RequiredArgsConstructor
 public class FraudInspectorHandler implements InspectorProxySrv.Iface {
@@ -43,12 +45,11 @@ public class FraudInspectorHandler implements InspectorProxySrv.Iface {
             kafkaPayoutResultTemplate.send(payoutResultTopic, model.getWithdrawalId(), new PayoutResult(model, result));
             return checkedResultToRiskScoreConverter.convert(result);
         } catch (IllegalArgumentException e) {
-            throw new InvalidRequest().setErrors(java.util.List.of(e.getMessage()));
+            throw new InvalidRequest().setErrors(List.of(e.getMessage()));
         } catch (Exception e) {
             throw new TException("Unable to inspect withdrawal", e);
         }
     }
-
 
     @Override
     public RiskScore inspectPayment(Context context) throws TException {

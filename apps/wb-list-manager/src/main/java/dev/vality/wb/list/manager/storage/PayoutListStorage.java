@@ -16,16 +16,16 @@ public class PayoutListStorage implements ListStorage {
     private final ListRepository repository;
 
     @Override
-    public String key(Row row) {
+    public String generateKey(Row row) {
         PayoutId id = row.getId().getPayoutId();
         return KeyGenerator.generatePayoutKey(row.getListType(), row.getListName(), row.getValue(),
                 id.getPartyId(), id.getWalletId());
     }
 
     @Override
-    public List<String> cascadeKeys(Row row) {
+    public List<String> generateCascadeKeys(Row row) {
         // The exact key is built first so that an invalid scope fails before the global fallback is read.
-        String walletKey = key(row);
+        String walletKey = generateKey(row);
         String partyId = row.getId().getPayoutId().getPartyId();
         return List.of(
                 KeyGenerator.generatePayoutKey(row.getListType(), row.getListName(), row.getValue(), null, null),

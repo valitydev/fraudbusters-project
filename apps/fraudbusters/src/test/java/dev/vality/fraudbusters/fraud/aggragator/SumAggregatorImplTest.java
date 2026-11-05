@@ -1,6 +1,6 @@
 package dev.vality.fraudbusters.fraud.aggragator;
 
-import dev.vality.fraudbusters.fraud.constant.CheckedField;
+import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.SumAggregatorImpl;
@@ -59,7 +59,7 @@ public class SumAggregatorImplTest {
         when(paymentRepository.sumOperationByFieldWithGroupBy(any(), any(), any(), any(), any())).thenReturn(1050100L);
 
         Double some = sumAggregator.sum(
-                CheckedField.BIN,
+                PaymentCheckedField.BIN,
                 paymentModel,
                 TimeWindow.builder().start(1444).timeUnit(MINUTES).build(),
                 null
@@ -78,14 +78,14 @@ public class SumAggregatorImplTest {
                 .end(400);
         when(paymentRepository.sumOperationByFieldWithGroupBy(any(), any(), any(), any(), any())).thenReturn(1050100L);
 
-        Double sum = sumAggregator.sum(CheckedField.BIN, paymentModel, timeWindowBuilder.build(), null);
+        Double sum = sumAggregator.sum(PaymentCheckedField.BIN, paymentModel, timeWindowBuilder.build(), null);
 
         assertEquals(Double.valueOf(1050101), sum);
 
         timeWindowBuilder = TimeWindow.builder()
                 .start(1444)
                 .timeUnit(MINUTES);
-        sum = sumAggregator.sum(CheckedField.BIN, paymentModel, timeWindowBuilder.build(), null);
+        sum = sumAggregator.sum(PaymentCheckedField.BIN, paymentModel, timeWindowBuilder.build(), null);
 
         assertEquals(Double.valueOf(1050101), sum);
     }
@@ -93,7 +93,7 @@ public class SumAggregatorImplTest {
     @Test
     public void sumSuccess() {
         when(paymentRepository.sumOperationSuccessWithGroupBy(any(), any(), any(), any(), any())).thenReturn(1050100L);
-        Double some = sumAggregator.sumSuccess(CheckedField.BIN, new PaymentModel(),
+        Double some = sumAggregator.sumSuccess(PaymentCheckedField.BIN, new PaymentModel(),
                 TimeWindow.builder()
                         .start(1444)
                         .timeUnit(MINUTES)
@@ -108,7 +108,7 @@ public class SumAggregatorImplTest {
     public void sumError() {
         when(paymentRepository.sumOperationErrorWithGroupBy(any(), any(), any(), any(), any(), any()))
                 .thenReturn(1050100L);
-        Double some = sumAggregator.sumError(CheckedField.BIN, new PaymentModel(),
+        Double some = sumAggregator.sumError(PaymentCheckedField.BIN, new PaymentModel(),
                 TimeWindow.builder()
                         .start(1444)
                         .timeUnit(MINUTES)
@@ -124,7 +124,7 @@ public class SumAggregatorImplTest {
     public void sumErrorWithoutCode() {
         when(paymentRepository.sumOperationErrorWithGroupBy(any(), any(), any(), any(), any()))
                 .thenReturn(1050100L);
-        Double some = sumAggregator.sumError(CheckedField.BIN, new PaymentModel(),
+        Double some = sumAggregator.sumError(PaymentCheckedField.BIN, new PaymentModel(),
                 TimeWindow.builder()
                         .start(1444)
                         .timeUnit(MINUTES)

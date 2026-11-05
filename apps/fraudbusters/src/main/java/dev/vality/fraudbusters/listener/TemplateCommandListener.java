@@ -4,7 +4,6 @@ import dev.vality.damsel.fraudbusters.Command;
 import dev.vality.damsel.fraudbusters.Template;
 import dev.vality.fraudbusters.fraud.FraudContextParser;
 import dev.vality.fraudbusters.fraud.InspectStorage;
-import dev.vality.fraudbusters.util.OperationTypeUtil;
 import dev.vality.fraudo.FraudoRulesParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,10 +22,6 @@ public abstract class TemplateCommandListener extends AbstractPoolCommandListene
     protected void handle(Command command) {
         log.info("{} command: {}", getClass().getSimpleName(), command);
         if (command != null && command.isSetCommandBody() && command.getCommandBody().isSetTemplate()) {
-            if (OperationTypeUtil.declaresOther(command, storage.getOperationType())) {
-                log.warn("{} skips command of another operation type: {}", getClass().getSimpleName(), command);
-                return;
-            }
             Template template = command.getCommandBody().getTemplate();
             execCommand(command, template.getId(), storage.getTemplatePool(), () -> parseTemplate(template));
         }

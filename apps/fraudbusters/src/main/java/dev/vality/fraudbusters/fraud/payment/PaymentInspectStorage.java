@@ -55,14 +55,12 @@ public class PaymentInspectStorage implements InspectStorage {
     }
 
     @Override
-    public String referenceKey(TemplateReference reference) {
-        rejectWallet(reference.isSetWalletId());
+    public String generateReferenceKey(TemplateReference reference) {
         return ReferenceKeyGenerator.generateTemplateKey(reference);
     }
 
     @Override
-    public String groupReferenceKey(GroupReference reference) {
-        rejectWallet(reference.isSetWalletId());
+    public String generateGroupReferenceKey(GroupReference reference) {
         return ReferenceKeyGenerator.generateTemplateKeyByList(reference.getPartyId(), reference.getShopId());
     }
 
@@ -71,12 +69,6 @@ public class PaymentInspectStorage implements InspectStorage {
         List<String> errors = templateValidator.validate(template);
         if (!CollectionUtils.isEmpty(errors)) {
             log.warn("TemplateListener templateId: {} validateError: {}", templateId, errors);
-        }
-    }
-
-    private void rejectWallet(boolean walletIdSet) {
-        if (walletIdSet) {
-            throw new IllegalArgumentException("wallet_id is not supported for payments");
         }
     }
 
