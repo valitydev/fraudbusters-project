@@ -1,0 +1,14 @@
+type: object
+description: Запись списка выплат. Без party и кошелька запись действует для всех выплат; кошелёк задаётся только вместе с party.
+required:
+  - listName
+  - value
+properties:
+  listName:
+    type: string
+  value:
+    type: string
+  partyId:
+    type: string
+  walletId:
+    type: string

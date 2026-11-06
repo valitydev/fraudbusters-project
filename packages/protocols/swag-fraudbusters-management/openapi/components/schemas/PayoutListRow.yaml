@@ -1,0 +1,8 @@
+type: object
+properties:
+  listType:
+    $ref: './ListType.yaml'
+  listRecord:
+    $ref: './PayoutListRecord.yaml'
+  countInfo:
+    $ref: './CountInfo.yaml'

@@ -1,0 +1,55 @@
+type: object
+description: Последнее известное состояние выплаты.
+required:
+  - id
+  - eventTime
+  - amount
+  - currency
+  - status
+properties:
+  id:
+    type: string
+  eventTime:
+    type: string
+    format: date-time
+  partyId:
+    type: string
+  walletId:
+    type: string
+  amount:
+    type: integer
+    format: int64
+  currency:
+    type: string
+  status:
+    type: string
+    enum:
+      - pending
+      - succeeded
+      - failed
+  destinationType:
+    description: Тип назначения выплаты; для назначений, кроме карты, история хранит только unknown.
+    type: string
+    enum:
+      - bank_card
+      - unknown
+  cardToken:
+    type: string
+  bin:
+    type: string
+  lastDigits:
+    type: string
+  paymentSystem:
+    type: string
+  issuerCountry:
+    type: string
+  accountId:
+    type: string
+  accountCurrency:
+    type: string
+  clientInfo:
+    $ref: './ClientInfo.yaml'
+  error:
+    $ref: './Error.yaml'
+  provider:
+    $ref: './ProviderInfo.yaml'

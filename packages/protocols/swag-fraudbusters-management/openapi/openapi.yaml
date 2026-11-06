@@ -42,6 +42,16 @@ tags:
     x-displayName: Data sets
   - name: analytics
     x-displayName: Analytics
+  - name: payout-template
+    x-displayName: Payout templates
+  - name: payout-reference
+    x-displayName: Payout references
+  - name: payout-group
+    x-displayName: Payout groups
+  - name: payout-group-reference
+    x-displayName: Payout groups reference
+  - name: payout-lists
+    x-displayName: Payout lists
 
 paths:
   # Audit
@@ -162,6 +172,8 @@ paths:
     $ref: ./paths/payments/historical-data/filterFraudPayments.yaml
   /payments-historical-data/refunds:
     $ref: ./paths/payments/historical-data/filterRefunds.yaml
+  /payouts-historical-data/withdrawals:
+    $ref: ./paths/payouts/historical-data/filterWithdrawals.yaml
 
   # Data sets
   /payments-data-set/data-sets:
@@ -179,6 +191,48 @@ paths:
   # Checked data sets
   /payments-data-set/checked-data-sets/{id}:
     $ref: ./paths/payments/checked-data-sets/getCheckedDataSet.yaml
+
+  # Payout templates
+  /payouts-templates:
+    $ref: ./paths/payouts/templates/insertTemplate.yaml
+  /payouts-templates/{id}:
+    $ref: ./paths/payouts/templates/removeTemplate.yaml
+  /payouts-templates/filter:
+    $ref: ./paths/payouts/templates/filterTemplates.yaml
+  /payouts-templates/names:
+    $ref: ./paths/payouts/templates/getTemplateNames.yaml
+  /payouts-templates/validate:
+    $ref: ./paths/payouts/templates/validateTemplate.yaml
+
+  # Payout references
+  /payouts-references:
+    $ref: ./paths/payouts/references/references.yaml
+  /payouts-references/filter:
+    $ref: ./paths/payouts/references/filterReferences.yaml
+
+  # Payout groups
+  /payouts-groups:
+    $ref: ./paths/payouts/groups/insertGroup.yaml
+  /payouts-groups/{groupId}:
+    $ref: ./paths/payouts/groups/group.yaml
+  /payouts-groups/filter:
+    $ref: ./paths/payouts/groups/filterGroups.yaml
+
+  # Payout groups reference
+  /payouts-groups/{groupId}/references:
+    $ref: ./paths/payouts/groups/references/groupReferences.yaml
+  /payouts-groups/references/filter:
+    $ref: ./paths/payouts/groups/references/filterGroupReferences.yaml
+
+  # Payout lists
+  /payouts-lists:
+    $ref: ./paths/payouts/lists/rows.yaml
+  /payouts-lists/filter:
+    $ref: ./paths/payouts/lists/filterLists.yaml
+  /payouts-lists/currentListNames:
+    $ref: ./paths/payouts/lists/getCurrentListNames.yaml
+  /payouts-lists/availableListNames:
+    $ref: ./paths/payouts/lists/getAvailableListNames.yaml
 
   # Analytics
   /analytics/fraud-payments/count:

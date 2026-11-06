@@ -1,0 +1,99 @@
+get:
+  summary: Поиск по истории выплат
+  description: Каждая выплата возвращается один раз, в последнем состоянии за период; фильтры применяются к нему.
+  operationId: filterWithdrawals
+  tags:
+    - historical-data
+  parameters:
+    - $ref: "../../../components/parameters/continuationId.yaml"
+    - $ref: "../../../components/parameters/sortOrder.yaml"
+    - $ref: "../../../components/parameters/sortBy.yaml"
+    - $ref: "../../../components/parameters/size.yaml"
+    - name: from
+      required: true
+      in: query
+      schema:
+        type: string
+    - name: to
+      required: true
+      in: query
+      schema:
+        type: string
+    - name: partyId
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: walletId
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: withdrawalId
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: status
+      required: false
+      in: query
+      schema:
+        type: string
+        enum:
+          - pending
+          - succeeded
+          - failed
+    - name: email
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: providerCountry
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: cardToken
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: fingerprint
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: terminal
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: maskedPan
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: customerId
+      required: false
+      in: query
+      schema:
+        type: string
+    - name: userId
+      description: User identifier in the merchant system; use partyId to scope the search.
+      required: false
+      in: query
+      schema:
+        type: string
+  responses:
+    '201':
+      description: Withdrawals
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/responses/WithdrawalsResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
