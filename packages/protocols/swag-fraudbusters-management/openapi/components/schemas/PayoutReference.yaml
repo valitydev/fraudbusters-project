@@ -1,0 +1,14 @@
+type: object
+description: Привязка шаблона выплат. Глобальная привязка задаётся без party и кошелька; кошелёк задаётся только вместе с party.
+required:
+  - templateId
+properties:
+  templateId:
+    type: string
+  partyId:
+    type: string
+  walletId:
+    type: string
+  isGlobal:
+    type: boolean
+    default: false

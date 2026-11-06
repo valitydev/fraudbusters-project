@@ -1,0 +1,8 @@
+type: object
+required:
+  - listRecord
+properties:
+  listRecord:
+    $ref: './PayoutListRecord.yaml'
+  countInfo:
+    $ref: './CountInfo.yaml'
