@@ -1,9 +1,13 @@
 package dev.vality.fraudbusters.repository;
 
+import dev.vality.fraudbusters.config.payout.PayoutFraudoConfig;
 import dev.vality.fraudbusters.exception.RuleFunctionException;
 import dev.vality.fraudbusters.extension.ClickHouseContainerExtension;
+import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.constant.PayoutCheckedField;
+import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.fraud.model.PayoutModel;
+import dev.vality.fraudbusters.fraud.payment.resolver.PaymentModelFieldResolver;
 import dev.vality.fraudbusters.fraud.payout.aggregator.clickhouse.PayoutAggregators;
 import dev.vality.fraudbusters.repository.clickhouse.impl.PayoutHistoryRepository;
 import dev.vality.fraudbusters.service.TimeBoundaryServiceImpl;
@@ -120,6 +124,52 @@ class PayoutHistoryRepositoryTest {
         assertEquals(1, aggregates.count(EMAIL, model, window, List.of(USER_ID)));
     }
 
+    @Test
+    void onlyOperationsInsideTheWindowAreCounted() {
+        insert("inside", 100, "succeeded", "party", "wallet", "RUB", 0);
+        insert("too-old", 200, "succeeded", "party", "wallet", "RUB", -25 * 3600 * 1000);
+        insert("after-inspected", 300, "succeeded", "party", "wallet", "RUB", 60_000);
+        var model = createPayoutModel();
+        assertEquals(1, aggregates.count(CARD_TOKEN, model, window, List.of()));
+        assertEquals(100.0, aggregates.sum(CARD_TOKEN, model, window, List.of()));
+        var twoDays = TimeWindow.builder()
+                .start(48)
+                .timeUnit("hours")
+                .build();
+        assertEquals(2, aggregates.count(CARD_TOKEN, model, twoDays, List.of()));
+        var olderHalf = TimeWindow.builder()
+                .start(48)
+                .end(24)
+                .timeUnit("hours")
+                .build();
+        assertEquals(1, aggregates.count(CARD_TOKEN, model, olderHalf, List.of()));
+    }
+
+    @Test
+    void paymentRulesReadPayoutHistoryWithPaymentValues() {
+        insert("a", 100, "succeeded", "party", "wallet", "RUB", 0);
+        insert("b", 200, "failed", "party", "other-wallet", "RUB", 0);
+        insert("c", 400, "succeeded", "other-party", "wallet", "RUB", 0);
+        var payment = new PaymentModel();
+        payment.setCardToken("synthetic-card");
+        payment.setPartyId("party");
+        payment.setShopId("shop");
+        payment.setCurrency("RUB");
+        payment.setTimestamp(timestamp + 2000);
+        var paymentAggregates = new PayoutAggregators<>(new PayoutHistoryRepository(jdbc),
+                new TimeBoundaryServiceImpl(),
+                new PayoutFraudoConfig().paymentFieldsInPayoutHistory(new PaymentModelFieldResolver()));
+        assertEquals(3, paymentAggregates.count(PaymentCheckedField.CARD_TOKEN, payment, window, List.of()));
+        assertEquals(2, paymentAggregates.count(PaymentCheckedField.CARD_TOKEN, payment, window,
+                List.of(PaymentCheckedField.PARTY_ID)));
+        assertEquals(1, paymentAggregates.countSuccess(PaymentCheckedField.CARD_TOKEN, payment, window,
+                List.of(PaymentCheckedField.PARTY_ID, PaymentCheckedField.CURRENCY)));
+        assertEquals(500.0, paymentAggregates.sumSuccess(PaymentCheckedField.CARD_TOKEN, payment, window,
+                List.of()));
+        assertThrows(RuleFunctionException.class, () -> paymentAggregates.count(PaymentCheckedField.CARD_TOKEN,
+                payment, window, List.of(PaymentCheckedField.SHOP_ID)));
+    }
+
     private PayoutModel createPayoutModel() {
         var model = new PayoutModel();
         model.setCardToken("synthetic-card");
@@ -136,8 +186,8 @@ class PayoutHistoryRepositoryTest {
         jdbc.update("""
                 INSERT INTO fraud.withdrawal(timestamp, eventTime, eventTimeHour, id, amount, currency,
                                              status, cardToken, bin, partyId, walletId, errorCode)
-                VALUES ('2026-01-01', ?, ?, ?, ?, ?, ?, 'synthetic-card', ?, ?, ?, 'synthetic-error')
-                """, (timestamp + offset) / 1000, timestamp / 3600000 * 3600000, id, amount, currency, status,
-                "bin-" + id, party, wallet);
+                VALUES (toDate(toDateTime(?, 'UTC')), ?, ?, ?, ?, ?, ?, 'synthetic-card', ?, ?, ?, 'synthetic-error')
+                """, (timestamp + offset) / 1000, (timestamp + offset) / 1000, timestamp / 3600000 * 3600000, id,
+                amount, currency, status, "bin-" + id, party, wallet);
     }
 }
