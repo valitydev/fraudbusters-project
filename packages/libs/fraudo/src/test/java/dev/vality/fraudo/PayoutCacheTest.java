@@ -63,28 +63,14 @@ public class PayoutCacheTest extends AbstractPayoutTest {
     void distinguishesAllCacheKeyArguments(boolean fullVisitor) throws Exception {
         when(payouts.count("user_id", model, window, List.of())).thenReturn(1);
         when(payouts.count("card_token", model, window, List.of())).thenReturn(2);
-        var last24Days = TimeWindow.builder()
-                .start(24)
-                .timeUnit("days")
-                .build();
-        when(payouts.count("user_id", model, last24Days, List.of())).thenReturn(3);
-        var from48To24Hours = TimeWindow.builder()
-                .start(48)
-                .end(24)
-                .timeUnit("hours")
-                .build();
-        when(payouts.count("user_id", model, from48To24Hours, List.of())).thenReturn(4);
-        var from48To12Hours = TimeWindow.builder()
-                .start(48)
-                .end(12)
-                .timeUnit("hours")
-                .build();
-        when(payouts.count("user_id", model, from48To12Hours, List.of())).thenReturn(23);
-        var last48Hours = TimeWindow.builder()
-                .start(48)
-                .timeUnit("hours")
-                .build();
-        when(payouts.count("user_id", model, last48Hours, List.of())).thenReturn(24);
+        when(payouts.count("user_id", model,
+                TimeWindow.builder().start(24).timeUnit("days").build(), List.of())).thenReturn(3);
+        when(payouts.count("user_id", model,
+                TimeWindow.builder().start(48).end(24).timeUnit("hours").build(), List.of())).thenReturn(4);
+        when(payouts.count("user_id", model,
+                TimeWindow.builder().start(48).end(12).timeUnit("hours").build(), List.of())).thenReturn(23);
+        when(payouts.count("user_id", model,
+                TimeWindow.builder().start(48).timeUnit("hours").build(), List.of())).thenReturn(24);
         when(payouts.count("user_id", model, window, List.of("party_id"))).thenReturn(5);
         when(payouts.count("user_id", model, window, List.of("wallet_id"))).thenReturn(6);
         when(payouts.count("user_id", model, window, List.of("party_id", "currency"))).thenReturn(7);
@@ -101,7 +87,8 @@ public class PayoutCacheTest extends AbstractPayoutTest {
         when(payoutUnique.countUniqueValue("user_id", model, "card_token", window, List.of())).thenReturn(17);
         when(payoutUnique.countUniqueValue("card_token", model, "user_id", window, List.of())).thenReturn(18);
         when(payoutUnique.countUniqueValue("user_id", model, "currency", window, List.of())).thenReturn(19);
-        when(payoutUnique.countUniqueValue("user_id", model, "card_token", last24Days, List.of())).thenReturn(20);
+        when(payoutUnique.countUniqueValue("user_id", model, "card_token",
+                TimeWindow.builder().start(24).timeUnit("days").build(), List.of())).thenReturn(20);
         when(payoutUnique.countUniqueValue("user_id", model, "card_token", window, List.of("party_id")))
                 .thenReturn(21);
 

@@ -44,8 +44,7 @@ class PaymentCacheTest extends AbstractPayoutTest {
         evaluateExpression(expression, fullVisitor);
 
         var calls = Stream.of(payments, paymentSums, paymentUnique)
-                .flatMap(aggregator -> mockingDetails(aggregator).getInvocations().stream())
-                .toList();
+                .flatMap(aggregator -> mockingDetails(aggregator).getInvocations().stream()).toList();
         assertEquals(1, calls.size());
         int windowArgument = function.startsWith("unique(") ? 3 : 2;
         assertEquals(window, calls.get(0).getArgument(windowArgument));
@@ -55,8 +54,7 @@ class PaymentCacheTest extends AbstractPayoutTest {
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
     void distinguishesHistoryFunctions(boolean fullVisitor) {
-        String expression = FUNCTIONS.stream()
-                .map(function -> function.formatted("24") + " >= 0")
+        String expression = FUNCTIONS.stream().map(function -> function.formatted("24") + " >= 0")
                 .collect(Collectors.joining(" AND "));
 
         evaluateExpression(expression, fullVisitor);
@@ -87,8 +85,7 @@ class PaymentCacheTest extends AbstractPayoutTest {
         evaluateExpression(first + " >= 0 AND " + second + " >= 0", fullVisitor);
 
         long calls = Stream.of(payments, paymentSums, paymentUnique)
-                .mapToLong(aggregator -> mockingDetails(aggregator).getInvocations().size())
-                .sum();
+                .mapToLong(aggregator -> mockingDetails(aggregator).getInvocations().size()).sum();
         assertEquals(2, calls);
     }
 
@@ -103,9 +100,7 @@ class PaymentCacheTest extends AbstractPayoutTest {
     }
 
     private static Stream<Arguments> equivalentQueries() {
-        return Stream.of(false, true)
-                .flatMap(full -> FUNCTIONS.stream()
-                        .map(function -> Arguments.of(full, function)));
+        return Stream.of(false, true).flatMap(full -> FUNCTIONS.stream().map(function -> Arguments.of(full, function)));
     }
 
     private static Stream<Arguments> differentQueries() {
@@ -125,8 +120,7 @@ class PaymentCacheTest extends AbstractPayoutTest {
                 List.of("sumError(\"user_id\", 24, \"failed\")", "sumError(\"user_id\", 24, \"other\")"),
                 List.of("unique(\"user_id\", \"card_token\", 24)", "unique(\"card_token\", \"user_id\", 24)"),
                 List.of("unique(\"user_id\", \"card_token\", 24)", "unique(\"user_id\", \"currency\", 24)"));
-        return Stream.of(false, true)
-                .flatMap(full -> queries.stream()
-                        .map(pair -> Arguments.of(full, pair.get(0), pair.get(1))));
+        return Stream.of(false, true).flatMap(full -> queries.stream()
+                .map(pair -> Arguments.of(full, pair.get(0), pair.get(1))));
     }
 }
