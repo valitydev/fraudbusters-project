@@ -1,0 +1,54 @@
+<div fxLayout="column" fxLayoutGap="16px">
+    <mat-card>
+        <mat-card-content [formGroup]="form" fxLayout="row wrap" fxLayoutGap="16px" fxLayoutAlign="start center">
+            <mat-checkbox formControlName="isGlobal">All payouts</mat-checkbox>
+            <ng-container *ngIf="!form.value.isGlobal">
+                <mat-form-field>
+                    <mat-label>Party ID</mat-label>
+                    <input matInput formControlName="partyId" />
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Wallet ID (optional)</mat-label>
+                    <input matInput formControlName="walletId" />
+                </mat-form-field>
+            </ng-container>
+            <mat-form-field fxFlex>
+                <mat-label>Template ID</mat-label>
+                <input matInput formControlName="templateId" [matAutocomplete]="templates" />
+                <mat-autocomplete #templates="matAutocomplete">
+                    <mat-option *ngFor="let name of templateNames$ | async" [value]="name">{{ name }}</mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+            <button mat-raised-button color="primary" [disabled]="form.invalid" (click)="save()">Add reference</button>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-form-field>
+        <mat-label>Search by party, wallet or template</mat-label>
+        <input matInput #searchInput (keyup.enter)="search(searchInput.value)" />
+    </mat-form-field>
+
+    <ng-container *ngIf="references$ | async as references">
+        <table mat-table [dataSource]="references" *ngIf="references.length; else empty">
+            <ng-container matColumnDef="scope">
+                <th mat-header-cell *matHeaderCellDef>Applies to</th>
+                <td mat-cell *matCellDef="let reference">{{ describeScope(reference) }}</td>
+            </ng-container>
+            <ng-container matColumnDef="templateId">
+                <th mat-header-cell *matHeaderCellDef>Template</th>
+                <td mat-cell *matCellDef="let reference">{{ reference.templateId }}</td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let reference">
+                    <button mat-icon-button (click)="remove(reference)" aria-label="Remove reference">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="columns"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns"></tr>
+        </table>
+    </ng-container>
+    <ng-template #empty><fb-empty-search-result></fb-empty-search-result></ng-template>
+</div>

@@ -1,0 +1,55 @@
+<div fxLayout="column" fxLayoutGap="16px">
+    <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="16px">
+        <mat-form-field fxFlex>
+            <mat-label>Search by template ID</mat-label>
+            <input matInput #searchInput (keyup.enter)="search(searchInput.value)" />
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="create()">Create template</button>
+    </div>
+
+    <mat-card *ngIf="editing">
+        <mat-card-content fxLayout="column" [formGroup]="form">
+            <mat-form-field>
+                <mat-label>Template ID</mat-label>
+                <input matInput formControlName="id" />
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>Rules</mat-label>
+                <textarea matInput class="fb-payout-template" formControlName="template" rows="10"></textarea>
+            </mat-form-field>
+            <div *ngFor="let error of errors" class="mat-error">{{ error }}</div>
+        </mat-card-content>
+        <mat-card-actions align="end">
+            <button mat-button (click)="cancel()">Cancel</button>
+            <button mat-button [disabled]="form.invalid" (click)="validate()">Validate</button>
+            <button mat-raised-button color="primary" [disabled]="form.invalid" (click)="save()">Save</button>
+        </mat-card-actions>
+    </mat-card>
+
+    <ng-container *ngIf="templates$ | async as templates">
+        <table mat-table [dataSource]="templates" *ngIf="templates.length; else empty">
+            <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef>ID</th>
+                <td mat-cell *matCellDef="let template">{{ template.id }}</td>
+            </ng-container>
+            <ng-container matColumnDef="template">
+                <th mat-header-cell *matHeaderCellDef>Rules</th>
+                <td mat-cell *matCellDef="let template" class="fb-payout-template">{{ template.template }}</td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let template">
+                    <button mat-icon-button (click)="edit(template)" aria-label="Edit template">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="remove(template)" aria-label="Remove template">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="columns"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns"></tr>
+        </table>
+    </ng-container>
+    <ng-template #empty><fb-empty-search-result></fb-empty-search-result></ng-template>
+</div>

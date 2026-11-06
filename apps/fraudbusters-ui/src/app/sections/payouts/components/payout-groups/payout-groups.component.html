@@ -1,0 +1,79 @@
+<div fxLayout="column" fxLayoutGap="16px">
+    <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="16px">
+        <mat-form-field fxFlex>
+            <mat-label>Search by group or template ID</mat-label>
+            <input matInput #searchInput (keyup.enter)="search(searchInput.value)" />
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="create()">Create group</button>
+    </div>
+
+    <mat-card *ngIf="editing">
+        <mat-card-content fxLayout="column" [formGroup]="form">
+            <mat-form-field>
+                <mat-label>Group ID</mat-label>
+                <input matInput formControlName="groupId" />
+            </mat-form-field>
+            <div class="mat-caption">Templates are applied in ascending priority until one makes a decision.</div>
+            <div
+                formArrayName="templates"
+                *ngFor="let template of templates.controls; let i = index"
+                fxLayout="row"
+                fxLayoutGap="16px"
+                fxLayoutAlign="start center"
+            >
+                <ng-container [formGroupName]="i">
+                    <mat-form-field fxFlex>
+                        <mat-label>Template ID</mat-label>
+                        <input matInput formControlName="id" />
+                    </mat-form-field>
+                    <mat-form-field>
+                        <mat-label>Priority</mat-label>
+                        <input matInput type="number" formControlName="priority" />
+                    </mat-form-field>
+                    <button mat-icon-button (click)="removeTemplate(i)" aria-label="Remove template from group">
+                        <mat-icon>remove_circle_outline</mat-icon>
+                    </button>
+                </ng-container>
+            </div>
+            <div><button mat-button (click)="addTemplate()">Add template</button></div>
+        </mat-card-content>
+        <mat-card-actions align="end">
+            <button mat-button (click)="cancel()">Cancel</button>
+            <button
+                mat-raised-button
+                color="primary"
+                [disabled]="form.invalid || templates.length === 0"
+                (click)="save()"
+            >
+                Save
+            </button>
+        </mat-card-actions>
+    </mat-card>
+
+    <ng-container *ngIf="groups$ | async as groups">
+        <table mat-table [dataSource]="groups" *ngIf="groups.length; else empty">
+            <ng-container matColumnDef="groupId">
+                <th mat-header-cell *matHeaderCellDef>Group</th>
+                <td mat-cell *matCellDef="let group">{{ group.groupId }}</td>
+            </ng-container>
+            <ng-container matColumnDef="templates">
+                <th mat-header-cell *matHeaderCellDef>Templates by priority</th>
+                <td mat-cell *matCellDef="let group">{{ templatesOf(group) }}</td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let group">
+                    <button mat-icon-button (click)="edit(group)" aria-label="Edit group">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="remove(group)" aria-label="Remove group">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="columns"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns"></tr>
+        </table>
+    </ng-container>
+    <ng-template #empty><fb-empty-search-result></fb-empty-search-result></ng-template>
+</div>

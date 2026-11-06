@@ -28,6 +28,12 @@ export class MenuModel {
             roles: [Roles.FraudOfficer, Roles.FraudMonitoring],
         },
         {
+            displayName: 'Payouts',
+            iconName: 'account_balance_wallet',
+            route: 'payouts',
+            roles: [Roles.FraudOfficer, Roles.FraudMonitoring],
+        },
+        {
             displayName: 'Historical data',
             iconName: 'history',
             route: 'historical-data/payments',
