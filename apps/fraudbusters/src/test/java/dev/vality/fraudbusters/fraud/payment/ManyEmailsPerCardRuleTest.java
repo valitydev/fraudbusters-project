@@ -121,7 +121,7 @@ class ManyEmailsPerCardRuleTest {
     private FirstFindVisitorImpl<PaymentModel, PaymentCheckedField> createVisitor(PaymentRepository repository) {
         DatabasePaymentFieldResolver databaseResolver = new DatabasePaymentFieldResolver();
         UniqueValueAggregator<PaymentModel, PaymentCheckedField> uniqueAggregator =
-                new UniqueValueAggregatorImpl(databaseResolver, repository, new TimeBoundaryServiceImpl());
+                new UniqueValueAggregatorImpl(databaseResolver, repository, new TimeBoundaryServiceImpl(), true);
         PaymentFraudoConfig config = new PaymentFraudoConfig();
         return config.paymentRuleVisitor(
                 unusedProxy(CountPaymentAggregator.class),

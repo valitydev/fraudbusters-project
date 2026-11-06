@@ -80,7 +80,7 @@ public class PayoutFraudoConfig {
             HistoryFieldResolverImpl<PayoutModel, PayoutCheckedField> payoutFieldsInPaymentHistory,
             TimeBoundaryService timeBoundaryService) {
         return new CountAggregatorImpl<>(payoutFieldsInPaymentHistory, paymentRepository, refundRepository,
-                chargebackRepository, timeBoundaryService);
+                chargebackRepository, timeBoundaryService, false);
     }
 
     @Bean
@@ -91,7 +91,7 @@ public class PayoutFraudoConfig {
             HistoryFieldResolverImpl<PayoutModel, PayoutCheckedField> payoutFieldsInPaymentHistory,
             TimeBoundaryService timeBoundaryService) {
         return new SumAggregatorImpl<>(payoutFieldsInPaymentHistory, paymentRepository, refundRepository,
-                chargebackRepository, timeBoundaryService);
+                chargebackRepository, timeBoundaryService, false);
     }
 
     @Bean
@@ -99,7 +99,8 @@ public class PayoutFraudoConfig {
             PaymentRepository paymentRepository,
             HistoryFieldResolverImpl<PayoutModel, PayoutCheckedField> payoutFieldsInPaymentHistory,
             TimeBoundaryService timeBoundaryService) {
-        return new UniqueValueAggregatorImpl<>(payoutFieldsInPaymentHistory, paymentRepository, timeBoundaryService);
+        return new UniqueValueAggregatorImpl<>(payoutFieldsInPaymentHistory, paymentRepository, timeBoundaryService,
+                false);
     }
 
     @Bean

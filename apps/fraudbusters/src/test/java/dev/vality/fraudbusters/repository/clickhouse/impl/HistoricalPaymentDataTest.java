@@ -72,11 +72,11 @@ class HistoricalPaymentDataTest {
         var boundaries = new dev.vality.fraudbusters.service.TimeBoundaryServiceImpl();
         var repository = (dev.vality.fraudbusters.repository.PaymentRepository) paymentRepository;
         final var counts = new dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.CountAggregatorImpl(
-                resolver, repository, null, null, boundaries);
+                resolver, repository, null, null, boundaries, true);
         final var sums = new dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.SumAggregatorImpl(
-                resolver, repository, null, null, boundaries);
+                resolver, repository, null, null, boundaries, true);
         final var unique = new dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.UniqueValueAggregatorImpl(
-                resolver, repository, boundaries);
+                resolver, repository, boundaries, true);
         var model = new dev.vality.fraudbusters.fraud.model.PaymentModel();
         model.setTimestamp(java.time.Instant.parse("2032-01-01T01:00:00Z").toEpochMilli());
         model.setPartyId("party-a");

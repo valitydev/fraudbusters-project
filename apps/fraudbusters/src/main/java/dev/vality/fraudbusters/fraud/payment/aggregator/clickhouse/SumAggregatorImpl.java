@@ -30,6 +30,8 @@ public class SumAggregatorImpl<T extends OperationModel, U> implements SumPaymen
     private final AggregationRepository refundRepository;
     private final AggregationRepository chargebackRepository;
     private final TimeBoundaryService timeBoundaryService;
+    /** Whether the inspected operation is itself part of the history this aggregator reads. */
+    private final boolean includeCurrentOperation;
 
     @Override
     @BasicMetric("sum")
@@ -62,7 +64,7 @@ public class SumAggregatorImpl<T extends OperationModel, U> implements SumPaymen
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
             FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, model);
             if (Objects.isNull(resolve.getValue())) {
-                return Double.valueOf(CurrentPaymentContribution.getAmount(model));
+                return Double.valueOf(getCurrentAmount(model));
             }
             List<FieldModel> eventFields = databasePaymentFieldResolver.resolveListFields(model, list);
             Long sum = paymentRepository.sumOperationErrorWithGroupBy(
@@ -97,7 +99,7 @@ public class SumAggregatorImpl<T extends OperationModel, U> implements SumPaymen
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
             FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, model);
             if (Objects.isNull(resolve.getValue())) {
-                return Double.valueOf(CurrentPaymentContribution.getAmount(model));
+                return Double.valueOf(getCurrentAmount(model));
             }
             List<FieldModel> eventFields = databasePaymentFieldResolver.resolveListFields(model, list);
             Long sum = paymentRepository.sumOperationErrorWithGroupBy(
@@ -107,7 +109,7 @@ public class SumAggregatorImpl<T extends OperationModel, U> implements SumPaymen
                     timeBound.getRight().toEpochMilli(),
                     eventFields
             );
-            double resultSum = (double) checkedLong(sum) + CurrentPaymentContribution.getAmount(model);
+            double resultSum = (double) checkedLong(sum) + getCurrentAmount(model);
             log.debug(
                     "SumAggregatorImpl field: {} value: {}  sumError: {}",
                     resolve.getName(),
@@ -177,7 +179,7 @@ public class SumAggregatorImpl<T extends OperationModel, U> implements SumPaymen
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
             FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, model);
             if (Objects.isNull(resolve.getValue())) {
-                return Double.valueOf(CurrentPaymentContribution.getAmount(model));
+                return Double.valueOf(getCurrentAmount(model));
             }
             List<FieldModel> eventFields = databasePaymentFieldResolver.resolveListFields(model, list);
             Long sum = aggregateFunction.accept(
@@ -188,7 +190,7 @@ public class SumAggregatorImpl<T extends OperationModel, U> implements SumPaymen
                     eventFields
             );
             double resultSum =
-                    withCurrent ? (double) checkedLong(sum) + CurrentPaymentContribution.getAmount(model)
+                    withCurrent ? (double) checkedLong(sum) + getCurrentAmount(model)
                             : checkedLong(sum);
             log.debug(
                     "SumAggregatorImpl field: {} value: {}  sum: {}",
@@ -201,6 +203,10 @@ public class SumAggregatorImpl<T extends OperationModel, U> implements SumPaymen
             log.warn("SumAggregatorImpl error when getSum e: ", e);
             throw new RuleFunctionException(e);
         }
+    }
+
+    private long getCurrentAmount(T model) {
+        return includeCurrentOperation ? checkedLong(model.getAmount()) : 0L;
     }
 
     private Long checkedLong(Long entry) {

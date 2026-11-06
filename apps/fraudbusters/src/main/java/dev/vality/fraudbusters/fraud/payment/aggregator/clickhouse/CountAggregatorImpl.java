@@ -25,11 +25,15 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class CountAggregatorImpl<T extends OperationModel, U> implements CountPaymentAggregator<T, U> {
 
+    private static final int CURRENT_ONE = 1;
+
     private final HistoryFieldResolver<T, U> databasePaymentFieldResolver;
     private final PaymentRepository paymentRepository;
     private final AggregationRepository refundRepository;
     private final AggregationRepository chargebackRepository;
     private final TimeBoundaryService timeBoundaryService;
+    /** Whether the inspected operation is itself part of the history this aggregator reads. */
+    private final boolean includeCurrentOperation;
 
     @Override
     @BasicMetric("count")
@@ -126,7 +130,7 @@ public class CountAggregatorImpl<T extends OperationModel, U> implements CountPa
                     resolve.getValue(),
                     count
             );
-            return count + CurrentPaymentContribution.count(model);
+            return count + getCurrentCount();
         } catch (Exception e) {
             log.warn("CountAggregatorImpl error when countError e: ", e);
             throw new RuleFunctionException(e);
@@ -204,7 +208,7 @@ public class CountAggregatorImpl<T extends OperationModel, U> implements CountPa
             FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, model);
             List<FieldModel> eventFields = databasePaymentFieldResolver.resolveListFields(model, list);
             if (Objects.isNull(resolve.getValue())) {
-                return withCurrent ? CurrentPaymentContribution.count(model) : 0;
+                return withCurrent ? getCurrentCount() : 0;
             }
             Integer count = aggregateFunction.accept(
                     resolve.getName(),
@@ -219,10 +223,14 @@ public class CountAggregatorImpl<T extends OperationModel, U> implements CountPa
                     resolve.getValue(),
                     count
             );
-            return withCurrent ? count + CurrentPaymentContribution.count(model) : count;
+            return withCurrent ? count + getCurrentCount() : count;
         } catch (Exception e) {
             log.warn("CountAggregatorImpl error when getCount e: ", e);
             throw new RuleFunctionException(e);
         }
+    }
+
+    private int getCurrentCount() {
+        return includeCurrentOperation ? CURRENT_ONE : 0;
     }
 }

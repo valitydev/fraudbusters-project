@@ -56,7 +56,8 @@ public class PaymentFraudoConfig {
                 paymentRepository,
                 refundRepository,
                 chargebackRepository,
-                timeBoundaryService
+                timeBoundaryService,
+                true
         );
     }
 
@@ -72,7 +73,8 @@ public class PaymentFraudoConfig {
                 paymentRepository,
                 refundRepository,
                 chargebackRepository,
-                timeBoundaryService
+                timeBoundaryService,
+                true
         );
     }
 
@@ -81,7 +83,8 @@ public class PaymentFraudoConfig {
             PaymentRepository paymentRepository,
             DatabasePaymentFieldResolver databasePaymentFieldResolver,
             TimeBoundaryService timeBoundaryService) {
-        return new UniqueValueAggregatorImpl<>(databasePaymentFieldResolver, paymentRepository, timeBoundaryService);
+        return new UniqueValueAggregatorImpl<>(databasePaymentFieldResolver, paymentRepository, timeBoundaryService,
+                true);
     }
 
     @Bean
@@ -151,7 +154,8 @@ public class PaymentFraudoConfig {
                 paymentRepositoryImpl,
                 refundRepository,
                 chargebackRepository,
-                timeBoundaryService
+                timeBoundaryService,
+                true
         );
         return new LocalCountAggregatorDecorator(
                 countAggregatorDecorator,
@@ -176,7 +180,8 @@ public class PaymentFraudoConfig {
                 paymentRepositoryImpl,
                 refundRepository,
                 chargebackRepository,
-                timeBoundaryService
+                timeBoundaryService,
+                true
         );
         return new LocalSumAggregatorDecorator(
                 sumAggregator,
@@ -195,7 +200,7 @@ public class PaymentFraudoConfig {
             TimeBoundaryService timeBoundaryService) {
         UniqueValueAggregatorImpl<PaymentModel, PaymentCheckedField> uniqueValueAggregator =
                 new UniqueValueAggregatorImpl<>(databasePaymentFieldResolver, fraudResultRepository,
-                        timeBoundaryService);
+                        timeBoundaryService, true);
 
         return new LocalUniqueValueAggregatorDecorator(
                 uniqueValueAggregator,

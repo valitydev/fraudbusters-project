@@ -1,6 +1,7 @@
 package dev.vality.fraudbusters.fraud.aggragator;
 
 import dev.vality.fraudbusters.domain.CheckedPayment;
+import dev.vality.fraudbusters.config.payout.PayoutFraudoConfig;
 import dev.vality.fraudbusters.exception.RuleFunctionException;
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.constant.PayoutCheckedField;
@@ -19,8 +20,9 @@ import dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.CountAggregat
 import dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.SumAggregatorImpl;
 import dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.UniqueValueAggregatorImpl;
 import dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver;
-import dev.vality.fraudbusters.repository.AggregationRepository;
 import dev.vality.fraudbusters.repository.PaymentRepository;
+import dev.vality.fraudbusters.repository.clickhouse.impl.ChargebackRepository;
+import dev.vality.fraudbusters.repository.clickhouse.impl.RefundRepository;
 import dev.vality.fraudbusters.service.TimeBoundaryServiceImpl;
 import dev.vality.fraudbusters.util.BeanUtil;
 import dev.vality.fraudo.model.TimeWindow;
@@ -38,8 +40,8 @@ class UserIdentityAggregationTest {
 
     private final DatabasePaymentFieldResolver resolver = new DatabasePaymentFieldResolver();
     private final PaymentRepository payments = mock(PaymentRepository.class);
-    private final AggregationRepository refunds = mock(AggregationRepository.class);
-    private final AggregationRepository chargebacks = mock(AggregationRepository.class);
+    private final RefundRepository refunds = mock(RefundRepository.class);
+    private final ChargebackRepository chargebacks = mock(ChargebackRepository.class);
     private final TimeBoundaryServiceImpl boundaries = new TimeBoundaryServiceImpl();
     private final TimeWindow window = TimeWindow.builder().start(60).timeUnit(MINUTES).build();
 
@@ -77,7 +79,7 @@ class UserIdentityAggregationTest {
 
     @Test
     void everyCountPathUsesUserId() {
-        var counts = new CountAggregatorImpl(resolver, payments, refunds, chargebacks, boundaries);
+        var counts = new CountAggregatorImpl(resolver, payments, refunds, chargebacks, boundaries, true);
         PaymentModel model = createPaymentModel();
         counts.count(USER_ID, model, window, List.of());
         counts.countSuccess(USER_ID, model, window, List.of());
@@ -104,7 +106,7 @@ class UserIdentityAggregationTest {
 
     @Test
     void everySumPathUsesUserId() {
-        var sums = new SumAggregatorImpl(resolver, payments, refunds, chargebacks, boundaries);
+        var sums = new SumAggregatorImpl(resolver, payments, refunds, chargebacks, boundaries, true);
         PaymentModel model = createPaymentModel();
         sums.sum(USER_ID, model, window, List.of());
         sums.sumSuccess(USER_ID, model, window, List.of());
@@ -133,9 +135,12 @@ class UserIdentityAggregationTest {
         model.setUserId("Synthetic-User");
         model.setAmount(100L);
         var payoutFields = BeanUtil.createPayoutFieldsInPaymentHistory();
-        var counts = new CountAggregatorImpl<>(payoutFields, payments, refunds, chargebacks, boundaries);
-        var sums = new SumAggregatorImpl<>(payoutFields, payments, refunds, chargebacks, boundaries);
-        final var unique = new UniqueValueAggregatorImpl<>(payoutFields, payments, boundaries);
+        var config = new PayoutFraudoConfig();
+        var counts = config.paymentHistoryCountAggregatorForPayouts(payments, refunds, chargebacks, payoutFields,
+                boundaries);
+        var sums = config.paymentHistorySumAggregatorForPayouts(payments, refunds, chargebacks, payoutFields,
+                boundaries);
+        final var unique = config.paymentHistoryUniqueValueAggregatorForPayouts(payments, payoutFields, boundaries);
         assertEquals(0, counts.count(PayoutCheckedField.USER_ID, model, window, List.of()));
         assertEquals(0, counts.countError(PayoutCheckedField.USER_ID, model, window, List.of()));
         assertEquals(0.0, sums.sum(PayoutCheckedField.USER_ID, model, window, List.of()));
@@ -154,7 +159,7 @@ class UserIdentityAggregationTest {
         PayoutModel model = new PayoutModel();
         model.setWalletId("synthetic-wallet");
         var counts = new CountAggregatorImpl<>(BeanUtil.createPayoutFieldsInPaymentHistory(), payments, refunds,
-                chargebacks, boundaries);
+                chargebacks, boundaries, false);
         assertThrows(RuleFunctionException.class,
                 () -> counts.count(PayoutCheckedField.WALLET_ID, model, window, List.of()));
         verifyNoInteractions(payments);
@@ -227,7 +232,7 @@ class UserIdentityAggregationTest {
 
     @Test
     void uniqueResolvesBothSelectionAndCountedField() {
-        final var unique = new UniqueValueAggregatorImpl(resolver, payments, boundaries);
+        final var unique = new UniqueValueAggregatorImpl(resolver, payments, boundaries, true);
         PaymentModel model = createPaymentModel();
         model.setPartyId("synthetic-party");
         unique.countUniqueValue(USER_ID, model, USER_ID, window, List.of());

@@ -23,9 +23,13 @@ import java.util.Objects;
 public class UniqueValueAggregatorImpl<T extends OperationModel, U>
         implements UniqueValueAggregator<T, U> {
 
+    private static final int CURRENT_ONE = 1;
+
     private final HistoryFieldResolver<T, U> databasePaymentFieldResolver;
     private final PaymentRepository paymentRepository;
     private final TimeBoundaryService timeBoundaryService;
+    /** Whether the inspected operation is itself part of the history this aggregator reads. */
+    private final boolean includeCurrentOperation;
 
     @Override
     @BasicMetric("countUniqueValueWindowed")
@@ -40,7 +44,7 @@ public class UniqueValueAggregatorImpl<T extends OperationModel, U>
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
             FieldModel resolve = databasePaymentFieldResolver.resolve(countField, model);
             if (Objects.isNull(resolve.getValue())) {
-                return CurrentPaymentContribution.count(model);
+                return getCurrentCount();
             }
             List<FieldModel> fieldModels = databasePaymentFieldResolver.resolveListFields(model, list);
             Integer uniqCountOperation = paymentRepository.uniqCountOperationWithGroupBy(
@@ -51,11 +55,14 @@ public class UniqueValueAggregatorImpl<T extends OperationModel, U>
                     timeBound.getRight().toEpochMilli(),
                     fieldModels
             );
-            return uniqCountOperation + CurrentPaymentContribution.count(model);
+            return uniqCountOperation + getCurrentCount();
         } catch (Exception e) {
             log.warn("UniqueValueAggregatorImpl error when getCount e: ", e);
             throw new RuleFunctionException(e);
         }
     }
 
+    private int getCurrentCount() {
+        return includeCurrentOperation ? CURRENT_ONE : 0;
+    }
 }
