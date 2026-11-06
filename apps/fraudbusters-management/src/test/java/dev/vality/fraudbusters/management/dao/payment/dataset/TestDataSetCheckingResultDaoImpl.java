@@ -32,10 +32,15 @@ public class TestDataSetCheckingResultDaoImpl {
     @Test
     void testDataSetCheckingResult() {
         PaymentModel paymentModel = createTestPaymentModel();
+        paymentModel.setCustomerId("synthetic-customer");
+        paymentModel.setUserId("Synthetic-User");
         Optional<Long> dataSetId = dataSetDao.insert(createDataSet(paymentModel));
         Long testDataSetId = dataSetId.get();
         paymentModel.setTestDataSetId(testDataSetId);
         paymentDao.insert(paymentModel);
+        var stored = paymentDao.getByDataSetId(testDataSetId).get(0);
+        assertEquals("synthetic-customer", stored.getCustomerId());
+        assertEquals("Synthetic-User", stored.getUserId());
 
         CheckedDataSetModel byId = dataSetCheckingResultDaoById.getById(testDataSetId);
         assertEquals(testDataSetId, byId.getTestDataSetId());
@@ -47,6 +52,8 @@ public class TestDataSetCheckingResultDaoImpl {
 
         byId = dataSetCheckingResultDaoById.getById(testDataSetId);
 
+        assertEquals("synthetic-customer", byId.getCheckedPaymentModels().get(0).getPaymentModel().getCustomerId());
+        assertEquals("Synthetic-User", byId.getCheckedPaymentModels().get(0).getPaymentModel().getUserId());
         assertEquals(TEST, byId.getTemplate());
         assertFalse(byId.getCheckedPaymentModels().isEmpty());
         assertEquals(Long.valueOf(1L), byId.getCheckedPaymentModels().get(0).getTestPaymentId());

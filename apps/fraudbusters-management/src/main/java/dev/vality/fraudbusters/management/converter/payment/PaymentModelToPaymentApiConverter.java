@@ -27,6 +27,8 @@ public class PaymentModelToPaymentApiConverter implements Converter<PaymentModel
                 .clientInfo(new ClientInfo()
                         .email(paymentModel.getEmail())
                         .ip(paymentModel.getIp())
+                        .customerId(paymentModel.getCustomerId())
+                        .userId(paymentModel.getUserId())
                         .fingerprint(paymentModel.getFingerprint()))
                 .error(StringUtils.hasText(paymentModel.getErrorCode())
                         ? new Error()

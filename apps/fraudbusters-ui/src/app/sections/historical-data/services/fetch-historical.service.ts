@@ -22,6 +22,8 @@ export interface FetchPaymentParams {
     partyId?: string;
     status?: string;
     fingerprint?: string;
+    customerId?: string;
+    userId?: string;
     email?: string;
     template?: string;
     rule?: string;
@@ -49,6 +51,8 @@ export abstract class FetchHistoricalService<T, P> extends PartialFetcherContinu
             partyId,
             status,
             fingerprint,
+            customerId,
+            userId,
             email,
             template,
             rule,
@@ -63,6 +67,8 @@ export abstract class FetchHistoricalService<T, P> extends PartialFetcherContinu
             partyId: partyId || '',
             status: status || '',
             fingerprint: fingerprint || '',
+            customerId: customerId || '',
+            userId: userId || '',
             email: email || '',
             template: template || '',
             rule: rule || '',

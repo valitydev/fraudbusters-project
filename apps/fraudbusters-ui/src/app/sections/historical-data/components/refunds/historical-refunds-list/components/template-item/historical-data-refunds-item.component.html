@@ -15,6 +15,14 @@
     </mat-expansion-panel-header>
     <div class="panel-content" fxLayout="column" [fxLayoutGap]="layoutGapM">
         <mat-divider></mat-divider>
+        <div fxLayout="row" *ngIf="refund.clientInfo?.customerId">
+            <div fxFlex>Customer ID:</div>
+            <div fxFlex>{{ refund.clientInfo.customerId }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="refund.clientInfo?.userId">
+            <div fxFlex>User ID:</div>
+            <div fxFlex>{{ refund.clientInfo.userId }}</div>
+        </div>
         <div class="row">
             <div fxFlex>Fingerprint:</div>
             <div fxFlex>{{ refund.clientInfo.fingerprint }}</div>

@@ -55,6 +55,8 @@ public class PaymentToTestPaymentModelConverter
                                   dev.vality.damsel.fraudbusters.ClientInfo clientInfo) {
         builder.ip(clientInfo.getIp())
                 .fingerprint(clientInfo.getFingerprint())
+                .customerId(clientInfo.getCustomerId())
+                .userId(clientInfo.getUserId())
                 .email(clientInfo.getEmail());
     }
 

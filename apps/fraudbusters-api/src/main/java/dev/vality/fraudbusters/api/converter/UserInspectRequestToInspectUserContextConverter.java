@@ -37,6 +37,9 @@ public class UserInspectRequestToInspectUserContextConverter
                 .map(Customer::getContact)
                 .orElseGet(Contact::new);
         ClientInfo clientInfo = new ClientInfo();
+        if (customer != null) {
+            clientInfo.setCustomerId(customer.getCustomerId()).setUserId(customer.getUserId());
+        }
         if (customer != null && customer.getDevice() != null) {
             clientInfo.setFingerprint(customer.getDevice().getFingerprint())
                     .setIp(customer.getDevice().getIp());
