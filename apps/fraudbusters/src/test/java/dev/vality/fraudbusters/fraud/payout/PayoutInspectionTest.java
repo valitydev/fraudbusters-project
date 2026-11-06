@@ -31,6 +31,7 @@ import dev.vality.fraudbusters.listener.payout.PayoutTemplateReferenceListener;
 import dev.vality.fraudbusters.pool.Pool;
 import dev.vality.fraudbusters.pool.PoolImpl;
 import dev.vality.fraudbusters.stream.impl.PayoutTemplateVisitorImpl;
+import dev.vality.fraudbusters.stream.impl.RuleCascade;
 import dev.vality.fraudbusters.stream.impl.NotifyingRuleApplierImpl;
 import dev.vality.fraudbusters.util.BeanUtil;
 import dev.vality.fraudbusters.util.CheckedResultFactory;
@@ -216,9 +217,11 @@ class PayoutInspectionTest {
     }
 
     private PayoutTemplateVisitorImpl createInspector(FirstFindVisitorImpl<PayoutModel, PayoutCheckedField> visitor) {
-        return new PayoutTemplateVisitorImpl(
+        return new PayoutTemplateVisitorImpl(new RuleCascade<>(
                 new NotifyingRuleApplierImpl<>(visitor, payoutTemplates, new CheckedResultFactory()),
-                payoutGroups, payoutReferences, payoutGroupReferences);
+                payoutGroups,
+                payoutReferences,
+                payoutGroupReferences));
     }
 
     private CheckedResultModel inspect(WithdrawalContext context) {

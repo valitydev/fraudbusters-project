@@ -8,6 +8,7 @@ import dev.vality.fraudbusters.fraud.payout.PayoutInspectStorage;
 import dev.vality.fraudbusters.pool.Pool;
 import dev.vality.fraudbusters.pool.PoolImpl;
 import dev.vality.fraudbusters.stream.impl.NotifyingRuleApplierImpl;
+import dev.vality.fraudbusters.stream.impl.RuleCascade;
 import dev.vality.fraudbusters.util.CheckedResultFactory;
 import dev.vality.fraudo.payment.visitor.impl.FirstFindVisitorImpl;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -45,6 +46,16 @@ public class PayoutPoolConfig {
             Pool<ParserRuleContext> payoutTemplatePoolImpl,
             CheckedResultFactory checkedResultFactory) {
         return new NotifyingRuleApplierImpl<>(payoutRuleVisitor, payoutTemplatePoolImpl, checkedResultFactory);
+    }
+
+    @Bean
+    public RuleCascade<PayoutModel> payoutRuleCascade(
+            NotifyingRuleApplierImpl<PayoutModel> payoutRuleApplier,
+            Pool<List<String>> payoutGroupPoolImpl,
+            Pool<String> payoutReferencePoolImpl,
+            Pool<String> payoutGroupReferencePoolImpl) {
+        return new RuleCascade<>(payoutRuleApplier, payoutGroupPoolImpl, payoutReferencePoolImpl,
+                payoutGroupReferencePoolImpl);
     }
 
     @Bean

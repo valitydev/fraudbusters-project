@@ -3,27 +3,19 @@ package dev.vality.fraudbusters.stream.impl;
 import dev.vality.fraudbusters.domain.CheckedResultModel;
 import dev.vality.fraudbusters.fraud.model.PayoutModel;
 import dev.vality.fraudbusters.util.PayoutScope;
-import dev.vality.fraudbusters.pool.Pool;
-import dev.vality.fraudbusters.stream.RuleApplier;
 import dev.vality.fraudbusters.stream.TemplateVisitor;
 import dev.vality.fraudo.constant.ResultStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class PayoutTemplateVisitorImpl implements TemplateVisitor<PayoutModel, CheckedResultModel> {
 
-    private final RuleCascade<PayoutModel> cascade;
-
-    public PayoutTemplateVisitorImpl(RuleApplier<PayoutModel> payoutRuleApplier,
-                                     Pool<List<String>> payoutGroupPoolImpl,
-                                     Pool<String> payoutReferencePoolImpl,
-                                     Pool<String> payoutGroupReferencePoolImpl) {
-        cascade = new RuleCascade<>(payoutRuleApplier, payoutGroupPoolImpl, payoutReferencePoolImpl,
-                payoutGroupReferencePoolImpl);
-    }
+    private final RuleCascade<PayoutModel> payoutRuleCascade;
 
     @Override
     public CheckedResultModel visit(PayoutModel model) {
@@ -32,13 +24,13 @@ public class PayoutTemplateVisitorImpl implements TemplateVisitor<PayoutModel, C
         }
         String partyKey = PayoutScope.generateKey(model.getPartyId(), null);
         String walletKey = PayoutScope.generateKey(model.getPartyId(), model.getWalletId());
-        return cascade.apply(List.of(
-                cascade.applyTemplate(model, PayoutScope.GLOBAL),
-                cascade.applyGroup(model, PayoutScope.GLOBAL),
-                cascade.applyGroup(model, partyKey),
-                cascade.applyGroup(model, walletKey),
-                cascade.applyTemplate(model, partyKey),
-                cascade.applyTemplate(model, walletKey)
+        return payoutRuleCascade.apply(List.of(
+                payoutRuleCascade.applyTemplate(model, PayoutScope.GLOBAL),
+                payoutRuleCascade.applyGroup(model, PayoutScope.GLOBAL),
+                payoutRuleCascade.applyGroup(model, partyKey),
+                payoutRuleCascade.applyGroup(model, walletKey),
+                payoutRuleCascade.applyTemplate(model, partyKey),
+                payoutRuleCascade.applyTemplate(model, walletKey)
         ), ResultStatus.HIGH_RISK);
     }
 }
