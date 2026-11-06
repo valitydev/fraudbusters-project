@@ -2,10 +2,15 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { AuthGuard, Roles } from '../../auth';
+import { PayoutGroupFormComponent } from './components/payout-group-form/payout-group-form.component';
+import { PayoutGroupReferenceFormComponent } from './components/payout-group-reference-form/payout-group-reference-form.component';
 import { PayoutGroupReferencesComponent } from './components/payout-group-references/payout-group-references.component';
 import { PayoutGroupsComponent } from './components/payout-groups/payout-groups.component';
+import { PayoutListRowsFormComponent } from './components/payout-list-rows-form/payout-list-rows-form.component';
 import { PayoutListsComponent } from './components/payout-lists/payout-lists.component';
+import { PayoutReferenceFormComponent } from './components/payout-reference-form/payout-reference-form.component';
 import { PayoutReferencesComponent } from './components/payout-references/payout-references.component';
+import { PayoutTemplateFormComponent } from './components/payout-template-form/payout-template-form.component';
 import { PayoutTemplatesComponent } from './components/payout-templates/payout-templates.component';
 import { PayoutSectionComponent } from './payout-section.component';
 import { ListType } from '../../api/fb-management/swagger-codegen/model/listType';
@@ -80,6 +85,24 @@ const listTab = (path: string, listType: ListType) => ({
                     listTab('named', ListType.Naming),
                     { path: '', redirectTo: 'black', pathMatch: 'full' },
                 ],
+            },
+            { path: 'template/new', component: PayoutTemplateFormComponent, ...OFFICER },
+            { path: 'template/new/:id', component: PayoutTemplateFormComponent, ...OFFICER },
+            {
+                path: 'template/:id',
+                component: PayoutTemplateFormComponent,
+                canActivate: [AuthGuard],
+                data: { roles: [Roles.FraudOfficer], mode: 'edit' },
+            },
+            { path: 'reference/new', component: PayoutReferenceFormComponent, ...OFFICER },
+            { path: 'group/new', component: PayoutGroupFormComponent, ...OFFICER },
+            { path: 'group/:id', component: PayoutGroupFormComponent, ...OFFICER },
+            { path: 'group-reference/new', component: PayoutGroupReferenceFormComponent, ...OFFICER },
+            {
+                path: 'list/new/:listType',
+                component: PayoutListRowsFormComponent,
+                canActivate: [AuthGuard],
+                data: { roles: LIST_ROLES },
             },
             { path: '', redirectTo: 'templates', pathMatch: 'full' },
         ]),

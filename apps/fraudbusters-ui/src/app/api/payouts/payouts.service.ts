@@ -100,6 +100,10 @@ export class PayoutsService {
         });
     }
 
+    getGroup(groupId: string): Observable<Group> {
+        return this.http.get<Group>(`${this.endpoint}/payouts-groups/${encodeURIComponent(groupId)}`);
+    }
+
     saveGroup(group: Group): Observable<string> {
         return this.http
             .post<IdResponse>(`${this.endpoint}/payouts-groups`, group, new HttpRequestModel())

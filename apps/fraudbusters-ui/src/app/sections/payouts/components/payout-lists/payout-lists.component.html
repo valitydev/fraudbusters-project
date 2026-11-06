@@ -1,95 +1,68 @@
-<div fxLayout="column" fxLayoutGap="16px">
-    <div class="fb-payout-form">
-        <mat-form-field appearance="outline" floatLabel="always">
-            <mat-label>Lists</mat-label>
-            <mat-select multiple (selectionChange)="filterNames($event.value)">
-                <mat-option *ngFor="let name of currentListNames$ | async" [value]="name">{{ name }}</mat-option>
-            </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" floatLabel="always" fxFlex>
-            <mat-label>Search by value, party or wallet</mat-label>
-            <input matInput #searchInput (keyup.enter)="search(searchInput.value)" />
-        </mat-form-field>
-    </div>
-
-    <mat-card>
-        <mat-card-content [formGroup]="form" class="fb-payout-form">
-            <mat-form-field appearance="outline" floatLabel="always" *ngIf="!isNaming">
-                <mat-label>Field</mat-label>
-                <mat-select formControlName="listName">
-                    <mat-option *ngFor="let name of nameOptions$ | async" [value]="name">{{ name }}</mat-option>
+<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <div fxLayout fxLayoutAlign="space-between center">
+        <form fxLayout fxLayoutGap="16px" [formGroup]="searchForm">
+            <mat-form-field class="multi-select" appearance="outline" *ngIf="listNames$ | async as listNames">
+                <mat-select formControlName="types" multiple>
+                    <mat-option *ngFor="let name of listNames" [value]="name">{{ name }}</mat-option>
                 </mat-select>
             </mat-form-field>
-            <mat-form-field appearance="outline" floatLabel="always" *ngIf="isNaming">
-                <mat-label>List name</mat-label>
-                <input matInput formControlName="listName" />
+            <mat-form-field appearance="outline">
+                <input matInput placeholder="Search" formControlName="searchQuery" type="string" autocomplete="false" />
             </mat-form-field>
-            <mat-form-field appearance="outline" floatLabel="always">
-                <mat-label>Value</mat-label>
-                <input matInput formControlName="value" />
-            </mat-form-field>
-            <mat-form-field appearance="outline" floatLabel="always">
-                <mat-label>Party ID (empty for all payouts)</mat-label>
-                <input matInput formControlName="partyId" />
-            </mat-form-field>
-            <mat-form-field appearance="outline" floatLabel="always">
-                <mat-label>Wallet ID (optional)</mat-label>
-                <input matInput formControlName="walletId" />
-            </mat-form-field>
-            <ng-container *ngIf="isGrey">
-                <mat-form-field appearance="outline" floatLabel="always">
-                    <mat-label>Allowed payouts</mat-label>
-                    <input matInput type="number" min="1" formControlName="count" />
-                </mat-form-field>
-                <mat-form-field appearance="outline" floatLabel="always">
-                    <mat-label>Counted from (optional)</mat-label>
-                    <input matInput type="datetime-local" formControlName="startCountTime" />
-                </mat-form-field>
-                <mat-form-field appearance="outline" floatLabel="always">
-                    <mat-label>Valid until</mat-label>
-                    <input matInput type="datetime-local" formControlName="endCountTime" />
-                </mat-form-field>
-            </ng-container>
-            <button mat-raised-button color="primary" [disabled]="form.invalid" (click)="save()">Add record</button>
-        </mat-card-content>
-    </mat-card>
-
-    <ng-container *ngIf="rows$ | async as rows">
-        <table mat-table [dataSource]="rows" *ngIf="rows.length; else empty">
-            <ng-container matColumnDef="listName">
-                <th mat-header-cell *matHeaderCellDef>List</th>
-                <td mat-cell *matCellDef="let row">{{ row.listRecord.listName }}</td>
-            </ng-container>
-            <ng-container matColumnDef="value">
-                <th mat-header-cell *matHeaderCellDef>Value</th>
-                <td mat-cell *matCellDef="let row">{{ row.listRecord.value }}</td>
-            </ng-container>
-            <ng-container matColumnDef="scope">
-                <th mat-header-cell *matHeaderCellDef>Applies to</th>
-                <td mat-cell *matCellDef="let row">{{ describeScope(row) }}</td>
-            </ng-container>
-            <ng-container matColumnDef="count">
-                <th mat-header-cell *matHeaderCellDef>Allowed payouts</th>
-                <td mat-cell *matCellDef="let row">{{ row.countInfo?.count }}</td>
-            </ng-container>
-            <ng-container matColumnDef="period">
-                <th mat-header-cell *matHeaderCellDef>Period</th>
-                <td mat-cell *matCellDef="let row">
-                    {{ row.countInfo?.startCountTime ? (row.countInfo.startCountTime | date : 'medium') : 'start' }}
-                    — {{ row.countInfo?.endCountTime | date : 'medium' }}
-                </td>
-            </ng-container>
-            <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef></th>
-                <td mat-cell *matCellDef="let row">
-                    <button mat-icon-button (click)="remove(row)" aria-label="Remove list record">
-                        <mat-icon>delete</mat-icon>
+        </form>
+        <button mat-button color="primary" (click)="createRow()">CREATE RECORD</button>
+    </div>
+    <div *ngIf="rows$ | async as rows">
+        <div *ngIf="rows.length; else Empty" fxLayout="column" [fxLayoutGap]="layoutGapM">
+            <fb-list-header>
+                <div class="fb-body-2" fxFlex>List name</div>
+                <div class="fb-body-2" fxFlex>Party id</div>
+                <div class="fb-body-2" fxFlex>Wallet id</div>
+                <div class="fb-body-2" fxFlex>Value</div>
+                <ng-container *ngIf="isGrey">
+                    <div class="fb-body-2" fxFlex="0 0 80px">Count</div>
+                    <div class="fb-body-2" fxFlex="0 0 160px">Start time</div>
+                    <div class="fb-body-2" fxFlex="0 0 160px">End time</div>
+                </ng-container>
+                <div fxFlex="0 0 20px"></div>
+            </fb-list-header>
+            <div *ngFor="let row of rows" fxLayout="column" [fxLayoutGap]="layoutGapM">
+                <mat-card
+                    class="fb-list-item"
+                    fxLayout
+                    fxFlexFill
+                    fxLayoutAlign="center center"
+                    [fxLayoutGap]="layoutGapM"
+                >
+                    <div class="fb-body-2" fxFlex>{{ row.listRecord.listName }}</div>
+                    <div class="fb-body-2" fxFlex>{{ row.listRecord.partyId }}</div>
+                    <div class="fb-body-2" fxFlex>{{ row.listRecord.walletId }}</div>
+                    <div class="fb-body-2" fxFlex>{{ row.listRecord.value }}</div>
+                    <ng-container *ngIf="isGrey">
+                        <div class="fb-body-2" fxFlex="0 0 80px">{{ row.countInfo?.count }}</div>
+                        <div class="fb-body-2" fxFlex="0 0 160px">
+                            {{ row.countInfo?.startCountTime | date : 'yyyy-MM-dd HH:mm:ss' }}
+                        </div>
+                        <div class="fb-body-2" fxFlex="0 0 160px">
+                            {{ row.countInfo?.endCountTime | date : 'yyyy-MM-dd HH:mm:ss' }}
+                        </div>
+                    </ng-container>
+                    <button mat-icon-button fxFlex="0 0 20px" [matMenuTriggerFor]="menu">
+                        <mat-icon>more_vert</mat-icon>
                     </button>
-                </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="columns$ | async"></tr>
-            <tr mat-row *matRowDef="let row; columns: columns$ | async"></tr>
-        </table>
-    </ng-container>
-    <ng-template #empty><fb-empty-search-result></fb-empty-search-result></ng-template>
+                    <mat-menu #menu="matMenu">
+                        <button mat-menu-item (click)="removeRow(row)">
+                            <span>Remove row</span>
+                        </button>
+                    </mat-menu>
+                </mat-card>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="inProgress$ | async" fxLayout fxLayoutAlign="center">
+        <mat-progress-spinner color="primary" mode="indeterminate" diameter="48"></mat-progress-spinner>
+    </div>
+    <ng-template #Empty>
+        <fb-empty-search-result *ngIf="!(inProgress$ | async)"></fb-empty-search-result>
+    </ng-template>
 </div>

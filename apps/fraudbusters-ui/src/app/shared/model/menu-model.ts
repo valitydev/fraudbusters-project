@@ -42,6 +42,7 @@ export class MenuModel {
         {
             displayName: 'Payouts',
             iconName: 'account_balance_wallet',
+            route: 'payouts',
             children: [
                 {
                     displayName: 'Templates',

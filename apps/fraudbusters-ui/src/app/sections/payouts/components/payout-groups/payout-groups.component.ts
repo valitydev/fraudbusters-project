@@ -1,123 +1,58 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { FormBuilder } from '@angular/forms';
+import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { debounceTime, finalize, map, switchMap } from 'rxjs/operators';
 
-import { Group } from '../../../../api/fb-management/swagger-codegen/model/group';
 import { PayoutsService } from '../../../../api/payouts';
+import { LAYOUT_GAP_M, LAYOUT_GAP_S } from '../../../../tokens';
 import { PayoutsFeedbackService } from '../../services/payouts-feedback.service';
 
 @Component({
     templateUrl: 'payout-groups.component.html',
-    styleUrls: ['../../payouts-section.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PayoutGroupsComponent {
-    readonly columns = ['groupId', 'templates', 'actions'];
-
     search$ = new BehaviorSubject<string>('');
+    inProgress$ = new BehaviorSubject<boolean>(false);
+    searchForm = this.fb.group({ searchQuery: [''] });
     groups$ = this.search$.pipe(
-        switchMap((searchValue) => this.payoutsService.findGroups(searchValue)),
+        switchMap((searchValue) => {
+            this.inProgress$.next(true);
+            return this.payoutsService.findGroups(searchValue).pipe(finalize(() => this.inProgress$.next(false)));
+        }),
         map((response) => response.result)
     );
-
-    editing = false;
-    form = this.fb.group({
-        groupId: ['', Validators.required],
-        templates: this.fb.array<FormGroup>([]),
-    });
 
     constructor(
         private payoutsService: PayoutsService,
         private feedback: PayoutsFeedbackService,
+        private router: Router,
         private fb: FormBuilder,
-        private cdr: ChangeDetectorRef
-    ) {}
-
-    get templates(): FormArray<FormGroup> {
-        return this.form.controls.templates;
+        @Inject(LAYOUT_GAP_M) public layoutGapM: string,
+        @Inject(LAYOUT_GAP_S) public layoutGapS: string
+    ) {
+        this.searchForm.controls.searchQuery.valueChanges
+            .pipe(debounceTime(300))
+            .subscribe((value) => this.search$.next((value ?? '').trim()));
     }
 
-    search(searchValue: string) {
-        this.search$.next(searchValue.trim());
+    createGroup() {
+        void this.router.navigate(['/payouts/group/new'], { queryParams: { returnUrl: this.router.url } });
     }
 
-    templatesOf(group: Group): string {
-        return (group.priorityTemplates ?? []).map((template) => `${template.priority}: ${template.id}`).join(', ');
+    editGroup(groupId: string) {
+        void this.router.navigate([`/payouts/group/${groupId}`], { queryParams: { returnUrl: this.router.url } });
     }
 
-    create() {
-        this.open({ groupId: '', priorityTemplates: [{ id: '', priority: 1 }] }, false);
-    }
-
-    edit(group: Group) {
-        this.open(group, true);
-    }
-
-    addTemplate() {
-        this.templates.push(this.templateRow('', this.templates.length + 1));
-    }
-
-    removeTemplate(index: number) {
-        this.templates.removeAt(index);
-    }
-
-    cancel() {
-        this.editing = false;
-    }
-
-    save() {
-        const { groupId, templates } = this.form.getRawValue();
-        const group: Group = {
-            groupId: groupId.trim(),
-            priorityTemplates: templates.map((template: { id: string; priority: number }) => ({
-                id: template.id.trim(),
-                priority: Number(template.priority),
-            })),
-        };
-        this.payoutsService.saveGroup(group).subscribe({
-            next: () => {
-                this.feedback.done(`Group ${group.groupId} saved`);
-                this.editing = false;
-                this.search$.next(this.search$.value);
-                this.cdr.markForCheck();
-            },
-            error: (error: HttpErrorResponse) => this.feedback.failed(error),
-        });
-    }
-
-    remove(group: Group) {
+    removeGroup(groupId: string) {
         this.feedback
-            .confirm(`Remove payout group ${group.groupId}?`)
-            .pipe(switchMap(() => this.payoutsService.removeGroup(group.groupId)))
+            .confirm(`Remove group ${groupId}?`)
+            .pipe(switchMap(() => this.payoutsService.removeGroup(groupId)))
             .subscribe({
-                next: () => {
-                    this.feedback.done(`Group ${group.groupId} removed`);
-                    this.search$.next(this.search$.value);
-                },
+                next: () => this.search$.next(this.search$.value),
                 error: (error: HttpErrorResponse) => this.feedback.failed(error),
             });
-    }
-
-    private open(group: Group, existing: boolean) {
-        this.form.controls.groupId.setValue(group.groupId);
-        if (existing) {
-            this.form.controls.groupId.disable();
-        } else {
-            this.form.controls.groupId.enable();
-        }
-        this.templates.clear();
-        (group.priorityTemplates ?? []).forEach((template) =>
-            this.templates.push(this.templateRow(template.id, template.priority))
-        );
-        this.editing = true;
-    }
-
-    private templateRow(id: string, priority: number): FormGroup {
-        return this.fb.group({
-            id: [id, Validators.required],
-            priority: [priority, [Validators.required, Validators.min(0)]],
-        });
     }
 }

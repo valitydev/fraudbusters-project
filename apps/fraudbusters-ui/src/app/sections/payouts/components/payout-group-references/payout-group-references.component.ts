@@ -1,77 +1,62 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { FormBuilder } from '@angular/forms';
+import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { debounceTime, finalize, map, switchMap } from 'rxjs/operators';
 
 import { PayoutGroupReference } from '../../../../api/fb-management/swagger-codegen/model/payoutGroupReference';
 import { PayoutsService } from '../../../../api/payouts';
-import { describePayoutScope, toPayoutScope } from '../../services/payout-scope';
+import { LAYOUT_GAP_M } from '../../../../tokens';
+import { describePayoutScope } from '../../services/payout-scope';
 import { PayoutsFeedbackService } from '../../services/payouts-feedback.service';
 
 @Component({
     templateUrl: 'payout-group-references.component.html',
-    styleUrls: ['../../payouts-section.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PayoutGroupReferencesComponent {
-    readonly columns = ['scope', 'groupId', 'actions'];
-
     search$ = new BehaviorSubject<string>('');
+    inProgress$ = new BehaviorSubject<boolean>(false);
+    searchForm = this.fb.group({ searchQuery: [''] });
     references$ = this.search$.pipe(
-        switchMap((searchValue) => this.payoutsService.findGroupReferences({ searchValue, size: 100 })),
+        switchMap((searchValue) => {
+            this.inProgress$.next(true);
+            return this.payoutsService
+                .findGroupReferences({ searchValue, size: 100 })
+                .pipe(finalize(() => this.inProgress$.next(false)));
+        }),
         map((response) => response.result)
     );
-    groups$ = this.payoutsService.findGroups().pipe(map((response) => response.result.map((group) => group.groupId)));
-
-    form = this.fb.group({
-        groupId: ['', Validators.required],
-        partyId: [''],
-        walletId: [''],
-    });
 
     constructor(
         private payoutsService: PayoutsService,
         private feedback: PayoutsFeedbackService,
-        private fb: FormBuilder
-    ) {}
-
-    describeScope(scope: { partyId?: string; walletId?: string; isGlobal?: boolean }): string {
-        return describePayoutScope(scope);
+        private router: Router,
+        private fb: FormBuilder,
+        @Inject(LAYOUT_GAP_M) public layoutGapM: string
+    ) {
+        this.searchForm.controls.searchQuery.valueChanges
+            .pipe(debounceTime(300))
+            .subscribe((value) => this.search$.next((value ?? '').trim()));
     }
 
-    search(searchValue: string) {
-        this.search$.next(searchValue.trim());
-    }
-
-    save() {
-        const { groupId, partyId, walletId } = this.form.getRawValue();
-        let scope: { partyId?: string; walletId?: string };
-        try {
-            scope = toPayoutScope(partyId, walletId);
-        } catch (e) {
-            this.feedback.failed((e as Error).message);
-            return;
-        }
-        this.payoutsService.saveGroupReferences(groupId, [{ groupId, ...scope }]).subscribe({
-            next: () => {
-                this.feedback.done('Group reference saved');
-                this.form.reset({ groupId: '', partyId: '', walletId: '' });
-                this.search$.next(this.search$.value);
-            },
-            error: (error: HttpErrorResponse) => this.feedback.failed(error),
+    createReference() {
+        void this.router.navigate(['/payouts/group-reference/new'], {
+            queryParams: { returnUrl: this.router.url },
         });
     }
 
-    remove(reference: PayoutGroupReference) {
+    goToGroup(groupId: string) {
+        void this.router.navigate([`/payouts/group/${groupId}`], { queryParams: { returnUrl: this.router.url } });
+    }
+
+    removeReference(reference: PayoutGroupReference) {
         this.feedback
             .confirm(`Remove the reference of ${describePayoutScope(reference)} to group ${reference.groupId}?`)
             .pipe(switchMap(() => this.payoutsService.removeGroupReference(reference)))
             .subscribe({
-                next: () => {
-                    this.feedback.done('Group reference removed');
-                    this.search$.next(this.search$.value);
-                },
+                next: () => this.search$.next(this.search$.value),
                 error: (error: HttpErrorResponse) => this.feedback.failed(error),
             });
     }

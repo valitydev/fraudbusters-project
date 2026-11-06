@@ -1,55 +1,46 @@
-<div fxLayout="column" fxLayoutGap="16px">
-    <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="16px">
-        <mat-form-field appearance="outline" floatLabel="always" fxFlex>
-            <mat-label>Search by template ID</mat-label>
-            <input matInput #searchInput (keyup.enter)="search(searchInput.value)" />
-        </mat-form-field>
-        <button mat-raised-button color="primary" (click)="create()">Create template</button>
+<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <div fxLayout fxLayoutAlign="space-between center">
+        <form fxLayout fxLayoutGap="16px" [formGroup]="searchForm">
+            <mat-form-field appearance="outline">
+                <input matInput placeholder="Search" formControlName="searchQuery" type="string" autocomplete="false" />
+            </mat-form-field>
+        </form>
+        <button mat-button color="primary" (click)="createTemplate()">CREATE TEMPLATE</button>
     </div>
-
-    <mat-card *ngIf="editing">
-        <mat-card-content fxLayout="column" [formGroup]="form">
-            <mat-form-field appearance="outline" floatLabel="always">
-                <mat-label>Template ID</mat-label>
-                <input matInput formControlName="id" />
-            </mat-form-field>
-            <mat-form-field appearance="outline" floatLabel="always">
-                <mat-label>Rules</mat-label>
-                <textarea matInput class="fb-payout-template" formControlName="template" rows="10"></textarea>
-            </mat-form-field>
-            <div *ngFor="let error of errors" class="mat-error">{{ error }}</div>
-        </mat-card-content>
-        <mat-card-actions align="end">
-            <button mat-button (click)="cancel()">Cancel</button>
-            <button mat-button [disabled]="form.invalid" (click)="validate()">Validate</button>
-            <button mat-raised-button color="primary" [disabled]="form.invalid" (click)="save()">Save</button>
-        </mat-card-actions>
-    </mat-card>
-
-    <ng-container *ngIf="templates$ | async as templates">
-        <table mat-table [dataSource]="templates" *ngIf="templates.length; else empty">
-            <ng-container matColumnDef="id">
-                <th mat-header-cell *matHeaderCellDef>ID</th>
-                <td mat-cell *matCellDef="let template">{{ template.id }}</td>
-            </ng-container>
-            <ng-container matColumnDef="template">
-                <th mat-header-cell *matHeaderCellDef>Rules</th>
-                <td mat-cell *matCellDef="let template" class="fb-payout-template">{{ template.template }}</td>
-            </ng-container>
-            <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef></th>
-                <td mat-cell *matCellDef="let template">
-                    <button mat-icon-button (click)="edit(template)" aria-label="Edit template">
-                        <mat-icon>edit</mat-icon>
-                    </button>
-                    <button mat-icon-button (click)="remove(template)" aria-label="Remove template">
-                        <mat-icon>delete</mat-icon>
-                    </button>
-                </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="columns"></tr>
-            <tr mat-row *matRowDef="let row; columns: columns"></tr>
-        </table>
-    </ng-container>
-    <ng-template #empty><fb-empty-search-result></fb-empty-search-result></ng-template>
+    <div *ngIf="templates$ | async as templates">
+        <div *ngIf="templates.length; else Empty" fxLayout="column" [fxLayoutGap]="layoutGapM">
+            <fb-list-header [reserveToggleSpace]="true">
+                <div class="fb-body-2" fxFlex>ID</div>
+            </fb-list-header>
+            <div *ngFor="let template of templates" fxLayout="column" [fxLayoutGap]="layoutGapM">
+                <mat-expansion-panel>
+                    <mat-expansion-panel-header>
+                        <div fxLayout fxFlexFill fxLayoutAlign="start center" [fxLayoutGap]="layoutGapM">
+                            <div class="fb-body-2" fxFlex>{{ template.id }}</div>
+                        </div>
+                    </mat-expansion-panel-header>
+                    <div class="panel-content" fxLayout="column" [fxLayoutGap]="layoutGapM">
+                        <mat-divider></mat-divider>
+                        <div class="fb-body-1 fb-template" fxLayout="column" [fxLayoutGap]="layoutGapS">
+                            <ng-container *ngFor="let rule of template.template | templateToRules">
+                                <code>{{ rule }}</code>
+                            </ng-container>
+                        </div>
+                        <mat-divider></mat-divider>
+                        <div fxLayout fxLayoutAlign="end" [fxLayoutGap]="layoutGapM">
+                            <button mat-button color="warn" (click)="removeTemplate(template.id)">Remove</button>
+                            <button mat-button color="accent" (click)="copyTemplate(template.id)">Copy</button>
+                            <button mat-button color="primary" (click)="editTemplate(template.id)">Edit</button>
+                        </div>
+                    </div>
+                </mat-expansion-panel>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="inProgress$ | async" fxLayout fxLayoutAlign="center">
+        <mat-progress-spinner color="primary" mode="indeterminate" diameter="48"></mat-progress-spinner>
+    </div>
+    <ng-template #Empty>
+        <fb-empty-search-result *ngIf="!(inProgress$ | async)"></fb-empty-search-result>
+    </ng-template>
 </div>

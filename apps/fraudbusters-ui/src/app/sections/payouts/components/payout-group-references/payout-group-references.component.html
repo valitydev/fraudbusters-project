@@ -1,52 +1,50 @@
-<div fxLayout="column" fxLayoutGap="16px">
-    <mat-card>
-        <mat-card-content [formGroup]="form" class="fb-payout-form">
-            <mat-form-field appearance="outline" floatLabel="always">
-                <mat-label>Group</mat-label>
-                <mat-select formControlName="groupId">
-                    <mat-option *ngFor="let groupId of groups$ | async" [value]="groupId">{{ groupId }}</mat-option>
-                </mat-select>
+<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <div fxLayout fxLayoutAlign="space-between center">
+        <form fxLayout fxLayoutGap="16px" [formGroup]="searchForm">
+            <mat-form-field appearance="outline">
+                <input matInput placeholder="Search" formControlName="searchQuery" type="string" autocomplete="false" />
             </mat-form-field>
-            <mat-form-field appearance="outline" floatLabel="always">
-                <mat-label>Party ID (empty for all payouts)</mat-label>
-                <input matInput formControlName="partyId" />
-            </mat-form-field>
-            <mat-form-field appearance="outline" floatLabel="always">
-                <mat-label>Wallet ID (optional)</mat-label>
-                <input matInput formControlName="walletId" />
-            </mat-form-field>
-            <button mat-raised-button color="primary" [disabled]="form.invalid" (click)="save()">
-                Add group reference
-            </button>
-        </mat-card-content>
-    </mat-card>
-
-    <mat-form-field appearance="outline" floatLabel="always">
-        <mat-label>Search by party, wallet or group</mat-label>
-        <input matInput #searchInput (keyup.enter)="search(searchInput.value)" />
-    </mat-form-field>
-
-    <ng-container *ngIf="references$ | async as references">
-        <table mat-table [dataSource]="references" *ngIf="references.length; else empty">
-            <ng-container matColumnDef="scope">
-                <th mat-header-cell *matHeaderCellDef>Applies to</th>
-                <td mat-cell *matCellDef="let reference">{{ describeScope(reference) }}</td>
-            </ng-container>
-            <ng-container matColumnDef="groupId">
-                <th mat-header-cell *matHeaderCellDef>Group</th>
-                <td mat-cell *matCellDef="let reference">{{ reference.groupId }}</td>
-            </ng-container>
-            <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef></th>
-                <td mat-cell *matCellDef="let reference">
-                    <button mat-icon-button (click)="remove(reference)" aria-label="Remove group reference">
-                        <mat-icon>delete</mat-icon>
+        </form>
+        <button mat-button color="primary" (click)="createReference()">CREATE REFERENCE</button>
+    </div>
+    <div *ngIf="references$ | async as references; else Empty" fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <div *ngIf="references.length; else Empty" fxLayout="column" [fxLayoutGap]="layoutGapM">
+            <fb-list-header>
+                <div class="fb-body-2" fxFlex fxGrow="2">Group ID</div>
+                <div class="fb-body-2" fxFlex>Party ID</div>
+                <div class="fb-body-2" fxFlex>Wallet ID</div>
+                <div fxFlex="0 0 20px"></div>
+            </fb-list-header>
+            <div *ngFor="let reference of references" fxLayout="column" [fxLayoutGap]="layoutGapM">
+                <mat-card
+                    class="fb-list-item"
+                    fxLayout
+                    fxFlexFill
+                    fxLayoutAlign="center center"
+                    [fxLayoutGap]="layoutGapM"
+                >
+                    <div class="fb-body-2 wrap" fxFlex fxGrow="2">{{ reference.groupId }}</div>
+                    <div class="fb-body-2 wrap" fxFlex>{{ reference.partyId }}</div>
+                    <div class="fb-body-2 wrap" fxFlex>{{ reference.walletId }}</div>
+                    <button mat-icon-button fxFlex="0 0 20px" [matMenuTriggerFor]="menu">
+                        <mat-icon>more_vert</mat-icon>
                     </button>
-                </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="columns"></tr>
-            <tr mat-row *matRowDef="let row; columns: columns"></tr>
-        </table>
-    </ng-container>
-    <ng-template #empty><fb-empty-search-result></fb-empty-search-result></ng-template>
+                    <mat-menu #menu="matMenu">
+                        <button mat-menu-item (click)="removeReference(reference)">
+                            <span>Remove reference</span>
+                        </button>
+                        <button mat-menu-item (click)="goToGroup(reference.groupId)">
+                            <span>Go to group</span>
+                        </button>
+                    </mat-menu>
+                </mat-card>
+            </div>
+        </div>
+    </div>
+    <ng-template #Empty>
+        <div *ngIf="inProgress$ | async" fxLayout fxLayoutAlign="center">
+            <mat-progress-spinner color="primary" mode="indeterminate" diameter="48"></mat-progress-spinner>
+        </div>
+        <fb-empty-search-result *ngIf="!(inProgress$ | async)"></fb-empty-search-result>
+    </ng-template>
 </div>

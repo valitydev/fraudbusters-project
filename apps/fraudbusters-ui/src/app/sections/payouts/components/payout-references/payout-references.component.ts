@@ -1,88 +1,60 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { FormBuilder } from '@angular/forms';
+import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
-import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
+import { debounceTime, finalize, map, switchMap } from 'rxjs/operators';
 
 import { PayoutReference } from '../../../../api/fb-management/swagger-codegen/model/payoutReference';
 import { PayoutsService } from '../../../../api/payouts';
-import { describePayoutScope, toPayoutScope } from '../../services/payout-scope';
+import { LAYOUT_GAP_M } from '../../../../tokens';
+import { describePayoutScope } from '../../services/payout-scope';
 import { PayoutsFeedbackService } from '../../services/payouts-feedback.service';
 
 @Component({
     templateUrl: 'payout-references.component.html',
-    styleUrls: ['../../payouts-section.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PayoutReferencesComponent {
-    readonly columns = ['scope', 'templateId', 'actions'];
-
     search$ = new BehaviorSubject<string>('');
+    inProgress$ = new BehaviorSubject<boolean>(false);
+    searchForm = this.fb.group({ searchQuery: [''] });
     references$ = this.search$.pipe(
-        switchMap((searchValue) => this.payoutsService.findReferences({ searchValue, size: 100 })),
+        switchMap((searchValue) => {
+            this.inProgress$.next(true);
+            return this.payoutsService
+                .findReferences({ searchValue, size: 100 })
+                .pipe(finalize(() => this.inProgress$.next(false)));
+        }),
         map((response) => response.result)
-    );
-
-    form = this.fb.group({
-        isGlobal: [false],
-        partyId: [''],
-        walletId: [''],
-        templateId: ['', Validators.required],
-    });
-    templateNames$ = this.form.controls.templateId.valueChanges.pipe(
-        startWith(''),
-        debounceTime(300),
-        switchMap((prefix) => this.payoutsService.getTemplateNames(prefix ?? ''))
     );
 
     constructor(
         private payoutsService: PayoutsService,
         private feedback: PayoutsFeedbackService,
-        private fb: FormBuilder
-    ) {}
-
-    describeScope(scope: { partyId?: string; walletId?: string; isGlobal?: boolean }): string {
-        return describePayoutScope(scope);
+        private router: Router,
+        private fb: FormBuilder,
+        @Inject(LAYOUT_GAP_M) public layoutGapM: string
+    ) {
+        this.searchForm.controls.searchQuery.valueChanges
+            .pipe(debounceTime(300))
+            .subscribe((value) => this.search$.next((value ?? '').trim()));
     }
 
-    search(searchValue: string) {
-        this.search$.next(searchValue.trim());
+    createReference() {
+        void this.router.navigate(['/payouts/reference/new'], { queryParams: { returnUrl: this.router.url } });
     }
 
-    save() {
-        const { isGlobal, partyId, walletId, templateId } = this.form.getRawValue();
-        let reference: PayoutReference;
-        try {
-            reference = isGlobal
-                ? { templateId: templateId.trim(), isGlobal: true }
-                : { templateId: templateId.trim(), isGlobal: false, ...toPayoutScope(partyId, walletId) };
-        } catch (e) {
-            this.feedback.failed((e as Error).message);
-            return;
-        }
-        if (!reference.isGlobal && !reference.partyId) {
-            this.feedback.failed('Set a party or make the reference global');
-            return;
-        }
-        this.payoutsService.saveReferences([reference]).subscribe({
-            next: () => {
-                this.feedback.done('Reference saved');
-                this.form.reset({ isGlobal: false, partyId: '', walletId: '', templateId: '' });
-                this.search$.next(this.search$.value);
-            },
-            error: (error: HttpErrorResponse) => this.feedback.failed(error),
-        });
+    goToTemplate(id: string) {
+        void this.router.navigate([`/payouts/template/${id}`], { queryParams: { returnUrl: this.router.url } });
     }
 
-    remove(reference: PayoutReference) {
+    removeReference(reference: PayoutReference) {
         this.feedback
             .confirm(`Remove the reference of ${describePayoutScope(reference)} to ${reference.templateId}?`)
             .pipe(switchMap(() => this.payoutsService.removeReference(reference)))
             .subscribe({
-                next: () => {
-                    this.feedback.done('Reference removed');
-                    this.search$.next(this.search$.value);
-                },
+                next: () => this.search$.next(this.search$.value),
                 error: (error: HttpErrorResponse) => this.feedback.failed(error),
             });
     }

@@ -69,11 +69,19 @@ export class MenuListItemComponent implements OnInit {
         return item.roles.some((role) => this.keycloak.getUserRoles().includes(role));
     }
 
+    /** A group contains its items' pages and, when it has its own route, every page under that route. */
     private containsCurrentPage(item: NavItem): boolean {
         if (item.children?.length) {
-            return item.children.some((child) => this.containsCurrentPage(child));
+            return this.isUnder(item.route) || item.children.some((child) => this.containsCurrentPage(child));
         }
-        const route = `/${item.route}`;
-        return this.router.url === route || this.router.url.startsWith(`${route}/`);
+        return this.isUnder(item.route);
+    }
+
+    private isUnder(route?: string): boolean {
+        if (!route) {
+            return false;
+        }
+        const path = `/${route}`;
+        return this.router.url === path || this.router.url.startsWith(`${path}/`);
     }
 }
