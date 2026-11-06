@@ -23,7 +23,8 @@ class PaymentInspectRequestToContextConverterTest {
         var converter = new PaymentInspectRequestToContextConverter(new CachToInternalDtoConverter());
         var payment = ApiBeanGenerator.initPayment();
         payment.setCustomer(new dev.vality.swag.fraudbusters.model.Customer()
-                .customerId(customerId).userId(userId));
+                .customerId(customerId)
+                .userId(userId));
         var context = converter.convert(new PaymentInspectRequest().payment(payment));
         var identity = context.getPayment().getInvoice().getClientIdentity();
         assertNotNull(identity);
@@ -36,11 +37,10 @@ class PaymentInspectRequestToContextConverterTest {
         var converter = new PaymentInspectRequestToContextConverter(new CachToInternalDtoConverter());
         var payment = ApiBeanGenerator.initPayment();
         payment.setCustomer(new dev.vality.swag.fraudbusters.model.Customer());
-        assertFalse(converter.convert(new PaymentInspectRequest().payment(payment))
-                .getPayment().getInvoice().isSetClientIdentity());
+        var request = new PaymentInspectRequest().payment(payment);
+        assertFalse(converter.convert(request).getPayment().getInvoice().isSetClientIdentity());
         payment.setCustomer(null);
-        assertFalse(converter.convert(new PaymentInspectRequest().payment(payment))
-                .getPayment().getInvoice().isSetClientIdentity());
+        assertFalse(converter.convert(request).getPayment().getInvoice().isSetClientIdentity());
     }
 
     @Test
@@ -48,8 +48,8 @@ class PaymentInspectRequestToContextConverterTest {
         var converter = new PaymentInspectRequestToContextConverter(new CachToInternalDtoConverter());
         var payment = ApiBeanGenerator.initPayment();
         payment.setCustomer(new dev.vality.swag.fraudbusters.model.Customer().userId("Synthetic-User"));
-        var identity = converter.convert(new PaymentInspectRequest().payment(payment))
-                .getPayment().getInvoice().getClientIdentity();
+        var context = converter.convert(new PaymentInspectRequest().payment(payment));
+        var identity = context.getPayment().getInvoice().getClientIdentity();
 
         assertEquals("Synthetic-User", identity.getUserId());
         assertThrows(TProtocolException.class, () -> new TSerializer().serialize(identity));

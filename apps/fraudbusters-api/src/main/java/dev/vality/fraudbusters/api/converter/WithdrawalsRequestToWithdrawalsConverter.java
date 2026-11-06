@@ -21,6 +21,7 @@ public class WithdrawalsRequestToWithdrawalsConverter implements Converter<Withd
     private final ErrorToInternalDtoConverter errorToInternalDtoConverter;
     private final ProviderToInternalDtoConverter providerToInternalDtoConverter;
     private final PaymentResourceToResourceConverter paymentResourceToResourceConverter;
+    private final CustomerToInternalDtoConverter customerToInternalDtoConverter;
 
     @Override
     public List<Withdrawal> convert(WithdrawalsRequest request) {
@@ -40,6 +41,10 @@ public class WithdrawalsRequestToWithdrawalsConverter implements Converter<Withd
                 .setAccount(new Account()
                         .setId(item.getAccount().getId())
                         .setCurrency(new CurrencyRef(item.getAccount().getCurrency())))
+                .setPartyId(item.getPartyId())
+                .setWalletId(item.getWalletId())
+                .setClientInfo(item.getCustomer() == null ? null
+                        : customerToInternalDtoConverter.convert(item.getCustomer()))
                 .setDestinationResource(paymentResourceToResourceConverter.convert(item.getPaymentResource()));
     }
 

@@ -25,12 +25,7 @@ class WithdrawalsRequestToWithdrawalsConverterTest {
 
     @Test
     void convert() {
-        WithdrawalsRequestToWithdrawalsConverter converter = new WithdrawalsRequestToWithdrawalsConverter(
-                cachToInternalDtoConverter,
-                errorToInternalDtoConverter,
-                providerToInternalDtoConverter,
-                new PaymentResourceToResourceConverter(new BankCardToInternalDtoConverter())
-        );
+        var converter = converter();
 
         List<Withdrawal> withdrawals = converter.convert(new WithdrawalsRequest().withdrawals(
                 List.of(ApiBeanGenerator.initWithdrawal())));
@@ -45,4 +40,33 @@ class WithdrawalsRequestToWithdrawalsConverterTest {
         assertEquals(WithdrawalStatus.succeeded, withdrawal.getStatus());
         assertEquals(ApiBeanGenerator.ACCOUNT_ID, withdrawal.getAccount().getId());
     }
+
+    @Test
+    void identityIsForwardedWithoutCustomerFallback() {
+        var item = ApiBeanGenerator.initWithdrawal()
+                .partyId("synthetic-party")
+                .walletId("synthetic-wallet")
+                .customer(new dev.vality.swag.fraudbusters.model.Customer()
+                        .customerId("synthetic-customer"));
+        var converter = converter();
+        var request = new WithdrawalsRequest().withdrawals(List.of(item));
+        var legacyIdentity = converter.convert(request).get(0);
+        assertEquals("synthetic-party", legacyIdentity.getPartyId());
+        assertEquals("synthetic-wallet", legacyIdentity.getWalletId());
+        assertEquals("synthetic-customer", legacyIdentity.getClientInfo().getCustomerId());
+        assertFalse(legacyIdentity.getClientInfo().isSetUserId());
+        item.getCustomer().setUserId("synthetic-user");
+        assertEquals("synthetic-user", converter.convert(request).get(0).getClientInfo().getUserId());
+    }
+
+    private WithdrawalsRequestToWithdrawalsConverter converter() {
+        return new WithdrawalsRequestToWithdrawalsConverter(
+                cachToInternalDtoConverter,
+                errorToInternalDtoConverter,
+                providerToInternalDtoConverter,
+                new PaymentResourceToResourceConverter(new BankCardToInternalDtoConverter()),
+                new CustomerToInternalDtoConverter()
+        );
+    }
+
 }
