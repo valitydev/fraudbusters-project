@@ -23,11 +23,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>25</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
-        <fraudo.version>1.0.10</fraudo.version>
+        <fraudo.version>1.1.1</fraudo.version>
         <clickhouse-jdbc.version>0.3.1</clickhouse-jdbc.version>
-        <fraudbusters-proto.version>1.136-89a0bc7</fraudbusters-proto.version>
+        <fraudbusters-proto.version>1.138-7689fd1</fraudbusters-proto.version>
         <trusted.tokens.proto.version>1.7-6d29f86</trusted.tokens.proto.version>
-        <wb.list.proto.version>1.44-5dbd6d4</wb.list.proto.version>
+        <wb.list.proto.version>1.52-e01057a</wb.list.proto.version>
         <columbus-proto.version>1.3-979c2b6</columbus-proto.version>
         <testcontainers-annotations.version>2.0.3</testcontainers-annotations.version>
         <!-- Keep the legacy container API required by clickhouse-test and testcontainers-annotations. -->
@@ -114,7 +114,7 @@
         <dependency>
             <groupId>dev.vality</groupId>
             <artifactId>damsel</artifactId>
-            <version>1.712-1018337</version>
+            <version>1.714-09f693a</version>
         </dependency>
         <dependency>
             <groupId>dev.vality</groupId>

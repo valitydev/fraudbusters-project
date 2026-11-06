@@ -9,7 +9,7 @@ public class PaymentModelFieldResolver implements FieldResolver<PaymentModel, Pa
 
     @Override
     public String resolveValue(String fieldName, PaymentModel paymentModel) {
-        return switch (PaymentCheckedField.getByValue(fieldName)) {
+        return switch (resolveName(fieldName)) {
             case BIN -> paymentModel.getBin();
             case IP -> paymentModel.getIp();
             case FINGERPRINT -> paymentModel.getFingerprint();
@@ -19,6 +19,9 @@ public class PaymentModelFieldResolver implements FieldResolver<PaymentModel, Pa
             case COUNTRY_BANK -> paymentModel.getBinCountryCode();
             case CARD_TOKEN -> paymentModel.getCardToken();
             case LAST_DIGITS -> paymentModel.getLastDigits();
+            case PARTY_ID -> paymentModel.getPartyId();
+            case SHOP_ID -> paymentModel.getShopId();
+            case CURRENCY -> paymentModel.getCurrency();
             case MASKED_PAN -> paymentModel.getBin() + paymentModel.getLastDigits();
             default -> throw new UnresolvableFieldException(fieldName);
         };

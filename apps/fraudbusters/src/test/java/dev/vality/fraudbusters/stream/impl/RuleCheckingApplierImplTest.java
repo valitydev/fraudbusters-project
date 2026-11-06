@@ -4,7 +4,7 @@ import dev.vality.fraudbusters.domain.CheckedResultModel;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.pool.HistoricalPool;
 import dev.vality.fraudbusters.util.CheckedResultFactory;
-import dev.vality.fraudo.FraudoPaymentParser;
+import dev.vality.fraudo.FraudoRulesParser;
 import dev.vality.fraudo.constant.ResultStatus;
 import dev.vality.fraudo.model.ResultModel;
 import dev.vality.fraudo.model.RuleResult;
@@ -68,8 +68,8 @@ class RuleCheckingApplierImplTest {
 
     @Test
     void apply() {
-        FraudoPaymentParser.ParseContext parseContext =
-                new FraudoPaymentParser.ParseContext(new ParserRuleContext(), 0);
+        FraudoRulesParser.ParseContext parseContext =
+                new FraudoRulesParser.ParseContext(new ParserRuleContext(), 0);
         PaymentModel paymentModel = createPaymentModel();
         ResultModel resultModel = createResultModel(List.of(ACCEPTED_RULE_RESULT, DECLINED_RULE_RESULT));
         CheckedResultModel checkedResultModel =
@@ -92,8 +92,8 @@ class RuleCheckingApplierImplTest {
 
     @Test
     void applyForAny() {
-        FraudoPaymentParser.ParseContext parseContext =
-                new FraudoPaymentParser.ParseContext(new ParserRuleContext(), 0);
+        FraudoRulesParser.ParseContext parseContext =
+                new FraudoRulesParser.ParseContext(new ParserRuleContext(), 0);
         PaymentModel paymentModel = createPaymentModel();
         ResultModel resultModel = createResultModel(List.of(ACCEPTED_RULE_RESULT, DECLINED_RULE_RESULT));
         CheckedResultModel checkedResultModel =
@@ -138,8 +138,8 @@ class RuleCheckingApplierImplTest {
 
     @Test
     void applyWithContext() {
-        FraudoPaymentParser.ParseContext parseContext =
-                new FraudoPaymentParser.ParseContext(new ParserRuleContext(), 0);
+        FraudoRulesParser.ParseContext parseContext =
+                new FraudoRulesParser.ParseContext(new ParserRuleContext(), 0);
         PaymentModel paymentModel = createPaymentModel();
         ResultModel resultModel = createResultModel(List.of(ACCEPTED_RULE_RESULT, DECLINED_RULE_RESULT));
         CheckedResultModel checkedResultModel =

@@ -4,8 +4,11 @@ import dev.vality.damsel.proxy_inspector.InspectorProxySrv;
 import dev.vality.damsel.wb_list.WbListServiceSrv;
 import dev.vality.fraudbusters.converter.CheckedResultToRiskScoreConverter;
 import dev.vality.fraudbusters.converter.ContextToFraudRequestConverter;
+import dev.vality.fraudbusters.converter.WithdrawalContextToModelConverter;
 import dev.vality.fraudbusters.domain.FraudResult;
+import dev.vality.fraudbusters.domain.PayoutResult;
 import dev.vality.fraudbusters.resource.payment.handler.FraudInspectorHandler;
+import dev.vality.fraudbusters.stream.impl.PayoutTemplateVisitorImpl;
 import dev.vality.fraudbusters.stream.impl.TemplateVisitorImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,20 +21,30 @@ public class PaymentResourceConfig {
     @Value("${kafka.topic.result}")
     private String resultTopic;
 
+    @Value("${kafka.topic.payout-result}")
+    private String payoutResultTopic;
+
     @Bean
     public InspectorProxySrv.Iface fraudInspectorHandler(
             KafkaTemplate<String, FraudResult> kafkaFraudResultTemplate,
             CheckedResultToRiskScoreConverter checkedResultToRiskScoreConverter,
             ContextToFraudRequestConverter requestConverter,
             TemplateVisitorImpl templateVisitor,
-            WbListServiceSrv.Iface wbListServiceSrv) {
+            WbListServiceSrv.Iface wbListServiceSrv,
+            WithdrawalContextToModelConverter withdrawalContextToModelConverter,
+            PayoutTemplateVisitorImpl payoutTemplateVisitor,
+            KafkaTemplate<String, PayoutResult> kafkaPayoutResultTemplate) {
         return new FraudInspectorHandler(
                 resultTopic,
                 checkedResultToRiskScoreConverter,
                 requestConverter,
                 templateVisitor,
                 kafkaFraudResultTemplate,
-                wbListServiceSrv
+                wbListServiceSrv,
+                withdrawalContextToModelConverter,
+                payoutTemplateVisitor,
+                payoutResultTopic,
+                kafkaPayoutResultTemplate
         );
     }
 

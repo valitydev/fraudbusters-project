@@ -1,6 +1,7 @@
 package dev.vality.fraudbusters.fraud.payment;
 
 import dev.vality.fraudbusters.config.payment.PaymentFraudoConfig;
+import dev.vality.fraudbusters.fraud.RulesContextParserImpl;
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.UniqueValueAggregatorImpl;
@@ -114,13 +115,13 @@ class ManyEmailsPerCardRuleTest {
     private ResultModel applyRule(String rule, PaymentModel paymentModel, RepositoryStub repository) {
         assertTrue(new PaymentTemplateValidator().validate(rule).isEmpty());
         FirstFindVisitorImpl<PaymentModel, PaymentCheckedField> visitor = createVisitor(repository.asRepository());
-        return visitor.visit(new PaymentContextParserImpl().parse(rule), paymentModel);
+        return visitor.visit(new RulesContextParserImpl().parse(rule), paymentModel);
     }
 
     private FirstFindVisitorImpl<PaymentModel, PaymentCheckedField> createVisitor(PaymentRepository repository) {
         DatabasePaymentFieldResolver databaseResolver = new DatabasePaymentFieldResolver();
         UniqueValueAggregator<PaymentModel, PaymentCheckedField> uniqueAggregator =
-                new UniqueValueAggregatorImpl(databaseResolver, repository, new TimeBoundaryServiceImpl());
+                new UniqueValueAggregatorImpl(databaseResolver, repository, new TimeBoundaryServiceImpl(), true);
         PaymentFraudoConfig config = new PaymentFraudoConfig();
         return config.paymentRuleVisitor(
                 unusedProxy(CountPaymentAggregator.class),
@@ -130,7 +131,8 @@ class ManyEmailsPerCardRuleTest {
                 unusedProxy(InListFinder.class),
                 new PaymentModelFieldResolver(),
                 new PaymentTypeResolverImpl(),
-                unusedProxy(CustomerTypeResolver.class)
+                unusedProxy(CustomerTypeResolver.class),
+                null
         );
     }
 

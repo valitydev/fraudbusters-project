@@ -9,7 +9,7 @@ import dev.vality.fraudbusters.fraud.FraudContextParser;
 import dev.vality.fraudbusters.fraud.localstorage.LocalResultStorageRepository;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.fraud.payment.CountryByIpResolver;
-import dev.vality.fraudbusters.fraud.payment.PaymentContextParserImpl;
+import dev.vality.fraudbusters.fraud.RulesContextParserImpl;
 import dev.vality.fraudbusters.fraud.payment.resolver.CustomerTypeResolverImpl;
 import dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver;
 import dev.vality.fraudbusters.fraud.payment.resolver.PaymentTypeResolverImpl;
@@ -22,7 +22,7 @@ import dev.vality.fraudbusters.service.TimeBoundaryServiceImpl;
 import dev.vality.fraudbusters.service.dto.CascadingTemplateDto;
 import dev.vality.fraudbusters.util.BeanUtil;
 import dev.vality.fraudbusters.util.CheckedResultFactory;
-import dev.vality.fraudo.FraudoPaymentParser;
+import dev.vality.fraudo.FraudoRulesParser;
 import dev.vality.fraudo.constant.ResultStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -53,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ContextConfiguration(classes = {
         PaymentTemplateValidator.class,
         RuleCheckingServiceImpl.class,
-        PaymentContextParserImpl.class,
+        RulesContextParserImpl.class,
         CheckedResultFactory.class,
         PaymentFraudoConfig.class,
         TimeBoundaryServiceImpl.class,
@@ -62,6 +62,9 @@ import static org.junit.jupiter.api.Assertions.*;
         HistoricalPaymentPoolConfig.class})
 @MockExternalServices
 class RuleCheckingServiceIntegrationTest {
+
+    @MockitoBean
+    private dev.vality.fraudbusters.fraud.payout.aggregator.clickhouse.PayoutAggregators payoutAggregators;
 
     @MockitoBean
     private RefundRepository refundRepository;
@@ -85,7 +88,7 @@ class RuleCheckingServiceIntegrationTest {
     @Autowired
     private HistoricalPool<ParserRuleContext> timeTemplatePoolImpl;
     @Autowired
-    private FraudContextParser<FraudoPaymentParser.ParseContext> paymentContextParser;
+    private FraudContextParser<FraudoRulesParser.ParseContext> rulesContextParser;
 
     private static final Instant now = Instant.now();
     private static final long TIMESTAMP = now.toEpochMilli();
@@ -380,7 +383,7 @@ class RuleCheckingServiceIntegrationTest {
 
     private void addTemplateRule(String template, String templateKey, String refKey, Long timestamp) {
         timeReferencePoolImpl.add(refKey, timestamp, templateKey);
-        timeTemplatePoolImpl.add(templateKey, timestamp, paymentContextParser.parse(template));
+        timeTemplatePoolImpl.add(templateKey, timestamp, rulesContextParser.parse(template));
     }
 
     private void addGroupRule(List<String> templates, List<String> templateKeys, String groupRefKey, String groupKey,
@@ -388,7 +391,7 @@ class RuleCheckingServiceIntegrationTest {
         timeGroupReferencePoolImpl.add(groupKey, timestamp, groupRefKey);
         timeGroupPoolImpl.add(groupRefKey, timestamp, templateKeys);
         for (int i = 0; i < templates.size(); i++) {
-            timeTemplatePoolImpl.add(templateKeys.get(i), timestamp, paymentContextParser.parse(templates.get(i)));
+            timeTemplatePoolImpl.add(templateKeys.get(i), timestamp, rulesContextParser.parse(templates.get(i)));
         }
     }
 

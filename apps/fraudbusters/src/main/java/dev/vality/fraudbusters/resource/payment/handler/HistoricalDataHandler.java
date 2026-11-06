@@ -71,6 +71,13 @@ public class HistoricalDataHandler implements HistoricalDataServiceSrv.Iface {
     }
 
     @Override
+    public HistoricalDataResponse getWithdrawals(Filter filter, Page page, Sort sort) {
+        FilterDto filterDto = filterConverter.convertWithdrawals(filter, page, sort);
+        HistoricalWithdrawalsDto historicalWithdrawalsDto = historicalDataService.getWithdrawals(filterDto);
+        return resultConverter.convertWithdrawal(historicalWithdrawalsDto);
+    }
+
+    @Override
     public HistoricalDataSetCheckResult applyRuleOnHistoricalDataSet(
             EmulationRuleApplyRequest emulationRuleApplyRequest) throws HistoricalDataServiceException, TException {
         Set<HistoricalTransactionCheck> historicalTransactionChecks = null;

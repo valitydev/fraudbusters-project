@@ -40,4 +40,8 @@ public enum PaymentCheckedField {
         return VALUE_MAP.get(value);
     }
 
+    public String getValue() {
+        return value;
+    }
+
 }
