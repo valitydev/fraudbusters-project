@@ -22,6 +22,8 @@ public class EventMapper implements RowMapper<Event> {
         event.setEmail(rs.getString(PaymentField.EMAIL.getValue()));
         event.setIp(rs.getString(PaymentField.IP.getValue()));
         event.setFingerprint(rs.getString(PaymentField.FINGERPRINT.getValue()));
+        event.setCustomerId(rs.getString(PaymentField.CUSTOMER_ID.getValue()));
+        event.setUserId(rs.getString(PaymentField.USER_ID.getValue()));
         event.setCardToken(rs.getString(PaymentField.CARD_TOKEN.getValue()));
         event.setBankCountry(rs.getString(PaymentField.BANK_COUNTRY.getValue()));
         event.setPartyId(rs.getString(PaymentField.PARTY_ID.getValue()));

@@ -27,6 +27,8 @@ public class DataSetRowToTestPaymentModelConverter implements Converter<DataSetR
                 .country(payment.getPaymentCountry())
                 .email(clientInfo != null ? clientInfo.getEmail() : null)
                 .fingerprint(clientInfo != null ? clientInfo.getFingerprint() : null)
+                .customerId(clientInfo != null ? clientInfo.getCustomerId() : null)
+                .userId(clientInfo != null ? clientInfo.getUserId() : null)
                 .errorCode(error != null ? error.getErrorCode() : null)
                 .errorReason(error != null ? error.getErrorReason() : null)
                 .ip(clientInfo != null ? clientInfo.getIp() : null)

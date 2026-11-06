@@ -14,7 +14,7 @@ public class PaymentBatchPreparedStatementSetter implements BatchPreparedStateme
     public static final String FIELDS = """
             timestamp, eventTimeHour, eventTime,
             id,
-            email, phone, ip, fingerprint,
+            email, phone, ip, fingerprint, customerId, userId,
             bin, lastDigits, cardToken, cardCategory, paymentSystem, paymentTool,
             terminal, providerId, bankCountry,
             partyId, shopId,
@@ -25,7 +25,7 @@ public class PaymentBatchPreparedStatementSetter implements BatchPreparedStateme
             recurrent
             """;
 
-    public static final String FIELDS_MARK = "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?";
+    public static final String FIELDS_MARK = "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?";
 
     private final List<CheckedPayment> batch;
 
@@ -41,6 +41,8 @@ public class PaymentBatchPreparedStatementSetter implements BatchPreparedStateme
         ps.setString(l++, checkedPayment.getPhone());
         ps.setString(l++, checkedPayment.getIp());
         ps.setString(l++, checkedPayment.getFingerprint());
+        ps.setString(l++, checkedPayment.getCustomerId());
+        ps.setString(l++, checkedPayment.getUserId());
 
         ps.setString(l++, checkedPayment.getBin());
         ps.setString(l++, checkedPayment.getLastDigits());

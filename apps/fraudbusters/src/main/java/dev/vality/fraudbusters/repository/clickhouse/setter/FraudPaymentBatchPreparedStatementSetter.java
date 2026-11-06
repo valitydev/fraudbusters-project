@@ -32,6 +32,8 @@ public class FraudPaymentBatchPreparedStatementSetter implements BatchPreparedSt
         ps.setString(l++, checkedPayment.getPhone());
         ps.setString(l++, checkedPayment.getIp());
         ps.setString(l++, checkedPayment.getFingerprint());
+        ps.setString(l++, checkedPayment.getCustomerId());
+        ps.setString(l++, checkedPayment.getUserId());
 
         ps.setString(l++, checkedPayment.getBin());
         ps.setString(l++, checkedPayment.getLastDigits());

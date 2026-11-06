@@ -51,6 +51,16 @@ public class GeneralInfoInitiator implements InfoInitializer<InvoicePaymentStatu
         return clientInfo;
     }
 
+    @Override
+    public ClientInfo initClientInfo(Payer payer, Invoice invoice) {
+        ClientInfo clientInfo = initClientInfo(payer);
+        if (invoice.isSetClientIdentity()) {
+            clientInfo.setCustomerId(invoice.getClientIdentity().getCustomerId());
+            clientInfo.setUserId(invoice.getClientIdentity().getUserId());
+        }
+        return clientInfo;
+    }
+
     public void initContactInfo(ClientInfo clientInfo, Payer payer) {
         if (payer.isSetPaymentResource() && payer.getPaymentResource().isSetContactInfo()) {
             clientInfo.setEmail(payer.getPaymentResource().getContactInfo().getEmail());

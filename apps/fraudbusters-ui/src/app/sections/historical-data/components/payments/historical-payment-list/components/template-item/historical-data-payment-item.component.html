@@ -34,6 +34,14 @@
             <div fxFlex>Payment System:</div>
             <div fxFlex>{{ payment.paymentSystem }}</div>
         </div>
+        <div fxLayout="row" *ngIf="payment.clientInfo?.customerId">
+            <div fxFlex>Customer ID:</div>
+            <div fxFlex>{{ payment.clientInfo.customerId }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="payment.clientInfo?.userId">
+            <div fxFlex>User ID:</div>
+            <div fxFlex>{{ payment.clientInfo.userId }}</div>
+        </div>
         <div class="row" *ngIf="payment.clientInfo.fingerprint">
             <div fxFlex>Fingerprint:</div>
             <div fxFlex>{{ payment.clientInfo.fingerprint }}</div>

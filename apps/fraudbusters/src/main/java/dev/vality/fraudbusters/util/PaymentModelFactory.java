@@ -13,6 +13,8 @@ public class PaymentModelFactory {
         paymentModel.setShopId(shopContext.getShopId());
         paymentModel.setTimestamp(System.currentTimeMillis());
         if (context.getUserInfo() != null) {
+            paymentModel.setCustomerId(context.getUserInfo().getCustomerId());
+            paymentModel.setUserId(context.getUserInfo().getUserId());
             paymentModel.setEmail(context.getUserInfo().isSetEmail()
                     ? context.getUserInfo().getEmail().toLowerCase()
                     : ClickhouseUtilsValue.UNKNOWN);

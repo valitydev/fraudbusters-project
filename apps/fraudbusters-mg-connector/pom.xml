@@ -27,7 +27,7 @@
         <dockerfile.registry>${env.REGISTRY}</dockerfile.registry>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <machinegun-proto.version>1.43-3decc8f</machinegun-proto.version>
-        <fraudbusters-proto.version>1.118-79e9e73</fraudbusters-proto.version>
+        <fraudbusters-proto.version>1.136-89a0bc7</fraudbusters-proto.version>
     </properties>
 
     <dependencies>
@@ -84,7 +84,7 @@
         <dependency>
             <groupId>dev.vality</groupId>
             <artifactId>damsel</artifactId>
-            <version>1.678-09e4c72</version>
+            <version>1.712-1018337</version>
         </dependency>
         <dependency>
             <groupId>dev.vality</groupId>
