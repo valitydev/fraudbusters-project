@@ -88,8 +88,7 @@ class PayoutInspectionTest {
                 payoutProducer);
         assertEquals(RiskScore.high, handler.inspectWithdrawal(context()));
         publishTemplate("global", "rule:1=1->decline;");
-        handle(createCommand(CommandBody.reference(new TemplateReference().setTemplateId("global")
-                .setIsGlobal(true).setOperationType(OperationType.payout))));
+        publishGlobalReference("global");
         assertEquals(RiskScore.fatal, handler.inspectWithdrawal(context()));
         verifyNoInteractions(paymentProducer);
         var result = org.mockito.ArgumentCaptor.forClass(PayoutResult.class);
@@ -115,16 +114,19 @@ class PayoutInspectionTest {
         when(payouts.countSuccess(eq(CARD_TOKEN), any(), any(), anyList())).thenReturn(3);
         assertEquals(RiskScore.fatal, risk.convert(inspect(context())));
         verify(payouts).countSuccess(eq(CARD_TOKEN), any(), any(), anyList());
-        handle(new Command().setCommandType(CommandType.DELETE).setCommandBody(CommandBody.template(
-                new Template().setId("shared-id").setOperationType(OperationType.payout))));
+        var template = new Template()
+                .setId("shared-id")
+                .setOperationType(OperationType.payout);
+        handle(new Command()
+                .setCommandType(CommandType.DELETE)
+                .setCommandBody(CommandBody.template(template)));
         assertEquals(RiskScore.high, risk.convert(inspect(context())));
     }
 
     @Test
     void notificationsContinueToLaterRulesAndMapToLowWhenAlone() {
         publishTemplate("global", "rule:1=1->notify;");
-        handle(createCommand(CommandBody.reference(new TemplateReference().setTemplateId("global")
-                .setIsGlobal(true).setOperationType(OperationType.payout))));
+        publishGlobalReference("global");
         assertEquals(RiskScore.low, risk.convert(inspect(context())));
         publishTemplate("wallet", "rule:1=1->highRisk;");
         publishReference("wallet", "synthetic-party", "synthetic-wallet");
@@ -137,11 +139,7 @@ class PayoutInspectionTest {
     void groupNotificationsAreKeptWithTheLaterDecision() {
         publishTemplate("notify", "rule:notify_rule:1=1->notify;");
         publishTemplate("decline", "rule:1=1->decline;");
-        handle(createCommand(CommandBody.group(new Group().setGroupId("group")
-                .setOperationType(OperationType.payout).setTemplateIds(List.of(
-                        new PriorityId(1, "notify"), new PriorityId(2, "decline"))))));
-        handle(createCommand(CommandBody.group_reference(new GroupReference().setGroupId("group")
-                .setPartyId("synthetic-party").setOperationType(OperationType.payout))));
+        publishGroup(new PriorityId(1, "notify"), new PriorityId(2, "decline"));
         var checked = inspect(context());
         assertEquals(RiskScore.fatal, risk.convert(checked));
         assertEquals("decline", checked.getCheckedTemplate());
@@ -152,21 +150,18 @@ class PayoutInspectionTest {
     void groupsAreOrderedAndGlobalRulesTakePrecedence() {
         publishTemplate("accept", "rule:1=1->accept;");
         publishTemplate("decline", "rule:1=1->decline;");
-        handle(createCommand(CommandBody.group(new Group().setGroupId("group")
-                .setOperationType(OperationType.payout).setTemplateIds(List.of(
-                        new PriorityId(2, "decline"), new PriorityId(1, "accept"))))));
-        handle(createCommand(CommandBody.group_reference(new GroupReference().setGroupId("group")
-                .setPartyId("synthetic-party").setOperationType(OperationType.payout))));
+        publishGroup(new PriorityId(2, "decline"), new PriorityId(1, "accept"));
         assertEquals(RiskScore.low, risk.convert(inspect(context())));
-        handle(createCommand(CommandBody.reference(new TemplateReference().setTemplateId("decline")
-                .setIsGlobal(true).setOperationType(OperationType.payout))));
+        publishGlobalReference("decline");
         assertEquals(RiskScore.fatal, risk.convert(inspect(context())));
     }
 
     @Test
     void payoutCommandsDoNotChangePaymentTemplatesAndInvalidTemplatesAreRejected() {
-        paymentTemplateListener.listen(createCommand(CommandBody.template(new Template().setId("shared-id")
-                .setTemplate(toBytes("rule:1=1->accept;")))));
+        var paymentTemplate = new Template()
+                .setId("shared-id")
+                .setTemplate(toBytes("rule:1=1->accept;"));
+        paymentTemplateListener.listen(createCommand(CommandBody.template(paymentTemplate)));
         var original = paymentTemplates.get("shared-id");
         assertNotNull(original);
         assertNull(payoutTemplates.get("shared-id"));
@@ -175,9 +170,12 @@ class PayoutInspectionTest {
         assertNotNull(payoutTemplates.get("shared-id"));
         assertThrows(IllegalArgumentException.class, () -> publishTemplate("invalid", "rule:1=1->3ds;"));
         assertNull(payoutTemplates.get("invalid"));
-        assertThrows(IllegalArgumentException.class, () -> handle(createCommand(CommandBody.reference(
-                new TemplateReference().setTemplateId("shared-id").setOperationType(OperationType.payout)
-                        .setWalletId("synthetic-wallet")))));
+        var walletWithoutParty = new TemplateReference()
+                .setTemplateId("shared-id")
+                .setOperationType(OperationType.payout)
+                .setWalletId("synthetic-wallet");
+        assertThrows(IllegalArgumentException.class,
+                () -> handle(createCommand(CommandBody.reference(walletWithoutParty))));
     }
 
     @ParameterizedTest
@@ -233,8 +231,10 @@ class PayoutInspectionTest {
 
     @Test
     void topicDefinesTheOperationType() {
-        templateListener.listen(createCommand(CommandBody.template(new Template().setId("untyped")
-                .setTemplate(toBytes("rule:1=1->decline;")))));
+        var untyped = new Template()
+                .setId("untyped")
+                .setTemplate(toBytes("rule:1=1->decline;"));
+        templateListener.listen(createCommand(CommandBody.template(untyped)));
         assertNotNull(payoutTemplates.get("untyped"));
         assertNull(paymentTemplates.get("untyped"));
     }
@@ -254,17 +254,47 @@ class PayoutInspectionTest {
     }
 
     private void publishTemplate(String id, String source) {
-        handle(createCommand(CommandBody.template(new Template().setId(id).setTemplate(toBytes(source))
-                .setOperationType(OperationType.payout))));
+        var template = new Template()
+                .setId(id)
+                .setTemplate(toBytes(source))
+                .setOperationType(OperationType.payout);
+        handle(createCommand(CommandBody.template(template)));
     }
 
     private void publishReference(String id, String party, String wallet) {
-        handle(createCommand(CommandBody.reference(new TemplateReference().setTemplateId(id)
-                .setPartyId(party).setWalletId(wallet).setOperationType(OperationType.payout))));
+        var reference = new TemplateReference()
+                .setTemplateId(id)
+                .setPartyId(party)
+                .setWalletId(wallet)
+                .setOperationType(OperationType.payout);
+        handle(createCommand(CommandBody.reference(reference)));
+    }
+
+    private void publishGlobalReference(String id) {
+        var reference = new TemplateReference()
+                .setTemplateId(id)
+                .setIsGlobal(true)
+                .setOperationType(OperationType.payout);
+        handle(createCommand(CommandBody.reference(reference)));
+    }
+
+    private void publishGroup(PriorityId... templates) {
+        var group = new Group()
+                .setGroupId("group")
+                .setOperationType(OperationType.payout)
+                .setTemplateIds(List.of(templates));
+        handle(createCommand(CommandBody.group(group)));
+        var reference = new GroupReference()
+                .setGroupId("group")
+                .setPartyId("synthetic-party")
+                .setOperationType(OperationType.payout);
+        handle(createCommand(CommandBody.group_reference(reference)));
     }
 
     private Command createCommand(CommandBody body) {
-        return new Command().setCommandType(CommandType.CREATE).setCommandBody(body);
+        return new Command()
+                .setCommandType(CommandType.CREATE)
+                .setCommandBody(body);
     }
 
     private byte[] toBytes(String value) {
@@ -272,13 +302,16 @@ class PayoutInspectionTest {
     }
 
     private WithdrawalContext context() {
-        return new WithdrawalContext().setParty(new Party(new PartyConfigRef("synthetic-party")))
-                .setWalletRef(new WalletConfigRef("synthetic-wallet")).setWithdrawalId("synthetic-withdrawal")
+        return new WithdrawalContext()
+                .setParty(new Party(new PartyConfigRef("synthetic-party")))
+                .setWalletRef(new WalletConfigRef("synthetic-wallet"))
+                .setWithdrawalId("synthetic-withdrawal")
                 .setWithdrawal(new dev.vality.damsel.withdrawals.domain.Withdrawal()
                         .setBody(new Cash(100, new CurrencyRef("RUB")))
                         .setDestination(Destination.digital_wallet(new dev.vality.damsel.domain.DigitalWallet()
                                 .setId("synthetic-destination")))
                         .setCreatedAt("2026-01-01T12:00:00Z")
-                        .setClientIdentity(new ClientIdentity().setCustomerId("synthetic-customer")));
+                        .setClientIdentity(new ClientIdentity()
+                                .setCustomerId("synthetic-customer")));
     }
 }

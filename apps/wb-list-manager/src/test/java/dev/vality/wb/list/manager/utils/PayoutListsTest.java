@@ -30,9 +30,13 @@ class PayoutListsTest {
 
     @Test
     void legacyPaymentKeysAreUnchangedAndPayoutScopesAreUnambiguous() {
-        Row row = createRow().setId(IdInfo.payment_id(new PaymentId().setPartyId("party").setShopId("shop")));
+        Row row = createRow().setId(IdInfo.payment_id(new PaymentId()
+                .setPartyId("party")
+                .setShopId("shop")));
         assertEquals("party_shop_black_USER_ID_synthetic-user", paymentStorage.generateKey(row));
-        Row payoutRow = createRow().setId(IdInfo.payout_id(new PayoutId().setPartyId("party").setWalletId("wallet")));
+        Row payoutRow = createRow().setId(IdInfo.payout_id(new PayoutId()
+                .setPartyId("party")
+                .setWalletId("wallet")));
         assertNotEquals(payoutStorage.generateKey(payoutRow),
                 KeyGenerator.generatePayoutKey(ListType.black, "USER_ID", "synthetic-user", "party_wallet", null));
         assertNotEquals(KeyGenerator.generatePayoutKey(ListType.black, "USER_ID", "synthetic-user", "a_b", "c"),
@@ -41,7 +45,9 @@ class PayoutListsTest {
 
     @Test
     void payoutFallbackNeverQueriesPaymentStorage() throws Exception {
-        Row row = createRow().setId(IdInfo.payout_id(new PayoutId().setPartyId("party").setWalletId("wallet")));
+        Row row = createRow().setId(IdInfo.payout_id(new PayoutId()
+                .setPartyId("party")
+                .setWalletId("wallet")));
         when(payoutRepository.get(anyString())).thenReturn(Optional.empty());
         assertFalse(handler.isExist(row));
         verifyNoInteractions(paymentRepository);
@@ -67,6 +73,9 @@ class PayoutListsTest {
     }
 
     private Row createRow() {
-        return new Row().setListType(ListType.black).setListName("USER_ID").setValue("synthetic-user");
+        return new Row()
+                .setListType(ListType.black)
+                .setListName("USER_ID")
+                .setValue("synthetic-user");
     }
 }

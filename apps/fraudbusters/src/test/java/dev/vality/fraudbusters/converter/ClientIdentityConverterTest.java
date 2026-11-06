@@ -32,9 +32,11 @@ class ClientIdentityConverterTest {
     void userInspectionUsesIdentityAndSeparatesCachedResults() {
         var context = new dev.vality.damsel.fraudbusters.InspectUserContext()
                 .setUserInfo(new dev.vality.damsel.fraudbusters.ClientInfo()
-                        .setCustomerId("synthetic-customer").setUserId("Synthetic-User"))
+                        .setCustomerId("synthetic-customer")
+                        .setUserId("Synthetic-User"))
                 .setShopList(java.util.List.of(new dev.vality.damsel.fraudbusters.ShopContext()
-                        .setPartyId("synthetic-party").setShopId("synthetic-shop")));
+                        .setPartyId("synthetic-party")
+                        .setShopId("synthetic-shop")));
         var model = dev.vality.fraudbusters.util.PaymentModelFactory.buildPaymentModel(
                 context, context.getShopList().get(0));
         assertEquals("synthetic-customer", model.getCustomerId());
@@ -42,7 +44,9 @@ class ClientIdentityConverterTest {
         String firstKey = dev.vality.fraudbusters.util.UserCacheKeyUtil.buildInspectUserCacheKey(context);
         context.getUserInfo().setUserId("different-synthetic-user");
         assertNotEquals(firstKey, dev.vality.fraudbusters.util.UserCacheKeyUtil.buildInspectUserCacheKey(context));
-        context.getUserInfo().setUserId("Synthetic-User").setCustomerId("different-synthetic-customer");
+        context.getUserInfo()
+                .setUserId("Synthetic-User")
+                .setCustomerId("different-synthetic-customer");
         assertEquals(firstKey, dev.vality.fraudbusters.util.UserCacheKeyUtil.buildInspectUserCacheKey(context));
     }
 
@@ -65,7 +69,9 @@ class ClientIdentityConverterTest {
     @Test
     void historicalPaymentRetainsIdentityWhenReplayed() {
         var payment = BeanUtil.createPayment(PaymentStatus.captured);
-        payment.getClientInfo().setCustomerId("synthetic-customer").setUserId("Synthetic-User");
+        payment.getClientInfo()
+                .setCustomerId("synthetic-customer")
+                .setUserId("Synthetic-User");
         var checked = new PaymentToCheckedPaymentConverter(paymentTypeResolver).convert(payment);
         var replay = new CheckedPaymentToPaymentConverter().convert(checked);
         assertEquals(payment.getClientInfo().getCustomerId(), replay.getClientInfo().getCustomerId());

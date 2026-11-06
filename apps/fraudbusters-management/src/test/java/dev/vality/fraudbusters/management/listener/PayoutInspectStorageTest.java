@@ -94,14 +94,20 @@ class PayoutInspectStorageTest {
 
     @Test
     void payoutTemplateIsStoredSeparatelyAndReplayIsIdempotent() {
-        var template = new Template().setId("synthetic-id").setOperationType(OperationType.payout)
+        var template = new Template()
+                .setId("synthetic-id")
+                .setOperationType(OperationType.payout)
                 .setTemplate("rule:1=1->decline;".getBytes(StandardCharsets.UTF_8));
         var command = createCommand(CommandBody.template(template));
         templateListener.listen(command);
         templateListener.listen(command);
         assertEquals(1, count("af.payout_template"));
-        templateListener.listen(new Command().setCommandType(CommandType.DELETE).setCommandBody(CommandBody.template(
-                new Template().setId("synthetic-id").setOperationType(OperationType.payout))));
+        var deletedTemplate = new Template()
+                .setId("synthetic-id")
+                .setOperationType(OperationType.payout);
+        templateListener.listen(new Command()
+                .setCommandType(CommandType.DELETE)
+                .setCommandBody(CommandBody.template(deletedTemplate)));
         assertEquals(0, count("af.payout_template"));
         verifyNoInteractions(payment.templates());
 
@@ -113,12 +119,16 @@ class PayoutInspectStorageTest {
 
     @Test
     void globalAndScopedReferencesAreSeparateAndReplayIsIdempotent() {
-        var reference = new TemplateReference().setTemplateId("synthetic-template")
-                .setOperationType(OperationType.payout).setIsGlobal(true);
+        var reference = new TemplateReference()
+                .setTemplateId("synthetic-template")
+                .setOperationType(OperationType.payout)
+                .setIsGlobal(true);
         var command = createCommand(CommandBody.reference(reference));
         referenceListener.listen(command);
         referenceListener.listen(command);
-        reference.setIsGlobal(false).setPartyId("synthetic-party").setWalletId("synthetic-wallet");
+        reference.setIsGlobal(false)
+                .setPartyId("synthetic-party")
+                .setWalletId("synthetic-wallet");
         referenceListener.listen(command);
         assertEquals(2, count("af.payout_reference"));
         command.setCommandType(CommandType.DELETE);
@@ -128,7 +138,9 @@ class PayoutInspectStorageTest {
 
     @Test
     void groupIsReplacedAndRepeatedTemplateKeepsHighestPriority() {
-        var group = new Group().setGroupId("synthetic-group").setOperationType(OperationType.payout)
+        var group = new Group()
+                .setGroupId("synthetic-group")
+                .setOperationType(OperationType.payout)
                 .setTemplateIds(List.of(new PriorityId(1, "old-template")));
         groupListener.listen(createCommand(CommandBody.group(group)));
         group.setTemplateIds(List.of(new PriorityId(3, "repeated"), new PriorityId(2, "repeated")));
@@ -140,7 +152,9 @@ class PayoutInspectStorageTest {
 
     @Test
     void groupReferenceIsUpsertedByPartyAndWallet() {
-        var reference = new GroupReference().setGroupId("first").setPartyId("synthetic-party")
+        var reference = new GroupReference()
+                .setGroupId("first")
+                .setPartyId("synthetic-party")
                 .setOperationType(OperationType.payout);
         groupReferenceListener.listen(createCommand(CommandBody.group_reference(reference)));
         reference.setGroupId("second");
@@ -150,24 +164,33 @@ class PayoutInspectStorageTest {
 
     @Test
     void invalidScopesAreRejected() {
-        assertThrows(IllegalArgumentException.class, () -> referenceListener.listen(createCommand(CommandBody.reference(
-                new TemplateReference().setTemplateId("t").setWalletId("synthetic-wallet")))));
+        var walletWithoutParty = new TemplateReference()
+                .setTemplateId("t")
+                .setWalletId("synthetic-wallet");
+        assertThrows(IllegalArgumentException.class,
+                () -> referenceListener.listen(createCommand(CommandBody.reference(walletWithoutParty))));
         assertEquals(0, count("af.payout_reference"));
     }
 
     @Test
     void payoutListRowsAreStoredSeparatelyFromPaymentRows() {
-        var row = new Row().setListType(ListType.black).setListName("EMAIL").setValue("synthetic@example.com")
-                .setId(IdInfo.payout_id(new PayoutId().setPartyId("synthetic-party")));
-        listListener.listen(new Event().setEventType(EventType.CREATED).setRow(row));
-        listListener.listen(new Event().setEventType(EventType.CREATED).setRow(row));
+        var row = new Row()
+                .setListType(ListType.black)
+                .setListName("EMAIL")
+                .setValue("synthetic@example.com")
+                .setId(IdInfo.payout_id(new PayoutId()
+                        .setPartyId("synthetic-party")));
+        listListener.listen(createEvent(EventType.CREATED, row));
+        listListener.listen(createEvent(EventType.CREATED, row));
         assertEquals(1, count("af.payout_list_record"));
-        listListener.listen(new Event().setEventType(EventType.DELETED).setRow(row));
+        listListener.listen(createEvent(EventType.DELETED, row));
         assertEquals(0, count("af.payout_list_record"));
         verifyNoInteractions(payment.lists());
 
-        var paymentEvent = new Event().setEventType(EventType.CREATED).setRow(new Row(row)
-                .setId(IdInfo.payment_id(new PaymentId().setPartyId("synthetic-party"))));
+        var paymentRow = new Row(row)
+                .setId(IdInfo.payment_id(new PaymentId()
+                        .setPartyId("synthetic-party")));
+        var paymentEvent = createEvent(EventType.CREATED, paymentRow);
         listListener.listen(paymentEvent);
         verify(payment.lists()).create(paymentEvent);
     }
@@ -177,6 +200,14 @@ class PayoutInspectStorageTest {
     }
 
     private Command createCommand(CommandBody body) {
-        return new Command().setCommandType(CommandType.CREATE).setCommandBody(body);
+        return new Command()
+                .setCommandType(CommandType.CREATE)
+                .setCommandBody(body);
+    }
+
+    private Event createEvent(EventType type, Row row) {
+        return new Event()
+                .setEventType(type)
+                .setRow(row);
     }
 }

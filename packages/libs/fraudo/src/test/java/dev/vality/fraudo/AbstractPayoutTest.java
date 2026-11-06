@@ -51,7 +51,10 @@ public abstract class AbstractPayoutTest {
     protected UniqueValueAggregator<BaseModel, String> paymentUnique;
 
     protected final BaseModel model = new BaseModel();
-    protected final TimeWindow window = TimeWindow.builder().start(24).timeUnit("hours").build();
+    protected final TimeWindow window = TimeWindow.builder()
+            .start(24)
+            .timeUnit("hours")
+            .build();
     protected final FieldResolver<BaseModel, String> fields = new FieldResolver<>() {
         @Override
         public String resolveValue(String fieldName, BaseModel value) {

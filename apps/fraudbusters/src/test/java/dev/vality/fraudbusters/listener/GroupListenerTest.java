@@ -66,9 +66,15 @@ public class GroupListenerTest {
     @Test
     public void listenKeepsRepeatedTemplateOnceAtHighestPriority() {
         groupListener.listen(BeanUtil.createGroupCommand(GROUP_1, List.of(
-                new PriorityId().setPriority(3L).setId(FIRST_TEMPL),
-                new PriorityId().setPriority(2L).setId(SECOND_TEMPL),
-                new PriorityId().setPriority(1L).setId(FIRST_TEMPL)
+                new PriorityId()
+                        .setPriority(3L)
+                        .setId(FIRST_TEMPL),
+                new PriorityId()
+                        .setPriority(2L)
+                        .setId(SECOND_TEMPL),
+                new PriorityId()
+                        .setPriority(1L)
+                        .setId(FIRST_TEMPL)
         )));
 
         assertEquals(List.of(FIRST_TEMPL, SECOND_TEMPL), groupPoolImpl.get(GROUP_1));

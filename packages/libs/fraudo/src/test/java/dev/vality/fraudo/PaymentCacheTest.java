@@ -87,7 +87,8 @@ class PaymentCacheTest extends AbstractPayoutTest {
         evaluateExpression(first + " >= 0 AND " + second + " >= 0", fullVisitor);
 
         long calls = Stream.of(payments, paymentSums, paymentUnique)
-                .mapToLong(aggregator -> mockingDetails(aggregator).getInvocations().size()).sum();
+                .mapToLong(aggregator -> mockingDetails(aggregator).getInvocations().size())
+                .sum();
         assertEquals(2, calls);
     }
 

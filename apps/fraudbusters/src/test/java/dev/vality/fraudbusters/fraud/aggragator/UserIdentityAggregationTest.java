@@ -43,7 +43,10 @@ class UserIdentityAggregationTest {
     private final RefundRepository refunds = mock(RefundRepository.class);
     private final ChargebackRepository chargebacks = mock(ChargebackRepository.class);
     private final TimeBoundaryServiceImpl boundaries = new TimeBoundaryServiceImpl();
-    private final TimeWindow window = TimeWindow.builder().start(60).timeUnit(MINUTES).build();
+    private final TimeWindow window = TimeWindow.builder()
+            .start(60)
+            .timeUnit(MINUTES)
+            .build();
 
     private PaymentModel createPaymentModel() {
         PaymentModel model = new PaymentModel();

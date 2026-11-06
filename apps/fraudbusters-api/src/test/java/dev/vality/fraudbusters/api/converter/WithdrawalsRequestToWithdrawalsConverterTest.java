@@ -43,8 +43,11 @@ class WithdrawalsRequestToWithdrawalsConverterTest {
 
     @Test
     void identityIsForwardedWithoutCustomerFallback() {
-        var item = ApiBeanGenerator.initWithdrawal().partyId("synthetic-party").walletId("synthetic-wallet")
-                .customer(new dev.vality.swag.fraudbusters.model.Customer().customerId("synthetic-customer"));
+        var item = ApiBeanGenerator.initWithdrawal()
+                .partyId("synthetic-party")
+                .walletId("synthetic-wallet")
+                .customer(new dev.vality.swag.fraudbusters.model.Customer()
+                        .customerId("synthetic-customer"));
         var converter = converter();
         var request = new WithdrawalsRequest().withdrawals(List.of(item));
         var legacyIdentity = converter.convert(request).get(0);
