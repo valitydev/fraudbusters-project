@@ -1,8 +1,10 @@
 # XYZ-598: проверка старых правил и покрытия выплат в fraudbusters — 6 ноября 2026
 
-Ветка `ft/XYZ-598/fraudo-withdrawall-impl` сравнивалась с `master`. Проверялись три вещи:
-старые платёжные правила дают те же решения и работают не медленнее, сценарии выплат
-полностью покрыты тестами и работают в запущенном сервисе.
+Изменения fraudbusters для выплат (этот PR вместе с пакетами из #7) сравнивались с тем, что
+сейчас работает в `master`. Там fraudbusters собран на fraudo `1.0.10`, а fraudo с выплатами
+из #5 ещё не подключён. Проверялись три вещи: старые платёжные правила дают те же решения и
+работают не медленнее, сценарии выплат полностью покрыты тестами и работают в запущенном
+сервисе.
 
 ## Итог
 
@@ -21,8 +23,9 @@
 
 ## Как проверялось
 
-1. **Дифференциальный прогон fraudo.** Один и тот же стенд собран против jar из `master`
-   (`fraudo-1.0.9`) и из ветки (`fraudo-1.1.0`). Корпус правил:
+1. **Дифференциальный прогон fraudo.** Один и тот же стенд собран против fraudo, на котором
+   работает fraudbusters в `master` (`1.0.10` из Central; `1.0.9` даёт тот же результат),
+   и против fraudo этой ветки (`1.1.1`). Корпус правил:
    - все `.frd` из тестов fraudo в `master`;
    - примеры из `docs/fraudo/content/docs/examples.md`;
    - 3000 случайно сгенерированных шаблонов. Они покрывают все платёжные функции, окна
@@ -85,11 +88,11 @@ select id from af.f_template where template ~ '(payments|withdrawals)Conditions'
 
 ### 2. Колонки ClickHouse — до выкатки
 
-Запись платежей, возвратов, чарджбэков, `events_unique` и `fraud_payment` теперь передаёт
-`customerId` и `userId`, а запись выплат — новые поля идентичности. fraudbusters не
-применяет миграции ClickHouse сам. Без
-`apps/fraudbusters/src/test/resources/sql/V12__add_client_identity.sql` и `V13__add_payout_identity.sql`
-на продовом ClickHouse **вставки упадут, и платёжная история перестанет пополняться**.
+Этот PR пишет в `fraud.withdrawal` новые поля идентичности выплаты (party, кошелёк,
+customerId/userId, IP, fingerprint, email, телефон). fraudbusters не применяет миграции
+ClickHouse сам. Без `V13__add_payout_identity.sql` на продовом ClickHouse **вставки выплат
+упадут, и история выплат перестанет пополняться**. Колонки для платежей, возвратов и
+чарджбэков (`V12__add_client_identity.sql`) нужны уже `master`, это не новое требование.
 
 Отдельно: `V13__add_payout_identity.sql` лежит ещё и в
 `apps/fraudbusters/src/main/resources/db/migration/`, хотя оттуда его никто не читает.
@@ -112,28 +115,21 @@ where template ~ 'rule:\s*(userId|countPayouts\w*|sumPayouts\w*|uniquePayouts)\s
 
 ### 4. Правила, которые в master падали, теперь вычисляются
 
-Чтобы платёжные правила могли читать историю выплат, резолверы полей платежа научились
-отдавать `party_id`, `shop_id` и `currency`, а `unique` — считать по `currency` и
-`country_bank`. В master такие правила всегда падали и давали результат `catch` или
-NOTIFY, теперь они считаются по-настоящему. Затронутые формы: `unique(.., "currency"|"country_bank", ..)`,
-а также `in`/`like`/`countryBy`/`inWhiteList`/`inBlackList`/`inGreyList`/`inList`
-по `party_id`, `shop_id`, `currency`. Скорее это исправление, но решения таких шаблонов
-поменяются:
+Чтобы платёжные правила могли читать историю выплат, резолвер полей платежа научился
+отдавать `party_id`, `shop_id` и `currency`. В master такие правила всегда падали и давали
+результат `catch` или NOTIFY, теперь они считаются по-настоящему. Затронутые формы:
+`in`/`like`/`countryBy`/`inWhiteList`/`inBlackList`/`inGreyList`/`inList` по `party_id`,
+`shop_id`, `currency`. Скорее это исправление, но решения таких шаблонов поменяются:
 
 ```sql
 select id from af.f_template
-where template ~ 'unique\("[a-z_]+",\s*"(currency|country_bank)"'
-   or template ~ '(in|like|countryBy|inWhiteList|inBlackList|inGreyList|inList)\([^)]*"(party_id|shop_id|currency)"';
+where template ~ '(in|like|countryBy|inWhiteList|inBlackList|inGreyList|inList)\([^)]*"(party_id|shop_id|currency)"';
 ```
 
-### 5. Мелкие намеренные изменения
+### 5. Мелкое намеренное изменение
 
-- Локальное хранилище (`LocalResultStorageRepository`) в `unique` больше не считает пустое
-  значение отдельным уникальным. Так же, как ClickHouse не считает NULL.
-- Повторный id шаблона в группе применяется один раз, с высшим приоритетом. Если такой
-  шаблон давал notify, уведомление больше не дублируется.
-- Ключ кэша `inspectUser` включает `userId`. Кэш в памяти (Caffeine), поэтому после
-  рестарта это ни на что не влияет.
+Повторный id шаблона в группе применяется один раз, с высшим приоритетом. Если такой шаблон
+давал notify, уведомление больше не дублируется.
 
 ## Покрытие сценариев выплат
 
