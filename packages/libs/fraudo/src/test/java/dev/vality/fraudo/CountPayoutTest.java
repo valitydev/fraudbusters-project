@@ -48,10 +48,7 @@ public class CountPayoutTest extends AbstractPayoutTest {
     @ValueSource(booleans = {false, true})
     void countPayoutsSuccessTest(boolean fullVisitor) throws Exception {
         List<String> scope = List.of("party_id", "currency");
-        var expectedWindow = TimeWindow.builder()
-                .start(30)
-                .timeUnit("calendar_days")
-                .build();
+        var expectedWindow = TimeWindow.builder().start(30).timeUnit("calendar_days").build();
         when(payouts.countSuccess("user_id", model, expectedWindow, scope)).thenReturn(2);
         var parseContext = getParseContext("/rules/payout/countPayoutsSuccess.frd");
         try (var visitor = createVisitor(fullVisitor)) {
@@ -83,11 +80,7 @@ public class CountPayoutTest extends AbstractPayoutTest {
     @ValueSource(booleans = {false, true})
     void countPayoutsErrorCodeTest(boolean fullVisitor) throws Exception {
         List<String> scope = List.of("party_id", "currency");
-        var expectedWindow = TimeWindow.builder()
-                .start(48)
-                .end(24)
-                .timeUnit("hours")
-                .build();
+        var expectedWindow = TimeWindow.builder().start(48).end(24).timeUnit("hours").build();
         when(payouts.countError("user_id", model, expectedWindow, "failed", scope)).thenReturn(2);
         var parseContext = getParseContext("/rules/payout/countPayoutsErrorCode.frd");
         try (var visitor = createVisitor(fullVisitor)) {

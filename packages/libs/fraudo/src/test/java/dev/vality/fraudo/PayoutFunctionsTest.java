@@ -96,10 +96,7 @@ class PayoutFunctionsTest extends AbstractPayoutTest {
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
     void combinesSuccessfulPaymentsAndPayoutsWithAnd(boolean fullVisitor) throws Exception {
-        var paymentWindow = TimeWindow.builder()
-                .start(30)
-                .timeUnit("days")
-                .build();
+        var paymentWindow = TimeWindow.builder().start(30).timeUnit("days").build();
         var scope = List.of("party_id");
         when(payments.countSuccess("user_id", model, paymentWindow, scope)).thenReturn(0, 1, 0);
         when(payouts.countSuccess("user_id", model, window, scope)).thenReturn(4, 3);
@@ -144,11 +141,7 @@ class PayoutFunctionsTest extends AbstractPayoutTest {
 
     @Test
     void preservesTimeWindowAndWalletScope() throws Exception {
-        var expectedWindow = TimeWindow.builder()
-                .start(48)
-                .end(24)
-                .timeUnit("hours")
-                .build();
+        var expectedWindow = TimeWindow.builder().start(48).end(24).timeUnit("hours").build();
         when(payouts.count("user_id", model, expectedWindow, List.of("party_id", "wallet_id")))
                 .thenReturn(1);
         assertStatus(ResultStatus.ACCEPT, evaluate("/rules/payout/windowWallet.frd", false));

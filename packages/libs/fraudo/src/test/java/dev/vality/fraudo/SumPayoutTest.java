@@ -33,10 +33,7 @@ public class SumPayoutTest extends AbstractPayoutTest {
     @ValueSource(booleans = {false, true})
     void sumPayoutsSuccessTest(boolean fullVisitor) throws Exception {
         List<String> scope = List.of("party_id", "currency");
-        var expectedWindow = TimeWindow.builder()
-                .start(30)
-                .timeUnit("calendar_days")
-                .build();
+        var expectedWindow = TimeWindow.builder().start(30).timeUnit("calendar_days").build();
         when(payoutSums.sumSuccess("user_id", model, expectedWindow, scope)).thenReturn(100.25);
         var parseContext = getParseContext("/rules/payout/sumPayoutsSuccess.frd");
         try (var visitor = createVisitor(fullVisitor)) {
@@ -68,11 +65,7 @@ public class SumPayoutTest extends AbstractPayoutTest {
     @ValueSource(booleans = {false, true})
     void sumPayoutsErrorCodeTest(boolean fullVisitor) throws Exception {
         List<String> scope = List.of("party_id", "currency");
-        var expectedWindow = TimeWindow.builder()
-                .start(48)
-                .end(24)
-                .timeUnit("hours")
-                .build();
+        var expectedWindow = TimeWindow.builder().start(48).end(24).timeUnit("hours").build();
         when(payoutSums.sumError("user_id", model, expectedWindow, "failed", scope)).thenReturn(100.25);
         var parseContext = getParseContext("/rules/payout/sumPayoutsErrorCode.frd");
         try (var visitor = createVisitor(fullVisitor)) {
