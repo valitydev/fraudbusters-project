@@ -32,12 +32,6 @@ export class MenuModel {
                     roles: [Roles.FraudOfficer, Roles.FraudMonitoring],
                 },
                 {
-                    displayName: 'Historical data',
-                    iconName: 'history',
-                    route: 'historical-data/payments',
-                    roles: [Roles.FraudOfficer, Roles.FraudMonitoring],
-                },
-                {
                     displayName: 'Testing',
                     iconName: 'bug_report',
                     route: 'testing/data-sets',
@@ -68,6 +62,12 @@ export class MenuModel {
                     roles: [Roles.FraudOfficer, Roles.FraudMonitoring],
                 },
             ],
+        },
+        {
+            displayName: 'Historical data',
+            iconName: 'history',
+            route: 'historical-data/payments',
+            roles: [Roles.FraudOfficer, Roles.FraudMonitoring],
         },
         {
             displayName: 'Notifications',
