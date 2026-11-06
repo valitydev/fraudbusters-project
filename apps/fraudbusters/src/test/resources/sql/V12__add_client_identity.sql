@@ -1,0 +1,10 @@
+ALTER TABLE fraud.events_unique ADD COLUMN IF NOT EXISTS customerId Nullable(String);
+ALTER TABLE fraud.events_unique ADD COLUMN IF NOT EXISTS userId Nullable(String);
+ALTER TABLE fraud.payment ADD COLUMN IF NOT EXISTS customerId Nullable(String);
+ALTER TABLE fraud.payment ADD COLUMN IF NOT EXISTS userId Nullable(String);
+ALTER TABLE fraud.refund ADD COLUMN IF NOT EXISTS customerId Nullable(String);
+ALTER TABLE fraud.refund ADD COLUMN IF NOT EXISTS userId Nullable(String);
+ALTER TABLE fraud.chargeback ADD COLUMN IF NOT EXISTS customerId Nullable(String);
+ALTER TABLE fraud.chargeback ADD COLUMN IF NOT EXISTS userId Nullable(String);
+ALTER TABLE fraud.fraud_payment ADD COLUMN IF NOT EXISTS customerId Nullable(String);
+ALTER TABLE fraud.fraud_payment ADD COLUMN IF NOT EXISTS userId Nullable(String);

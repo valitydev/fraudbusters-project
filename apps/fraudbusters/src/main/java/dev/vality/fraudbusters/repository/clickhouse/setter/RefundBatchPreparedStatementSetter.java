@@ -23,12 +23,13 @@ import static dev.vality.fraudbusters.constant.ClickhouseUtilsValue.UNKNOWN;
 public class RefundBatchPreparedStatementSetter implements BatchPreparedStatementSetter {
 
     public static final String FIELDS = """
-            timestamp, eventTimeHour, eventTime, id, email, ip, fingerprint, bin, lastDigits, cardToken, paymentSystem,
+            timestamp, eventTimeHour, eventTime, id, email, ip, fingerprint, customerId, userId,
+            bin, lastDigits, cardToken, paymentSystem,
             paymentTool, terminal, providerId, bankCountry, partyId, shopId, amount, currency, status, errorCode,
             errorReason, paymentId, payerType, tokenProvider
             """;
 
-    public static final String FIELDS_MARK = "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?";
+    public static final String FIELDS_MARK = "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?";
 
     private final List<Refund> batch;
     private final PaymentTypeByContextResolver paymentTypeByContextResolver;
@@ -48,6 +49,8 @@ public class RefundBatchPreparedStatementSetter implements BatchPreparedStatemen
         ps.setString(l++, clientInfo.getEmail());
         ps.setString(l++, clientInfo.getIp());
         ps.setString(l++, clientInfo.getFingerprint());
+        ps.setString(l++, clientInfo.getCustomerId());
+        ps.setString(l++, clientInfo.getUserId());
 
         PaymentTool paymentTool = event.getPaymentTool();
         ps.setString(l++, paymentTool.isSetBankCard() ? paymentTool.getBankCard().getBin() : UNKNOWN);

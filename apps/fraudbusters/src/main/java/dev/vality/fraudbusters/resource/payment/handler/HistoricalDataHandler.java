@@ -44,7 +44,7 @@ public class HistoricalDataHandler implements HistoricalDataServiceSrv.Iface {
 
     @Override
     public HistoricalDataResponse getFraudResults(Filter filter, Page page, Sort sort) {
-        FilterDto filterDto = filterConverter.convert(filter, page, sort);
+        FilterDto filterDto = filterConverter.convertFraudResults(filter, page, sort);
         HistoricalFraudResultsDto historicalFraudResultsDto = historicalDataService.getFraudResults(filterDto);
         return resultConverter.convertFraudResult(historicalFraudResultsDto);
     }

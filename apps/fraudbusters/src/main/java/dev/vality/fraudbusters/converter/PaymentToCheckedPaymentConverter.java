@@ -33,6 +33,8 @@ public class PaymentToCheckedPaymentConverter implements Converter<Payment, Chec
         checkedPayment.setId(payment.getId());
 
         ClientInfo clientInfo = payment.getClientInfo();
+        checkedPayment.setCustomerId(clientInfo.getCustomerId());
+        checkedPayment.setUserId(clientInfo.getUserId());
         checkedPayment.setEmail(clientInfo.isSetEmail() ? clientInfo.getEmail().toLowerCase() : UNKNOWN);
         checkedPayment.setPhone(clientInfo.isSetPhone() ? clientInfo.getPhone() : UNKNOWN);
         checkedPayment.setIp(clientInfo.isSetIp() ? clientInfo.getIp() : UNKNOWN);

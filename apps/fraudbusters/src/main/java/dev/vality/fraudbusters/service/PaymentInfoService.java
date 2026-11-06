@@ -18,7 +18,7 @@ import java.util.List;
 public class PaymentInfoService {
 
     private static final String FIELDS = """
-            timestamp, eventTimeHour, eventTime, id, email, phone, ip, fingerprint, bin,
+            timestamp, eventTimeHour, eventTime, id, email, phone, ip, fingerprint, customerId, userId, bin,
             lastDigits, cardToken, cardCategory, paymentSystem, paymentTool, terminal, 
             providerId, bankCountry, partyId, shopId, amount, currency, status, 
             errorCode, errorReason,
