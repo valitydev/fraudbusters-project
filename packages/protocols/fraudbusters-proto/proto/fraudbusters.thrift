@@ -332,6 +332,7 @@ struct Filter {
     14: optional string rule
     15: optional string customer_id
     16: optional string user_id
+    17: optional WalletID wallet_id
 }
 
 struct Page {
@@ -432,6 +433,7 @@ union HistoricalData {
    3: list<Chargeback> chargebacks
    4: list<HistoricalTransactionCheck> fraud_results
    5: list<FraudPaymentInfo> fraud_payments
+   6: list<Withdrawal> withdrawals
 }
 
 /**
@@ -544,6 +546,11 @@ service HistoricalDataService {
     * Получение исторических данных по мошенническим платежам
     **/
     HistoricalDataResponse getFraudPayments(1: Filter filter, 2: Page page, 3: Sort sort)
+
+    /**
+    * Получение исторических данных по выплатам: последнее состояние каждой выплаты за период
+    **/
+    HistoricalDataResponse getWithdrawals(1: Filter filter, 2: Page page, 3: Sort sort)
 
     /**
     * Применение нового правила к историческим данным
