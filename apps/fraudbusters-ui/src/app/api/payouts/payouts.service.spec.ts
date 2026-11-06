@@ -67,4 +67,22 @@ describe('PayoutsService', () => {
         expect(groupRequest.request.params.get('partyId')).toBe('party-1');
         groupRequest.flush({ id: 'key' });
     });
+
+    it('searches payout history with only the filled filters', () => {
+        service
+            .filterWithdrawals({
+                from: '2034-01-01 00:00:00',
+                to: '2034-01-02 00:00:00',
+                sortOrder: 'DESC',
+                walletId: 'wallet-1',
+                status: undefined,
+            })
+            .subscribe();
+        const request = http.expectOne((r) => r.url === `${endpoint}/payouts-historical-data/withdrawals`);
+        expect(request.request.method).toBe('GET');
+        expect(request.request.params.get('walletId')).toBe('wallet-1');
+        expect(request.request.params.get('from')).toBe('2034-01-01 00:00:00');
+        expect(request.request.params.has('status')).toBeFalse();
+        request.flush({ result: [] });
+    });
 });
