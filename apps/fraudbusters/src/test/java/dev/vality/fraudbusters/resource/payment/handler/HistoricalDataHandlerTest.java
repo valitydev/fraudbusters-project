@@ -623,4 +623,27 @@ class HistoricalDataHandlerTest {
                 .withZone(ZoneOffset.UTC)
                 .format(Instant.ofEpochSecond(epochSeconds));
     }
+
+    @Test
+    void getWithdrawalsSearchesPayoutHistoryByWallet() {
+        Withdrawal withdrawal = new Withdrawal().setId("withdrawal").setWalletId("wallet");
+        when(service.getWithdrawals(any(FilterDto.class))).thenReturn(HistoricalWithdrawalsDto.builder()
+                .withdrawals(List.of(withdrawal))
+                .lastId("1")
+                .build());
+
+        HistoricalDataResponse response = handler.getWithdrawals(
+                new Filter().setWalletId("wallet").setShopId("shop"), new Page(), new Sort().setOrder(SortOrder.DESC));
+
+        assertEquals("1", response.getContinuationId());
+        assertEquals(List.of(withdrawal), response.getData().getWithdrawals());
+        ArgumentCaptor<FilterDto> captor = ArgumentCaptor.forClass(FilterDto.class);
+        verify(service).getWithdrawals(captor.capture());
+        assertEquals(Set.of(SearchFieldDto.builder()
+                        .field(dev.vality.fraudbusters.constant.PaymentField.WALLET_ID)
+                        .type(FieldType.STRING)
+                        .value("wallet")
+                        .build()),
+                captor.getValue().getSearchFields());
+    }
 }

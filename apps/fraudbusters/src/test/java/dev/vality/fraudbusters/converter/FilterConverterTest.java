@@ -153,4 +153,51 @@ class FilterConverterTest {
         assertEquals(sort.getField(), dto.getSort().getField());
         assertEquals(sort.getOrder(), SortOrder.valueOf(dto.getSort().getOrder().name()));
     }
+
+    @Test
+    void convertWithdrawalsKeepsOnlyWhatPayoutHistoryStores() {
+        Filter filter = new Filter()
+                .setPartyId("party")
+                .setWalletId("wallet")
+                .setPaymentId("withdrawal")
+                .setStatus("failed")
+                .setCardToken("token")
+                .setUserId("user")
+                .setShopId("shop")
+                .setInvoiceId("invoice")
+                .setTemplate("template")
+                .setRule("rule");
+
+        FilterDto dto = filterConverter.convertWithdrawals(filter, new Page().setSize(5),
+                new Sort().setOrder(SortOrder.ASC));
+
+        assertEquals(Set.of(
+                        searchField(PaymentField.PARTY_ID, FieldType.STRING, "party"),
+                        searchField(PaymentField.WALLET_ID, FieldType.STRING, "wallet"),
+                        searchField(PaymentField.ID, FieldType.STRING, "withdrawal"),
+                        searchField(PaymentField.STATUS, FieldType.ENUM, "failed"),
+                        searchField(PaymentField.CARD_TOKEN, FieldType.STRING, "token"),
+                        searchField(PaymentField.USER_ID, FieldType.STRING, "user")),
+                dto.getSearchFields());
+        assertEquals(5L, dto.getSize());
+        assertEquals(dev.vality.fraudbusters.constant.SortOrder.ASC, dto.getSort().getOrder());
+        String sql = dev.vality.fraudbusters.repository.clickhouse.util.FilterUtil.appendFilters(dto);
+        assertTrue(sql.contains("like(walletId,:walletId)"));
+        assertFalse(sql.contains("shopId"));
+    }
+
+    @Test
+    void convertWithdrawalsIgnoresEmptyWallet() {
+        FilterDto dto = filterConverter.convertWithdrawals(new Filter().setWalletId(""), new Page(), new Sort());
+
+        assertTrue(dto.getSearchFields().isEmpty());
+    }
+
+    private static SearchFieldDto searchField(PaymentField field, FieldType type, String value) {
+        return SearchFieldDto.builder()
+                .field(field)
+                .type(type)
+                .value(value)
+                .build();
+    }
 }

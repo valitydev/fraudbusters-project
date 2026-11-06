@@ -107,7 +107,9 @@ class PayoutHistoryRepositoryTest {
                 .setDestinationResource(dev.vality.damsel.fraudbusters.Resource.digital_wallet(
                         new dev.vality.damsel.fraudbusters.DigitalWallet()
                                 .setId("synthetic-destination")));
-        var writer = new dev.vality.fraudbusters.repository.clickhouse.impl.WithdrawalRepositoryImpl(jdbc);
+        var writer = new dev.vality.fraudbusters.repository.clickhouse.impl.WithdrawalRepositoryImpl(jdbc,
+                new org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate(jdbc),
+                new dev.vality.fraudbusters.repository.clickhouse.mapper.WithdrawalMapper());
         writer.insertBatch(List.of(withdrawal));
         assertNull(jdbc.queryForObject("SELECT userId FROM fraud.withdrawal", String.class));
         withdrawal.setPartyId("party")

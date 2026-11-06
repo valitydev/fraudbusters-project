@@ -2,6 +2,7 @@ package dev.vality.fraudbusters.service;
 
 import dev.vality.damsel.fraudbusters.Chargeback;
 import dev.vality.damsel.fraudbusters.Refund;
+import dev.vality.damsel.fraudbusters.Withdrawal;
 import dev.vality.fraudbusters.domain.CheckedPayment;
 import dev.vality.fraudbusters.domain.Event;
 import dev.vality.fraudbusters.domain.FraudPaymentRow;
@@ -22,6 +23,7 @@ public class HistoricalDataServiceImpl implements HistoricalDataService {
     private final Repository<Chargeback> chargebackRepository;
     private final Repository<Event> fraudResultRepository;
     private final Repository<FraudPaymentRow> fraudPaymentRepository;
+    private final Repository<Withdrawal> withdrawalRepository;
 
     @Override
     public HistoricalPaymentsDto getPayments(FilterDto filter) {
@@ -69,6 +71,16 @@ public class HistoricalDataServiceImpl implements HistoricalDataService {
         String lastId = buildContinuationId(filter.getLastId(), filter.getSize(), payments);
         return HistoricalPaymentsDto.builder()
                 .payments(payments)
+                .lastId(lastId)
+                .build();
+    }
+
+    @Override
+    public HistoricalWithdrawalsDto getWithdrawals(FilterDto filter) {
+        List<Withdrawal> withdrawals = withdrawalRepository.getByFilter(filter);
+        String lastId = buildContinuationId(filter.getLastId(), filter.getSize(), withdrawals);
+        return HistoricalWithdrawalsDto.builder()
+                .withdrawals(withdrawals)
                 .lastId(lastId)
                 .build();
     }
