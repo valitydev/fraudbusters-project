@@ -16,6 +16,11 @@ public class KafkaTopics {
     private String groupList;
     private String groupReference;
 
+    private String payoutTemplate;
+    private String payoutReference;
+    private String payoutGroupList;
+    private String payoutGroupReference;
+
     private String fullTemplate;
     private String fullReference;
     private String fullGroupList;

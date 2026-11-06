@@ -8,7 +8,7 @@ import dev.vality.fraudbusters.fraud.payment.validator.PaymentTemplateValidator;
 import dev.vality.fraudbusters.listener.CommandListener;
 import dev.vality.fraudbusters.pool.HistoricalPool;
 import dev.vality.fraudbusters.util.TimestampUtil;
-import dev.vality.fraudo.FraudoPaymentParser;
+import dev.vality.fraudo.FraudoRulesParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -25,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TimeTemplateListener extends AbstractTimePoolCommandListenerExecutor implements CommandListener {
 
-    private final FraudContextParser<FraudoPaymentParser.ParseContext> paymentContextParser;
+    private final FraudContextParser<FraudoRulesParser.ParseContext> rulesContextParser;
     private final PaymentTemplateValidator paymentTemplateValidator;
     private final HistoricalPool<ParserRuleContext> timeTemplateTimePoolImpl;
 
@@ -47,7 +47,7 @@ public class TimeTemplateListener extends AbstractTimePoolCommandListenerExecuto
                     template.getId(),
                     timestamp,
                     timeTemplateTimePoolImpl,
-                    paymentContextParser::parse,
+                    rulesContextParser::parse,
                     templateString
             );
         }

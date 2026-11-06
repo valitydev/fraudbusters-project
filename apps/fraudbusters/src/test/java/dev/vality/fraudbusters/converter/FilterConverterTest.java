@@ -22,6 +22,22 @@ class FilterConverterTest {
     private final FilterConverter filterConverter = new FilterConverter();
 
     @Test
+    void identityFiltersUseStandardStringSearch() {
+        String userId = "Synthetic_'User%";
+        var filter = new Filter()
+                .setCustomerId("synthetic-customer")
+                .setUserId(userId);
+        var dto = filterConverter.convert(filter, new Page(), new Sort().setOrder(SortOrder.DESC));
+        String sql = dev.vality.fraudbusters.repository.clickhouse.util.FilterUtil.appendFilters(dto);
+        final var params = dev.vality.fraudbusters.repository.clickhouse.util.FilterUtil.initParams(dto);
+        assertTrue(sql.contains("like(customerId,:customerId)"));
+        assertTrue(sql.contains("like(userId,:userId)"));
+        assertFalse(sql.contains(userId));
+        assertEquals(userId, params.getValue("userId"));
+        assertEquals("synthetic-customer", params.getValue("customerId"));
+    }
+
+    @Test
     void convertWithEmptyFiled() {
         Filter filter = new Filter();
         filter.setPaymentId("");
@@ -36,6 +52,37 @@ class FilterConverterTest {
         assertNull(dto.getLastId());
         assertNull(dto.getSort().getOrder());
         assertNull(dto.getSort().getField());
+    }
+
+    @Test
+    void convertFraudResultsMapsStatusToResultStatus() {
+        for (String status : new String[]{"trust", "TRUST", "Trust"}) {
+            Filter filter = new Filter();
+            filter.setStatus(status);
+
+            FilterDto dto = filterConverter.convertFraudResults(filter, new Page(), new Sort());
+
+            assertEquals(1, dto.getSearchFields().size());
+            SearchFieldDto field = dto.getSearchFields().iterator().next();
+            assertEquals(FraudResultField.RESULT_STATUS, field.getField());
+            assertEquals("TRUST", field.getValue());
+        }
+        Filter filter = new Filter();
+        filter.setStatus("3ds");
+        FilterDto dto = filterConverter.convertFraudResults(filter, new Page(), new Sort());
+        assertEquals("THREE_DS", dto.getSearchFields().iterator().next().getValue());
+    }
+
+    @Test
+    void convertKeepsPaymentStatusForPayments() {
+        Filter filter = new Filter();
+        filter.setStatus("captured");
+
+        FilterDto dto = filterConverter.convert(filter, new Page(), new Sort());
+
+        SearchFieldDto field = dto.getSearchFields().iterator().next();
+        assertEquals(PaymentField.STATUS, field.getField());
+        assertEquals("captured", field.getValue());
     }
 
     @Test

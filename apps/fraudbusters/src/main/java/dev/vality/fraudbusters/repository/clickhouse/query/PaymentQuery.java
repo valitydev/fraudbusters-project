@@ -23,6 +23,8 @@ public class PaymentQuery {
                         lastDigits,
                         bankCountry,
                         fingerprint,
+                        customerId,
+                        userId,
                         ip,
                         status,
                         errorReason,

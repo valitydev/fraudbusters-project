@@ -16,6 +16,8 @@ public class CheckedPayment {
     private String phone;
     private String ip;
     private String fingerprint;
+    private String customerId;
+    private String userId;
 
     private String bin;
     private String lastDigits;

@@ -14,6 +14,14 @@ public class GroupPostfix {
 
     public static final String REFERENCE_GROUP_ID = "reference-listener";
 
+    public static final String PAYOUT_TEMPLATE_GROUP_ID = "payout-template-listener";
+
+    public static final String PAYOUT_GROUP_LIST_GROUP_ID = "payout-group-listener";
+
+    public static final String PAYOUT_GROUP_LIST_REFERENCE_GROUP_ID = "payout-group-reference-listener";
+
+    public static final String PAYOUT_REFERENCE_GROUP_ID = "payout-reference-listener";
+
     public static final String RESULT_AGGREGATOR = "result-aggregator";
 
 }

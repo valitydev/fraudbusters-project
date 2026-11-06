@@ -1,10 +1,14 @@
 package dev.vality.fraudbusters.config.payment;
 
+import dev.vality.fraudbusters.fraud.FraudTemplateValidator;
+import dev.vality.fraudbusters.fraud.InspectStorage;
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.payment.PaymentInspectStorage;
 import dev.vality.fraudbusters.pool.Pool;
 import dev.vality.fraudbusters.pool.PoolImpl;
 import dev.vality.fraudbusters.stream.impl.RuleApplierImpl;
+import dev.vality.fraudbusters.stream.impl.RuleCascade;
 import dev.vality.fraudbusters.util.CheckedResultFactory;
 import dev.vality.fraudo.payment.visitor.impl.FirstFindVisitorImpl;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -42,6 +46,26 @@ public class PaymentPoolConfig {
             Pool<ParserRuleContext> templatePoolImpl,
             CheckedResultFactory checkedResultFactory) {
         return new RuleApplierImpl<>(paymentRuleVisitor, templatePoolImpl, checkedResultFactory);
+    }
+
+    @Bean
+    public RuleCascade<PaymentModel> paymentRuleCascade(
+            RuleApplierImpl<PaymentModel> ruleApplier,
+            Pool<List<String>> groupPoolImpl,
+            Pool<String> referencePoolImpl,
+            Pool<String> groupReferencePoolImpl) {
+        return new RuleCascade<>(ruleApplier, groupPoolImpl, referencePoolImpl, groupReferencePoolImpl);
+    }
+
+    @Bean
+    public InspectStorage paymentInspectStorage(
+            Pool<ParserRuleContext> templatePoolImpl,
+            Pool<List<String>> groupPoolImpl,
+            Pool<String> referencePoolImpl,
+            Pool<String> groupReferencePoolImpl,
+            FraudTemplateValidator paymentTemplateValidator) {
+        return new PaymentInspectStorage(templatePoolImpl, groupPoolImpl, referencePoolImpl, groupReferencePoolImpl,
+                paymentTemplateValidator);
     }
 
 }

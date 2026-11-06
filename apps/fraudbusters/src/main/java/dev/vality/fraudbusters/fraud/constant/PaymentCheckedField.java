@@ -8,6 +8,7 @@ public enum PaymentCheckedField {
     EMAIL("email"),
     IP("ip"),
     FINGERPRINT("fingerprint"),
+    USER_ID("user_id"),
     COUNTRY_BANK("country_bank"),
     COUNTRY_IP("country_ip"),
     BIN("bin"),
@@ -37,6 +38,10 @@ public enum PaymentCheckedField {
 
     public static PaymentCheckedField getByValue(String value) {
         return VALUE_MAP.get(value);
+    }
+
+    public String getValue() {
+        return value;
     }
 
 }

@@ -24,6 +24,8 @@ public class EventParametersGenerator {
         parameters.put(EventField.email.name(), value.getEmail());
         parameters.put(EventField.bin.name(), value.getBin());
         parameters.put(EventField.fingerprint.name(), value.getFingerprint());
+        parameters.put(EventField.customerId.name(), value.getCustomerId());
+        parameters.put(EventField.userId.name(), value.getUserId());
         parameters.put(EventField.shopId.name(), value.getShopId());
         parameters.put(EventField.partyId.name(), value.getPartyId());
         parameters.put(EventField.resultStatus.name(), value.getResultStatus());
