@@ -1,70 +1,131 @@
 package dev.vality.fraudbusters.repository.clickhouse.impl;
 
-import dev.vality.fraudbusters.domain.TimeBound;
+import dev.vality.damsel.fraudbusters.WithdrawalStatus;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
+import dev.vality.fraudbusters.repository.clickhouse.extractor.CountExtractor;
+import dev.vality.fraudbusters.repository.clickhouse.extractor.SumExtractor;
+import dev.vality.fraudbusters.repository.clickhouse.query.PayoutHistoryQuery;
+import dev.vality.fraudbusters.repository.clickhouse.util.AggregationUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.sql.Date;
-import java.time.ZoneOffset;
 
-/** Resolves replays and status changes before applying rule filters. */
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class PayoutHistoryRepository {
 
-    private static final String HISTORY = """
-            FROM (
-                SELECT id,
-                       latest.1 AS eventTime, latest.2 AS amount, latest.3 AS currency,
-                       latest.4 AS status, latest.5 AS errorCode, latest.6 AS partyId,
-                       latest.7 AS walletId, latest.8 AS userId, latest.9 AS cardToken,
-                       latest.10 AS bin, latest.11 AS lastDigits, latest.12 AS issuerCountry,
-                       latest.13 AS ip, latest.14 AS email, latest.15 AS phone,
-                       latest.16 AS fingerprint
-                FROM (
-                    SELECT id, argMax(tuple(eventTime, amount, currency, status, errorCode,
-                                            partyId, walletId, userId, cardToken, bin, lastDigits,
-                                            issuerCountry, ip, email, phone, fingerprint),
-                                      tuple(eventTime, isNotNull(partyId) + isNotNull(walletId)
-                                            + isNotNull(userId))) AS latest
-                    FROM fraud.withdrawal
-                    WHERE timestamp >= :fromDate AND timestamp <= :toDate
-                      AND eventTime >= :from AND eventTime <= :to
-                    GROUP BY id
-                )
-            )
-            WHERE eventTime >= :from AND eventTime <= :to
-              AND status IN ('succeeded', 'failed')
-            """;
+    private static final List<String> FINAL_STATUSES = List.of(
+            WithdrawalStatus.succeeded.name(),
+            WithdrawalStatus.failed.name()
+    );
 
-    private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
-    public double aggregate(String expression, List<FieldModel> filters, TimeBound bound,
-                            String status, String errorCode) {
-        StringBuilder sql = new StringBuilder("SELECT ").append(expression).append(' ').append(HISTORY);
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("from", bound.getLeft().getEpochSecond())
-                .addValue("to", bound.getRight().getEpochSecond())
-                .addValue("fromDate", Date.valueOf(bound.getLeft().atOffset(ZoneOffset.UTC).toLocalDate()))
-                .addValue("toDate", Date.valueOf(bound.getRight().atOffset(ZoneOffset.UTC).toLocalDate()));
-        for (int i = 0; i < filters.size(); i++) {
-            FieldModel filter = filters.get(i);
-            sql.append(" AND ").append(filter.getName()).append(" = :field").append(i);
-            params.addValue("field" + i, filter.getValue());
-        }
-        if (status != null) {
-            sql.append(" AND status = :status");
-            params.addValue("status", status);
-        }
-        if (errorCode != null) {
-            sql.append(" AND errorCode = :errorCode");
-            params.addValue("errorCode", errorCode);
-        }
-        Number result = jdbcTemplate.queryForObject(sql.toString(), params, Number.class);
-        return result == null ? 0 : result.doubleValue();
+    public Integer countOperationByFieldWithGroupBy(
+            String fieldName, Object value, Long from, Long to,
+            List<FieldModel> fieldModels) {
+        String sql = buildSql(fieldName, "count() as cnt", "status in (?, ?)", fieldModels);
+        List<Object> params = AggregationUtil.generateStatusesParams(from, to, fieldModels, value, FINAL_STATUSES);
+        log.debug("PayoutHistoryRepository countOperationByFieldWithGroupBy sql: {}", sql);
+        return jdbcTemplate.query(sql, params.toArray(), new CountExtractor());
+    }
+
+    public Integer countOperationSuccessWithGroupBy(
+            String fieldName, Object value, Long from, Long to,
+            List<FieldModel> fieldModels) {
+        String sql = buildSql(fieldName, "count() as cnt", "status = ?", fieldModels);
+        List<Object> params =
+                AggregationUtil.generateParams(from, to, fieldModels, value, WithdrawalStatus.succeeded.name());
+        log.debug("PayoutHistoryRepository countOperationSuccessWithGroupBy sql: {}", sql);
+        return jdbcTemplate.query(sql, params.toArray(), new CountExtractor());
+    }
+
+    public Integer countOperationErrorWithGroupBy(
+            String fieldName, Object value, Long from, Long to,
+            List<FieldModel> fieldModels) {
+        String sql = buildSql(fieldName, "count() as cnt", "status = ?", fieldModels);
+        List<Object> params =
+                AggregationUtil.generateParams(from, to, fieldModels, value, WithdrawalStatus.failed.name());
+        log.debug("PayoutHistoryRepository countOperationErrorWithGroupBy sql: {}", sql);
+        return jdbcTemplate.query(sql, params.toArray(), new CountExtractor());
+    }
+
+    public Integer countOperationErrorWithGroupBy(
+            String fieldName, Object value, Long from, Long to,
+            List<FieldModel> fieldModels, String errorCode) {
+        String sql = buildSql(fieldName, "count() as cnt", "status = ? and errorCode = ?", fieldModels);
+        List<Object> params = AggregationUtil.generateParams(from, to, fieldModels, value,
+                WithdrawalStatus.failed.name(), errorCode);
+        log.debug("PayoutHistoryRepository countOperationErrorWithGroupBy sql: {}", sql);
+        return jdbcTemplate.query(sql, params.toArray(), new CountExtractor());
+    }
+
+    public Long sumOperationByFieldWithGroupBy(
+            String fieldName, Object value, Long from, Long to,
+            List<FieldModel> fieldModels) {
+        String sql = buildSql(fieldName, "sum(amount) as sum", "status in (?, ?)", fieldModels);
+        List<Object> params = AggregationUtil.generateStatusesParams(from, to, fieldModels, value, FINAL_STATUSES);
+        log.debug("PayoutHistoryRepository sumOperationByFieldWithGroupBy sql: {}", sql);
+        return jdbcTemplate.query(sql, params.toArray(), new SumExtractor());
+    }
+
+    public Long sumOperationSuccessWithGroupBy(
+            String fieldName, Object value, Long from, Long to,
+            List<FieldModel> fieldModels) {
+        String sql = buildSql(fieldName, "sum(amount) as sum", "status = ?", fieldModels);
+        List<Object> params =
+                AggregationUtil.generateParams(from, to, fieldModels, value, WithdrawalStatus.succeeded.name());
+        log.debug("PayoutHistoryRepository sumOperationSuccessWithGroupBy sql: {}", sql);
+        return jdbcTemplate.query(sql, params.toArray(), new SumExtractor());
+    }
+
+    public Long sumOperationErrorWithGroupBy(
+            String fieldName, Object value, Long from, Long to,
+            List<FieldModel> fieldModels) {
+        String sql = buildSql(fieldName, "sum(amount) as sum", "status = ?", fieldModels);
+        List<Object> params =
+                AggregationUtil.generateParams(from, to, fieldModels, value, WithdrawalStatus.failed.name());
+        log.debug("PayoutHistoryRepository sumOperationErrorWithGroupBy sql: {}", sql);
+        return jdbcTemplate.query(sql, params.toArray(), new SumExtractor());
+    }
+
+    public Long sumOperationErrorWithGroupBy(
+            String fieldName, Object value, Long from, Long to,
+            List<FieldModel> fieldModels, String errorCode) {
+        String sql = buildSql(fieldName, "sum(amount) as sum", "status = ? and errorCode = ?", fieldModels);
+        List<Object> params = AggregationUtil.generateParams(from, to, fieldModels, value,
+                WithdrawalStatus.failed.name(), errorCode);
+        log.debug("PayoutHistoryRepository sumOperationErrorWithGroupBy sql: {}", sql);
+        return jdbcTemplate.query(sql, params.toArray(), new SumExtractor());
+    }
+
+    public Integer uniqCountOperationWithGroupBy(
+            String fieldNameBy, Object value, String fieldNameCount, Long from, Long to,
+            List<FieldModel> fieldModels) {
+        String sql = buildSql(fieldNameBy, String.format("uniqExact(%s) as cnt", fieldNameCount),
+                "status in (?, ?)", fieldModels);
+        List<Object> params = AggregationUtil.generateStatusesParams(from, to, fieldModels, value, FINAL_STATUSES);
+        log.debug("PayoutHistoryRepository uniqCountOperationWithGroupBy sql: {}", sql);
+        return jdbcTemplate.query(sql, params.toArray(), new CountExtractor());
+    }
+
+    private String buildSql(String fieldName, String aggregate, String statusCondition,
+                            List<FieldModel> fieldModels) {
+        StringBuilder sql = new StringBuilder(String.format("""
+                select %1$s, %2$s
+                from %3$s
+                where %1$s = ? and %4$s""",
+                fieldName,
+                aggregate,
+                PayoutHistoryQuery.SELECT_LATEST_PAYOUTS,
+                statusCondition
+        ));
+        StringBuilder sqlGroupBy = new StringBuilder(String.format(" group by %1$s", fieldName));
+        return AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy)
+                .toString();
     }
 }

@@ -1,6 +1,8 @@
 package dev.vality.fraudbusters.fraud.payout.aggregator.clickhouse;
 
+import dev.vality.fraudbusters.domain.TimeBound;
 import dev.vality.fraudbusters.exception.RuleFunctionException;
+import dev.vality.fraudbusters.fraud.AggregateGroupingFunction;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.OperationModel;
 import dev.vality.fraudbusters.fraud.resolver.HistoryFieldResolver;
@@ -13,7 +15,7 @@ import dev.vality.fraudo.payout.aggregator.CountPayoutAggregator;
 import dev.vality.fraudo.payout.aggregator.SumPayoutAggregator;
 import lombok.RequiredArgsConstructor;
 
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.List;
 
 /** Payout history aggregates; payment and payout rules can both use them. */
@@ -29,76 +31,113 @@ public class PayoutAggregators<T extends OperationModel, U> implements CountPayo
     @Override
     public Integer count(U field, T model, TimeWindow window,
                          List<U> groups) {
-        return (int) aggregate("count()", field, model, window, groups, null, null);
+        return aggregate(field, model, window, groups, 0, repository::countOperationByFieldWithGroupBy);
     }
 
     @Override
     public Integer countSuccess(U field, T model, TimeWindow window,
                                 List<U> groups) {
-        return (int) aggregate("count()", field, model, window, groups, "succeeded", null);
+        return aggregate(field, model, window, groups, 0, repository::countOperationSuccessWithGroupBy);
     }
 
     @Override
     public Integer countError(U field, T model, TimeWindow window,
                               List<U> groups) {
-        return countError(field, model, window, null, groups);
+        return aggregate(field, model, window, groups, 0, repository::countOperationErrorWithGroupBy);
     }
 
     @Override
     public Integer countError(U field, T model, TimeWindow window,
                               String errorCode, List<U> groups) {
-        return (int) aggregate("count()", field, model, window, groups, "failed", errorCode);
+        return aggregate(
+                field,
+                model,
+                window,
+                groups,
+                0,
+                (fieldName, value, from, to, fieldModels) -> repository.countOperationErrorWithGroupBy(
+                        fieldName, value, from, to, fieldModels, errorCode)
+        );
     }
 
     @Override
     public Double sum(U field, T model, TimeWindow window,
                       List<U> groups) {
-        return aggregate("sum(amount)", field, model, window, groups, null, null);
+        return Double.valueOf(aggregate(field, model, window, groups, 0L,
+                repository::sumOperationByFieldWithGroupBy));
     }
 
     @Override
     public Double sumSuccess(U field, T model, TimeWindow window,
                              List<U> groups) {
-        return aggregate("sum(amount)", field, model, window, groups, "succeeded", null);
+        return Double.valueOf(aggregate(field, model, window, groups, 0L,
+                repository::sumOperationSuccessWithGroupBy));
     }
 
     @Override
     public Double sumError(U field, T model, TimeWindow window,
                            List<U> groups) {
-        return sumError(field, model, window, null, groups);
+        return Double.valueOf(aggregate(field, model, window, groups, 0L,
+                repository::sumOperationErrorWithGroupBy));
     }
 
     @Override
     public Double sumError(U field, T model, TimeWindow window,
                            String errorCode, List<U> groups) {
-        return aggregate("sum(amount)", field, model, window, groups, "failed", errorCode);
+        return Double.valueOf(aggregate(
+                field,
+                model,
+                window,
+                groups,
+                0L,
+                (fieldName, value, from, to, fieldModels) -> repository.sumOperationErrorWithGroupBy(
+                        fieldName, value, from, to, fieldModels, errorCode)
+        ));
     }
 
     @Override
     public Integer countUniqueValue(U field, T model, U uniqueField,
                                     TimeWindow window, List<U> groups) {
-        return (int) aggregate("uniqExact(" + fields.resolve(uniqueField) + ")", field, model, window, groups,
-                null, null);
+        return aggregate(
+                field,
+                model,
+                window,
+                groups,
+                0,
+                (fieldName, value, from, to, fieldModels) -> repository.uniqCountOperationWithGroupBy(
+                        fieldName, value, fields.resolve(uniqueField), from, to, fieldModels)
+        );
     }
 
-    private double aggregate(String expression, U field, T model, TimeWindow window,
-                             List<U> groups, String status, String errorCode) {
+    private <R> R aggregate(
+            U field,
+            T model,
+            TimeWindow window,
+            List<U> groups,
+            R emptyResult,
+            AggregateGroupingFunction<String, Object, Long, Long, List<FieldModel>, R> aggregateFunction) {
         try {
-            List<FieldModel> filters = new ArrayList<>();
-            filters.add(fields.resolve(field, model));
-            if (groups != null) {
-                groups.forEach(group -> filters.add(fields.resolve(group, model)));
+            FieldModel resolve = fields.resolve(field, model);
+            List<FieldModel> eventFields = fields.resolveListFields(model, groups);
+            if (isMissing(resolve) || eventFields.stream().anyMatch(this::isMissing)) {
+                return emptyResult;
             }
-            boolean hasMissingValue = filters.stream()
-                    .anyMatch(filter -> filter.getValue() == null
-                            || filter.getValue() instanceof String value && value.isBlank());
-            if (hasMissingValue) {
-                return 0;
-            }
-            var bound = timeBoundaryService.getBoundary(TimestampUtil.instantFromModel(model), window);
-            return repository.aggregate(expression, filters, bound, status, errorCode);
+            Instant timestamp = TimestampUtil.instantFromModel(model);
+            TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, window);
+            return aggregateFunction.accept(
+                    resolve.getName(),
+                    resolve.getValue(),
+                    timeBound.getLeft().toEpochMilli(),
+                    timeBound.getRight().toEpochMilli(),
+                    eventFields
+            );
         } catch (Exception e) {
             throw new RuleFunctionException(e);
         }
+    }
+
+    private boolean isMissing(FieldModel fieldModel) {
+        return fieldModel.getValue() == null
+                || fieldModel.getValue() instanceof String value && value.isBlank();
     }
 }

@@ -45,14 +45,14 @@ class PayoutInListFinderImplTest {
         final var finder = new PayoutInListFinderImpl(lists, history, BeanUtil.createPayoutFieldsInPayoutHistory());
         var model = new PayoutModel();
         model.setTimestamp(java.time.Instant.parse("2026-01-01T12:00:00Z").toEpochMilli());
-        var info = new dev.vality.damsel.wb_list.CountInfo().setCount(1)
+        var info = new dev.vality.damsel.wb_list.CountInfo()
+                .setCount(1)
                 .setTimeToLive("2026-01-02T12:00:00Z");
         when(lists.getRowInfo(any())).thenReturn(new dev.vality.damsel.wb_list.Result()
                 .setRowInfo(dev.vality.damsel.wb_list.RowInfo.count_info(info)));
         assertTrue(finder.findInGreyList(List.of(new Pair<>(CARD_TOKEN, "synthetic-card")), model));
-        var bound = ArgumentCaptor.forClass(dev.vality.fraudbusters.domain.TimeBound.class);
-        verify(history).aggregate(eq("count()"), anyList(), bound.capture(), isNull(), isNull());
-        assertEquals(java.time.Instant.EPOCH, bound.getValue().getLeft());
+        verify(history).countOperationByFieldWithGroupBy(eq("cardToken"), eq("synthetic-card"),
+                eq(java.time.Instant.EPOCH.toEpochMilli()), eq(model.getTimestamp()), eq(List.of()));
     }
 
 }

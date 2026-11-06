@@ -13,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import ru.yandex.clickhouse.ClickHouseDataSource;
 
 import java.time.Instant;
@@ -27,7 +26,10 @@ class PayoutHistoryRepositoryTest {
 
     private JdbcTemplate jdbc;
     private PayoutAggregators<PayoutModel, PayoutCheckedField> aggregates;
-    private final TimeWindow window = TimeWindow.builder().start(24).timeUnit("hours").build();
+    private final TimeWindow window = TimeWindow.builder()
+            .start(24)
+            .timeUnit("hours")
+            .build();
     private final long timestamp = Instant.parse("2026-01-01T12:00:00Z").toEpochMilli();
 
     @BeforeEach
@@ -35,7 +37,7 @@ class PayoutHistoryRepositoryTest {
         jdbc = new JdbcTemplate(new ClickHouseDataSource("jdbc:clickhouse://localhost:" +
                 ClickHouseContainerExtension.CLICKHOUSE_CONTAINER.getFirstMappedPort() + "/default"));
         jdbc.execute("TRUNCATE TABLE fraud.withdrawal");
-        aggregates = new PayoutAggregators<>(new PayoutHistoryRepository(new NamedParameterJdbcTemplate(jdbc)),
+        aggregates = new PayoutAggregators<>(new PayoutHistoryRepository(jdbc),
                 new TimeBoundaryServiceImpl(), BeanUtil.createPayoutFieldsInPayoutHistory());
     }
 
@@ -91,19 +93,24 @@ class PayoutHistoryRepositoryTest {
     @Test
     void legacyAndEnrichedWithdrawalsCanBeWrittenThroughTheExistingBatchPath() {
         var withdrawal = new dev.vality.damsel.fraudbusters.Withdrawal()
-                .setId("synthetic-batch").setEventTime("2026-01-01T12:00:00Z")
+                .setId("synthetic-batch")
+                .setEventTime("2026-01-01T12:00:00Z")
                 .setCost(new dev.vality.damsel.domain.Cash(100, new dev.vality.damsel.domain.CurrencyRef("RUB")))
                 .setStatus(dev.vality.damsel.fraudbusters.WithdrawalStatus.succeeded)
                 .setAccount(new dev.vality.damsel.fraudbusters.Account()
-                        .setId("synthetic-account").setCurrency(new dev.vality.damsel.domain.CurrencyRef("RUB")))
+                        .setId("synthetic-account")
+                        .setCurrency(new dev.vality.damsel.domain.CurrencyRef("RUB")))
                 .setDestinationResource(dev.vality.damsel.fraudbusters.Resource.digital_wallet(
-                        new dev.vality.damsel.fraudbusters.DigitalWallet().setId("synthetic-destination")));
+                        new dev.vality.damsel.fraudbusters.DigitalWallet()
+                                .setId("synthetic-destination")));
         var writer = new dev.vality.fraudbusters.repository.clickhouse.impl.WithdrawalRepositoryImpl(jdbc);
         writer.insertBatch(List.of(withdrawal));
         assertNull(jdbc.queryForObject("SELECT userId FROM fraud.withdrawal", String.class));
-        withdrawal.setPartyId("party").setWalletId("wallet")
+        withdrawal.setPartyId("party")
+                .setWalletId("wallet")
                 .setClientInfo(new dev.vality.damsel.fraudbusters.ClientInfo()
-                        .setCustomerId("synthetic-customer").setUserId("synthetic-user")
+                        .setCustomerId("synthetic-customer")
+                        .setUserId("synthetic-user")
                         .setEmail("synthetic@example.com"));
         writer.insertBatch(List.of(withdrawal));
         var model = createPayoutModel();

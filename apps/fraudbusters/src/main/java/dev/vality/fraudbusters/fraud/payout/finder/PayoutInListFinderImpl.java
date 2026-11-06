@@ -5,7 +5,6 @@ import dev.vality.damsel.wb_list.ListType;
 import dev.vality.damsel.wb_list.PayoutId;
 import dev.vality.damsel.wb_list.Row;
 import dev.vality.damsel.wb_list.WbListServiceSrv;
-import dev.vality.fraudbusters.domain.TimeBound;
 import dev.vality.fraudbusters.exception.RuleFunctionException;
 import dev.vality.fraudbusters.fraud.constant.PayoutCheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
@@ -63,16 +62,20 @@ public class PayoutInListFinderImpl implements InListFinder<PayoutModel, PayoutC
                 if (from.isAfter(now) || !to.isAfter(now) || !from.isBefore(to)) {
                     continue;
                 }
-                List<FieldModel> filters = new ArrayList<>();
-                filters.add(new FieldModel(historyFieldResolver.resolve(field.getFirst()), field.getSecond()));
+                List<FieldModel> scope = new ArrayList<>();
                 if (StringUtils.hasText(model.getPartyId())) {
-                    filters.add(historyFieldResolver.resolve(PayoutCheckedField.PARTY_ID, model));
+                    scope.add(historyFieldResolver.resolve(PayoutCheckedField.PARTY_ID, model));
                 }
                 if (StringUtils.hasText(model.getWalletId())) {
-                    filters.add(historyFieldResolver.resolve(PayoutCheckedField.WALLET_ID, model));
+                    scope.add(historyFieldResolver.resolve(PayoutCheckedField.WALLET_ID, model));
                 }
-                double count = history.aggregate("count()", filters,
-                        TimeBound.builder().left(from).right(now).build(), null, null);
+                Integer count = history.countOperationByFieldWithGroupBy(
+                        historyFieldResolver.resolve(field.getFirst()),
+                        field.getSecond(),
+                        from.toEpochMilli(),
+                        now.toEpochMilli(),
+                        scope
+                );
                 if (count + 1 <= info.getCount()) {
                     return true;
                 }
@@ -104,8 +107,12 @@ public class PayoutInListFinderImpl implements InListFinder<PayoutModel, PayoutC
     }
 
     private Row createRow(ListType type, Pair<PayoutCheckedField, String> field, PayoutModel model) {
-        return new Row().setId(IdInfo.payout_id(new PayoutId()
-                        .setPartyId(model.getPartyId()).setWalletId(model.getWalletId())))
-                .setListType(type).setListName(field.getFirst().name()).setValue(field.getSecond());
+        return new Row()
+                .setId(IdInfo.payout_id(new PayoutId()
+                        .setPartyId(model.getPartyId())
+                        .setWalletId(model.getWalletId())))
+                .setListType(type)
+                .setListName(field.getFirst().name())
+                .setValue(field.getSecond());
     }
 }
