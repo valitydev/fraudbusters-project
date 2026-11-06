@@ -11,6 +11,7 @@ import { PayoutsFeedbackService } from '../../services/payouts-feedback.service'
 
 @Component({
     templateUrl: 'payout-references.component.html',
+    styleUrls: ['../../payouts-section.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PayoutReferencesComponent {

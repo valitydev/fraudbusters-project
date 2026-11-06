@@ -1,6 +1,6 @@
 <div fxLayout="column" fxLayoutGap="16px">
     <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="16px">
-        <mat-form-field fxFlex>
+        <mat-form-field appearance="outline" floatLabel="always" fxFlex>
             <mat-label>Search by group or template ID</mat-label>
             <input matInput #searchInput (keyup.enter)="search(searchInput.value)" />
         </mat-form-field>
@@ -9,7 +9,7 @@
 
     <mat-card *ngIf="editing">
         <mat-card-content fxLayout="column" [formGroup]="form">
-            <mat-form-field>
+            <mat-form-field appearance="outline" floatLabel="always">
                 <mat-label>Group ID</mat-label>
                 <input matInput formControlName="groupId" />
             </mat-form-field>
@@ -22,11 +22,11 @@
                 fxLayoutAlign="start center"
             >
                 <ng-container [formGroupName]="i">
-                    <mat-form-field fxFlex>
+                    <mat-form-field appearance="outline" floatLabel="always" fxFlex>
                         <mat-label>Template ID</mat-label>
                         <input matInput formControlName="id" />
                     </mat-form-field>
-                    <mat-form-field>
+                    <mat-form-field appearance="outline" floatLabel="always">
                         <mat-label>Priority</mat-label>
                         <input matInput type="number" formControlName="priority" />
                     </mat-form-field>

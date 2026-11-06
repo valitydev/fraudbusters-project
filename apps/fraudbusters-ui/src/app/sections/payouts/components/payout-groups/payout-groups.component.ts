@@ -10,6 +10,7 @@ import { PayoutsFeedbackService } from '../../services/payouts-feedback.service'
 
 @Component({
     templateUrl: 'payout-groups.component.html',
+    styleUrls: ['../../payouts-section.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PayoutGroupsComponent {

@@ -1,54 +1,54 @@
 <div fxLayout="column" fxLayoutGap="16px">
-    <div fxLayout="row wrap" fxLayoutGap="16px" fxLayoutAlign="start center">
+    <div class="fb-payout-form">
         <mat-button-toggle-group [value]="listType$ | async" (change)="selectType($event.value)">
             <mat-button-toggle *ngFor="let item of listTypes" [value]="item.type">{{ item.name }}</mat-button-toggle>
         </mat-button-toggle-group>
-        <mat-form-field>
+        <mat-form-field appearance="outline" floatLabel="always">
             <mat-label>Lists</mat-label>
             <mat-select multiple (selectionChange)="filterNames($event.value)">
                 <mat-option *ngFor="let name of currentListNames$ | async" [value]="name">{{ name }}</mat-option>
             </mat-select>
         </mat-form-field>
-        <mat-form-field fxFlex>
+        <mat-form-field appearance="outline" floatLabel="always" fxFlex>
             <mat-label>Search by value, party or wallet</mat-label>
             <input matInput #searchInput (keyup.enter)="search(searchInput.value)" />
         </mat-form-field>
     </div>
 
     <mat-card>
-        <mat-card-content [formGroup]="form" fxLayout="row wrap" fxLayoutGap="16px" fxLayoutAlign="start center">
-            <mat-form-field *ngIf="!isNaming">
+        <mat-card-content [formGroup]="form" class="fb-payout-form">
+            <mat-form-field appearance="outline" floatLabel="always" *ngIf="!isNaming">
                 <mat-label>Field</mat-label>
                 <mat-select formControlName="listName">
                     <mat-option *ngFor="let name of nameOptions$ | async" [value]="name">{{ name }}</mat-option>
                 </mat-select>
             </mat-form-field>
-            <mat-form-field *ngIf="isNaming">
+            <mat-form-field appearance="outline" floatLabel="always" *ngIf="isNaming">
                 <mat-label>List name</mat-label>
                 <input matInput formControlName="listName" />
             </mat-form-field>
-            <mat-form-field>
+            <mat-form-field appearance="outline" floatLabel="always">
                 <mat-label>Value</mat-label>
                 <input matInput formControlName="value" />
             </mat-form-field>
-            <mat-form-field>
+            <mat-form-field appearance="outline" floatLabel="always">
                 <mat-label>Party ID (empty for all payouts)</mat-label>
                 <input matInput formControlName="partyId" />
             </mat-form-field>
-            <mat-form-field>
+            <mat-form-field appearance="outline" floatLabel="always">
                 <mat-label>Wallet ID (optional)</mat-label>
                 <input matInput formControlName="walletId" />
             </mat-form-field>
             <ng-container *ngIf="isGrey">
-                <mat-form-field>
+                <mat-form-field appearance="outline" floatLabel="always">
                     <mat-label>Allowed payouts</mat-label>
                     <input matInput type="number" min="1" formControlName="count" />
                 </mat-form-field>
-                <mat-form-field>
+                <mat-form-field appearance="outline" floatLabel="always">
                     <mat-label>Counted from (optional)</mat-label>
                     <input matInput type="datetime-local" formControlName="startCountTime" />
                 </mat-form-field>
-                <mat-form-field>
+                <mat-form-field appearance="outline" floatLabel="always">
                     <mat-label>Valid until</mat-label>
                     <input matInput type="datetime-local" formControlName="endCountTime" />
                 </mat-form-field>

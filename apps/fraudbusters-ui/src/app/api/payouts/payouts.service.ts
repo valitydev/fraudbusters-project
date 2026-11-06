@@ -142,8 +142,9 @@ export class PayoutsService {
         searchValue?: string;
         size?: number;
     }): Observable<PayoutListRecordsResponse> {
+        const listNames = params.listNames?.length ? params.listNames : undefined;
         return this.http.get<PayoutListRecordsResponse>(`${this.endpoint}/payouts-lists/filter`, {
-            params: filterParameters(params),
+            params: filterParameters({ ...params, listNames }),
         });
     }
 

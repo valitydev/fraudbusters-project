@@ -1,17 +1,17 @@
 <div fxLayout="column" fxLayoutGap="16px">
     <mat-card>
-        <mat-card-content [formGroup]="form" fxLayout="row wrap" fxLayoutGap="16px" fxLayoutAlign="start center">
-            <mat-form-field>
+        <mat-card-content [formGroup]="form" class="fb-payout-form">
+            <mat-form-field appearance="outline" floatLabel="always">
                 <mat-label>Group</mat-label>
                 <mat-select formControlName="groupId">
                     <mat-option *ngFor="let groupId of groups$ | async" [value]="groupId">{{ groupId }}</mat-option>
                 </mat-select>
             </mat-form-field>
-            <mat-form-field>
+            <mat-form-field appearance="outline" floatLabel="always">
                 <mat-label>Party ID (empty for all payouts)</mat-label>
                 <input matInput formControlName="partyId" />
             </mat-form-field>
-            <mat-form-field>
+            <mat-form-field appearance="outline" floatLabel="always">
                 <mat-label>Wallet ID (optional)</mat-label>
                 <input matInput formControlName="walletId" />
             </mat-form-field>
@@ -21,7 +21,7 @@
         </mat-card-content>
     </mat-card>
 
-    <mat-form-field>
+    <mat-form-field appearance="outline" floatLabel="always">
         <mat-label>Search by party, wallet or group</mat-label>
         <input matInput #searchInput (keyup.enter)="search(searchInput.value)" />
     </mat-form-field>

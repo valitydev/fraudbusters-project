@@ -1,18 +1,18 @@
 <div fxLayout="column" fxLayoutGap="16px">
     <mat-card>
-        <mat-card-content [formGroup]="form" fxLayout="row wrap" fxLayoutGap="16px" fxLayoutAlign="start center">
+        <mat-card-content [formGroup]="form" class="fb-payout-form">
             <mat-checkbox formControlName="isGlobal">All payouts</mat-checkbox>
             <ng-container *ngIf="!form.value.isGlobal">
-                <mat-form-field>
+                <mat-form-field appearance="outline" floatLabel="always">
                     <mat-label>Party ID</mat-label>
                     <input matInput formControlName="partyId" />
                 </mat-form-field>
-                <mat-form-field>
+                <mat-form-field appearance="outline" floatLabel="always">
                     <mat-label>Wallet ID (optional)</mat-label>
                     <input matInput formControlName="walletId" />
                 </mat-form-field>
             </ng-container>
-            <mat-form-field fxFlex>
+            <mat-form-field appearance="outline" floatLabel="always" fxFlex>
                 <mat-label>Template ID</mat-label>
                 <input matInput formControlName="templateId" [matAutocomplete]="templates" />
                 <mat-autocomplete #templates="matAutocomplete">
@@ -23,7 +23,7 @@
         </mat-card-content>
     </mat-card>
 
-    <mat-form-field>
+    <mat-form-field appearance="outline" floatLabel="always">
         <mat-label>Search by party, wallet or template</mat-label>
         <input matInput #searchInput (keyup.enter)="search(searchInput.value)" />
     </mat-form-field>

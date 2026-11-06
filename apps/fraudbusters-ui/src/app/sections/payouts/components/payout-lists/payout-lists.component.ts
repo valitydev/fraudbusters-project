@@ -18,6 +18,7 @@ interface ListFilter {
 
 @Component({
     templateUrl: 'payout-lists.component.html',
+    styleUrls: ['../../payouts-section.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PayoutListsComponent {
