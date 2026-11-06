@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
@@ -22,13 +23,12 @@ interface ListFilter {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PayoutListsComponent {
-    filter$ = new BehaviorSubject<ListFilter>({ listType: ListType.Black, listNames: [], searchValue: '' });
-    readonly listTypes: { type: ListType; name: string }[] = [
-        { type: ListType.Black, name: 'Black list' },
-        { type: ListType.White, name: 'White list' },
-        { type: ListType.Grey, name: 'Grey list' },
-        { type: ListType.Naming, name: 'Named lists' },
-    ];
+    /** The tab fixes the list type, as each payment list has its own tab. */
+    filter$ = new BehaviorSubject<ListFilter>({
+        listType: this.route.snapshot.data.listType as ListType,
+        listNames: [],
+        searchValue: '',
+    });
     listType$ = this.filter$.pipe(map((filter) => filter.listType));
     rows$ = this.filter$.pipe(
         switchMap((filter) => this.payoutsService.findListRows({ ...filter, size: 100 })),
@@ -58,6 +58,7 @@ export class PayoutListsComponent {
     });
 
     constructor(
+        private route: ActivatedRoute,
         private payoutsService: PayoutsService,
         private feedback: PayoutsFeedbackService,
         private fb: FormBuilder
@@ -73,11 +74,6 @@ export class PayoutListsComponent {
 
     get isNaming(): boolean {
         return this.filter$.value.listType === ListType.Naming;
-    }
-
-    selectType(listType: ListType) {
-        this.form.reset({ listName: '', value: '', partyId: '', walletId: '', count: null });
-        this.filter$.next({ listType, listNames: [], searchValue: '' });
     }
 
     filterNames(listNames: string[]) {

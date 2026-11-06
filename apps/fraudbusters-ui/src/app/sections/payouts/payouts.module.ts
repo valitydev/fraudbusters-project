@@ -4,7 +4,6 @@ import { FlexModule } from '@angular/flex-layout';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -22,8 +21,8 @@ import { PayoutGroupsComponent } from './components/payout-groups/payout-groups.
 import { PayoutListsComponent } from './components/payout-lists/payout-lists.component';
 import { PayoutReferencesComponent } from './components/payout-references/payout-references.component';
 import { PayoutTemplatesComponent } from './components/payout-templates/payout-templates.component';
+import { PayoutSectionComponent } from './payout-section.component';
 import { PayoutsRoutingModule } from './payouts-routing.module';
-import { PayoutsComponent } from './payouts.component';
 import { PayoutsFeedbackService } from './services/payouts-feedback.service';
 import { ConfirmActionDialogModule } from '../../shared/components/confirm-action-dialog';
 import { EmptySearchResultModule } from '../../shared/components/empty-search-result';
@@ -36,7 +35,6 @@ import { EmptySearchResultModule } from '../../shared/components/empty-search-re
         ReactiveFormsModule,
         MatAutocompleteModule,
         MatButtonModule,
-        MatButtonToggleModule,
         MatCardModule,
         MatCheckboxModule,
         MatDialogModule,
@@ -51,7 +49,7 @@ import { EmptySearchResultModule } from '../../shared/components/empty-search-re
         EmptySearchResultModule,
     ],
     declarations: [
-        PayoutsComponent,
+        PayoutSectionComponent,
         PayoutTemplatesComponent,
         PayoutReferencesComponent,
         PayoutGroupsComponent,

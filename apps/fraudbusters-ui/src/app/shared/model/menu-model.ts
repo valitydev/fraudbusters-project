@@ -4,46 +4,70 @@ import { Roles } from '../../auth';
 export class MenuModel {
     public static navItems: NavItem[] = [
         {
-            displayName: 'Analytics',
-            iconName: 'pie_chart',
-            route: 'analytics',
-            roles: [Roles.FraudMonitoring],
-        },
-        {
-            displayName: 'Templates',
-            iconName: 'business',
-            route: 'templates',
-            roles: [Roles.FraudOfficer],
-        },
-        {
-            displayName: 'Groups',
-            iconName: 'group_work',
-            route: 'groups',
-            roles: [Roles.FraudOfficer],
-        },
-        {
-            displayName: 'Lists',
-            iconName: 'list_alt',
-            route: 'lists',
-            roles: [Roles.FraudOfficer, Roles.FraudMonitoring],
+            displayName: 'Payments',
+            iconName: 'payments',
+            children: [
+                {
+                    displayName: 'Analytics',
+                    iconName: 'pie_chart',
+                    route: 'analytics',
+                    roles: [Roles.FraudMonitoring],
+                },
+                {
+                    displayName: 'Templates',
+                    iconName: 'business',
+                    route: 'templates',
+                    roles: [Roles.FraudOfficer],
+                },
+                {
+                    displayName: 'Groups',
+                    iconName: 'group_work',
+                    route: 'groups',
+                    roles: [Roles.FraudOfficer],
+                },
+                {
+                    displayName: 'Lists',
+                    iconName: 'list_alt',
+                    route: 'lists',
+                    roles: [Roles.FraudOfficer, Roles.FraudMonitoring],
+                },
+                {
+                    displayName: 'Historical data',
+                    iconName: 'history',
+                    route: 'historical-data/payments',
+                    roles: [Roles.FraudOfficer, Roles.FraudMonitoring],
+                },
+                {
+                    displayName: 'Testing',
+                    iconName: 'bug_report',
+                    route: 'testing/data-sets',
+                    roles: [Roles.FraudOfficer],
+                },
+            ],
         },
         {
             displayName: 'Payouts',
             iconName: 'account_balance_wallet',
-            route: 'payouts',
-            roles: [Roles.FraudOfficer, Roles.FraudMonitoring],
-        },
-        {
-            displayName: 'Historical data',
-            iconName: 'history',
-            route: 'historical-data/payments',
-            roles: [Roles.FraudOfficer, Roles.FraudMonitoring],
-        },
-        {
-            displayName: 'Testing',
-            iconName: 'bug_report',
-            route: 'testing/data-sets',
-            roles: [Roles.FraudOfficer],
+            children: [
+                {
+                    displayName: 'Templates',
+                    iconName: 'business',
+                    route: 'payouts/templates',
+                    roles: [Roles.FraudOfficer],
+                },
+                {
+                    displayName: 'Groups',
+                    iconName: 'group_work',
+                    route: 'payouts/groups',
+                    roles: [Roles.FraudOfficer],
+                },
+                {
+                    displayName: 'Lists',
+                    iconName: 'list_alt',
+                    route: 'payouts/lists',
+                    roles: [Roles.FraudOfficer, Roles.FraudMonitoring],
+                },
+            ],
         },
         {
             displayName: 'Notifications',
