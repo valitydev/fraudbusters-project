@@ -23,6 +23,7 @@ import dev.vality.fraudbusters.util.ReferenceKeyGenerator;
 import dev.vality.testcontainers.annotations.KafkaSpringBootTest;
 import dev.vality.testcontainers.annotations.kafka.KafkaTestcontainer;
 import dev.vality.testcontainers.annotations.kafka.config.KafkaProducer;
+import dev.vality.trusted.tokens.ConditionTemplate;
 import dev.vality.trusted.tokens.TrustedTokensSrv;
 import dev.vality.woody.thrift.impl.http.THClientBuilder;
 import dev.vality.woody.thrift.impl.http.THSpawnClientBuilder;
@@ -170,8 +171,7 @@ class EndToEndIntegrationTest {
                 ReferenceKeyGenerator.generateTemplateKeyByList(GROUP_P_ID, null),
                 BeanUtil.createGroupReferenceCommand(GROUP_P_ID, null, GROUP_ID));
         Mockito.when(geoIpServiceSrv.getLocationIsoCode(any())).thenReturn("RUS");
-        Mockito.when(trustedTokensSrv.isTokenTrustedByConditionTemplateName(
-                anyString(), Mockito.eq("synthetic-trusted-template"))).thenReturn(true);
+        Mockito.when(trustedTokensSrv.isTokenTrusted(anyString(), any(ConditionTemplate.class))).thenReturn(true);
 
         Thread.sleep(TestProperties.TIMEOUT);
     }

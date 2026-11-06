@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Component
@@ -75,7 +74,6 @@ public class LocalResultStorageRepository implements PaymentRepository {
                         && checkedPayment.getEventTime() <= to
                         && paymentFieldValueFilter.filter(fieldNameBy, value, checkedPayment))
                 .map(checkedPayment -> paymentFieldValueResolver.resolve(fieldNameCount, checkedPayment))
-                .filter(Optional::isPresent)
                 .distinct()
                 .count();
         log.debug("LocalResultStorageRepository uniqCountOperation: {}", count);
@@ -95,7 +93,6 @@ public class LocalResultStorageRepository implements PaymentRepository {
                 .filter(checkedPayment -> filterPaymentByValue(
                         fieldNameBy, value, from, to, fieldModels, checkedPayment))
                 .map(checkedPayment -> paymentFieldValueResolver.resolve(fieldNameCount, checkedPayment))
-                .filter(Optional::isPresent)
                 .distinct()
                 .count();
         log.debug("LocalResultStorageRepository uniqCountOperation: {}", count);

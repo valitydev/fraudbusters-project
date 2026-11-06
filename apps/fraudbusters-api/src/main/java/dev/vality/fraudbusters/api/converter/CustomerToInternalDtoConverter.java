@@ -15,9 +15,7 @@ public class CustomerToInternalDtoConverter
 
     @Override
     public ClientInfo convert(Customer customer) {
-        ClientInfo clientInfo = new ClientInfo()
-                .setCustomerId(customer.getCustomerId())
-                .setUserId(customer.getUserId());
+        ClientInfo clientInfo = new ClientInfo();
         Device device = customer.getDevice();
         if (Objects.nonNull(device)) {
             clientInfo.setFingerprint(device.getFingerprint());

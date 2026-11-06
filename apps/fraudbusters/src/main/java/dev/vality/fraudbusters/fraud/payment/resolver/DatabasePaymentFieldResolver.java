@@ -5,19 +5,16 @@ import dev.vality.fraudbusters.exception.UnknownFieldException;
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
-import dev.vality.fraudbusters.fraud.resolver.HistoryFieldResolver;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class DatabasePaymentFieldResolver implements HistoryFieldResolver<PaymentModel, PaymentCheckedField> {
+public class DatabasePaymentFieldResolver {
 
-    @Override
     @NotNull
     public List<FieldModel> resolveListFields(PaymentModel model, List<PaymentCheckedField> list) {
         if (list != null) {
@@ -28,7 +25,6 @@ public class DatabasePaymentFieldResolver implements HistoryFieldResolver<Paymen
         return new ArrayList<>();
     }
 
-    @Override
     public FieldModel resolve(PaymentCheckedField field, PaymentModel model) {
         if (field == null) {
             throw new UnknownFieldException();
@@ -38,7 +34,6 @@ public class DatabasePaymentFieldResolver implements HistoryFieldResolver<Paymen
             case EMAIL -> new FieldModel(EventField.email.name(), model.getEmail());
             case BIN -> new FieldModel(EventField.bin.name(), model.getBin());
             case FINGERPRINT -> new FieldModel(EventField.fingerprint.name(), model.getFingerprint());
-            case USER_ID -> new FieldModel(EventField.userId.name(), model.getUserId());
             case PARTY_ID -> new FieldModel(EventField.partyId.name(), model.getPartyId());
             case SHOP_ID -> new FieldModel(EventField.shopId.name(), model.getShopId());
             case CARD_TOKEN -> new FieldModel(EventField.cardToken.name(), model.getCardToken());
@@ -52,33 +47,24 @@ public class DatabasePaymentFieldResolver implements HistoryFieldResolver<Paymen
         };
     }
 
-    @Override
     public String resolve(PaymentCheckedField field) {
-        return findColumn(field)
-                .orElseThrow(UnknownFieldException::new);
-    }
-
-    public Optional<String> findColumn(PaymentCheckedField field) {
         if (field == null) {
-            return Optional.empty();
+            throw new UnknownFieldException();
         }
-        return Optional.ofNullable(switch (field) {
+        return switch (field) {
             case IP -> EventField.ip.name();
             case EMAIL -> EventField.email.name();
             case PHONE -> EventField.phone.name();
             case BIN -> EventField.bin.name();
             case LAST_DIGITS -> EventField.lastDigits.name();
             case FINGERPRINT -> EventField.fingerprint.name();
-            case USER_ID -> EventField.userId.name();
             case PARTY_ID -> EventField.partyId.name();
             case SHOP_ID -> EventField.shopId.name();
             case CARD_TOKEN -> EventField.cardToken.name();
             case MOBILE -> EventField.mobile.name();
             case RECURRENT -> EventField.recurrent.name();
-            case CURRENCY -> EventField.currency.name();
-            case COUNTRY_BANK -> EventField.bankCountry.name();
-            default -> null;
-        });
+            default -> throw new UnknownFieldException();
+        };
     }
 
 }

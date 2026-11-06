@@ -25,20 +25,14 @@ public class UserCacheKeyUtil {
                     ? context.getUserInfo().getPhone()
                     : ClickhouseUtilsValue.UNKNOWN;
         }
-        String identityKey = context.getUserInfo() == null ? ""
-                : encodeIdentity(context.getUserInfo().getUserId());
         if (context.getShopList() == null || context.getShopList().isEmpty()) {
-            return email + "|" + phone + "|" + identityKey + "|";
+            return email + "|" + phone + "|";
         }
         String shopsKey = context.getShopList().stream()
                 .map(UserCacheKeyUtil::buildShopKey)
                 .sorted(Comparator.naturalOrder())
                 .collect(Collectors.joining(","));
-        return email + "|" + phone + "|" + identityKey + "|" + shopsKey;
-    }
-
-    private static String encodeIdentity(String value) {
-        return value == null ? "-1:" : value.length() + ":" + value;
+        return email + "|" + phone + "|" + shopsKey;
     }
 
     private static String buildShopKey(ShopContext shopContext) {

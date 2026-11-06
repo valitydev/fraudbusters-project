@@ -47,8 +47,7 @@ public class SumAggregatorImplTest {
                 paymentRepository,
                 analyticsRefundRepository,
                 analyticsChargebackRepository,
-                timeBoundaryService,
-                true
+                timeBoundaryService
         );
     }
 

@@ -5,6 +5,7 @@ import dev.vality.fraudbusters.config.CachingConfig;
 import dev.vality.fraudbusters.constant.ClickhouseUtilsValue;
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.payment.CountryByIpResolver;
+import dev.vality.fraudbusters.fraud.payment.resolver.CountryResolverImpl;
 import org.apache.thrift.TException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith({MockitoExtension.class, SpringExtension.class})
-@ContextConfiguration(classes = {CachingConfig.class, CountryByIpResolver.class})
+@ContextConfiguration(classes = {CachingConfig.class, CountryByIpResolver.class, CountryResolverImpl.class})
 public class CountryResolverImplTest {
 
     public static final String IP = "123.123.123.123";
@@ -32,9 +33,7 @@ public class CountryResolverImplTest {
     private ColumbusServiceSrv.Iface geoIpServiceSrv;
 
     @Autowired
-    private CountryByIpResolver countryByIpResolver;
-
-    private CountryResolverImpl<PaymentCheckedField> countryResolver;
+    private CountryResolverImpl countryResolver;
 
     @Autowired
     private CacheManager cacheManager;
@@ -42,8 +41,6 @@ public class CountryResolverImplTest {
     @BeforeEach
     void setUp() {
         cacheManager.getCache("resolveCountry").clear();
-        countryResolver = new CountryResolverImpl<>(countryByIpResolver, PaymentCheckedField.IP,
-                PaymentCheckedField.COUNTRY_BANK);
     }
 
     @Test

@@ -72,11 +72,6 @@ kafka:
     reference: template_reference
     group-list: group_list
     group-reference: group_reference
-    payout-template: payout_template
-    payout-reference: payout_template_reference
-    payout-group-list: payout_group_list
-    payout-group-reference: payout_group_reference
-    payout-result: payout_result
     full-template: full_template
     full-reference: full_template_reference
     full-group-list: full_group_list

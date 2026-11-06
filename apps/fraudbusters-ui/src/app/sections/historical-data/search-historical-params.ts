@@ -11,8 +11,6 @@ export interface SearchHistoricalParams {
     partyId?: string;
     status?: string;
     fingerprint?: string;
-    customerId?: string;
-    userId?: string;
     email?: string;
     terminal?: string;
     maskedPan?: string;

@@ -32,8 +32,6 @@ public class CheckedPaymentToPaymentConverter implements Converter<CheckedPaymen
                 .setEventTime(TimestampUtil.getStringDate(checkedPayment.getEventTime()))
                 .setClientInfo(new ClientInfo()
                         .setFingerprint(checkedPayment.getFingerprint())
-                        .setCustomerId(checkedPayment.getCustomerId())
-                        .setUserId(checkedPayment.getUserId())
                         .setIp(checkedPayment.getIp())
                         .setEmail(checkedPayment.getEmail())
                         .setPhone(checkedPayment.getPhone())

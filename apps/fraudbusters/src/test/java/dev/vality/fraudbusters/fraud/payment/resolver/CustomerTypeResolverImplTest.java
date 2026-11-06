@@ -1,7 +1,12 @@
 package dev.vality.fraudbusters.fraud.payment.resolver;
 
+import dev.vality.fraudbusters.factory.TestObjectsFactory;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.fraud.pool.CardTokenPool;
+import dev.vality.fraudbusters.util.ConditionTemplateFactory;
+import dev.vality.fraudo.model.TrustCondition;
+import dev.vality.fraudo.payment.resolver.CustomerTypeResolver;
+import dev.vality.trusted.tokens.ConditionTemplate;
 import dev.vality.trusted.tokens.TrustedTokensSrv;
 import org.apache.thrift.TException;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 import static dev.vality.fraudbusters.util.BeanUtil.TOKEN;
 import static dev.vality.fraudbusters.util.BeanUtil.createPaymentModel;
@@ -20,7 +27,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class CustomerTypeResolverImplTest {
 
-    private CustomerTypeResolverImpl customerTypeResolver;
+    private CustomerTypeResolver<PaymentModel> customerTypeResolver;
 
     @Mock
     private CardTokenPool cardTokenPool;
@@ -28,9 +35,12 @@ class CustomerTypeResolverImplTest {
     @Mock
     private TrustedTokensSrv.Iface trustedTokensSrv;
 
+    @Mock
+    private ConditionTemplateFactory conditionTemplateFactory;
+
     @BeforeEach
     void setUp() {
-        customerTypeResolver = new CustomerTypeResolverImpl(cardTokenPool, trustedTokensSrv);
+        customerTypeResolver = new CustomerTypeResolverImpl(cardTokenPool, trustedTokensSrv, conditionTemplateFactory);
     }
 
     @Test
@@ -61,4 +71,26 @@ class CustomerTypeResolverImplTest {
                 .isTokenTrustedByConditionTemplateName(TOKEN, templateName);
     }
 
+    @Test
+    void isTrustedByConditionTemplateTest() throws TException {
+        when(trustedTokensSrv.isTokenTrusted(anyString(), any(ConditionTemplate.class)))
+                .thenReturn(false)
+                .thenReturn(true);
+        ConditionTemplate conditionTemplate = TestObjectsFactory.createConditionTemplate();
+        when(conditionTemplateFactory.createConditionTemplate(anyList(), anyList()))
+                .thenReturn(conditionTemplate);
+
+        PaymentModel paymentModel = createPaymentModel();
+        List<TrustCondition> paymentsConditions =
+                List.of(TestObjectsFactory.createTrustCondition(1), TestObjectsFactory.createTrustCondition(null));
+        List<TrustCondition> withdrawalsConditions =
+                List.of(TestObjectsFactory.createTrustCondition(2), TestObjectsFactory.createTrustCondition(null));
+        assertFalse(customerTypeResolver.isTrusted(paymentModel, paymentsConditions, withdrawalsConditions));
+        assertTrue(customerTypeResolver.isTrusted(paymentModel, paymentsConditions, withdrawalsConditions));
+
+        verify(conditionTemplateFactory, times(2))
+                .createConditionTemplate(paymentsConditions, withdrawalsConditions);
+        verify(trustedTokensSrv, times(2)).isTokenTrusted(TOKEN, conditionTemplate);
+
+    }
 }

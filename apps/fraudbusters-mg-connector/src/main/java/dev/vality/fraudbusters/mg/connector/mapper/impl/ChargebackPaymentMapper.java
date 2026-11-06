@@ -70,7 +70,7 @@ public class ChargebackPaymentMapper implements Mapper<InvoiceChange, MachineEve
                         invoicePaymentChargebackChange.getId()))
                 .setPaymentId(String.join(DELIMITER, invoice.getId(), invoicePayment.getPayment().getId()))
                 .setEventTime(event.getCreatedAt())
-                .setClientInfo(generalInfoInitiator.initClientInfo(payer, invoice))
+                .setClientInfo(generalInfoInitiator.initClientInfo(payer))
                 .setPayerType(TBaseUtil.unionFieldToEnum(payer, PayerType.class))
                 .setProviderInfo(generalInfoInitiator.initProviderInfo(invoicePayment));
 

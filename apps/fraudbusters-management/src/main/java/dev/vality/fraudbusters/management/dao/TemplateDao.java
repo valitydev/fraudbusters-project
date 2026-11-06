@@ -5,9 +5,13 @@ import dev.vality.fraudbusters.management.domain.request.FilterRequest;
 
 import java.util.List;
 
-public interface TemplateDao extends CommandDao<TemplateModel> {
+public interface TemplateDao {
+
+    void insert(TemplateModel listRecord);
 
     void remove(String id);
+
+    void remove(TemplateModel listRecord);
 
     TemplateModel getById(String id);
 

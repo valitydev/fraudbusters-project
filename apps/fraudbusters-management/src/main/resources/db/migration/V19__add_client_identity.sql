@@ -1,2 +1,0 @@
-ALTER TABLE af.test_payment ADD COLUMN customer_id CHARACTER VARYING;
-ALTER TABLE af.test_payment ADD COLUMN user_id CHARACTER VARYING;

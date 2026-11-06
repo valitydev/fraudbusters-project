@@ -28,8 +28,6 @@ public class PaymentToApiPaymentConverter
                 .clientInfo(new ClientInfo()
                         .email(clientInfo.getEmail())
                         .fingerprint(clientInfo.getFingerprint())
-                        .customerId(clientInfo.getCustomerId())
-                        .userId(clientInfo.getUserId())
                         .ip(clientInfo.getIp())
                 )
                 .currency(cost.getCurrency().getSymbolicCode())

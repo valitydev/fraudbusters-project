@@ -2,8 +2,8 @@ package dev.vality.fraudbusters.fraud.payment.validator;
 
 import dev.vality.fraudbusters.fraud.FraudTemplateValidator;
 import dev.vality.fraudbusters.fraud.listener.ValidateErrorListener;
-import dev.vality.fraudo.FraudoRulesLexer;
-import dev.vality.fraudo.FraudoRulesParser;
+import dev.vality.fraudo.FraudoPaymentLexer;
+import dev.vality.fraudo.FraudoPaymentParser;
 import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -18,8 +18,8 @@ public class PaymentTemplateValidator implements FraudTemplateValidator {
     @Override
     public List<String> validate(String template) {
         log.info("PaymentTemplateValidator validate: {}", template);
-        FraudoRulesLexer lexer = new FraudoRulesLexer(CharStreams.fromString(template));
-        FraudoRulesParser parser = new FraudoRulesParser(new CommonTokenStream(lexer));
+        FraudoPaymentLexer lexer = new FraudoPaymentLexer(CharStreams.fromString(template));
+        FraudoPaymentParser parser = new FraudoPaymentParser(new CommonTokenStream(lexer));
         ValidateErrorListener validateErrorListener = new ValidateErrorListener();
         parser.addErrorListener(validateErrorListener);
         parser.parse();

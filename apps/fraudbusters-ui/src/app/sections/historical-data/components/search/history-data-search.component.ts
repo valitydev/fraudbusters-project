@@ -23,8 +23,6 @@ export class HistoryDataSearchComponent {
         status: '',
         paymentId: '',
         fingerprint: '',
-        customerId: '',
-        userId: '',
         email: '',
         terminal: '',
         template: '',
@@ -49,8 +47,6 @@ export class HistoryDataSearchComponent {
             params.status = v.status;
             params.id = v.id;
             params.fingerprint = v.fingerprint;
-            params.customerId = v.customerId;
-            params.userId = v.userId;
             params.email = v.email;
             params.terminal = v.terminal;
             params.template = v.template;

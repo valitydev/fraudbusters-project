@@ -6,20 +6,15 @@ import dev.vality.damsel.proxy_inspector.*;
 import dev.vality.damsel.wb_list.*;
 import dev.vality.fraudbusters.converter.CheckedResultToRiskScoreConverter;
 import dev.vality.fraudbusters.converter.ContextToFraudRequestConverter;
-import dev.vality.fraudbusters.converter.WithdrawalContextToModelConverter;
 import dev.vality.fraudbusters.domain.CheckedResultModel;
 import dev.vality.fraudbusters.domain.FraudRequest;
 import dev.vality.fraudbusters.domain.FraudResult;
-import dev.vality.fraudbusters.domain.PayoutResult;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
-import dev.vality.fraudbusters.fraud.model.PayoutModel;
 import dev.vality.fraudbusters.stream.TemplateVisitor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 import org.springframework.kafka.core.KafkaTemplate;
-
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -31,25 +26,6 @@ public class FraudInspectorHandler implements InspectorProxySrv.Iface {
     private final TemplateVisitor<PaymentModel, CheckedResultModel> templateVisitor;
     private final KafkaTemplate<String, FraudResult> kafkaFraudResultTemplate;
     private final WbListServiceSrv.Iface wbListServiceSrv;
-    private final WithdrawalContextToModelConverter withdrawalContextToModelConverter;
-    private final TemplateVisitor<PayoutModel, CheckedResultModel> payoutTemplateVisitor;
-    private final String payoutResultTopic;
-    private final KafkaTemplate<String, PayoutResult> kafkaPayoutResultTemplate;
-
-    @Override
-    public RiskScore inspectWithdrawal(WithdrawalContext context) throws InvalidRequest, TException {
-        try {
-            context.validate();
-            PayoutModel model = withdrawalContextToModelConverter.convert(context);
-            CheckedResultModel result = payoutTemplateVisitor.visit(model);
-            kafkaPayoutResultTemplate.send(payoutResultTopic, model.getWithdrawalId(), new PayoutResult(model, result));
-            return checkedResultToRiskScoreConverter.convert(result);
-        } catch (IllegalArgumentException e) {
-            throw new InvalidRequest().setErrors(List.of(e.getMessage()));
-        } catch (Exception e) {
-            throw new TException("Unable to inspect withdrawal", e);
-        }
-    }
 
     @Override
     public RiskScore inspectPayment(Context context) throws TException {

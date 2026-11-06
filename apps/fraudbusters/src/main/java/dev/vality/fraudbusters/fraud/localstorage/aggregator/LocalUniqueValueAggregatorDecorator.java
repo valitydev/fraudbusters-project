@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LocalUniqueValueAggregatorDecorator implements UniqueValueAggregator<PaymentModel, PaymentCheckedField> {
 
-    private final UniqueValueAggregatorImpl<PaymentModel, PaymentCheckedField> uniqueValueAggregator;
+    private final UniqueValueAggregatorImpl uniqueValueAggregator;
     private final LocalPaymentFieldResolver localPaymentFieldResolver;
     private final LocalResultStorageRepository localStorageRepository;
     private final TimeBoundaryService timeBoundaryService;
@@ -36,7 +36,7 @@ public class LocalUniqueValueAggregatorDecorator implements UniqueValueAggregato
             List<PaymentCheckedField> list) {
         try {
             Integer uniq = uniqueValueAggregator.countUniqueValue(countField, paymentModel, onField, timeWindow, list);
-            Instant timestamp = TimestampUtil.instantFromModel(paymentModel);
+            Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
             FieldModel resolve = localPaymentFieldResolver.resolve(countField, paymentModel);
             List<FieldModel> fieldModels = localPaymentFieldResolver.resolveListFields(paymentModel, list);

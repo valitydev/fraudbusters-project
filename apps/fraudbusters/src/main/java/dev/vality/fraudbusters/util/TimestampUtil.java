@@ -1,7 +1,7 @@
 package dev.vality.fraudbusters.util;
 
 import dev.vality.fraudbusters.domain.TimeProperties;
-import dev.vality.fraudbusters.fraud.model.OperationModel;
+import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.NonNull;
@@ -28,7 +28,7 @@ public class TimestampUtil {
         return TimestampUtil.generateTimestampNowMillis(instant);
     }
 
-    public static Instant instantFromModel(OperationModel paymentModel) {
+    public static Instant instantFromPaymentModel(PaymentModel paymentModel) {
         return paymentModel.getTimestamp() != null ? Instant.ofEpochMilli(paymentModel.getTimestamp()) : Instant.now();
     }
 

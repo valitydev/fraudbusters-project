@@ -17,6 +17,9 @@ import dev.vality.fraudbusters.util.BeanUtil;
 import dev.vality.fraudo.constant.ResultStatus;
 import dev.vality.fraudo.model.ResultModel;
 import dev.vality.fraudo.model.RuleResult;
+import dev.vality.fraudo.model.TrustCondition;
+import dev.vality.trusted.tokens.Condition;
+import dev.vality.trusted.tokens.*;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -463,6 +466,39 @@ public abstract class TestObjectsFactory {
                 );
     }
 
+    public static TrustCondition createTrustCondition(Integer transactionSum) {
+        return TrustCondition.builder()
+                .transactionsCurrency("RUB")
+                .transactionsCount(positiveInt())
+                .transactionsYearsOffset(1)
+                .transactionsSum(transactionSum)
+                .build();
+    }
+
+    public static Condition createCondition() {
+        return new Condition()
+                .setCurrencySymbolicCode("RUB")
+                .setCount(positiveInt())
+                .setYearsOffset(YearsOffset.current_with_last_years);
+    }
+
+    public static Condition createCondition(Integer sum) {
+        return new Condition()
+                .setCurrencySymbolicCode("RUB")
+                .setCount(positiveInt())
+                .setYearsOffset(YearsOffset.current_with_last_years)
+                .setSum(sum);
+    }
+
+    public static ConditionTemplate createConditionTemplate() {
+        return new ConditionTemplate()
+                .setPaymentsConditions(new PaymentsConditions()
+                        .setConditions(List.of(createCondition(positiveInt()), createCondition())))
+                .setWithdrawalsConditions(new WithdrawalsConditions()
+                        .setConditions(List.of(createCondition(positiveInt()), createCondition()))
+                );
+    }
+
     public static Command createCommandTemplate(String id, String templateString) {
         Command command = new Command();
         Template template = new Template();
@@ -483,6 +519,10 @@ public abstract class TestObjectsFactory {
         command.setCommandType(dev.vality.damsel.fraudbusters.CommandType.CREATE);
         command.setCommandTime(LocalDateTime.now().toString());
         return command;
+    }
+
+    public static int positiveInt() {
+        return ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE);
     }
 
 }

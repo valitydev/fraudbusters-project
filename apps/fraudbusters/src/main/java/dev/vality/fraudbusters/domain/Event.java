@@ -17,8 +17,6 @@ public class Event {
     private String email;
     private String bin;
     private String fingerprint;
-    private String customerId;
-    private String userId;
     private String shopId;
     private String partyId;
     private String resultStatus;

@@ -9,7 +9,6 @@ import tools.jackson.databind.json.JsonMapper;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -48,9 +47,6 @@ class FraudResultJsonCompatibilityTest {
             byte[] data = serializer.serialize("result", expected);
             assertEquals(expected, deserializer.deserialize("result", data));
             var mapper = JsonMapper.builder().build();
-            var model = mapper.readTree(data).get("fraudRequest").get("fraudModel");
-            assertFalse(model.has("walletId"));
-            assertFalse(model.has("operationType"));
             assertEquals(mapper.readTree(LEGACY_JSON).get("resultModel"), mapper.readTree(data).get("resultModel"));
         }
     }

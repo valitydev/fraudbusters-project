@@ -25,8 +25,6 @@ public class ChargeBackQuery {
                         status,
                         ip,
                         fingerprint,
-                        customerId,
-                        userId,
                         terminal,
                         paymentId,
                         chargebackCode,

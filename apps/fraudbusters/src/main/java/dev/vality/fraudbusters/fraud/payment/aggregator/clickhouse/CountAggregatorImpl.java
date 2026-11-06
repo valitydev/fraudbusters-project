@@ -4,9 +4,10 @@ import dev.vality.fraudbusters.aspect.BasicMetric;
 import dev.vality.fraudbusters.domain.TimeBound;
 import dev.vality.fraudbusters.exception.RuleFunctionException;
 import dev.vality.fraudbusters.fraud.AggregateGroupingFunction;
+import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
-import dev.vality.fraudbusters.fraud.model.OperationModel;
-import dev.vality.fraudbusters.fraud.resolver.HistoryFieldResolver;
+import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver;
 import dev.vality.fraudbusters.repository.AggregationRepository;
 import dev.vality.fraudbusters.repository.PaymentRepository;
 import dev.vality.fraudbusters.service.TimeBoundaryService;
@@ -23,28 +24,26 @@ import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
-public class CountAggregatorImpl<T extends OperationModel, U> implements CountPaymentAggregator<T, U> {
+public class CountAggregatorImpl implements CountPaymentAggregator<PaymentModel, PaymentCheckedField> {
 
     private static final int CURRENT_ONE = 1;
 
-    private final HistoryFieldResolver<T, U> databasePaymentFieldResolver;
+    private final DatabasePaymentFieldResolver databasePaymentFieldResolver;
     private final PaymentRepository paymentRepository;
     private final AggregationRepository refundRepository;
     private final AggregationRepository chargebackRepository;
     private final TimeBoundaryService timeBoundaryService;
-    /** Whether the inspected operation is itself part of the history this aggregator reads. */
-    private final boolean includeCurrentOperation;
 
     @Override
     @BasicMetric("count")
     public Integer count(
-            U checkedField,
-            T model,
+            PaymentCheckedField checkedField,
+            PaymentModel paymentModel,
             TimeWindow timeWindow,
-            List<U> list) {
+            List<PaymentCheckedField> list) {
         return getCount(
                 checkedField,
-                model,
+                paymentModel,
                 timeWindow,
                 list,
                 paymentRepository::countOperationByFieldWithGroupBy
@@ -54,13 +53,13 @@ public class CountAggregatorImpl<T extends OperationModel, U> implements CountPa
     @Override
     @BasicMetric("countSuccess")
     public Integer countSuccess(
-            U checkedField,
-            T model,
+            PaymentCheckedField checkedField,
+            PaymentModel paymentModel,
             TimeWindow timeWindow,
-            List<U> list) {
+            List<PaymentCheckedField> list) {
         return getCount(
                 checkedField,
-                model,
+                paymentModel,
                 timeWindow,
                 list,
                 paymentRepository::countOperationSuccessWithGroupBy,
@@ -71,13 +70,13 @@ public class CountAggregatorImpl<T extends OperationModel, U> implements CountPa
     @Override
     @BasicMetric("countError")
     public Integer countError(
-            U checkedField, T model, TimeWindow timeWindow,
-            String errorCode, List<U> list) {
+            PaymentCheckedField checkedField, PaymentModel paymentModel, TimeWindow timeWindow,
+            String errorCode, List<PaymentCheckedField> list) {
         try {
-            Instant timestamp = TimestampUtil.instantFromModel(model);
+            Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
-            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, model);
-            List<FieldModel> eventFields = databasePaymentFieldResolver.resolveListFields(model, list);
+            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel);
+            List<FieldModel> eventFields = databasePaymentFieldResolver.resolveListFields(paymentModel, list);
             if (Objects.isNull(resolve.getValue())) {
                 return 0;
             }
@@ -104,15 +103,15 @@ public class CountAggregatorImpl<T extends OperationModel, U> implements CountPa
     }
 
     @Override
-    public Integer countError(U checkedField,
-                              T model,
+    public Integer countError(PaymentCheckedField checkedField,
+                              PaymentModel paymentModel,
                               TimeWindow timeWindow,
-                              List<U> list) {
+                              List<PaymentCheckedField> list) {
         try {
-            Instant timestamp = TimestampUtil.instantFromModel(model);
+            Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
-            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, model);
-            List<FieldModel> eventFields = databasePaymentFieldResolver.resolveListFields(model, list);
+            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel);
+            List<FieldModel> eventFields = databasePaymentFieldResolver.resolveListFields(paymentModel, list);
             if (Objects.isNull(resolve.getValue())) {
                 return 0;
             }
@@ -130,7 +129,7 @@ public class CountAggregatorImpl<T extends OperationModel, U> implements CountPa
                     resolve.getValue(),
                     count
             );
-            return count + getCurrentCount();
+            return count + CURRENT_ONE;
         } catch (Exception e) {
             log.warn("CountAggregatorImpl error when countError e: ", e);
             throw new RuleFunctionException(e);
@@ -138,12 +137,12 @@ public class CountAggregatorImpl<T extends OperationModel, U> implements CountPa
     }
 
     @Override
-    public Integer countPending(U checkedField, T model, TimeWindow timeWindow,
-                                List<U> list) {
-        Integer countFinished = count(checkedField, model, timeWindow, list);
+    public Integer countPending(PaymentCheckedField checkedField, PaymentModel paymentModel, TimeWindow timeWindow,
+                                List<PaymentCheckedField> list) {
+        Integer countFinished = count(checkedField, paymentModel, timeWindow, list);
         return getCount(
                 checkedField,
-                model,
+                paymentModel,
                 timeWindow,
                 list,
                 paymentRepository::countOperationPendingWithGroupBy
@@ -153,13 +152,13 @@ public class CountAggregatorImpl<T extends OperationModel, U> implements CountPa
     @Override
     @BasicMetric("countChargeback")
     public Integer countChargeback(
-            U checkedField,
-            T model,
+            PaymentCheckedField paymentCheckedField,
+            PaymentModel paymentModel,
             TimeWindow timeWindow,
-            List<U> list) {
+            List<PaymentCheckedField> list) {
         return getCount(
-                checkedField,
-                model,
+                paymentCheckedField,
+                paymentModel,
                 timeWindow,
                 list,
                 chargebackRepository::countOperationByFieldWithGroupBy,
@@ -170,13 +169,13 @@ public class CountAggregatorImpl<T extends OperationModel, U> implements CountPa
     @Override
     @BasicMetric("countRefund")
     public Integer countRefund(
-            U checkedField,
-            T model,
+            PaymentCheckedField paymentCheckedField,
+            PaymentModel paymentModel,
             TimeWindow timeWindow,
-            List<U> list) {
+            List<PaymentCheckedField> list) {
         return getCount(
-                checkedField,
-                model,
+                paymentCheckedField,
+                paymentModel,
                 timeWindow,
                 list,
                 refundRepository::countOperationByFieldWithGroupBy,
@@ -186,29 +185,29 @@ public class CountAggregatorImpl<T extends OperationModel, U> implements CountPa
 
     @NotNull
     private Integer getCount(
-            U checkedField,
-            T model,
+            PaymentCheckedField checkedField,
+            PaymentModel paymentModel,
             TimeWindow timeWindow,
-            List<U> list,
+            List<PaymentCheckedField> list,
             AggregateGroupingFunction<String, Object, Long, Long, List<FieldModel>, Integer> aggregateFunction) {
-        return getCount(checkedField, model, timeWindow, list, aggregateFunction, true);
+        return getCount(checkedField, paymentModel, timeWindow, list, aggregateFunction, true);
     }
 
     @NotNull
     private Integer getCount(
-            U checkedField,
-            T model,
+            PaymentCheckedField checkedField,
+            PaymentModel paymentModel,
             TimeWindow timeWindow,
-            List<U> list,
+            List<PaymentCheckedField> list,
             AggregateGroupingFunction<String, Object, Long, Long, List<FieldModel>, Integer> aggregateFunction,
             boolean withCurrent) {
         try {
-            Instant timestamp = TimestampUtil.instantFromModel(model);
+            Instant timestamp = TimestampUtil.instantFromPaymentModel(paymentModel);
             TimeBound timeBound = timeBoundaryService.getBoundary(timestamp, timeWindow);
-            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, model);
-            List<FieldModel> eventFields = databasePaymentFieldResolver.resolveListFields(model, list);
+            FieldModel resolve = databasePaymentFieldResolver.resolve(checkedField, paymentModel);
+            List<FieldModel> eventFields = databasePaymentFieldResolver.resolveListFields(paymentModel, list);
             if (Objects.isNull(resolve.getValue())) {
-                return withCurrent ? getCurrentCount() : 0;
+                return withCurrent ? CURRENT_ONE : 0;
             }
             Integer count = aggregateFunction.accept(
                     resolve.getName(),
@@ -223,14 +222,10 @@ public class CountAggregatorImpl<T extends OperationModel, U> implements CountPa
                     resolve.getValue(),
                     count
             );
-            return withCurrent ? count + getCurrentCount() : count;
+            return withCurrent ? count + CURRENT_ONE : count;
         } catch (Exception e) {
             log.warn("CountAggregatorImpl error when getCount e: ", e);
             throw new RuleFunctionException(e);
         }
-    }
-
-    private int getCurrentCount() {
-        return includeCurrentOperation ? CURRENT_ONE : 0;
     }
 }

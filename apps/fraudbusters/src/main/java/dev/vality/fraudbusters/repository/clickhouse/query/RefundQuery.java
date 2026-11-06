@@ -21,8 +21,6 @@ public class RefundQuery {
                         lastDigits,
                         bankCountry,
                         fingerprint,
-                        customerId,
-                        userId,
                         ip,
                         status,
                         errorReason,

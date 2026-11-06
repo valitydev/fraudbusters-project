@@ -24,7 +24,7 @@ public class ChargebackBatchPreparedStatementSetter implements BatchPreparedStat
     public static final String FIELDS = """
             timestamp, eventTimeHour, eventTime,
             id,
-            email, ip, fingerprint, customerId, userId,
+            email, ip, fingerprint,
             bin, lastDigits, cardToken, paymentSystem, paymentTool ,
             terminal, providerId, bankCountry,
             partyId, shopId,
@@ -33,7 +33,7 @@ public class ChargebackBatchPreparedStatementSetter implements BatchPreparedStat
             payerType, tokenProvider
             """;
 
-    public static final String FIELDS_MARK = "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?";
+    public static final String FIELDS_MARK = "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?";
 
     private final List<Chargeback> batch;
     private final PaymentTypeByContextResolver paymentTypeByContextResolver;
@@ -53,8 +53,6 @@ public class ChargebackBatchPreparedStatementSetter implements BatchPreparedStat
         ps.setString(l++, clientInfo.getEmail());
         ps.setString(l++, clientInfo.getIp());
         ps.setString(l++, clientInfo.getFingerprint());
-        ps.setString(l++, clientInfo.getCustomerId());
-        ps.setString(l++, clientInfo.getUserId());
 
         PaymentTool paymentTool = event.getPaymentTool();
 

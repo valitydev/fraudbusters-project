@@ -23,8 +23,6 @@ public class FraudPaymentQuery {
                         lastDigits,
                         bankCountry,
                         fingerprint,
-                        customerId,
-                        userId,
                         ip,
                         status,
                         errorReason,

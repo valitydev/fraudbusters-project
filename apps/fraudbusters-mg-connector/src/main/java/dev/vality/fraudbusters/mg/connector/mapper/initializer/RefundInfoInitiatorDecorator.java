@@ -47,11 +47,6 @@ public class RefundInfoInitiatorDecorator implements InfoInitializer<InvoicePaym
     }
 
     @Override
-    public ClientInfo initClientInfo(Payer payer, Invoice invoice) {
-        return generalInfoInitiator.initClientInfo(payer, invoice);
-    }
-
-    @Override
     public void initContactInfo(ClientInfo clientInfo, Payer payer) {
         generalInfoInitiator.initContactInfo(clientInfo, payer);
     }

@@ -35,15 +35,12 @@ public class ListRepositoryTest {
     @Autowired
     private ListRepository listRepository;
 
-    @Autowired
-    private ListRepository payoutListRepository;
-
     @Container
     static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer<>("postgres:14-alpine");
 
     @BeforeEach
     public void setUp() throws SQLException {
-        jdbcTemplate.execute("truncate table wb_list.row, wb_list.payout_row;");
+        jdbcTemplate.execute("truncate table wb_list.row;");
     }
 
     @DynamicPropertySource
@@ -51,18 +48,6 @@ public class ListRepositoryTest {
         registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
         registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
-    }
-
-    @Test
-    void paymentAndPayoutRowsWithSameKeyRemainIndependent() {
-        listRepository.create(new Row(KEY, "payment"));
-        payoutListRepository.create(new Row(KEY, "payout"));
-        payoutListRepository.create(new Row(KEY, "updated-payout"));
-        assertEquals("payment", listRepository.get(KEY).orElseThrow().getValue());
-        assertEquals("updated-payout", payoutListRepository.get(KEY).orElseThrow().getValue());
-        payoutListRepository.remove(new Row(KEY, "updated-payout"));
-        assertTrue(payoutListRepository.get(KEY).isEmpty());
-        assertEquals("payment", listRepository.get(KEY).orElseThrow().getValue());
     }
 
     @Test

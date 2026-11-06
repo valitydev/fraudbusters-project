@@ -25,8 +25,6 @@ public class ChargebackToApiChargebackConverter
                 .clientInfo(new ClientInfo()
                         .email(chargeback.getClientInfo().getEmail())
                         .fingerprint(chargeback.getClientInfo().getFingerprint())
-                        .customerId(chargeback.getClientInfo().getCustomerId())
-                        .userId(chargeback.getClientInfo().getUserId())
                         .ip(chargeback.getClientInfo().getIp())
                 )
                 .currency(cost.getCurrency().getSymbolicCode())

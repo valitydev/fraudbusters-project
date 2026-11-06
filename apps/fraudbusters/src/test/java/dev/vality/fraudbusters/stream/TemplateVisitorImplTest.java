@@ -5,7 +5,6 @@ import dev.vality.fraudbusters.fraud.model.PaymentModel;
 import dev.vality.fraudbusters.pool.Pool;
 import dev.vality.fraudbusters.pool.PoolImpl;
 import dev.vality.fraudbusters.stream.impl.RuleApplierImpl;
-import dev.vality.fraudbusters.stream.impl.RuleCascade;
 import dev.vality.fraudbusters.stream.impl.TemplateVisitorImpl;
 import dev.vality.fraudbusters.util.ReferenceKeyGenerator;
 import dev.vality.fraudo.constant.ResultStatus;
@@ -42,8 +41,8 @@ public class TemplateVisitorImplTest {
         referencePoolImpl = new PoolImpl<>("reference");
         groupReferencePoolImpl = new PoolImpl<>("group-reference");
 
-        templateVisitor = new TemplateVisitorImpl(
-                new RuleCascade<>(ruleApplier, groupPoolImpl, referencePoolImpl, groupReferencePoolImpl));
+        templateVisitor =
+                new TemplateVisitorImpl(ruleApplier, groupPoolImpl, referencePoolImpl, groupReferencePoolImpl);
     }
 
     @Test

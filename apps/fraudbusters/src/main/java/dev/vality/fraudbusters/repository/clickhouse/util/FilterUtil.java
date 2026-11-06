@@ -61,9 +61,9 @@ public class FilterUtil {
                         filters
                                 .append(" and like(")
                                 .append(searchField.getField().getValue())
-                                .append(",:")
-                                .append(searchField.getField().getValue())
-                                .append(")"));
+                                .append(",'")
+                                .append(searchField.getValue())
+                                .append("')"));
     }
 
     private static void addEqualSearchFields(StringBuilder filters, Set<SearchFieldDto> searchFields) {
@@ -74,8 +74,9 @@ public class FilterUtil {
                         filters
                                 .append(" and ")
                                 .append(searchField.getField().getValue())
-                                .append(" = :")
-                                .append(searchField.getField().getValue()));
+                                .append(" = '")
+                                .append(searchField.getValue())
+                                .append("'"));
     }
 
     private static void addPaymentFraudResultSearchFields(StringBuilder filters, Set<SearchFieldDto> searchFields) {
@@ -115,6 +116,7 @@ public class FilterUtil {
                 .addValue(QueryParamName.SIZE, filter.getSize());
         if (!CollectionUtils.isEmpty(filter.getSearchFields())) {
             filter.getSearchFields().stream()
+                    .filter(searchField -> searchField.getField() instanceof FraudResultField)
                     .forEach(searchField -> params.addValue(
                             searchField.getField().getValue(),
                             searchField.getValue()));

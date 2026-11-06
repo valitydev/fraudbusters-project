@@ -3,8 +3,8 @@ package dev.vality.wb.list.manager.handler;
 import dev.vality.damsel.wb_list.*;
 import dev.vality.wb.list.manager.exception.DbExecutionException;
 import dev.vality.wb.list.manager.model.CountInfoModel;
-import dev.vality.wb.list.manager.storage.ListStorage;
-import dev.vality.wb.list.manager.storage.ListStorageRegistry;
+import dev.vality.wb.list.manager.repository.ListRepository;
+import dev.vality.wb.list.manager.utils.KeyGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
@@ -18,7 +18,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class WbListServiceHandler implements WbListServiceSrv.Iface {
 
-    private final ListStorageRegistry listStorageRegistry;
+    private final ListRepository listRepository;
     private final JsonMapper objectMapper;
 
     @Override
@@ -82,11 +82,27 @@ public class WbListServiceHandler implements WbListServiceSrv.Iface {
     }
 
     private Optional<dev.vality.wb.list.manager.model.Row> getCascadeRow(Row row) {
-        ListStorage storage = listStorageRegistry.get(row);
-        return storage.generateCascadeKeys(row).stream()
-                .map(key -> storage.getRepository().get(key))
-                .flatMap(Optional::stream)
-                .findFirst();
+        if (row.isSetId() && row.getId().isSetPaymentId()) {
+            PaymentId paymentId = row.getId().getPaymentId();
+            return cascadeGetRow(row.getListType(), row.getListName(), row.getValue(), paymentId.getPartyId(),
+                    paymentId.getShopId());
+        } else if (row.isSetId() && row.getId().isSetP2pId()) {
+            throw new IllegalStateException("P2P is not supported. Row: " + row);
+        }
+        return cascadeGetRow(row.list_type, row.list_name, row.value, row.getPartyId(), row.getShopId());
+    }
+
+    private Optional<dev.vality.wb.list.manager.model.Row> cascadeGetRow(ListType listType,
+                                                                         String listName,
+                                                                         String value,
+                                                                         String partyId,
+                                                                         String shopId) {
+        return Optional.ofNullable(
+                listRepository.get(KeyGenerator.generateKey(listType, listName, value))
+                        .orElse(listRepository.get(KeyGenerator.generateKey(listType, listName, value, partyId))
+                                .orElse(listRepository
+                                        .get(KeyGenerator.generateKey(listType, listName, value, partyId, shopId))
+                                        .orElse(null))));
     }
 
 }

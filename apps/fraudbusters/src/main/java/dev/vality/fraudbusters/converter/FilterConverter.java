@@ -11,11 +11,9 @@ import dev.vality.fraudbusters.service.dto.FieldType;
 import dev.vality.fraudbusters.service.dto.FilterDto;
 import dev.vality.fraudbusters.service.dto.SearchFieldDto;
 import dev.vality.fraudbusters.service.dto.SortDto;
-import dev.vality.fraudo.constant.ResultStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -24,16 +22,8 @@ import java.util.Set;
 public class FilterConverter {
 
     public FilterDto convert(Filter filter, Page page, Sort sort) {
-        return buildFilter(filter, page, sort, false);
-    }
-
-    public FilterDto convertFraudResults(Filter filter, Page page, Sort sort) {
-        return buildFilter(filter, page, sort, true);
-    }
-
-    private FilterDto buildFilter(Filter filter, Page page, Sort sort, boolean fraudResults) {
         FilterDto filterDto = new FilterDto();
-        Set<SearchFieldDto> searchFields = assembleSearchFields(filter, fraudResults);
+        Set<SearchFieldDto> searchFields = assembleSearchFields(filter);
         filterDto.setSearchFields(searchFields);
         filterDto.setLastId(page.getContinuationId());
         if (page.getSize() > 0) {
@@ -52,7 +42,7 @@ public class FilterConverter {
         return filterDto;
     }
 
-    private Set<SearchFieldDto> assembleSearchFields(Filter filter, boolean fraudResults) {
+    private Set<SearchFieldDto> assembleSearchFields(Filter filter) {
         Set<SearchFieldDto> searchFields = new HashSet<>();
         if (filter.isSetCardToken() && StringUtils.hasLength(filter.getCardToken())) {
             addSearchField(searchFields, PaymentField.CARD_TOKEN, FieldType.STRING, filter.getCardToken());
@@ -61,12 +51,7 @@ public class FilterConverter {
             addSearchField(searchFields, PaymentField.EMAIL, FieldType.STRING, filter.getEmail());
         }
         if (filter.isSetStatus() && StringUtils.hasLength(filter.getStatus())) {
-            if (fraudResults) {
-                addSearchField(searchFields, FraudResultField.RESULT_STATUS, FieldType.ENUM,
-                        resolveResultStatus(filter.getStatus()));
-            } else {
-                addSearchField(searchFields, PaymentField.STATUS, FieldType.ENUM, filter.getStatus());
-            }
+            addSearchField(searchFields, PaymentField.STATUS, FieldType.ENUM, filter.getStatus());
         }
         if (filter.isSetShopId() && StringUtils.hasLength(filter.getShopId())) {
             addSearchField(searchFields, PaymentField.SHOP_ID, FieldType.STRING, filter.getShopId());
@@ -79,12 +64,6 @@ public class FilterConverter {
         }
         if (filter.isSetFingerprint() && StringUtils.hasLength(filter.getFingerprint())) {
             addSearchField(searchFields, PaymentField.FINGERPRINT, FieldType.STRING, filter.getFingerprint());
-        }
-        if (filter.isSetCustomerId() && StringUtils.hasLength(filter.getCustomerId())) {
-            addSearchField(searchFields, PaymentField.CUSTOMER_ID, FieldType.STRING, filter.getCustomerId());
-        }
-        if (filter.isSetUserId() && StringUtils.hasLength(filter.getUserId())) {
-            addSearchField(searchFields, PaymentField.USER_ID, FieldType.STRING, filter.getUserId());
         }
         if (filter.isSetTerminal() && StringUtils.hasLength(filter.getTerminal())) {
             addSearchField(searchFields, PaymentField.TERMINAL, FieldType.STRING, filter.getTerminal());
@@ -105,19 +84,6 @@ public class FilterConverter {
             addSearchField(searchFields, FraudResultField.CHECKED_RULE, FieldType.STRING, filter.getRule());
         }
         return searchFields;
-    }
-
-    private String resolveResultStatus(String value) {
-        String trimmed = value.trim();
-        ResultStatus byValue = ResultStatus.getByValue(trimmed);
-        if (byValue != null) {
-            return byValue.name();
-        }
-        return Arrays.stream(ResultStatus.values())
-                .filter(status -> status.name().equalsIgnoreCase(trimmed))
-                .findFirst()
-                .map(ResultStatus::name)
-                .orElse(value);
     }
 
     private void addSearchField(Set<SearchFieldDto> searchFields,

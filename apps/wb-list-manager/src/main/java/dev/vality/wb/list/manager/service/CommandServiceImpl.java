@@ -6,7 +6,6 @@ import dev.vality.damsel.wb_list.EventType;
 import dev.vality.wb.list.manager.converter.CommandToRowConverter;
 import dev.vality.wb.list.manager.model.Row;
 import dev.vality.wb.list.manager.repository.ListRepository;
-import dev.vality.wb.list.manager.storage.ListStorageRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -18,7 +17,7 @@ import org.springframework.util.StringUtils;
 public class CommandServiceImpl implements CommandService {
 
     private final CommandToRowConverter commandToRowConverter;
-    private final ListStorageRegistry listStorageRegistry;
+    private final ListRepository listRepository;
 
     @Override
     public Event apply(ChangeCommand command) {
@@ -36,7 +35,6 @@ public class CommandServiceImpl implements CommandService {
     }
 
     private Event applyCommandAndGetEvent(ChangeCommand command, Row row) {
-        ListRepository listRepository = listStorageRegistry.get(command.getRow()).getRepository();
         return switch (command.getCommand()) {
             case CREATE -> {
                 listRepository.create(row);
