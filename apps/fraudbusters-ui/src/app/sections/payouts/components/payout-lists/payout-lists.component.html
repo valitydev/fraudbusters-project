@@ -1,0 +1,68 @@
+<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <div fxLayout fxLayoutAlign="space-between center">
+        <form fxLayout fxLayoutGap="16px" [formGroup]="searchForm">
+            <mat-form-field class="multi-select" appearance="outline" *ngIf="listNames$ | async as listNames">
+                <mat-select formControlName="types" multiple>
+                    <mat-option *ngFor="let name of listNames" [value]="name">{{ name }}</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <input matInput placeholder="Search" formControlName="searchQuery" type="string" autocomplete="false" />
+            </mat-form-field>
+        </form>
+        <button mat-button color="primary" (click)="createRow()">CREATE RECORD</button>
+    </div>
+    <div *ngIf="rows$ | async as rows">
+        <div *ngIf="rows.length; else Empty" fxLayout="column" [fxLayoutGap]="layoutGapM">
+            <fb-list-header>
+                <div class="fb-body-2" fxFlex>List name</div>
+                <div class="fb-body-2" fxFlex>Party id</div>
+                <div class="fb-body-2" fxFlex>Wallet id</div>
+                <div class="fb-body-2" fxFlex>Value</div>
+                <ng-container *ngIf="isGrey">
+                    <div class="fb-body-2" fxFlex="0 0 80px">Count</div>
+                    <div class="fb-body-2" fxFlex="0 0 160px">Start time</div>
+                    <div class="fb-body-2" fxFlex="0 0 160px">End time</div>
+                </ng-container>
+                <div fxFlex="0 0 20px"></div>
+            </fb-list-header>
+            <div *ngFor="let row of rows" fxLayout="column" [fxLayoutGap]="layoutGapM">
+                <mat-card
+                    class="fb-list-item"
+                    fxLayout
+                    fxFlexFill
+                    fxLayoutAlign="center center"
+                    [fxLayoutGap]="layoutGapM"
+                >
+                    <div class="fb-body-2" fxFlex>{{ row.listRecord.listName }}</div>
+                    <div class="fb-body-2" fxFlex>{{ row.listRecord.partyId }}</div>
+                    <div class="fb-body-2" fxFlex>{{ row.listRecord.walletId }}</div>
+                    <div class="fb-body-2" fxFlex>{{ row.listRecord.value }}</div>
+                    <ng-container *ngIf="isGrey">
+                        <div class="fb-body-2" fxFlex="0 0 80px">{{ row.countInfo?.count }}</div>
+                        <div class="fb-body-2" fxFlex="0 0 160px">
+                            {{ row.countInfo?.startCountTime | date : 'yyyy-MM-dd HH:mm:ss' }}
+                        </div>
+                        <div class="fb-body-2" fxFlex="0 0 160px">
+                            {{ row.countInfo?.endCountTime | date : 'yyyy-MM-dd HH:mm:ss' }}
+                        </div>
+                    </ng-container>
+                    <button mat-icon-button fxFlex="0 0 20px" [matMenuTriggerFor]="menu">
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu">
+                        <button mat-menu-item (click)="removeRow(row)">
+                            <span>Remove row</span>
+                        </button>
+                    </mat-menu>
+                </mat-card>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="inProgress$ | async" fxLayout fxLayoutAlign="center">
+        <mat-progress-spinner color="primary" mode="indeterminate" diameter="48"></mat-progress-spinner>
+    </div>
+    <ng-template #Empty>
+        <fb-empty-search-result *ngIf="!(inProgress$ | async)"></fb-empty-search-result>
+    </ng-template>
+</div>

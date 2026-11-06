@@ -1,0 +1,47 @@
+<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <div fxLayout fxLayoutAlign="space-between center">
+        <form fxLayout fxLayoutGap="16px" [formGroup]="searchForm">
+            <mat-form-field appearance="outline">
+                <input matInput placeholder="Search" formControlName="searchQuery" type="string" autocomplete="false" />
+            </mat-form-field>
+        </form>
+        <button mat-button color="primary" (click)="createGroup()">CREATE GROUP</button>
+    </div>
+    <div *ngIf="groups$ | async as groups">
+        <div *ngIf="groups.length; else Empty" fxLayout="column" [fxLayoutGap]="layoutGapM">
+            <fb-list-header [reserveToggleSpace]="true">
+                <div class="fb-body-2" fxFlex>Name</div>
+            </fb-list-header>
+            <div *ngFor="let group of groups" fxLayout="column" [fxLayoutGap]="layoutGapM">
+                <mat-expansion-panel>
+                    <mat-expansion-panel-header>
+                        <div fxLayout fxFlexFill fxLayoutAlign="start center" [fxLayoutGap]="layoutGapM">
+                            <div class="fb-body-2" fxFlex>{{ group.groupId }}</div>
+                        </div>
+                    </mat-expansion-panel-header>
+                    <div class="panel-content" fxLayout="column" [fxLayoutGap]="layoutGapM">
+                        <mat-divider></mat-divider>
+                        <div class="fb-body-1 fb-template" fxLayout="column" [fxLayoutGap]="layoutGapS">
+                            <ng-container *ngFor="let template of group.priorityTemplates">
+                                <div fxLayout="row">
+                                    <div fxFlex>{{ template.priority }} - {{ template.id }}</div>
+                                </div>
+                            </ng-container>
+                        </div>
+                        <mat-divider></mat-divider>
+                        <div fxLayout fxLayoutAlign="end" [fxLayoutGap]="layoutGapM">
+                            <button mat-button color="warn" (click)="removeGroup(group.groupId)">Remove</button>
+                            <button mat-button color="primary" (click)="editGroup(group.groupId)">Edit</button>
+                        </div>
+                    </div>
+                </mat-expansion-panel>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="inProgress$ | async" fxLayout fxLayoutAlign="center">
+        <mat-progress-spinner color="primary" mode="indeterminate" diameter="48"></mat-progress-spinner>
+    </div>
+    <ng-template #Empty>
+        <fb-empty-search-result *ngIf="!(inProgress$ | async)"></fb-empty-search-result>
+    </ng-template>
+</div>

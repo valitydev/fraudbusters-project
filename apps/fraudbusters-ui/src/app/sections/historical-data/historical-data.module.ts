@@ -37,6 +37,8 @@ import { HistoricalPaymentsDataComponent } from './components/payments/historica
 import { HistoricalRefundsDataComponent } from './components/refunds/historical-refunds-data.component';
 import { HistoricalDataRefundsListModule } from './components/refunds/historical-refunds-list';
 import { HistoryDataSearchComponent } from './components/search/history-data-search.component';
+import { HistoricalWithdrawalsDataComponent } from './components/withdrawals/historical-withdrawals-data.component';
+import { HistoricalDataWithdrawalsListModule } from './components/withdrawals/historical-withdrawals-list';
 import { HistoricalDataRoutingModule } from './historical-data-routing.module';
 import { HistoricalDataComponent } from './historical-data.component';
 import { FetchHistoricalChargebacksService } from './services/fetch-historical-chargebacks.service';
@@ -44,8 +46,10 @@ import { FetchHistoricalFraudPaymentsService } from './services/fetch-historical
 import { FetchHistoricalInspectResultsService } from './services/fetch-historical-inspect-results.service';
 import { FetchHistoricalPaymentsService } from './services/fetch-historical-payments.service';
 import { FetchHistoricalRefundsService } from './services/fetch-historical-refunds.service';
+import { FetchHistoricalWithdrawalsService } from './services/fetch-historical-withdrawals.service';
 import { DataSetService } from '../../api/payments/data-set';
 import { HistoricalDataService } from '../../api/payments/historical-data';
+import { PayoutsService } from '../../api/payouts';
 import { EmptySearchResultModule } from '../../shared/components/empty-search-result';
 import { ShowMorePanelModule } from '../../shared/components/show-more-panel';
 import { ShowMoreContinuationPanelModule } from '../../shared/components/show-more-panel-continuation';
@@ -60,6 +64,7 @@ import { SearchFieldService } from '../../shared/services/utils/search-field.ser
         HistoricalInspectResultsDataComponent,
         HistoricalFraudPaymentsDataComponent,
         HistoricalRefundsDataComponent,
+        HistoricalWithdrawalsDataComponent,
     ],
     imports: [
         FlexModule,
@@ -97,6 +102,7 @@ import { SearchFieldService } from '../../shared/services/utils/search-field.ser
         HistoricalDataRefundsListModule,
         HistoricalDataInspectResultsListModule,
         HistoricalDataFraudPaymentsListModule,
+        HistoricalDataWithdrawalsListModule,
         ShowMoreContinuationPanelModule,
     ],
     providers: [
@@ -105,7 +111,9 @@ import { SearchFieldService } from '../../shared/services/utils/search-field.ser
         FetchHistoricalChargebacksService,
         FetchHistoricalFraudPaymentsService,
         FetchHistoricalRefundsService,
+        FetchHistoricalWithdrawalsService,
         HistoricalDataService,
+        PayoutsService,
         DatePipe,
         SearchFieldService,
         DataSetService,

@@ -1,0 +1,9 @@
+type: object
+description: Привязка группы шаблонов выплат. Без party и кошелька группа применяется ко всем выплатам; кошелёк задаётся только вместе с party.
+properties:
+  groupId:
+    type: string
+  partyId:
+    type: string
+  walletId:
+    type: string

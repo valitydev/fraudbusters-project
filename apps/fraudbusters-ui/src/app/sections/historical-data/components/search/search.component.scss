@@ -52,3 +52,9 @@
         }
     }
 }
+
+// The payout status select follows the size of the text filters next to it.
+mat-select {
+    font-size: inherit;
+    line-height: inherit;
+}
