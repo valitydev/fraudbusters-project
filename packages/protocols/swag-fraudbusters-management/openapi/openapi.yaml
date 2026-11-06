@@ -172,6 +172,8 @@ paths:
     $ref: ./paths/payments/historical-data/filterFraudPayments.yaml
   /payments-historical-data/refunds:
     $ref: ./paths/payments/historical-data/filterRefunds.yaml
+  /payouts-historical-data/withdrawals:
+    $ref: ./paths/payouts/historical-data/filterWithdrawals.yaml
 
   # Data sets
   /payments-data-set/data-sets:
