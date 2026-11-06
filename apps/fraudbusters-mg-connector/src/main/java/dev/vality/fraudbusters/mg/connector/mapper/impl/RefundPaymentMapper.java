@@ -67,7 +67,7 @@ public class RefundPaymentMapper implements Mapper<InvoiceChange, MachineEvent, 
                         invoicePaymentRefundChange.getId()))
                 .setPaymentId(String.join(DELIMITER, invoice.getId(), invoicePayment.getPayment().getId()))
                 .setEventTime(event.getCreatedAt())
-                .setClientInfo(generalInfoInitiator.initClientInfo(payer))
+                .setClientInfo(generalInfoInitiator.initClientInfo(payer, invoice))
                 .setProviderInfo(generalInfoInitiator.initProviderInfo(invoicePayment))
                 .setPayerType(TBaseUtil.unionFieldToEnum(payer, PayerType.class))
                 .setError(generalInfoInitiator.initError(invoicePaymentRefundStatusChanged));

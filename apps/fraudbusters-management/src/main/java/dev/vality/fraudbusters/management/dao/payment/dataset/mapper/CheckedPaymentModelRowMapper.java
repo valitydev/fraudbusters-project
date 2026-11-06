@@ -36,6 +36,8 @@ public class CheckedPaymentModelRowMapper implements RowMapper<CheckedPaymentMod
                         .errorReason(resultSet.getString(TEST_PAYMENT.ERROR_REASON.getName()))
                         .eventTime(resultSet.getObject(TEST_PAYMENT.EVENT_TIME.getName(), LocalDateTime.class))
                         .fingerprint(resultSet.getString(TEST_PAYMENT.FINGERPRINT.getName()))
+                        .customerId(resultSet.getString(TEST_PAYMENT.CUSTOMER_ID.getName()))
+                        .userId(resultSet.getString(TEST_PAYMENT.USER_ID.getName()))
                         .id(resultSet.getLong(TEST_PAYMENT.ID.getName()))
                         .paymentTool(resultSet.getString(TEST_PAYMENT.PAYMENT_TOOL.getName()))
                         .ip(resultSet.getString(TEST_PAYMENT.IP.getName()))

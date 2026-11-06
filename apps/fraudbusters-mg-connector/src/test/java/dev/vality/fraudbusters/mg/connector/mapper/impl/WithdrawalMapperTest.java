@@ -2,6 +2,9 @@ package dev.vality.fraudbusters.mg.connector.mapper.impl;
 
 import dev.vality.damsel.fraudbusters.Withdrawal;
 import dev.vality.damsel.fraudbusters.WithdrawalStatus;
+import dev.vality.fistful.base.ClientIdentity;
+import dev.vality.fistful.base.ClientInfo;
+import dev.vality.fistful.base.ContactInfo;
 import dev.vality.fistful.withdrawal.TimestampedChange;
 import dev.vality.fistful.withdrawal.WithdrawalState;
 import dev.vality.fistful.withdrawal.status.Failed;
@@ -92,5 +95,42 @@ public class WithdrawalMapperTest {
         assertTrue(map.getDestinationResource().isSetBankCard());
         assertEquals(WALLET_ACCOUNT_ID, Long.valueOf(map.getAccount().getId()));
         assertEquals(RUB, map.getAccount().getCurrency().symbolic_code);
+        assertFalse(map.isSetClientInfo());
+    }
+
+    @Test
+    void mapClientFields() {
+        final MachineEvent event = new MachineEvent();
+        event.setSourceId(SOURCE_ID);
+        event.setEventId(EVENT_ID);
+
+        final WithdrawalState withdrawalState = new WithdrawalState();
+        withdrawalState.setBody(createCash());
+        withdrawalState.setDestinationId(DESTINATION_ID);
+        withdrawalState.setWalletId(WALLET_ID);
+        withdrawalState.setContactInfo(new ContactInfo()
+                .setEmail("synthetic@example.com")
+                .setPhoneNumber("synthetic-phone"));
+        withdrawalState.setClientInfo(new ClientInfo()
+                .setIpAddress("192.0.2.1")
+                .setFingerprint("synthetic-fingerprint"));
+        withdrawalState.setClientIdentity(new ClientIdentity()
+                .setCustomerId("synthetic-customer")
+                .setUserId("synthetic-user"));
+        when(withdrawalClientService.getWithdrawalInfoFromFistful(SOURCE_ID, EVENT_ID)).thenReturn(withdrawalState);
+        when(dominantClientService.getWalletConfig(WALLET_ID)).thenReturn(createWalletConfigObject().getData());
+        when(destinationClientService.getDestinationInfoFromFistful(DESTINATION_ID))
+                .thenReturn(createDestinationState());
+
+        final var clientInfo = logWithdrawalMapperDecorator
+                .map(createStatusChange(Status.failed(new Failed())), event)
+                .getClientInfo();
+
+        assertEquals("synthetic@example.com", clientInfo.getEmail());
+        assertEquals("synthetic-phone", clientInfo.getPhone());
+        assertEquals("192.0.2.1", clientInfo.getIp());
+        assertEquals("synthetic-fingerprint", clientInfo.getFingerprint());
+        assertEquals("synthetic-customer", clientInfo.getCustomerId());
+        assertEquals("synthetic-user", clientInfo.getUserId());
     }
 }

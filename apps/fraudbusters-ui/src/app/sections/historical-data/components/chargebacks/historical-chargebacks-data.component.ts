@@ -68,6 +68,8 @@ export class HistoricalChargebacksDataComponent {
             partyId: event.partyId,
             status: event.status,
             fingerprint: event.fingerprint,
+            customerId: event.customerId,
+            userId: event.userId,
             email: event.email,
             terminal: event.terminal,
             maskedPan: event.maskedPan,
