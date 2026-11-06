@@ -1,0 +1,18 @@
+get:
+  summary: Поля, по которым можно вести списки выплат
+  operationId: getAvailablePayoutListNames
+  tags:
+    - payout-lists
+  responses:
+    '201':
+      description: Available list names
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/responses/ListResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found

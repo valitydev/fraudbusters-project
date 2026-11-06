@@ -1,0 +1,48 @@
+get:
+  summary: Группа шаблонов выплат
+  operationId: getPayoutGroup
+  tags:
+    - payout-group
+  parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '201':
+      description: Payout group
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/schemas/Group.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
+delete:
+  summary: Удаление группы шаблонов выплат
+  operationId: removePayoutGroup
+  tags:
+    - payout-group
+  parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '201':
+      description: Removed payout group
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/responses/IdResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
