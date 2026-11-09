@@ -4,6 +4,7 @@ import dev.vality.fraudbusters.fraud.payment.PaymentInspectStorage;
 import dev.vality.fraudbusters.listener.payment.GroupReferenceListener;
 import dev.vality.fraudbusters.pool.Pool;
 import dev.vality.fraudbusters.pool.PoolImpl;
+import dev.vality.fraudbusters.pool.handler.GroupReferenceCommandHandler;
 import dev.vality.fraudbusters.util.BeanUtil;
 import dev.vality.fraudbusters.util.ReferenceKeyGenerator;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,8 +27,8 @@ public class GroupReferenceListenerTest {
     @BeforeEach
     public void init() {
         groupReferencePoolImpl = new PoolImpl<>("group-reference");
-        groupReferenceListener = new GroupReferenceListener(
-                new PaymentInspectStorage(null, null, null, groupReferencePoolImpl, null));
+        groupReferenceListener = new GroupReferenceListener(new GroupReferenceCommandHandler(
+                new PaymentInspectStorage(null, null, null, groupReferencePoolImpl, null)));
     }
 
     @Test

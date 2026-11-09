@@ -5,6 +5,7 @@ import dev.vality.fraudbusters.fraud.payment.PaymentInspectStorage;
 import dev.vality.fraudbusters.listener.payment.GroupListener;
 import dev.vality.fraudbusters.pool.Pool;
 import dev.vality.fraudbusters.pool.PoolImpl;
+import dev.vality.fraudbusters.pool.handler.GroupCommandHandler;
 import dev.vality.fraudbusters.util.BeanUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,8 @@ public class GroupListenerTest {
     @BeforeEach
     public void init() {
         groupPoolImpl = new PoolImpl<>("group");
-        groupListener = new GroupListener(new PaymentInspectStorage(null, groupPoolImpl, null, null, null));
+        groupListener = new GroupListener(
+                new GroupCommandHandler(new PaymentInspectStorage(null, groupPoolImpl, null, null, null)));
     }
 
     @Test

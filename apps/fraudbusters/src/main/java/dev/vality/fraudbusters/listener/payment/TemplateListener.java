@@ -1,26 +1,26 @@
 package dev.vality.fraudbusters.listener.payment;
 
 import dev.vality.damsel.fraudbusters.Command;
-import dev.vality.fraudbusters.fraud.FraudContextParser;
-import dev.vality.fraudbusters.fraud.InspectStorage;
-import dev.vality.fraudbusters.listener.TemplateCommandListener;
-import dev.vality.fraudo.FraudoRulesParser;
+import dev.vality.fraudbusters.listener.CommandListener;
+import dev.vality.fraudbusters.pool.handler.TemplateCommandHandler;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
-public class TemplateListener extends TemplateCommandListener {
+@RequiredArgsConstructor
+public class TemplateListener implements CommandListener {
 
-    public TemplateListener(FraudContextParser<FraudoRulesParser.ParseContext> rulesContextParser,
-                            InspectStorage paymentInspectStorage) {
-        super(rulesContextParser, paymentInspectStorage);
-    }
+    private final TemplateCommandHandler paymentTemplateCommandHandler;
 
     @Override
     @KafkaListener(topics = "${kafka.topic.template}", containerFactory = "templateListenerContainerFactory")
     public void listen(@Payload Command command) {
-        handle(command);
+        log.info("TemplateListener command: {}", command);
+        paymentTemplateCommandHandler.handle(command);
     }
 
 }

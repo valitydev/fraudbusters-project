@@ -1,23 +1,26 @@
 package dev.vality.fraudbusters.listener.payment;
 
 import dev.vality.damsel.fraudbusters.Command;
-import dev.vality.fraudbusters.fraud.InspectStorage;
-import dev.vality.fraudbusters.listener.TemplateReferenceCommandListener;
+import dev.vality.fraudbusters.listener.CommandListener;
+import dev.vality.fraudbusters.pool.handler.TemplateReferenceCommandHandler;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
-public class TemplateReferenceListener extends TemplateReferenceCommandListener {
+@RequiredArgsConstructor
+public class TemplateReferenceListener implements CommandListener {
 
-    public TemplateReferenceListener(InspectStorage paymentInspectStorage) {
-        super(paymentInspectStorage);
-    }
+    private final TemplateReferenceCommandHandler paymentTemplateReferenceCommandHandler;
 
     @Override
     @KafkaListener(topics = "${kafka.topic.reference}", containerFactory = "referenceListenerContainerFactory")
     public void listen(@Payload Command command) {
-        handle(command);
+        log.info("TemplateReferenceListener command: {}", command);
+        paymentTemplateReferenceCommandHandler.handle(command);
     }
 
 }

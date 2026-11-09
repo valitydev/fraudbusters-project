@@ -1,21 +1,20 @@
-package dev.vality.fraudbusters.listener;
+package dev.vality.fraudbusters.pool.handler;
 
 import dev.vality.damsel.fraudbusters.Command;
 import dev.vality.damsel.fraudbusters.TemplateReference;
 import dev.vality.fraudbusters.fraud.InspectStorage;
+import dev.vality.fraudbusters.listener.AbstractPoolCommandListenerExecutor;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-/** Keeps the template references of the operation type whose topic the subclass listens to. */
-@Slf4j
+/**
+ * Applies template reference commands to the reference pool of one operation type.
+ */
 @RequiredArgsConstructor
-public abstract class TemplateReferenceCommandListener extends AbstractPoolCommandListenerExecutor
-        implements CommandListener {
+public class TemplateReferenceCommandHandler extends AbstractPoolCommandListenerExecutor {
 
     private final InspectStorage storage;
 
-    protected void handle(Command command) {
-        log.info("{} command: {}", getClass().getSimpleName(), command);
+    public void handle(Command command) {
         if (command != null && command.isSetCommandBody() && command.getCommandBody().isSetReference()) {
             TemplateReference reference = command.getCommandBody().getReference();
             String key = storage.generateReferenceKey(reference);

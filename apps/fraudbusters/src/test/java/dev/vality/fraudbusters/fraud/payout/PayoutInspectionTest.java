@@ -30,6 +30,10 @@ import dev.vality.fraudbusters.listener.payout.PayoutTemplateListener;
 import dev.vality.fraudbusters.listener.payout.PayoutTemplateReferenceListener;
 import dev.vality.fraudbusters.pool.Pool;
 import dev.vality.fraudbusters.pool.PoolImpl;
+import dev.vality.fraudbusters.pool.handler.GroupCommandHandler;
+import dev.vality.fraudbusters.pool.handler.GroupReferenceCommandHandler;
+import dev.vality.fraudbusters.pool.handler.TemplateCommandHandler;
+import dev.vality.fraudbusters.pool.handler.TemplateReferenceCommandHandler;
 import dev.vality.fraudbusters.stream.impl.PayoutTemplateVisitorImpl;
 import dev.vality.fraudbusters.stream.impl.RuleCascade;
 import dev.vality.fraudbusters.stream.impl.NotifyingRuleApplierImpl;
@@ -65,13 +69,16 @@ class PayoutInspectionTest {
             new PaymentTemplateValidator());
     private final InspectStorage payoutStorage = new PayoutInspectStorage(payoutTemplates, payoutGroups,
             payoutReferences, payoutGroupReferences, BeanUtil.createPayoutTemplateValidator());
-    private final TemplateListener paymentTemplateListener = new TemplateListener(parser, paymentStorage);
-    private final PayoutTemplateListener templateListener = new PayoutTemplateListener(parser, payoutStorage);
-    private final PayoutGroupListener groupListener = new PayoutGroupListener(payoutStorage);
+    private final TemplateListener paymentTemplateListener =
+            new TemplateListener(new TemplateCommandHandler(parser, paymentStorage));
+    private final PayoutTemplateListener templateListener =
+            new PayoutTemplateListener(new TemplateCommandHandler(parser, payoutStorage));
+    private final PayoutGroupListener groupListener =
+            new PayoutGroupListener(new GroupCommandHandler(payoutStorage));
     private final PayoutTemplateReferenceListener referenceListener =
-            new PayoutTemplateReferenceListener(payoutStorage);
+            new PayoutTemplateReferenceListener(new TemplateReferenceCommandHandler(payoutStorage));
     private final PayoutGroupReferenceListener groupReferenceListener =
-            new PayoutGroupReferenceListener(payoutStorage);
+            new PayoutGroupReferenceListener(new GroupReferenceCommandHandler(payoutStorage));
     @SuppressWarnings("unchecked")
     private final PayoutAggregators<PayoutModel, PayoutCheckedField> payouts = mock(PayoutAggregators.class);
     private final WithdrawalContextToModelConverter converter = new WithdrawalContextToModelConverter();
