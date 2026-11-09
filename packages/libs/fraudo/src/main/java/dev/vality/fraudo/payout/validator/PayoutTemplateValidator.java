@@ -3,6 +3,7 @@ package dev.vality.fraudo.payout.validator;
 import dev.vality.fraudo.FraudoRulesLexer;
 import dev.vality.fraudo.FraudoRulesParser;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -22,6 +23,7 @@ import static dev.vality.fraudo.payout.validator.HistoryFunctions.PAYOUT_HISTORY
 import static dev.vality.fraudo.utils.TextUtil.safeGetText;
 
 /** Validates payout rules using the shared grammar, without changing payment rule validation. */
+@Slf4j
 @RequiredArgsConstructor
 public class PayoutTemplateValidator {
 
@@ -84,6 +86,8 @@ public class PayoutTemplateValidator {
             checkFieldsSupported(ctx, list.string_list().STRING(), fields.operation(), errors);
         } else if (ctx instanceof In_grey_listContext list) {
             checkFieldsSupported(ctx, list.string_list().STRING(), fields.payoutHistory(), errors);
+        } else {
+            log.warn("No payout field check for {}", ctx.getClass().getSimpleName());
         }
     }
 
