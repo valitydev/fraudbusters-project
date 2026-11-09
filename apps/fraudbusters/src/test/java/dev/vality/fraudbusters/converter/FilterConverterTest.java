@@ -5,7 +5,9 @@ import dev.vality.damsel.fraudbusters.Page;
 import dev.vality.damsel.fraudbusters.Sort;
 import dev.vality.damsel.fraudbusters.SortOrder;
 import dev.vality.fraudbusters.constant.FraudResultField;
+import dev.vality.fraudbusters.constant.FilterField;
 import dev.vality.fraudbusters.constant.PaymentField;
+import dev.vality.fraudbusters.constant.WithdrawalField;
 import dev.vality.fraudbusters.factory.TestObjectsFactory;
 import dev.vality.fraudbusters.service.dto.FieldType;
 import dev.vality.fraudbusters.service.dto.FilterDto;
@@ -173,7 +175,7 @@ class FilterConverterTest {
 
         assertEquals(Set.of(
                         searchField(PaymentField.PARTY_ID, FieldType.STRING, "party"),
-                        searchField(PaymentField.WALLET_ID, FieldType.STRING, "wallet"),
+                        searchField(WithdrawalField.WALLET_ID, FieldType.STRING, "wallet"),
                         searchField(PaymentField.ID, FieldType.STRING, "withdrawal"),
                         searchField(PaymentField.STATUS, FieldType.ENUM, "failed"),
                         searchField(PaymentField.CARD_TOKEN, FieldType.STRING, "token"),
@@ -193,7 +195,7 @@ class FilterConverterTest {
         assertTrue(dto.getSearchFields().isEmpty());
     }
 
-    private static SearchFieldDto searchField(PaymentField field, FieldType type, String value) {
+    private static SearchFieldDto searchField(FilterField field, FieldType type, String value) {
         return SearchFieldDto.builder()
                 .field(field)
                 .type(type)

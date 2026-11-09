@@ -640,7 +640,7 @@ class HistoricalDataHandlerTest {
         ArgumentCaptor<FilterDto> captor = ArgumentCaptor.forClass(FilterDto.class);
         verify(service).getWithdrawals(captor.capture());
         assertEquals(Set.of(SearchFieldDto.builder()
-                        .field(dev.vality.fraudbusters.constant.PaymentField.WALLET_ID)
+                        .field(dev.vality.fraudbusters.constant.WithdrawalField.WALLET_ID)
                         .type(FieldType.STRING)
                         .value("wallet")
                         .build()),

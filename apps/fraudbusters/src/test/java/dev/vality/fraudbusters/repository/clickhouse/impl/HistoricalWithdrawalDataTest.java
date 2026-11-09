@@ -14,7 +14,9 @@ import dev.vality.damsel.fraudbusters.Resource;
 import dev.vality.damsel.fraudbusters.Withdrawal;
 import dev.vality.damsel.fraudbusters.WithdrawalStatus;
 import dev.vality.fraudbusters.constant.ClickhouseUtilsValue;
+import dev.vality.fraudbusters.constant.FilterField;
 import dev.vality.fraudbusters.constant.PaymentField;
+import dev.vality.fraudbusters.constant.WithdrawalField;
 import dev.vality.fraudbusters.constant.SortOrder;
 import dev.vality.fraudbusters.extension.ClickHouseContainerExtension;
 import dev.vality.fraudbusters.repository.clickhouse.mapper.WithdrawalMapper;
@@ -98,7 +100,7 @@ class HistoricalWithdrawalDataTest {
 
     @Test
     void filtersApplyToTheLatestState() {
-        assertEquals(List.of("w2", "w1"), ids(filter(search(PaymentField.WALLET_ID, FieldType.STRING, "wallet-a"))));
+        assertEquals(List.of("w2", "w1"), ids(filter(search(WithdrawalField.WALLET_ID, FieldType.STRING, "wallet-a"))));
         assertEquals(List.of("w2"), ids(filter(search(PaymentField.STATUS, FieldType.ENUM, "failed"))));
         assertTrue(ids(filter(search(PaymentField.STATUS, FieldType.ENUM, "pending"))).isEmpty());
         assertEquals(List.of("w1"), ids(filter(
@@ -150,7 +152,7 @@ class HistoricalWithdrawalDataTest {
         return filter;
     }
 
-    private static SearchFieldDto search(PaymentField field, FieldType type, String value) {
+    private static SearchFieldDto search(FilterField field, FieldType type, String value) {
         return SearchFieldDto.builder()
                 .field(field)
                 .type(type)

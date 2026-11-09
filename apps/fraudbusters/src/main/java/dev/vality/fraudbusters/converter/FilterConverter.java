@@ -6,6 +6,7 @@ import dev.vality.damsel.fraudbusters.Sort;
 import dev.vality.fraudbusters.constant.FilterField;
 import dev.vality.fraudbusters.constant.FraudResultField;
 import dev.vality.fraudbusters.constant.PaymentField;
+import dev.vality.fraudbusters.constant.WithdrawalField;
 import dev.vality.fraudbusters.constant.SortOrder;
 import dev.vality.fraudbusters.service.dto.FieldType;
 import dev.vality.fraudbusters.service.dto.FilterDto;
@@ -28,7 +29,7 @@ public class FilterConverter {
     private static final Set<FilterField> WITHDRAWAL_FIELDS = Set.of(
             PaymentField.ID,
             PaymentField.PARTY_ID,
-            PaymentField.WALLET_ID,
+            WithdrawalField.WALLET_ID,
             PaymentField.STATUS,
             PaymentField.EMAIL,
             PaymentField.BANK_COUNTRY,
@@ -54,7 +55,7 @@ public class FilterConverter {
                 .filter(searchField -> WITHDRAWAL_FIELDS.contains(searchField.getField()))
                 .collect(Collectors.toCollection(HashSet::new));
         if (filter.isSetWalletId() && StringUtils.hasLength(filter.getWalletId())) {
-            addSearchField(searchFields, PaymentField.WALLET_ID, FieldType.STRING, filter.getWalletId());
+            addSearchField(searchFields, WithdrawalField.WALLET_ID, FieldType.STRING, filter.getWalletId());
         }
         filterDto.setSearchFields(searchFields);
         return filterDto;

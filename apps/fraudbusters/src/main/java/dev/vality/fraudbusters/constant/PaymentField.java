@@ -9,7 +9,6 @@ public enum PaymentField implements FilterField {
     EVENT_TIME("eventTime"),
     SHOP_ID("shopId"),
     PARTY_ID("partyId"),
-    WALLET_ID("walletId"),
     EMAIL("email"),
     PHONE("phone"),
     IP("ip"),

@@ -15,6 +15,7 @@ import dev.vality.damsel.fraudbusters.Withdrawal;
 import dev.vality.damsel.fraudbusters.WithdrawalStatus;
 import dev.vality.fraudbusters.constant.ClickhouseUtilsValue;
 import dev.vality.fraudbusters.constant.PaymentField;
+import dev.vality.fraudbusters.constant.WithdrawalField;
 import dev.vality.fraudbusters.util.TimestampUtil;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -50,7 +51,7 @@ public class WithdrawalMapper implements RowMapper<Withdrawal> {
                         .setCurrency(new CurrencyRef(rs.getString(ACCOUNT_CURRENCY))))
                 .setDestinationResource(mapResource(rs))
                 .setPartyId(rs.getString(PaymentField.PARTY_ID.getValue()))
-                .setWalletId(rs.getString(PaymentField.WALLET_ID.getValue()));
+                .setWalletId(rs.getString(WithdrawalField.WALLET_ID.getValue()));
         String errorCode = known(rs.getString(PaymentField.ERROR_CODE.getValue()));
         if (errorCode != null) {
             withdrawal.setError(new Error()
