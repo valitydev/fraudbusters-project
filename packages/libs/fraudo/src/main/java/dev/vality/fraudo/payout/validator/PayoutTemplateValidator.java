@@ -2,6 +2,8 @@ package dev.vality.fraudo.payout.validator;
 
 import dev.vality.fraudo.FraudoRulesLexer;
 import dev.vality.fraudo.FraudoRulesParser;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -16,26 +18,16 @@ import java.util.List;
 import java.util.Set;
 
 import static dev.vality.fraudo.FraudoRulesParser.*;
+import static dev.vality.fraudo.payout.validator.HistoryFunctions.PAYMENT_HISTORY_FUNCTIONS;
+import static dev.vality.fraudo.payout.validator.HistoryFunctions.PAYOUT_HISTORY_FUNCTIONS;
 import static dev.vality.fraudo.utils.TextUtil.safeGetText;
 
 /** Validates payout rules using the shared grammar, without changing payment rule validation. */
+@Slf4j
+@RequiredArgsConstructor
 public class PayoutTemplateValidator {
 
-    private static final Set<Class<? extends ParserRuleContext>> PAYMENT_HISTORY_FUNCTIONS = Set.of(
-            CountContext.class, Count_successContext.class, Count_pendingContext.class, Count_errorContext.class,
-            Count_chargebackContext.class, Count_refundContext.class, SumContext.class, Sum_successContext.class,
-            Sum_errorContext.class, Sum_chargebackContext.class, Sum_refundContext.class, UniqueContext.class);
-
-    private static final Set<Class<? extends ParserRuleContext>> PAYOUT_HISTORY_FUNCTIONS = Set.of(
-            Count_payoutsContext.class, Count_payouts_successContext.class, Count_payouts_errorContext.class,
-            Sum_payoutsContext.class, Sum_payouts_successContext.class, Sum_payouts_errorContext.class,
-            Unique_payoutsContext.class);
-
     private final PayoutRuleFields fields;
-
-    public PayoutTemplateValidator(PayoutRuleFields fields) {
-        this.fields = fields;
-    }
 
     public List<String> validate(String template) {
         List<String> errors = new ArrayList<>();
@@ -94,6 +86,8 @@ public class PayoutTemplateValidator {
             checkFieldsSupported(ctx, list.string_list().STRING(), fields.operation(), errors);
         } else if (ctx instanceof In_grey_listContext list) {
             checkFieldsSupported(ctx, list.string_list().STRING(), fields.payoutHistory(), errors);
+        } else {
+            log.warn("No payout field check for {}", ctx.getClass().getSimpleName());
         }
     }
 

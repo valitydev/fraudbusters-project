@@ -79,7 +79,7 @@
         <dependency>
             <groupId>dev.vality</groupId>
             <artifactId>fistful-proto</artifactId>
-            <version>1.201-6e551cb</version>
+            <version>1.202-49fa493</version>
         </dependency>
         <dependency>
             <groupId>dev.vality</groupId>
