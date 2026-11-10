@@ -25,7 +25,7 @@ class WithdrawalsRequestToWithdrawalsConverterTest {
 
     @Test
     void convert() {
-        var converter = converter();
+        var converter = createConverter();
 
         List<Withdrawal> withdrawals = converter.convert(new WithdrawalsRequest().withdrawals(
                 List.of(ApiBeanGenerator.initWithdrawal())));
@@ -48,7 +48,7 @@ class WithdrawalsRequestToWithdrawalsConverterTest {
                 .walletId("synthetic-wallet")
                 .customer(new dev.vality.swag.fraudbusters.model.Customer()
                         .customerId("synthetic-customer"));
-        var converter = converter();
+        var converter = createConverter();
         var request = new WithdrawalsRequest().withdrawals(List.of(item));
         var withdrawal = converter.convert(request).get(0);
         assertEquals("synthetic-party", withdrawal.getPartyId());
@@ -59,7 +59,7 @@ class WithdrawalsRequestToWithdrawalsConverterTest {
         assertEquals("synthetic-user", converter.convert(request).get(0).getClientInfo().getUserId());
     }
 
-    private WithdrawalsRequestToWithdrawalsConverter converter() {
+    private WithdrawalsRequestToWithdrawalsConverter createConverter() {
         return new WithdrawalsRequestToWithdrawalsConverter(
                 cachToInternalDtoConverter,
                 errorToInternalDtoConverter,
