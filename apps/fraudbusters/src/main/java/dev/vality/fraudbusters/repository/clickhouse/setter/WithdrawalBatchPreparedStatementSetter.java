@@ -1,6 +1,7 @@
 package dev.vality.fraudbusters.repository.clickhouse.setter;
 
 import dev.vality.damsel.fraudbusters.Resource;
+import dev.vality.damsel.fraudbusters.ClientInfo;
 import dev.vality.damsel.fraudbusters.Withdrawal;
 import dev.vality.fraudbusters.domain.TimeProperties;
 import dev.vality.fraudbusters.util.TimestampUtil;
@@ -19,10 +20,10 @@ public class WithdrawalBatchPreparedStatementSetter implements BatchPreparedStat
     public static final String FIELDS = """
             timestamp, eventTimeHour, eventTime, id, amount, currency, bin, lastDigits, cardToken, paymentSystem,
             terminal, providerId, bankCountry, accountId, accountCurrency, status, errorCode,
-            errorReason
+            errorReason, issuerCountry, partyId, walletId, customerId, userId, ip, fingerprint, email, phone
             """;
 
-    public static final String FIELDS_MARK = "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?";
+    public static final String FIELDS_MARK = "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?";
 
     private final List<Withdrawal> batch;
 
@@ -48,6 +49,7 @@ public class WithdrawalBatchPreparedStatementSetter implements BatchPreparedStat
         );
         ps.setString(l++, destinationResource.isSetBankCard() ? destinationResource.getBankCard().getToken() : UNKNOWN);
         ps.setString(l++, destinationResource.isSetBankCard()
+                && destinationResource.getBankCard().isSetPaymentSystem()
                 ? destinationResource.getBankCard().getPaymentSystem().getId()
                 : UNKNOWN
         );
@@ -65,7 +67,19 @@ public class WithdrawalBatchPreparedStatementSetter implements BatchPreparedStat
 
         ps.setObject(l++, withdrawal.getStatus());
         ps.setObject(l++, withdrawal.isSetError() ? withdrawal.getError().getErrorCode() : null);
-        ps.setObject(l, withdrawal.isSetError() ? withdrawal.getError().getErrorReason() : null);
+        ps.setObject(l++, withdrawal.isSetError() ? withdrawal.getError().getErrorReason() : null);
+        ps.setString(l++, destinationResource.isSetBankCard()
+                && destinationResource.getBankCard().isSetIssuerCountry()
+                ? destinationResource.getBankCard().getIssuerCountry().name() : UNKNOWN);
+        ps.setString(l++, withdrawal.getPartyId());
+        ps.setString(l++, withdrawal.getWalletId());
+        ClientInfo client = withdrawal.getClientInfo();
+        ps.setString(l++, client == null ? null : client.getCustomerId());
+        ps.setString(l++, client == null ? null : client.getUserId());
+        ps.setString(l++, client == null ? null : client.getIp());
+        ps.setString(l++, client == null ? null : client.getFingerprint());
+        ps.setString(l++, client == null ? null : client.getEmail());
+        ps.setString(l, client == null ? null : client.getPhone());
     }
 
     @Override

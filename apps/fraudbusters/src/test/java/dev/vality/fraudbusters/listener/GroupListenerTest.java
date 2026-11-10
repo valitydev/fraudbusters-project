@@ -1,9 +1,11 @@
 package dev.vality.fraudbusters.listener;
 
 import dev.vality.damsel.fraudbusters.PriorityId;
+import dev.vality.fraudbusters.fraud.payment.PaymentInspectStorage;
 import dev.vality.fraudbusters.listener.payment.GroupListener;
 import dev.vality.fraudbusters.pool.Pool;
 import dev.vality.fraudbusters.pool.PoolImpl;
+import dev.vality.fraudbusters.pool.handler.GroupCommandHandler;
 import dev.vality.fraudbusters.util.BeanUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +25,8 @@ public class GroupListenerTest {
     @BeforeEach
     public void init() {
         groupPoolImpl = new PoolImpl<>("group");
-        groupListener = new GroupListener(groupPoolImpl);
+        groupListener = new GroupListener(
+                new GroupCommandHandler(new PaymentInspectStorage(null, groupPoolImpl, null, null, null)));
     }
 
     @Test
@@ -60,5 +63,22 @@ public class GroupListenerTest {
         groupListener.listen(BeanUtil.deleteGroupCommand(GROUP_1, List.of()));
         templateIds = groupPoolImpl.get(GROUP_1);
         assertNull(templateIds);
+    }
+
+    @Test
+    public void listenKeepsRepeatedTemplateOnceAtHighestPriority() {
+        groupListener.listen(BeanUtil.createGroupCommand(GROUP_1, List.of(
+                new PriorityId()
+                        .setPriority(3L)
+                        .setId(FIRST_TEMPL),
+                new PriorityId()
+                        .setPriority(2L)
+                        .setId(SECOND_TEMPL),
+                new PriorityId()
+                        .setPriority(1L)
+                        .setId(FIRST_TEMPL)
+        )));
+
+        assertEquals(List.of(FIRST_TEMPL, SECOND_TEMPL), groupPoolImpl.get(GROUP_1));
     }
 }

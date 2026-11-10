@@ -72,11 +72,11 @@ class HistoricalPaymentDataTest {
         var boundaries = new dev.vality.fraudbusters.service.TimeBoundaryServiceImpl();
         var repository = (dev.vality.fraudbusters.repository.PaymentRepository) paymentRepository;
         final var counts = new dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.CountAggregatorImpl(
-                resolver, repository, null, null, boundaries);
+                resolver, repository, null, null, boundaries, true);
         final var sums = new dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.SumAggregatorImpl(
-                resolver, repository, null, null, boundaries);
+                resolver, repository, null, null, boundaries, true);
         final var unique = new dev.vality.fraudbusters.fraud.payment.aggregator.clickhouse.UniqueValueAggregatorImpl(
-                resolver, repository, boundaries);
+                resolver, repository, boundaries, true);
         var model = new dev.vality.fraudbusters.fraud.model.PaymentModel();
         model.setTimestamp(java.time.Instant.parse("2032-01-01T01:00:00Z").toEpochMilli());
         model.setPartyId("party-a");
@@ -84,8 +84,10 @@ class HistoricalPaymentDataTest {
         model.setUserId("shared-user");
         model.setCustomerId("customer-a");
         model.setCardToken(rows.get(0).getCardToken());
-        var window = dev.vality.fraudo.model.TimeWindow.builder().start(120)
-                .timeUnit(dev.vality.fraudo.constant.TimeUnit.MINUTES).build();
+        var window = dev.vality.fraudo.model.TimeWindow.builder()
+                .start(120)
+                .timeUnit(dev.vality.fraudo.constant.TimeUnit.MINUTES)
+                .build();
         var user = dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.USER_ID;
         var party = dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.PARTY_ID;
         final var shop = dev.vality.fraudbusters.fraud.constant.PaymentCheckedField.SHOP_ID;
@@ -151,14 +153,20 @@ class HistoricalPaymentDataTest {
         SortDto sort = new SortDto();
         sort.setOrder(SortOrder.DESC);
         filter.setSort(sort);
-        filter.setSearchFields(Set.of(SearchFieldDto.builder().field(PaymentField.USER_ID)
-                .type(FieldType.STRING).value(payment.getUserId()).build()));
+        filter.setSearchFields(Set.of(SearchFieldDto.builder()
+                .field(PaymentField.USER_ID)
+                .type(FieldType.STRING)
+                .value(payment.getUserId())
+                .build()));
         var rows = paymentRepository.getByFilter(filter);
         assertEquals(1, rows.size());
         assertEquals(payment.getCustomerId(), rows.get(0).getCustomerId());
         assertEquals(payment.getUserId(), rows.get(0).getUserId());
-        filter.setSearchFields(Set.of(SearchFieldDto.builder().field(PaymentField.CUSTOMER_ID)
-                .type(FieldType.STRING).value(payment.getCustomerId()).build()));
+        filter.setSearchFields(Set.of(SearchFieldDto.builder()
+                .field(PaymentField.CUSTOMER_ID)
+                .type(FieldType.STRING)
+                .value(payment.getCustomerId())
+                .build()));
         rows = paymentRepository.getByFilter(filter);
         assertEquals(1, rows.size());
         assertEquals(payment.getUserId(), rows.get(0).getUserId());

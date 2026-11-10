@@ -4,6 +4,7 @@ package dev.vality.fraudbusters.repository.clickhouse.util;
 import dev.vality.fraudbusters.constant.FraudResultField;
 import dev.vality.fraudbusters.constant.PaymentField;
 import dev.vality.fraudbusters.constant.QueryParamName;
+import dev.vality.fraudbusters.constant.WithdrawalField;
 import dev.vality.fraudbusters.repository.clickhouse.query.FraudResultQuery;
 import dev.vality.fraudbusters.service.dto.FieldType;
 import dev.vality.fraudbusters.service.dto.FilterDto;
@@ -56,7 +57,7 @@ public class FilterUtil {
     private static void addLikeSearchFields(StringBuilder filters, Set<SearchFieldDto> searchFields) {
         searchFields.stream()
                 .filter(searchField -> searchField.getType().equals(FieldType.STRING))
-                .filter(searchField -> searchField.getField() instanceof PaymentField)
+                .filter(FilterUtil::isOperationField)
                 .forEach(searchField ->
                         filters
                                 .append(" and like(")
@@ -69,13 +70,20 @@ public class FilterUtil {
     private static void addEqualSearchFields(StringBuilder filters, Set<SearchFieldDto> searchFields) {
         searchFields.stream()
                 .filter(searchField -> searchField.getType().equals(FieldType.ENUM))
-                .filter(searchField -> searchField.getField() instanceof PaymentField)
+                .filter(FilterUtil::isOperationField)
                 .forEach(searchField ->
                         filters
                                 .append(" and ")
                                 .append(searchField.getField().getValue())
                                 .append(" = :")
                                 .append(searchField.getField().getValue()));
+    }
+
+    /**
+     * Columns of the queried table itself; fraud result fields go through their own conditions.
+     */
+    private static boolean isOperationField(SearchFieldDto searchField) {
+        return searchField.getField() instanceof PaymentField || searchField.getField() instanceof WithdrawalField;
     }
 
     private static void addPaymentFraudResultSearchFields(StringBuilder filters, Set<SearchFieldDto> searchFields) {

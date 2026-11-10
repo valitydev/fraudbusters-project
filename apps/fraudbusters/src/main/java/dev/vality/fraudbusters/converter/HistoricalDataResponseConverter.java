@@ -5,6 +5,7 @@ import dev.vality.fraudbusters.service.dto.HistoricalChargebacksDto;
 import dev.vality.fraudbusters.service.dto.HistoricalFraudResultsDto;
 import dev.vality.fraudbusters.service.dto.HistoricalPaymentsDto;
 import dev.vality.fraudbusters.service.dto.HistoricalRefundsDto;
+import dev.vality.fraudbusters.service.dto.HistoricalWithdrawalsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -65,6 +66,14 @@ public class HistoricalDataResponseConverter {
         historicalData.setFraudPayments(payments);
         return new HistoricalDataResponse()
                 .setContinuationId(historicalPaymentsDto.getLastId())
+                .setData(historicalData);
+    }
+
+    public HistoricalDataResponse convertWithdrawal(HistoricalWithdrawalsDto historicalWithdrawalsDto) {
+        HistoricalData historicalData = new HistoricalData();
+        historicalData.setWithdrawals(historicalWithdrawalsDto.getWithdrawals());
+        return new HistoricalDataResponse()
+                .setContinuationId(historicalWithdrawalsDto.getLastId())
                 .setData(historicalData);
     }
 }

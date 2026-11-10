@@ -6,6 +6,7 @@ import dev.vality.damsel.fraudbusters.Sort;
 import dev.vality.fraudbusters.constant.FilterField;
 import dev.vality.fraudbusters.constant.FraudResultField;
 import dev.vality.fraudbusters.constant.PaymentField;
+import dev.vality.fraudbusters.constant.WithdrawalField;
 import dev.vality.fraudbusters.constant.SortOrder;
 import dev.vality.fraudbusters.service.dto.FieldType;
 import dev.vality.fraudbusters.service.dto.FilterDto;
@@ -19,9 +20,26 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class FilterConverter {
+
+    /** Columns that fraud.withdrawal stores; payout history has no shop, invoice or antifraud rule. */
+    private static final Set<FilterField> WITHDRAWAL_FIELDS = Set.of(
+            PaymentField.ID,
+            PaymentField.PARTY_ID,
+            WithdrawalField.WALLET_ID,
+            PaymentField.STATUS,
+            PaymentField.EMAIL,
+            PaymentField.BANK_COUNTRY,
+            PaymentField.CARD_TOKEN,
+            PaymentField.FINGERPRINT,
+            PaymentField.TERMINAL,
+            PaymentField.LAST_DIGITS,
+            PaymentField.CUSTOMER_ID,
+            PaymentField.USER_ID
+    );
 
     public FilterDto convert(Filter filter, Page page, Sort sort) {
         return buildFilter(filter, page, sort, false);
@@ -29,6 +47,18 @@ public class FilterConverter {
 
     public FilterDto convertFraudResults(Filter filter, Page page, Sort sort) {
         return buildFilter(filter, page, sort, true);
+    }
+
+    public FilterDto convertWithdrawals(Filter filter, Page page, Sort sort) {
+        FilterDto filterDto = buildFilter(filter, page, sort, false);
+        Set<SearchFieldDto> searchFields = filterDto.getSearchFields().stream()
+                .filter(searchField -> WITHDRAWAL_FIELDS.contains(searchField.getField()))
+                .collect(Collectors.toCollection(HashSet::new));
+        if (filter.isSetWalletId() && StringUtils.hasLength(filter.getWalletId())) {
+            addSearchField(searchFields, WithdrawalField.WALLET_ID, FieldType.STRING, filter.getWalletId());
+        }
+        filterDto.setSearchFields(searchFields);
+        return filterDto;
     }
 
     private FilterDto buildFilter(Filter filter, Page page, Sort sort, boolean fraudResults) {

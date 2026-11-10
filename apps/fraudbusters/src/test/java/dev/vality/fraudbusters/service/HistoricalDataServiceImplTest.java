@@ -2,6 +2,7 @@ package dev.vality.fraudbusters.service;
 
 import dev.vality.damsel.fraudbusters.Chargeback;
 import dev.vality.damsel.fraudbusters.Refund;
+import dev.vality.damsel.fraudbusters.Withdrawal;
 import dev.vality.fraudbusters.domain.CheckedPayment;
 import dev.vality.fraudbusters.domain.Event;
 import dev.vality.fraudbusters.domain.FraudPaymentRow;
@@ -40,6 +41,8 @@ class HistoricalDataServiceImplTest {
     private Repository<Event> fraudResultRepository;
     @MockitoBean
     private Repository<FraudPaymentRow> fraudPaymentRepository;
+    @MockitoBean
+    private Repository<Withdrawal> withdrawalRepository;
 
     @Test
     void getPaymentsWithoutPayments() {
@@ -266,4 +269,37 @@ class HistoricalDataServiceImplTest {
         assertEquals(fraudPaymentRows.size(), actualFraudPayments.getPayments().size());
     }
 
+    @Test
+    void getWithdrawalsWithoutWithdrawals() {
+        FilterDto filterDto = new FilterDto();
+        when(withdrawalRepository.getByFilter(filterDto)).thenReturn(Collections.emptyList());
+
+        HistoricalWithdrawalsDto actual = historicalDataService.getWithdrawals(filterDto);
+
+        assertNull(actual.getLastId());
+        assertTrue(actual.getWithdrawals().isEmpty());
+    }
+
+    @Test
+    void getWithdrawalsContinuesAfterAFullPage() {
+        FilterDto filterDto = new FilterDto();
+        filterDto.setSize(2L);
+        filterDto.setLastId("4");
+        List<Withdrawal> withdrawals = List.of(new Withdrawal().setId("a"), new Withdrawal().setId("b"));
+        when(withdrawalRepository.getByFilter(filterDto)).thenReturn(withdrawals);
+
+        HistoricalWithdrawalsDto actual = historicalDataService.getWithdrawals(filterDto);
+
+        assertEquals("6", actual.getLastId());
+        assertEquals(withdrawals, actual.getWithdrawals());
+    }
+
+    @Test
+    void getWithdrawalsStopsAfterAShortPage() {
+        FilterDto filterDto = new FilterDto();
+        filterDto.setSize(2L);
+        when(withdrawalRepository.getByFilter(filterDto)).thenReturn(List.of(new Withdrawal().setId("a")));
+
+        assertNull(historicalDataService.getWithdrawals(filterDto).getLastId());
+    }
 }

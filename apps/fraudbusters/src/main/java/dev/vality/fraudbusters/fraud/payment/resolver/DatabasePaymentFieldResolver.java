@@ -5,16 +5,19 @@ import dev.vality.fraudbusters.exception.UnknownFieldException;
 import dev.vality.fraudbusters.fraud.constant.PaymentCheckedField;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.resolver.HistoryFieldResolver;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class DatabasePaymentFieldResolver {
+public class DatabasePaymentFieldResolver implements HistoryFieldResolver<PaymentModel, PaymentCheckedField> {
 
+    @Override
     @NotNull
     public List<FieldModel> resolveListFields(PaymentModel model, List<PaymentCheckedField> list) {
         if (list != null) {
@@ -25,6 +28,7 @@ public class DatabasePaymentFieldResolver {
         return new ArrayList<>();
     }
 
+    @Override
     public FieldModel resolve(PaymentCheckedField field, PaymentModel model) {
         if (field == null) {
             throw new UnknownFieldException();
@@ -48,11 +52,17 @@ public class DatabasePaymentFieldResolver {
         };
     }
 
+    @Override
     public String resolve(PaymentCheckedField field) {
+        return findColumn(field)
+                .orElseThrow(UnknownFieldException::new);
+    }
+
+    public Optional<String> findColumn(PaymentCheckedField field) {
         if (field == null) {
-            throw new UnknownFieldException();
+            return Optional.empty();
         }
-        return switch (field) {
+        return Optional.ofNullable(switch (field) {
             case IP -> EventField.ip.name();
             case EMAIL -> EventField.email.name();
             case PHONE -> EventField.phone.name();
@@ -65,8 +75,10 @@ public class DatabasePaymentFieldResolver {
             case CARD_TOKEN -> EventField.cardToken.name();
             case MOBILE -> EventField.mobile.name();
             case RECURRENT -> EventField.recurrent.name();
-            default -> throw new UnknownFieldException();
-        };
+            case CURRENCY -> EventField.currency.name();
+            case COUNTRY_BANK -> EventField.bankCountry.name();
+            default -> null;
+        });
     }
 
 }
