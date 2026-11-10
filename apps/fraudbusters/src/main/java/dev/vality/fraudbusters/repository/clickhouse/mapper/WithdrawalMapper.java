@@ -52,12 +52,22 @@ public class WithdrawalMapper implements RowMapper<Withdrawal> {
                 .setDestinationResource(mapResource(rs))
                 .setPartyId(rs.getString(PaymentField.PARTY_ID.getValue()))
                 .setWalletId(rs.getString(WithdrawalField.WALLET_ID.getValue()));
+        mapError(rs, withdrawal);
+        mapProviderInfo(rs, withdrawal);
+        mapClientInfo(rs, withdrawal);
+        return withdrawal;
+    }
+
+    private static void mapError(ResultSet rs, Withdrawal withdrawal) throws SQLException {
         String errorCode = known(rs.getString(PaymentField.ERROR_CODE.getValue()));
         if (errorCode != null) {
             withdrawal.setError(new Error()
                     .setErrorCode(errorCode)
                     .setErrorReason(known(rs.getString(PaymentField.ERROR_REASON.getValue()))));
         }
+    }
+
+    private static void mapProviderInfo(ResultSet rs, Withdrawal withdrawal) throws SQLException {
         String providerId = known(rs.getString(PaymentField.PROVIDER_ID.getValue()));
         String terminal = known(rs.getString(PaymentField.TERMINAL.getValue()));
         if (providerId != null || terminal != null) {
@@ -66,6 +76,9 @@ public class WithdrawalMapper implements RowMapper<Withdrawal> {
                     .setTerminalId(terminal != null ? terminal : ClickhouseUtilsValue.UNKNOWN)
                     .setCountry(known(rs.getString(PaymentField.BANK_COUNTRY.getValue()))));
         }
+    }
+
+    private static void mapClientInfo(ResultSet rs, Withdrawal withdrawal) throws SQLException {
         ClientInfo clientInfo = new ClientInfo()
                 .setCustomerId(rs.getString(PaymentField.CUSTOMER_ID.getValue()))
                 .setUserId(rs.getString(PaymentField.USER_ID.getValue()))
@@ -76,7 +89,6 @@ public class WithdrawalMapper implements RowMapper<Withdrawal> {
         if (Stream.of(ClientInfo._Fields.values()).anyMatch(clientInfo::isSet)) {
             withdrawal.setClientInfo(clientInfo);
         }
-        return withdrawal;
     }
 
     private static Resource mapResource(ResultSet rs) throws SQLException {

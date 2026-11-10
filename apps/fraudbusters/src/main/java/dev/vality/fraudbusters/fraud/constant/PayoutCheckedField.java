@@ -1,9 +1,13 @@
 package dev.vality.fraudbusters.fraud.constant;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import java.util.HashMap;
 import java.util.Map;
 
 /** Rule fields that a withdrawal inspection request (proxy_inspector.WithdrawalContext) carries. */
+@AllArgsConstructor
 public enum PayoutCheckedField {
 
     EMAIL("email"),
@@ -28,18 +32,11 @@ public enum PayoutCheckedField {
         }
     }
 
+    @Getter
     private final String value;
-
-    PayoutCheckedField(String value) {
-        this.value = value;
-    }
 
     public static PayoutCheckedField getByValue(String value) {
         return VALUE_MAP.get(value);
-    }
-
-    public String getValue() {
-        return value;
     }
 
 }
