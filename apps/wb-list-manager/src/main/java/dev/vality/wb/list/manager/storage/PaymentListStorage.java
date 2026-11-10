@@ -30,11 +30,15 @@ public class PaymentListStorage implements ListStorage {
     }
 
     private String getPartyId(Row row) {
-        return row.isSetId() ? row.getId().getPaymentId().getPartyId() : row.getPartyId();
+        return hasPaymentId(row) ? row.getId().getPaymentId().getPartyId() : row.getPartyId();
     }
 
     private String getShopId(Row row) {
-        return row.isSetId() ? row.getId().getPaymentId().getShopId() : row.getShopId();
+        return hasPaymentId(row) ? row.getId().getPaymentId().getShopId() : row.getShopId();
+    }
+
+    private static boolean hasPaymentId(Row row) {
+        return row.isSetId() && row.getId().isSetPaymentId();
     }
 
 }

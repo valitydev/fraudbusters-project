@@ -44,6 +44,15 @@ class PayoutListsTest {
     }
 
     @Test
+    void paymentRowWithEmptyIdKeepsLegacyPartyAndShop() {
+        Row row = createRow()
+                .setPartyId("party")
+                .setShopId("shop")
+                .setId(new IdInfo());
+        assertEquals("party_shop_black_USER_ID_synthetic-user", paymentStorage.generateKey(row));
+    }
+
+    @Test
     void payoutFallbackNeverQueriesPaymentStorage() throws Exception {
         Row row = createRow().setId(IdInfo.payout_id(new PayoutId()
                 .setPartyId("party")
