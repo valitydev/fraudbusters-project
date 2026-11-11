@@ -1,7 +1,6 @@
 package dev.vality.fraudbusters.management.dao.payout.group;
 
 import dev.vality.fraudbusters.management.dao.AbstractDao;
-import dev.vality.fraudbusters.management.dao.CommandDao;
 import dev.vality.fraudbusters.management.domain.GroupModel;
 import dev.vality.fraudbusters.management.domain.PriorityIdModel;
 import org.jooq.Query;
@@ -16,16 +15,15 @@ import java.util.List;
 import static dev.vality.fraudbusters.management.domain.tables.PayoutGroup.PAYOUT_GROUP;
 
 @Component
-public class PayoutGroupDao extends AbstractDao implements CommandDao<GroupModel> {
+public class PayoutGroupDao extends AbstractDao {
 
     public PayoutGroupDao(DataSource dataSource) {
         super(dataSource);
     }
 
     /** Replaces the whole group; a repeated template is kept at its highest priority. */
-    @Override
     @Transactional
-    public void insert(GroupModel groupModel) {
+    public void replaceGroupTemplates(GroupModel groupModel) {
         remove(groupModel);
         if (CollectionUtils.isEmpty(groupModel.getPriorityTemplates())) {
             return;
@@ -43,7 +41,6 @@ public class PayoutGroupDao extends AbstractDao implements CommandDao<GroupModel
         batchExecute(inserts);
     }
 
-    @Override
     public void remove(GroupModel groupModel) {
         execute(getDslContext()
                 .delete(PAYOUT_GROUP)

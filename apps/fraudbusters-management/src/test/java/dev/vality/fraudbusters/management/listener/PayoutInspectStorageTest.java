@@ -82,7 +82,8 @@ class PayoutInspectStorageTest {
                 mock(ModelProjection.class));
         InspectStorage payout = new InspectStorage(InspectStorageConfig::isPayoutRow,
                 ModelProjection.fromCommandDao(new CommandToTemplateModelConverter(), payoutTemplateDao),
-                ModelProjection.fromCommandDao(new CommandToGroupModelConverter(), payoutGroupDao),
+                new ModelProjection<>(new CommandToGroupModelConverter(), payoutGroupDao::replaceGroupTemplates,
+                        payoutGroupDao::remove),
                 ModelProjection.fromCommandDao(new CommandToPayoutReferenceModelConverter(), payoutReferenceDao),
                 ModelProjection.fromCommandDao(new CommandToPayoutGroupReferenceModelConverter(),
                         payoutGroupReferenceDao),

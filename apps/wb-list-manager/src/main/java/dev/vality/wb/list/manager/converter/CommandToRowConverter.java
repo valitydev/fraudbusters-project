@@ -22,7 +22,8 @@ public class CommandToRowConverter implements Converter<ChangeCommand, Row> {
     public Row convert(ChangeCommand command) {
         Row row = new Row();
         dev.vality.damsel.wb_list.Row commandRow = command.getRow();
-        row.setKey(listStorageRegistry.findStorageByRow(commandRow).generateKey(commandRow));
+        row.setKey(listStorageRegistry.findStorageByRow(commandRow)
+                .generateKey(commandRow));
         row.setValue(initValue(commandRow));
         return row;
     }

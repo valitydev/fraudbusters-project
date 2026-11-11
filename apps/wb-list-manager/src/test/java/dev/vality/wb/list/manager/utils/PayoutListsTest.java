@@ -32,11 +32,11 @@ class PayoutListsTest {
 
     @Test
     void legacyPaymentKeysAreUnchangedAndPayoutScopesAreUnambiguous() {
-        Row row = createRow().setId(IdInfo.payment_id(new PaymentId()
+        Row row = createRow(IdInfo.payment_id(new PaymentId()
                 .setPartyId("party")
                 .setShopId("shop")));
         assertEquals("party_shop_black_USER_ID_synthetic-user", paymentStorage.generateKey(row));
-        Row payoutRow = createRow().setId(IdInfo.payout_id(new PayoutId()
+        Row payoutRow = createRow(IdInfo.payout_id(new PayoutId()
                 .setPartyId("party")
                 .setWalletId("wallet")));
         assertNotEquals(payoutStorage.generateKey(payoutRow),
@@ -58,16 +58,16 @@ class PayoutListsTest {
     void storageIsSelectedByRowIdentifierAndP2pIsRejected() {
         ListStorageRegistry registry = new ListStorageRegistry(List.of(paymentStorage, payoutStorage));
         assertSame(paymentStorage, registry.findStorageByRow(createRow()));
-        assertSame(paymentStorage, registry.findStorageByRow(createRow().setId(new IdInfo())));
-        assertSame(paymentStorage, registry.findStorageByRow(createRow().setId(IdInfo.payment_id(new PaymentId()))));
-        assertSame(payoutStorage, registry.findStorageByRow(createRow().setId(IdInfo.payout_id(new PayoutId()))));
-        Row p2pRow = createRow().setId(IdInfo.p2p_id(new P2pId()));
+        assertSame(paymentStorage, registry.findStorageByRow(createRow(new IdInfo())));
+        assertSame(paymentStorage, registry.findStorageByRow(createRow(IdInfo.payment_id(new PaymentId()))));
+        assertSame(payoutStorage, registry.findStorageByRow(createRow(IdInfo.payout_id(new PayoutId()))));
+        Row p2pRow = createRow(IdInfo.p2p_id(new P2pId()));
         assertThrows(IllegalStateException.class, () -> registry.findStorageByRow(p2pRow));
     }
 
     @Test
     void payoutFallbackNeverQueriesPaymentStorage() throws Exception {
-        Row row = createRow().setId(IdInfo.payout_id(new PayoutId()
+        Row row = createRow(IdInfo.payout_id(new PayoutId()
                 .setPartyId("party")
                 .setWalletId("wallet")));
         when(payoutRepository.get(anyString())).thenReturn(Optional.empty());
@@ -83,7 +83,7 @@ class PayoutListsTest {
 
     @Test
     void globalPayoutListMatchesAndWalletWithoutPartyIsRejected() throws Exception {
-        Row row = createRow().setId(IdInfo.payout_id(new PayoutId()));
+        Row row = createRow(IdInfo.payout_id(new PayoutId()));
         String global = payoutStorage.generateKey(row);
         when(payoutRepository.get(global)).thenReturn(Optional.of(
                 new dev.vality.wb.list.manager.model.Row(global, "synthetic-user")));
@@ -99,5 +99,10 @@ class PayoutListsTest {
                 .setListType(ListType.black)
                 .setListName("USER_ID")
                 .setValue("synthetic-user");
+    }
+
+    private Row createRow(IdInfo id) {
+        return createRow()
+                .setId(id);
     }
 }

@@ -62,7 +62,7 @@ public class InspectStorageConfig {
             EventToPayoutListRecordConverter listRecordConverter) {
         return new InspectStorage(InspectStorageConfig::isPayoutRow,
                 ModelProjection.fromCommandDao(templateConverter, payoutTemplateDao),
-                ModelProjection.fromCommandDao(groupConverter, payoutGroupDao),
+                new ModelProjection<>(groupConverter, payoutGroupDao::replaceGroupTemplates, payoutGroupDao::remove),
                 ModelProjection.fromCommandDao(referenceConverter, payoutReferenceDao),
                 ModelProjection.fromCommandDao(groupReferenceConverter, payoutGroupReferenceDao),
                 ModelProjection.fromListDao(listRecordConverter, payoutListDao));

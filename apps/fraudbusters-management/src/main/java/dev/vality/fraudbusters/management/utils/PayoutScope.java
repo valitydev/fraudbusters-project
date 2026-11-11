@@ -1,12 +1,11 @@
 package dev.vality.fraudbusters.management.utils;
 
+import lombok.experimental.UtilityClass;
 import org.springframework.util.StringUtils;
 
 /** Payout rules are scoped by party and wallet; an absent identifier is stored as an empty string. */
-public final class PayoutScope {
-
-    private PayoutScope() {
-    }
+@UtilityClass
+public class PayoutScope {
 
     public static String replaceNullWithEmpty(String value) {
         return value == null ? "" : value;
