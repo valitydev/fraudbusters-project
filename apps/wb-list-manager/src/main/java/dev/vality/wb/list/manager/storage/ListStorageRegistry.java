@@ -12,7 +12,7 @@ public class ListStorageRegistry {
     private final ListStorage payoutListStorage;
 
     /** A row without an identifier keeps its historical meaning: payment. */
-    public ListStorage get(Row row) {
+    public ListStorage findStorageByRow(Row row) {
         if (row.isSetId() && row.getId().isSetPayoutId()) {
             return payoutListStorage;
         }

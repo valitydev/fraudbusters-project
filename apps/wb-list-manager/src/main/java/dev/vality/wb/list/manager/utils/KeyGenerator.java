@@ -26,14 +26,16 @@ public class KeyGenerator {
                 .toString();
     }
 
-    public static String generatePayoutKey(ListType type, String name, String value, String party, String wallet) {
-        if (StringUtils.hasText(wallet) && !StringUtils.hasText(party)) {
+    public static String generatePayoutKey(ListType listType, String listName, String value,
+                                           String partyId, String walletId) {
+        if (StringUtils.hasText(walletId) && !StringUtils.hasText(partyId)) {
             throw new IllegalArgumentException("wallet_id requires party_id");
         }
-        return encode(party) + encode(wallet) + encode(type.name()) + encode(name) + encode(value);
+        return prefixWithLength(partyId) + prefixWithLength(walletId) + prefixWithLength(listType.name()) +
+                prefixWithLength(listName) + prefixWithLength(value);
     }
 
-    private static String encode(String value) {
+    private static String prefixWithLength(String value) {
         return value == null || value.isEmpty() ? "0:" : value.length() + ":" + value;
     }
 

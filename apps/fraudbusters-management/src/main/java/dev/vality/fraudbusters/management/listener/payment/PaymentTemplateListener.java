@@ -20,7 +20,7 @@ public class PaymentTemplateListener extends ConfigurationCommandListener {
             containerFactory = "kafkaTemplateListenerContainerFactory")
     public void listen(Command command) {
         log.info("PaymentTemplateListener event: {}", command);
-        apply(command, InspectStorage::templates);
+        applyCommandToProjection(command, InspectStorage::templates);
     }
 
 }

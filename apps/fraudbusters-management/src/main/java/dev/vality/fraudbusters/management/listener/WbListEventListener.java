@@ -19,10 +19,10 @@ public class WbListEventListener {
     @KafkaListener(topics = "${kafka.topic.wblist.event.sink}", containerFactory = "kafkaListenerContainerFactory")
     public void listen(Event event) throws DaoException {
         log.info("WbListListener event: {}", event);
-        ModelProjection<Event, ?> lists = inspectStorageRegistry.get(event).lists();
+        ModelProjection<Event, ?> listProjection = inspectStorageRegistry.findStorageByEvent(event).lists();
         switch (event.getEventType()) {
-            case CREATED -> lists.create(event);
-            case DELETED -> lists.delete(event);
+            case CREATED -> listProjection.convertAndCreate(event);
+            case DELETED -> listProjection.convertAndDelete(event);
             default -> log.warn("WbListListener event for list not found! event: {}", event);
         }
         auditService.logEvent(event);

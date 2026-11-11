@@ -20,7 +20,7 @@ public class PayoutGroupListener extends ConfigurationCommandListener {
             containerFactory = "kafkaGroupListenerContainerFactory")
     public void listen(Command command) {
         log.info("PayoutGroupListener event: {}", command);
-        apply(command, InspectStorage::groups);
+        applyCommandToProjection(command, InspectStorage::groups);
     }
 
 }

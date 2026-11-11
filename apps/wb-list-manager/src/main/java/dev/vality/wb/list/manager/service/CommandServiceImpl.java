@@ -36,7 +36,7 @@ public class CommandServiceImpl implements CommandService {
     }
 
     private Event applyCommandAndGetEvent(ChangeCommand command, Row row) {
-        ListRepository listRepository = listStorageRegistry.get(command.getRow()).getRepository();
+        ListRepository listRepository = listStorageRegistry.findStorageByRow(command.getRow()).getRepository();
         return switch (command.getCommand()) {
             case CREATE -> {
                 listRepository.create(row);

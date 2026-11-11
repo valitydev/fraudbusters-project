@@ -41,11 +41,11 @@ public class InspectStorageConfig {
             CommandToPaymentGroupReferenceModelConverter groupReferenceConverter,
             EventToListRecordConverter listRecordConverter) {
         return new InspectStorage(OperationType.payment,
-                ModelProjection.of(templateConverter, paymentTemplateDao),
-                ModelProjection.of(groupConverter, paymentGroupDao),
-                ModelProjection.of(referenceConverter, referenceDao),
-                ModelProjection.of(groupReferenceConverter, groupReferenceDao),
-                ModelProjection.ofList(listRecordConverter, wbListDao));
+                ModelProjection.fromCommandDao(templateConverter, paymentTemplateDao),
+                ModelProjection.fromCommandDao(groupConverter, paymentGroupDao),
+                ModelProjection.fromCommandDao(referenceConverter, referenceDao),
+                ModelProjection.fromCommandDao(groupReferenceConverter, groupReferenceDao),
+                ModelProjection.fromListDao(listRecordConverter, wbListDao));
     }
 
     @Bean
@@ -61,11 +61,11 @@ public class InspectStorageConfig {
             CommandToPayoutGroupReferenceModelConverter groupReferenceConverter,
             EventToPayoutListRecordConverter listRecordConverter) {
         return new InspectStorage(OperationType.payout,
-                ModelProjection.of(templateConverter, payoutTemplateDao),
-                ModelProjection.of(groupConverter, payoutGroupDao),
-                ModelProjection.of(referenceConverter, payoutReferenceDao),
-                ModelProjection.of(groupReferenceConverter, payoutGroupReferenceDao),
-                ModelProjection.ofList(listRecordConverter, payoutListDao));
+                ModelProjection.fromCommandDao(templateConverter, payoutTemplateDao),
+                ModelProjection.fromCommandDao(groupConverter, payoutGroupDao),
+                ModelProjection.fromCommandDao(referenceConverter, payoutReferenceDao),
+                ModelProjection.fromCommandDao(groupReferenceConverter, payoutGroupReferenceDao),
+                ModelProjection.fromListDao(listRecordConverter, payoutListDao));
     }
 
 }

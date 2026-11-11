@@ -21,7 +21,7 @@ public class PayoutGroupReferenceListener extends ConfigurationCommandListener {
     public void listen(Command command) {
         log.info("PayoutGroupReferenceListener command: {}", command);
         if (command.getCommandBody().isSetGroupReference()) {
-            apply(command, InspectStorage::groupReferences);
+            applyCommandToProjection(command, InspectStorage::groupReferences);
         } else {
             log.warn("Unknown reference in command in PayoutGroupReferenceListener! command: {}", command);
         }

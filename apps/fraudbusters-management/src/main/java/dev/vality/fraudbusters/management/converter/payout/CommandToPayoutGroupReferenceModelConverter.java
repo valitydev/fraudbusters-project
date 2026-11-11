@@ -13,10 +13,10 @@ public class CommandToPayoutGroupReferenceModelConverter implements Converter<Co
     @Override
     public PayoutGroupReferenceModel convert(Command command) {
         GroupReference reference = command.getCommandBody().getGroupReference();
-        PayoutScope.validate(reference.getPartyId(), reference.getWalletId());
+        PayoutScope.requirePartyForWallet(reference.getPartyId(), reference.getWalletId());
         PayoutGroupReferenceModel model = new PayoutGroupReferenceModel();
-        model.setPartyId(PayoutScope.normalizeId(reference.getPartyId()));
-        model.setWalletId(PayoutScope.normalizeId(reference.getWalletId()));
+        model.setPartyId(PayoutScope.replaceNullWithEmpty(reference.getPartyId()));
+        model.setWalletId(PayoutScope.replaceNullWithEmpty(reference.getWalletId()));
         model.setGroupId(reference.getGroupId());
         return model;
     }

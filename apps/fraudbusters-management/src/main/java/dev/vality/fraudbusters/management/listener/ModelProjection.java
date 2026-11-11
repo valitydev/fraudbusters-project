@@ -15,19 +15,19 @@ public class ModelProjection<S, T> {
     private final Consumer<T> createConsumer;
     private final Consumer<T> deleteConsumer;
 
-    public static <S, T> ModelProjection<S, T> of(Converter<S, T> converter, CommandDao<T> dao) {
+    public static <S, T> ModelProjection<S, T> fromCommandDao(Converter<S, T> converter, CommandDao<T> dao) {
         return new ModelProjection<>(converter, dao::insert, dao::remove);
     }
 
-    public static <S, T> ModelProjection<S, T> ofList(Converter<S, T> converter, CdDao<T> dao) {
+    public static <S, T> ModelProjection<S, T> fromListDao(Converter<S, T> converter, CdDao<T> dao) {
         return new ModelProjection<>(converter, dao::saveListRecord, dao::removeRecord);
     }
 
-    public void create(S source) {
+    public void convertAndCreate(S source) {
         createConsumer.accept(converter.convert(source));
     }
 
-    public void delete(S source) {
+    public void convertAndDelete(S source) {
         deleteConsumer.accept(converter.convert(source));
     }
 }

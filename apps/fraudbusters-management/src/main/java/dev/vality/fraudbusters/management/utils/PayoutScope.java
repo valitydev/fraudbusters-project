@@ -8,11 +8,11 @@ public final class PayoutScope {
     private PayoutScope() {
     }
 
-    public static String normalizeId(String value) {
+    public static String replaceNullWithEmpty(String value) {
         return value == null ? "" : value;
     }
 
-    public static void validate(String partyId, String walletId) {
+    public static void requirePartyForWallet(String partyId, String walletId) {
         if (StringUtils.hasText(walletId) && !StringUtils.hasText(partyId)) {
             throw new IllegalArgumentException("Invalid payout scope");
         }

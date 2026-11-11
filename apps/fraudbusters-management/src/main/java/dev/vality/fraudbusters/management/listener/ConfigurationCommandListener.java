@@ -15,11 +15,12 @@ public abstract class ConfigurationCommandListener {
     private final InspectStorage storage;
     private final AuditService auditService;
 
-    protected void apply(Command command, Function<InspectStorage, ModelProjection<Command, ?>> projectionSelector) {
+    protected void applyCommandToProjection(Command command,
+                                            Function<InspectStorage, ModelProjection<Command, ?>> projectionSelector) {
         ModelProjection<Command, ?> projection = projectionSelector.apply(storage);
         switch (command.getCommandType()) {
-            case CREATE -> projection.create(command);
-            case DELETE -> projection.delete(command);
+            case CREATE -> projection.convertAndCreate(command);
+            case DELETE -> projection.convertAndDelete(command);
             default -> log.warn("CommandType not found! command: {}", command);
         }
         auditService.logCommand(command);

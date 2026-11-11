@@ -20,9 +20,9 @@ public class CommandToPayoutReferenceModelConverter implements Converter<Command
             model.setPartyId("");
             model.setWalletId("");
         } else {
-            PayoutScope.validate(reference.getPartyId(), reference.getWalletId());
-            model.setPartyId(PayoutScope.normalizeId(reference.getPartyId()));
-            model.setWalletId(PayoutScope.normalizeId(reference.getWalletId()));
+            PayoutScope.requirePartyForWallet(reference.getPartyId(), reference.getWalletId());
+            model.setPartyId(PayoutScope.replaceNullWithEmpty(reference.getPartyId()));
+            model.setWalletId(PayoutScope.replaceNullWithEmpty(reference.getWalletId()));
         }
         return model;
     }

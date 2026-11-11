@@ -17,23 +17,23 @@ public class PaymentListStorage implements ListStorage {
 
     @Override
     public String generateKey(Row row) {
-        return KeyGenerator.generateKey(row.getListType(), row.getListName(), row.getValue(), getPartyId(row),
-                getShopId(row));
+        return KeyGenerator.generateKey(row.getListType(), row.getListName(), row.getValue(), extractPartyId(row),
+                extractShopId(row));
     }
 
     @Override
     public List<String> generateCascadeKeys(Row row) {
         return List.of(
                 KeyGenerator.generateKey(row.getListType(), row.getListName(), row.getValue()),
-                KeyGenerator.generateKey(row.getListType(), row.getListName(), row.getValue(), getPartyId(row)),
+                KeyGenerator.generateKey(row.getListType(), row.getListName(), row.getValue(), extractPartyId(row)),
                 generateKey(row));
     }
 
-    private String getPartyId(Row row) {
+    private String extractPartyId(Row row) {
         return hasPaymentId(row) ? row.getId().getPaymentId().getPartyId() : row.getPartyId();
     }
 
-    private String getShopId(Row row) {
+    private String extractShopId(Row row) {
         return hasPaymentId(row) ? row.getId().getPaymentId().getShopId() : row.getShopId();
     }
 

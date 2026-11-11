@@ -27,20 +27,20 @@ public class InspectStorageRegistry {
     }
 
     /** A list row without an identifier keeps its historical meaning: payment. */
-    public InspectStorage get(Event event) {
+    public InspectStorage findStorageByEvent(Event event) {
         Row row = event.getRow();
         if (!row.isSetId() || row.getId().isSetPaymentId()) {
-            return get(OperationType.payment);
+            return findStorageByOperationType(OperationType.payment);
         }
         if (row.getId().isSetPayoutId()) {
-            return get(OperationType.payout);
+            return findStorageByOperationType(OperationType.payout);
         }
         log.error("Unknown event when wbListEventListener listen event: {}", event);
         throw new UnknownEventException(
                 String.format("Unknown event when wbListEventListener listen event: %s", event));
     }
 
-    private InspectStorage get(OperationType operationType) {
+    private InspectStorage findStorageByOperationType(OperationType operationType) {
         InspectStorage storage = storagesByType.get(operationType);
         if (storage == null) {
             throw new IllegalArgumentException("Unsupported operation type: " + operationType);

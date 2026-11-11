@@ -78,11 +78,12 @@ class PayoutInspectStorageTest {
                 mock(ModelProjection.class), mock(ModelProjection.class), mock(ModelProjection.class),
                 mock(ModelProjection.class));
         InspectStorage payout = new InspectStorage(OperationType.payout,
-                ModelProjection.of(new CommandToTemplateModelConverter(), payoutTemplateDao),
-                ModelProjection.of(new CommandToGroupModelConverter(), payoutGroupDao),
-                ModelProjection.of(new CommandToPayoutReferenceModelConverter(), payoutReferenceDao),
-                ModelProjection.of(new CommandToPayoutGroupReferenceModelConverter(), payoutGroupReferenceDao),
-                ModelProjection.ofList(new EventToPayoutListRecordConverter(
+                ModelProjection.fromCommandDao(new CommandToTemplateModelConverter(), payoutTemplateDao),
+                ModelProjection.fromCommandDao(new CommandToGroupModelConverter(), payoutGroupDao),
+                ModelProjection.fromCommandDao(new CommandToPayoutReferenceModelConverter(), payoutReferenceDao),
+                ModelProjection.fromCommandDao(new CommandToPayoutGroupReferenceModelConverter(),
+                        payoutGroupReferenceDao),
+                ModelProjection.fromListDao(new EventToPayoutListRecordConverter(
                         new RowUtilsService(JsonMapper.builder().build())), payoutListDao));
         AuditService audit = mock(AuditService.class);
         templateListener = new PayoutTemplateListener(payout, audit);
@@ -101,19 +102,19 @@ class PayoutInspectStorageTest {
         var command = createCommand(CommandBody.template(template));
         templateListener.listen(command);
         templateListener.listen(command);
-        assertEquals(1, count("af.payout_template"));
+        assertEquals(1, countRows("af.payout_template"));
         var deletedTemplate = new Template()
                 .setId("synthetic-id")
                 .setOperationType(OperationType.payout);
         templateListener.listen(new Command()
                 .setCommandType(CommandType.DELETE)
                 .setCommandBody(CommandBody.template(deletedTemplate)));
-        assertEquals(0, count("af.payout_template"));
+        assertEquals(0, countRows("af.payout_template"));
         verifyNoInteractions(payment.templates());
 
         template.unsetOperationType();
         templateListener.listen(command);
-        assertEquals(1, count("af.payout_template"));
+        assertEquals(1, countRows("af.payout_template"));
         verifyNoInteractions(payment.templates());
     }
 
@@ -130,10 +131,10 @@ class PayoutInspectStorageTest {
                 .setPartyId("synthetic-party")
                 .setWalletId("synthetic-wallet");
         referenceListener.listen(command);
-        assertEquals(2, count("af.payout_reference"));
+        assertEquals(2, countRows("af.payout_reference"));
         command.setCommandType(CommandType.DELETE);
         referenceListener.listen(command);
-        assertEquals(1, count("af.payout_reference"));
+        assertEquals(1, countRows("af.payout_reference"));
     }
 
     @Test
@@ -169,7 +170,7 @@ class PayoutInspectStorageTest {
                 .setWalletId("synthetic-wallet");
         assertThrows(IllegalArgumentException.class,
                 () -> referenceListener.listen(createCommand(CommandBody.reference(walletWithoutParty))));
-        assertEquals(0, count("af.payout_reference"));
+        assertEquals(0, countRows("af.payout_reference"));
     }
 
     @Test
@@ -182,9 +183,9 @@ class PayoutInspectStorageTest {
                         .setPartyId("synthetic-party")));
         listListener.listen(createEvent(EventType.CREATED, row));
         listListener.listen(createEvent(EventType.CREATED, row));
-        assertEquals(1, count("af.payout_list_record"));
+        assertEquals(1, countRows("af.payout_list_record"));
         listListener.listen(createEvent(EventType.DELETED, row));
-        assertEquals(0, count("af.payout_list_record"));
+        assertEquals(0, countRows("af.payout_list_record"));
         verifyNoInteractions(payment.lists());
 
         var paymentRow = new Row(row)
@@ -192,10 +193,10 @@ class PayoutInspectStorageTest {
                         .setPartyId("synthetic-party")));
         var paymentEvent = createEvent(EventType.CREATED, paymentRow);
         listListener.listen(paymentEvent);
-        verify(payment.lists()).create(paymentEvent);
+        verify(payment.lists()).convertAndCreate(paymentEvent);
     }
 
-    private int count(String table) {
+    private int countRows(String table) {
         return jdbc.queryForObject("SELECT count(*) FROM " + table, Integer.class);
     }
 

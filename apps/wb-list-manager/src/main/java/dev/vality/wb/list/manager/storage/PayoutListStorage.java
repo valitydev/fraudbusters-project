@@ -17,9 +17,9 @@ public class PayoutListStorage implements ListStorage {
 
     @Override
     public String generateKey(Row row) {
-        PayoutId id = row.getId().getPayoutId();
+        PayoutId payoutId = row.getId().getPayoutId();
         return KeyGenerator.generatePayoutKey(row.getListType(), row.getListName(), row.getValue(),
-                id.getPartyId(), id.getWalletId());
+                payoutId.getPartyId(), payoutId.getWalletId());
     }
 
     @Override
