@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,8 +36,8 @@ public class WbListServiceHandlerTest {
 
     @BeforeEach
     void setUp() {
-        wbListServiceHandler = new WbListServiceHandler(new ListStorageRegistry(
-                new PaymentListStorage(listRepository), new PayoutListStorage(payoutListRepository)),
+        wbListServiceHandler = new WbListServiceHandler(new ListStorageRegistry(List.of(
+                new PaymentListStorage(listRepository), new PayoutListStorage(payoutListRepository))),
                 JsonMapper.builder().configureForJackson2().build());
         Row rowValue = new Row();
         rowValue.setValue(TestObjectFactory.randomString());

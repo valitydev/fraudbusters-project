@@ -26,5 +26,4 @@ public class GroupReferenceListener extends ConfigurationCommandListener {
             log.warn("Unknown reference in command in ReferenceListener! command: {}", command);
         }
     }
-
 }

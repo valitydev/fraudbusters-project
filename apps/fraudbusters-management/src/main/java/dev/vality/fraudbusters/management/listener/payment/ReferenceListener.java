@@ -26,5 +26,4 @@ public class ReferenceListener extends ConfigurationCommandListener {
             log.warn("Unknown reference in command in ReferenceListener! command: {}", command);
         }
     }
-
 }

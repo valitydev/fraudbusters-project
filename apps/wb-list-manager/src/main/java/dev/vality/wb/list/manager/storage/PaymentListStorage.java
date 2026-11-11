@@ -15,6 +15,12 @@ public class PaymentListStorage implements ListStorage {
 
     private final ListRepository repository;
 
+    /** A row without an identifier keeps its historical meaning: payment. */
+    @Override
+    public boolean canHandle(Row row) {
+        return !row.isSetId() || !row.getId().isSet() || row.getId().isSetPaymentId();
+    }
+
     @Override
     public String generateKey(Row row) {
         return KeyGenerator.generateKey(row.getListType(), row.getListName(), row.getValue(), extractPartyId(row),

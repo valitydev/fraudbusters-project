@@ -5,9 +5,11 @@ import dev.vality.damsel.wb_list.Event;
 import dev.vality.damsel.wb_list.EventType;
 import dev.vality.damsel.wb_list.IdInfo;
 import dev.vality.damsel.wb_list.ListType;
+import dev.vality.damsel.wb_list.P2pId;
 import dev.vality.damsel.wb_list.PaymentId;
 import dev.vality.damsel.wb_list.PayoutId;
 import dev.vality.damsel.wb_list.Row;
+import dev.vality.fraudbusters.management.config.InspectStorageConfig;
 import dev.vality.fraudbusters.management.config.PostgresqlJooqITest;
 import dev.vality.fraudbusters.management.converter.CommandToGroupModelConverter;
 import dev.vality.fraudbusters.management.converter.CommandToTemplateModelConverter;
@@ -19,6 +21,7 @@ import dev.vality.fraudbusters.management.dao.payout.group.PayoutGroupReferenceD
 import dev.vality.fraudbusters.management.dao.payout.wblist.PayoutListDao;
 import dev.vality.fraudbusters.management.dao.payout.reference.PayoutReferenceDao;
 import dev.vality.fraudbusters.management.dao.payout.template.PayoutTemplateDao;
+import dev.vality.fraudbusters.management.exception.UnknownEventException;
 import dev.vality.fraudbusters.management.listener.payout.PayoutGroupListener;
 import dev.vality.fraudbusters.management.listener.payout.PayoutGroupReferenceListener;
 import dev.vality.fraudbusters.management.listener.payout.PayoutReferenceListener;
@@ -74,10 +77,10 @@ class PayoutInspectStorageTest {
         jdbc = new JdbcTemplate(dataSource);
         jdbc.execute("TRUNCATE af.payout_template, af.payout_group, af.payout_reference, " +
                 "af.payout_group_reference, af.payout_list_record");
-        payment = new InspectStorage(OperationType.payment, mock(ModelProjection.class),
+        payment = new InspectStorage(InspectStorageConfig::isPaymentRow, mock(ModelProjection.class),
                 mock(ModelProjection.class), mock(ModelProjection.class), mock(ModelProjection.class),
                 mock(ModelProjection.class));
-        InspectStorage payout = new InspectStorage(OperationType.payout,
+        InspectStorage payout = new InspectStorage(InspectStorageConfig::isPayoutRow,
                 ModelProjection.fromCommandDao(new CommandToTemplateModelConverter(), payoutTemplateDao),
                 ModelProjection.fromCommandDao(new CommandToGroupModelConverter(), payoutGroupDao),
                 ModelProjection.fromCommandDao(new CommandToPayoutReferenceModelConverter(), payoutReferenceDao),
@@ -194,6 +197,18 @@ class PayoutInspectStorageTest {
         var paymentEvent = createEvent(EventType.CREATED, paymentRow);
         listListener.listen(paymentEvent);
         verify(payment.lists()).convertAndCreate(paymentEvent);
+    }
+
+    @Test
+    void listRowOfUnsupportedTypeIsRejected() {
+        var row = new Row()
+                .setListType(ListType.black)
+                .setListName("EMAIL")
+                .setValue("synthetic@example.com")
+                .setId(IdInfo.p2p_id(new P2pId()));
+        var event = createEvent(EventType.CREATED, row);
+        assertThrows(UnknownEventException.class, () -> listListener.listen(event));
+        verifyNoInteractions(payment.lists());
     }
 
     private int countRows(String table) {

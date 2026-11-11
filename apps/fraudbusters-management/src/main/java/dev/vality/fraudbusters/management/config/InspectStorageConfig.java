@@ -1,6 +1,6 @@
 package dev.vality.fraudbusters.management.config;
 
-import dev.vality.damsel.fraudbusters.OperationType;
+import dev.vality.damsel.wb_list.Row;
 import dev.vality.fraudbusters.management.converter.CommandToGroupModelConverter;
 import dev.vality.fraudbusters.management.converter.CommandToTemplateModelConverter;
 import dev.vality.fraudbusters.management.converter.payment.CommandToPaymentGroupReferenceModelConverter;
@@ -40,7 +40,7 @@ public class InspectStorageConfig {
             CommandToPaymentReferenceModelConverter referenceConverter,
             CommandToPaymentGroupReferenceModelConverter groupReferenceConverter,
             EventToListRecordConverter listRecordConverter) {
-        return new InspectStorage(OperationType.payment,
+        return new InspectStorage(InspectStorageConfig::isPaymentRow,
                 ModelProjection.fromCommandDao(templateConverter, paymentTemplateDao),
                 ModelProjection.fromCommandDao(groupConverter, paymentGroupDao),
                 ModelProjection.fromCommandDao(referenceConverter, referenceDao),
@@ -60,12 +60,21 @@ public class InspectStorageConfig {
             CommandToPayoutReferenceModelConverter referenceConverter,
             CommandToPayoutGroupReferenceModelConverter groupReferenceConverter,
             EventToPayoutListRecordConverter listRecordConverter) {
-        return new InspectStorage(OperationType.payout,
+        return new InspectStorage(InspectStorageConfig::isPayoutRow,
                 ModelProjection.fromCommandDao(templateConverter, payoutTemplateDao),
                 ModelProjection.fromCommandDao(groupConverter, payoutGroupDao),
                 ModelProjection.fromCommandDao(referenceConverter, payoutReferenceDao),
                 ModelProjection.fromCommandDao(groupReferenceConverter, payoutGroupReferenceDao),
                 ModelProjection.fromListDao(listRecordConverter, payoutListDao));
+    }
+
+    /** A list row without an identifier keeps its historical meaning: payment. */
+    public static boolean isPaymentRow(Row row) {
+        return !row.isSetId() || row.getId().isSetPaymentId();
+    }
+
+    public static boolean isPayoutRow(Row row) {
+        return row.isSetId() && row.getId().isSetPayoutId();
     }
 
 }

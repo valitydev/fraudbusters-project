@@ -8,6 +8,8 @@ import java.util.List;
 /** Table and key conventions of list rows with one type of identifier. */
 public interface ListStorage {
 
+    boolean canHandle(Row row);
+
     ListRepository getRepository();
 
     String generateKey(Row row);

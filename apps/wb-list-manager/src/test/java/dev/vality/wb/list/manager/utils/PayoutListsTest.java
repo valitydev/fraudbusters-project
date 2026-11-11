@@ -2,6 +2,7 @@ package dev.vality.wb.list.manager.utils;
 
 import dev.vality.damsel.wb_list.IdInfo;
 import dev.vality.damsel.wb_list.ListType;
+import dev.vality.damsel.wb_list.P2pId;
 import dev.vality.damsel.wb_list.PaymentId;
 import dev.vality.damsel.wb_list.PayoutId;
 import dev.vality.damsel.wb_list.Row;
@@ -13,6 +14,7 @@ import dev.vality.wb.list.manager.storage.PayoutListStorage;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,7 +28,7 @@ class PayoutListsTest {
     private final PaymentListStorage paymentStorage = new PaymentListStorage(paymentRepository);
     private final PayoutListStorage payoutStorage = new PayoutListStorage(payoutRepository);
     private final WbListServiceHandler handler = new WbListServiceHandler(
-            new ListStorageRegistry(paymentStorage, payoutStorage), JsonMapper.builder().build());
+            new ListStorageRegistry(List.of(paymentStorage, payoutStorage)), JsonMapper.builder().build());
 
     @Test
     void legacyPaymentKeysAreUnchangedAndPayoutScopesAreUnambiguous() {
@@ -50,6 +52,17 @@ class PayoutListsTest {
                 .setShopId("shop")
                 .setId(new IdInfo());
         assertEquals("party_shop_black_USER_ID_synthetic-user", paymentStorage.generateKey(row));
+    }
+
+    @Test
+    void storageIsSelectedByRowIdentifierAndP2pIsRejected() {
+        ListStorageRegistry registry = new ListStorageRegistry(List.of(paymentStorage, payoutStorage));
+        assertSame(paymentStorage, registry.findStorageByRow(createRow()));
+        assertSame(paymentStorage, registry.findStorageByRow(createRow().setId(new IdInfo())));
+        assertSame(paymentStorage, registry.findStorageByRow(createRow().setId(IdInfo.payment_id(new PaymentId()))));
+        assertSame(payoutStorage, registry.findStorageByRow(createRow().setId(IdInfo.payout_id(new PayoutId()))));
+        Row p2pRow = createRow().setId(IdInfo.p2p_id(new P2pId()));
+        assertThrows(IllegalStateException.class, () -> registry.findStorageByRow(p2pRow));
     }
 
     @Test

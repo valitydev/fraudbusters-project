@@ -16,6 +16,11 @@ public class PayoutListStorage implements ListStorage {
     private final ListRepository repository;
 
     @Override
+    public boolean canHandle(Row row) {
+        return row.isSetId() && row.getId().isSetPayoutId();
+    }
+
+    @Override
     public String generateKey(Row row) {
         PayoutId payoutId = row.getId().getPayoutId();
         return KeyGenerator.generatePayoutKey(row.getListType(), row.getListName(), row.getValue(),
