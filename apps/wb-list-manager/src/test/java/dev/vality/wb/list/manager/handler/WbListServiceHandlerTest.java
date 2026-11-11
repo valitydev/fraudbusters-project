@@ -4,6 +4,9 @@ import dev.vality.damsel.wb_list.Result;
 import dev.vality.wb.list.manager.TestObjectFactory;
 import dev.vality.wb.list.manager.model.Row;
 import dev.vality.wb.list.manager.repository.ListRepository;
+import dev.vality.wb.list.manager.storage.ListStorageRegistry;
+import dev.vality.wb.list.manager.storage.PaymentListStorage;
+import dev.vality.wb.list.manager.storage.PayoutListStorage;
 import org.apache.thrift.TException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,11 +30,14 @@ public class WbListServiceHandlerTest {
 
     @Mock
     private ListRepository listRepository;
+    @Mock
+    private ListRepository payoutListRepository;
     private dev.vality.damsel.wb_list.Row row;
 
     @BeforeEach
     void setUp() {
-        wbListServiceHandler = new WbListServiceHandler(listRepository,
+        wbListServiceHandler = new WbListServiceHandler(new ListStorageRegistry(List.of(
+                new PaymentListStorage(listRepository), new PayoutListStorage(payoutListRepository))),
                 JsonMapper.builder().configureForJackson2().build());
         Row rowValue = new Row();
         rowValue.setValue(TestObjectFactory.randomString());

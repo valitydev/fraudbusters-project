@@ -1,0 +1,19 @@
+package dev.vality.fraudbusters.management.utils;
+
+import lombok.experimental.UtilityClass;
+import org.springframework.util.StringUtils;
+
+/** Payout rules are scoped by party and wallet; an absent identifier is stored as an empty string. */
+@UtilityClass
+public class PayoutScope {
+
+    public static String replaceNullWithEmpty(String value) {
+        return value == null ? "" : value;
+    }
+
+    public static void requirePartyForWallet(String partyId, String walletId) {
+        if (StringUtils.hasText(walletId) && !StringUtils.hasText(partyId)) {
+            throw new IllegalArgumentException("Invalid payout scope");
+        }
+    }
+}

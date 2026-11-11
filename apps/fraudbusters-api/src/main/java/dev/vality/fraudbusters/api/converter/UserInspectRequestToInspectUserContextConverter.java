@@ -38,7 +38,8 @@ public class UserInspectRequestToInspectUserContextConverter
                 .orElseGet(Contact::new);
         ClientInfo clientInfo = new ClientInfo();
         if (customer != null) {
-            clientInfo.setCustomerId(customer.getCustomerId()).setUserId(customer.getUserId());
+            clientInfo.setCustomerId(customer.getCustomerId())
+                    .setUserId(customer.getUserId());
         }
         if (customer != null && customer.getDevice() != null) {
             clientInfo.setFingerprint(customer.getDevice().getFingerprint())

@@ -4,11 +4,7 @@ import dev.vality.fraudbusters.management.domain.GroupReferenceModel;
 
 import java.util.List;
 
-public interface GroupReferenceDao<T extends GroupReferenceModel> {
-
-    void insert(T referenceModel);
-
-    void remove(T referenceModel);
+public interface GroupReferenceDao<T extends GroupReferenceModel> extends CommandDao<T> {
 
     List<T> getByGroupId(String id);
 
