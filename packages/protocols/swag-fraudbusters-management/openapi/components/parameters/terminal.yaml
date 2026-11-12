@@ -1,0 +1,4 @@
+name: terminal
+in: query
+schema:
+  type: string

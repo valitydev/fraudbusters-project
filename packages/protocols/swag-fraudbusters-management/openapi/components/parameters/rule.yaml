@@ -1,0 +1,5 @@
+name: rule
+in: query
+description: Сработавшее правило антифрода
+schema:
+  type: string

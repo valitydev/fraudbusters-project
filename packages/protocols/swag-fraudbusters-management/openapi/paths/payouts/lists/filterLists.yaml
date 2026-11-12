@@ -4,16 +4,7 @@ get:
   tags:
     - payout-lists
   parameters:
-    - name: listType
-      in: query
-      required: true
-      schema:
-        type: string
-        enum:
-          - white
-          - black
-          - grey
-          - naming
+    - $ref: "../../../components/parameters/listType.yaml"
     - name: listNames
       in: query
       schema:

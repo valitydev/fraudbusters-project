@@ -4,10 +4,7 @@ get:
   tags:
     - template
   parameters:
-    - name: regexpName
-      in: query
-      schema:
-        type: string
+    - $ref: "../../../components/parameters/regexpName.yaml"
 
   responses:
     '201':

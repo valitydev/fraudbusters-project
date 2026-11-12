@@ -19,16 +19,7 @@ get:
         items:
           type: string
 
-    - name: listType
-      required: true
-      in: query
-      schema:
-        type: string
-        enum:
-          - white
-          - black
-          - grey
-          - naming
+    - $ref: "../../../components/parameters/listType.yaml"
 
   responses:
     '201':

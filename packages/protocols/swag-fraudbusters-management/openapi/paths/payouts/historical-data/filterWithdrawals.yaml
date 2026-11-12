@@ -9,26 +9,10 @@ get:
     - $ref: "../../../components/parameters/sortOrder.yaml"
     - $ref: "../../../components/parameters/sortBy.yaml"
     - $ref: "../../../components/parameters/size.yaml"
-    - name: from
-      required: true
-      in: query
-      schema:
-        type: string
-    - name: to
-      required: true
-      in: query
-      schema:
-        type: string
-    - name: partyId
-      required: false
-      in: query
-      schema:
-        type: string
-    - name: walletId
-      required: false
-      in: query
-      schema:
-        type: string
+    - $ref: "../../../components/parameters/from.yaml"
+    - $ref: "../../../components/parameters/to.yaml"
+    - $ref: "../../../components/parameters/partyId.yaml"
+    - $ref: "../../../components/parameters/walletId.yaml"
     - name: withdrawalId
       required: false
       in: query
@@ -43,47 +27,14 @@ get:
           - pending
           - succeeded
           - failed
-    - name: email
-      required: false
-      in: query
-      schema:
-        type: string
-    - name: providerCountry
-      required: false
-      in: query
-      schema:
-        type: string
-    - name: cardToken
-      required: false
-      in: query
-      schema:
-        type: string
-    - name: fingerprint
-      required: false
-      in: query
-      schema:
-        type: string
-    - name: terminal
-      required: false
-      in: query
-      schema:
-        type: string
-    - name: maskedPan
-      required: false
-      in: query
-      schema:
-        type: string
-    - name: customerId
-      required: false
-      in: query
-      schema:
-        type: string
-    - name: userId
-      description: User identifier in the merchant system; use partyId to scope the search.
-      required: false
-      in: query
-      schema:
-        type: string
+    - $ref: "../../../components/parameters/email.yaml"
+    - $ref: "../../../components/parameters/providerCountry.yaml"
+    - $ref: "../../../components/parameters/cardToken.yaml"
+    - $ref: "../../../components/parameters/fingerprint.yaml"
+    - $ref: "../../../components/parameters/terminal.yaml"
+    - $ref: "../../../components/parameters/maskedPan.yaml"
+    - $ref: "../../../components/parameters/customerId.yaml"
+    - $ref: "../../../components/parameters/userId.yaml"
   responses:
     '201':
       description: Withdrawals

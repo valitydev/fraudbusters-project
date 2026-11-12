@@ -1,0 +1,4 @@
+name: walletId
+in: query
+schema:
+  type: string

@@ -5,10 +5,7 @@ get:
     - payout-reference
   parameters:
     - $ref: "../../../components/parameters/searchValue.yaml"
-    - name: isGlobal
-      in: query
-      schema:
-        type: boolean
+    - $ref: "../../../components/parameters/isGlobal.yaml"
     - $ref: "../../../components/parameters/lastId.yaml"
     - $ref: "../../../components/parameters/sortOrder.yaml"
     - $ref: "../../../components/parameters/size.yaml"

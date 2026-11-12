@@ -41,14 +41,8 @@ delete:
       required: true
       schema:
         type: string
-    - name: partyId
-      in: query
-      schema:
-        type: string
-    - name: walletId
-      in: query
-      schema:
-        type: string
+    - $ref: "../../../../components/parameters/partyId.yaml"
+    - $ref: "../../../../components/parameters/walletId.yaml"
   responses:
     '201':
       description: Removed payout group reference

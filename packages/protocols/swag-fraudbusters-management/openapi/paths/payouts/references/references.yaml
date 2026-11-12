@@ -30,18 +30,9 @@ delete:
   tags:
     - payout-reference
   parameters:
-    - name: partyId
-      in: query
-      schema:
-        type: string
-    - name: walletId
-      in: query
-      schema:
-        type: string
-    - name: isGlobal
-      in: query
-      schema:
-        type: boolean
+    - $ref: "../../../components/parameters/partyId.yaml"
+    - $ref: "../../../components/parameters/walletId.yaml"
+    - $ref: "../../../components/parameters/isGlobal.yaml"
   responses:
     '201':
       description: Removed payout reference
