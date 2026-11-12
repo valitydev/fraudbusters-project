@@ -9,6 +9,8 @@ get:
       in: query
       schema:
         type: boolean
+    - $ref: "../../../components/parameters/lastId.yaml"
+    - $ref: "../../../components/parameters/sortOrder.yaml"
     - $ref: "../../../components/parameters/size.yaml"
   responses:
     '201':

@@ -3,6 +3,8 @@ description: Привязка шаблона выплат. Глобальная 
 required:
   - templateId
 properties:
+  id:
+    type: string
   templateId:
     type: string
   partyId:
@@ -12,3 +14,8 @@ properties:
   isGlobal:
     type: boolean
     default: false
+  lastUpdateDate:
+    type: string
+    format: date-time
+  modifiedByUser:
+    type: string

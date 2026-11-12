@@ -26,3 +26,11 @@ properties:
     - white
     - grey
     - naming
+    - payout_template
+    - payout_reference
+    - payout_group_reference
+    - payout_group
+    - payout_black
+    - payout_white
+    - payout_grey
+    - payout_naming

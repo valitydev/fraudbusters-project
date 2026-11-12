@@ -227,6 +227,8 @@ paths:
   # Payout lists
   /payouts-lists:
     $ref: ./paths/payouts/lists/rows.yaml
+  /payouts-lists/{id}:
+    $ref: ./paths/payouts/lists/removeRow.yaml
   /payouts-lists/filter:
     $ref: ./paths/payouts/lists/filterLists.yaml
   /payouts-lists/currentListNames:

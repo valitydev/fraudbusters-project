@@ -5,6 +5,8 @@ get:
     - payout-group-reference
   parameters:
     - $ref: "../../../../components/parameters/searchValue.yaml"
+    - $ref: "../../../../components/parameters/lastId.yaml"
+    - $ref: "../../../../components/parameters/sortOrder.yaml"
     - $ref: "../../../../components/parameters/size.yaml"
   responses:
     '201':
