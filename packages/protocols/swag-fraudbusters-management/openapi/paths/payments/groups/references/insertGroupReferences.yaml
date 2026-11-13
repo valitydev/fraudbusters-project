@@ -4,11 +4,7 @@ post:
   tags:
     - group-reference
   parameters:
-    - name: id
-      required: true
-      in: path
-      schema:
-        type: string
+    - $ref: "../../../../components/parameters/id.yaml"
 
   requestBody:
     content:

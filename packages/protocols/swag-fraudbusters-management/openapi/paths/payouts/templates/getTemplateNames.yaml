@@ -1,0 +1,20 @@
+get:
+  summary: Список идентификаторов шаблонов выплат
+  operationId: getPayoutTemplateNames
+  tags:
+    - payout-template
+  parameters:
+    - $ref: "../../../components/parameters/regexpName.yaml"
+  responses:
+    '201':
+      description: Payout template names
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/responses/ListResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found

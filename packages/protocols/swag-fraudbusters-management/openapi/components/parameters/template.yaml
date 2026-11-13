@@ -1,0 +1,5 @@
+name: template
+in: query
+description: Сработавший шаблон антифрода
+schema:
+  type: string

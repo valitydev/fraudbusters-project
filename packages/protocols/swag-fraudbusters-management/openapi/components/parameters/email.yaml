@@ -1,0 +1,4 @@
+name: email
+in: query
+schema:
+  type: string

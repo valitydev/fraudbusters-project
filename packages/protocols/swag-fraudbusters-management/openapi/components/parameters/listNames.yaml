@@ -1,0 +1,6 @@
+name: listNames
+in: query
+schema:
+  type: array
+  items:
+    type: string

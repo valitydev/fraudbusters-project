@@ -1,0 +1,38 @@
+get:
+  summary: Поиск по истории выплат
+  description: Каждая выплата возвращается один раз, в последнем состоянии за период; фильтры применяются к нему.
+  operationId: filterWithdrawals
+  tags:
+    - historical-data
+  parameters:
+    - $ref: "../../../components/parameters/continuationId.yaml"
+    - $ref: "../../../components/parameters/sortOrder.yaml"
+    - $ref: "../../../components/parameters/sortBy.yaml"
+    - $ref: "../../../components/parameters/size.yaml"
+    - $ref: "../../../components/parameters/from.yaml"
+    - $ref: "../../../components/parameters/to.yaml"
+    - $ref: "../../../components/parameters/partyId.yaml"
+    - $ref: "../../../components/parameters/walletId.yaml"
+    - $ref: "../../../components/parameters/withdrawalId.yaml"
+    - $ref: "../../../components/parameters/withdrawalStatus.yaml"
+    - $ref: "../../../components/parameters/email.yaml"
+    - $ref: "../../../components/parameters/providerCountry.yaml"
+    - $ref: "../../../components/parameters/cardToken.yaml"
+    - $ref: "../../../components/parameters/fingerprint.yaml"
+    - $ref: "../../../components/parameters/terminal.yaml"
+    - $ref: "../../../components/parameters/maskedPan.yaml"
+    - $ref: "../../../components/parameters/customerId.yaml"
+    - $ref: "../../../components/parameters/userId.yaml"
+  responses:
+    '201':
+      description: Withdrawals
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/responses/WithdrawalsResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found

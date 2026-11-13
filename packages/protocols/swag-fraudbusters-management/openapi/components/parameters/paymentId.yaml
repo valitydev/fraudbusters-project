@@ -1,0 +1,4 @@
+name: paymentId
+in: query
+schema:
+  type: string

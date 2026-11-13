@@ -1,0 +1,15 @@
+type: object
+properties:
+  id:
+    type: string
+  listType:
+    $ref: './ListType.yaml'
+  listRecord:
+    $ref: './PayoutListRecord.yaml'
+  countInfo:
+    $ref: './CountInfo.yaml'
+  insertTime:
+    type: string
+    format: date-time
+  createdByUser:
+    type: string

@@ -1,0 +1,24 @@
+get:
+  summary: Поиск привязок шаблонов выплат
+  operationId: filterPayoutReferences
+  tags:
+    - payout-reference
+  parameters:
+    - $ref: "../../../components/parameters/searchValue.yaml"
+    - $ref: "../../../components/parameters/isGlobal.yaml"
+    - $ref: "../../../components/parameters/lastId.yaml"
+    - $ref: "../../../components/parameters/sortOrder.yaml"
+    - $ref: "../../../components/parameters/size.yaml"
+  responses:
+    '201':
+      description: Payout references
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/responses/PayoutReferencesResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found

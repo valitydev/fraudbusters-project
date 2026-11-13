@@ -1,0 +1,25 @@
+get:
+  summary: Поиск по спискам выплат
+  operationId: filterPayoutLists
+  tags:
+    - payout-lists
+  parameters:
+    - $ref: "../../../components/parameters/listType.yaml"
+    - $ref: "../../../components/parameters/listNames.yaml"
+    - $ref: "../../../components/parameters/searchValue.yaml"
+    - $ref: "../../../components/parameters/lastId.yaml"
+    - $ref: "../../../components/parameters/sortOrder.yaml"
+    - $ref: "../../../components/parameters/size.yaml"
+  responses:
+    '201':
+      description: Payout list records
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/responses/PayoutListRecordsResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found

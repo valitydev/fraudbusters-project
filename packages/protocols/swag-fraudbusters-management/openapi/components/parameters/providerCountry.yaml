@@ -1,0 +1,4 @@
+name: providerCountry
+in: query
+schema:
+  type: string

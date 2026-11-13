@@ -1,0 +1,4 @@
+name: isGlobal
+in: query
+schema:
+  type: boolean

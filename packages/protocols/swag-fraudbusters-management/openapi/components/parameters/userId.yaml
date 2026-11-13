@@ -1,0 +1,5 @@
+name: userId
+in: query
+description: User identifier in the merchant system; use partyId to scope the search.
+schema:
+  type: string

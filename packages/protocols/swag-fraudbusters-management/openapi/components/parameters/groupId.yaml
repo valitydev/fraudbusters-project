@@ -1,0 +1,5 @@
+name: groupId
+in: path
+required: true
+schema:
+  type: string
