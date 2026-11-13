@@ -1,29 +1,27 @@
 package dev.vality.fraudbusters.management.service.payout;
 
 import dev.vality.damsel.fraudbusters.Command;
-import dev.vality.damsel.fraudbusters.CommandBody;
 import dev.vality.damsel.fraudbusters.CommandType;
-import dev.vality.damsel.fraudbusters.GroupReference;
 import dev.vality.fraudbusters.management.converter.payment.GroupModelToGroupConverter;
 import dev.vality.fraudbusters.management.converter.payment.GroupToCommandConverter;
+import dev.vality.fraudbusters.management.converter.payout.PayoutGroupReferenceModelToPayoutGroupReferenceConverter;
 import dev.vality.fraudbusters.management.dao.payout.group.PayoutGroupDao;
 import dev.vality.fraudbusters.management.dao.payout.group.PayoutGroupReferenceDao;
 import dev.vality.fraudbusters.management.domain.GroupModel;
-import dev.vality.fraudbusters.management.domain.payout.PayoutGroupReferenceModel;
 import dev.vality.fraudbusters.management.exception.NotFoundException;
-import dev.vality.fraudbusters.management.utils.DateTimeUtils;
 import dev.vality.fraudbusters.management.utils.FilterRequestUtils;
 import dev.vality.fraudbusters.management.utils.PagingDataUtils;
-import dev.vality.fraudbusters.management.utils.PayoutScope;
+import dev.vality.fraudbusters.management.utils.PayoutGroupReferenceUtils;
 import dev.vality.swag.fraudbusters.management.model.Group;
 import dev.vality.swag.fraudbusters.management.model.GroupsResponse;
 import dev.vality.swag.fraudbusters.management.model.PayoutGroupReference;
 import dev.vality.swag.fraudbusters.management.model.PayoutGroupReferencesResponse;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +32,8 @@ public class PayoutGroupsService {
     private final PayoutCommandService payoutCommandService;
     private final GroupToCommandConverter groupToCommandConverter;
     private final GroupModelToGroupConverter groupModelToGroupConverter;
+    private final PayoutGroupReferenceModelToPayoutGroupReferenceConverter
+            payoutGroupReferenceModelToPayoutGroupReferenceConverter;
 
     public GroupsResponse filterGroups(String searchValue) {
         List<Group> groups = payoutGroupDao.filterGroup(FilterRequestUtils.prepareSearchValue(searchValue)).stream()
@@ -73,7 +73,7 @@ public class PayoutGroupsService {
                 .count(payoutGroupReferenceDao.countFilter(pattern))
                 .result(payoutGroupReferenceDao.filter(pattern, lastId, PagingDataUtils.getSortOrder(sortOrder), size)
                         .stream()
-                        .map(PayoutGroupsService::toApi)
+                        .map(payoutGroupReferenceModelToPayoutGroupReferenceConverter::convert)
                         .toList());
     }
 
@@ -81,7 +81,8 @@ public class PayoutGroupsService {
     public List<String> insertGroupReferences(String groupId, List<PayoutGroupReference> references,
                                               String initiator) {
         List<Command> commands = references.stream()
-                .map(reference -> toCommand(groupId, reference.getPartyId(), reference.getWalletId()))
+                .map(reference -> PayoutGroupReferenceUtils.toCommand(groupId, reference.getPartyId(),
+                        reference.getWalletId()))
                 .toList();
         return commands.stream()
                 .map(command -> payoutCommandService.sendGroupReference(command, CommandType.CREATE, initiator))
@@ -89,34 +90,7 @@ public class PayoutGroupsService {
     }
 
     public String removeGroupReference(String groupId, String partyId, String walletId, String initiator) {
-        return payoutCommandService.sendGroupReference(toCommand(groupId, partyId, walletId), CommandType.DELETE,
-                initiator);
-    }
-
-    private static Command toCommand(String groupId, String partyId, String walletId) {
-        if (!StringUtils.hasText(groupId)) {
-            throw new IllegalArgumentException("groupId is required");
-        }
-        PayoutScope.requirePartyForWallet(partyId, walletId);
-        GroupReference reference = new GroupReference()
-                .setGroupId(groupId);
-        if (StringUtils.hasText(partyId)) {
-            reference.setPartyId(partyId);
-            if (StringUtils.hasText(walletId)) {
-                reference.setWalletId(walletId);
-            }
-        }
-        return new Command()
-                .setCommandBody(CommandBody.group_reference(reference));
-    }
-
-    private static PayoutGroupReference toApi(PayoutGroupReferenceModel model) {
-        return new PayoutGroupReference()
-                .id(model.getId())
-                .groupId(model.getGroupId())
-                .partyId(StringUtils.hasText(model.getPartyId()) ? model.getPartyId() : null)
-                .walletId(StringUtils.hasText(model.getWalletId()) ? model.getWalletId() : null)
-                .lastUpdateDate(DateTimeUtils.toDate(model.getLastUpdateDate()))
-                .modifiedByUser(model.getModifiedByUser());
+        return payoutCommandService.sendGroupReference(
+                PayoutGroupReferenceUtils.toCommand(groupId, partyId, walletId), CommandType.DELETE, initiator);
     }
 }

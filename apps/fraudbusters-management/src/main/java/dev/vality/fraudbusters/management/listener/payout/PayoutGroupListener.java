@@ -16,7 +16,7 @@ public class PayoutGroupListener extends ConfigurationCommandListener {
         super(payoutInspectStorage, auditService);
     }
 
-    @KafkaListener(topics = "${kafka.topic.fraudbusters.payout.group.list}",
+    @KafkaListener(topics = "#{payoutProperties.groupTopic}",
             containerFactory = "kafkaGroupListenerContainerFactory")
     public void listen(Command command) {
         log.info("PayoutGroupListener event: {}", command);

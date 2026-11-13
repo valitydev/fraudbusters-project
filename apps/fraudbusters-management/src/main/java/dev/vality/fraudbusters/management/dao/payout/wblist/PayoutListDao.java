@@ -31,15 +31,12 @@ public class PayoutListDao extends AbstractDao implements CdDao<PayoutListRecord
 
     @Override
     public void saveListRecord(PayoutListRecord listRecord) {
+        var record = getDslContext().newRecord(PAYOUT_LIST_RECORD, listRecord);
+        record.changed(PAYOUT_LIST_RECORD.ID, false);
+        record.changed(PAYOUT_LIST_RECORD.INSERT_TIME, false);
         execute(getDslContext()
                 .insertInto(PAYOUT_LIST_RECORD)
-                .set(PAYOUT_LIST_RECORD.PARTY_ID, listRecord.getPartyId())
-                .set(PAYOUT_LIST_RECORD.WALLET_ID, listRecord.getWalletId())
-                .set(PAYOUT_LIST_RECORD.LIST_TYPE, listRecord.getListType())
-                .set(PAYOUT_LIST_RECORD.LIST_NAME, listRecord.getListName())
-                .set(PAYOUT_LIST_RECORD.VALUE, listRecord.getValue())
-                .set(PAYOUT_LIST_RECORD.ROW_INFO, listRecord.getRowInfo())
-                .set(PAYOUT_LIST_RECORD.CREATED_BY_USER, listRecord.getCreatedByUser())
+                .set(record)
                 .onConflict(PAYOUT_LIST_RECORD.PARTY_ID, PAYOUT_LIST_RECORD.WALLET_ID, PAYOUT_LIST_RECORD.LIST_TYPE,
                         PAYOUT_LIST_RECORD.LIST_NAME, PAYOUT_LIST_RECORD.VALUE)
                 .doUpdate()

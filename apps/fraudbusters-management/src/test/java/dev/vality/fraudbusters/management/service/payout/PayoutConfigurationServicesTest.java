@@ -7,11 +7,15 @@ import dev.vality.damsel.fraudbusters.PaymentServiceSrv;
 import dev.vality.damsel.fraudbusters.TemplateValidateError;
 import dev.vality.damsel.fraudbusters.ValidateTemplateResponse;
 import dev.vality.damsel.wb_list.Row;
+import dev.vality.fraudbusters.management.config.PayoutProperties;
 import dev.vality.fraudbusters.management.converter.TemplateModelToCommandConverter;
 import dev.vality.fraudbusters.management.converter.payment.GroupModelToGroupConverter;
 import dev.vality.fraudbusters.management.converter.payment.GroupToCommandConverter;
 import dev.vality.fraudbusters.management.converter.payment.TemplateModelToTemplateConverter;
 import dev.vality.fraudbusters.management.converter.payment.TemplateToCommandConverter;
+import dev.vality.fraudbusters.management.converter.payout.PayoutListRecordToPayoutListRowConverter;
+import dev.vality.fraudbusters.management.converter.payout.PayoutReferenceModelToPayoutReferenceConverter;
+import dev.vality.fraudbusters.management.converter.payout.PayoutReferenceToCommandConverter;
 import dev.vality.fraudbusters.management.dao.payout.group.PayoutGroupDao;
 import dev.vality.fraudbusters.management.dao.payout.group.PayoutGroupReferenceDao;
 import dev.vality.fraudbusters.management.dao.payout.reference.PayoutReferenceDao;
@@ -21,7 +25,6 @@ import dev.vality.fraudbusters.management.domain.payout.PayoutReferenceModel;
 import dev.vality.fraudbusters.management.exception.NotFoundException;
 import dev.vality.fraudbusters.management.service.CommandSender;
 import dev.vality.fraudbusters.management.service.WbListCommandService;
-import dev.vality.fraudbusters.management.utils.CountInfoApiUtils;
 import dev.vality.swag.fraudbusters.management.model.CountInfo;
 import dev.vality.swag.fraudbusters.management.model.Group;
 import dev.vality.swag.fraudbusters.management.model.ListType;
@@ -60,17 +63,18 @@ class PayoutConfigurationServicesTest {
     private static final String USER = "synthetic-user";
 
     private final CommandSender commandSender = mock(CommandSender.class);
-    private final PayoutCommandService commandService = new PayoutCommandService(commandSender);
+    private final PayoutProperties payoutProperties = new PayoutProperties();
+    private final PayoutCommandService commandService = new PayoutCommandService(commandSender, payoutProperties);
     private final PaymentServiceSrv.Iface fraudbusters = mock(PaymentServiceSrv.Iface.class);
     private final PayoutReferenceDao referenceDao = mock(PayoutReferenceDao.class);
     private final WbListCommandService wbListCommandService = mock(WbListCommandService.class);
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(commandService, "templateTopic", "payout_template");
-        ReflectionTestUtils.setField(commandService, "referenceTopic", "payout_template_reference");
-        ReflectionTestUtils.setField(commandService, "groupTopic", "payout_group_list");
-        ReflectionTestUtils.setField(commandService, "groupReferenceTopic", "payout_group_reference");
+        ReflectionTestUtils.setField(payoutProperties, "templateTopic", "payout_template");
+        ReflectionTestUtils.setField(payoutProperties, "referenceTopic", "payout_template_reference");
+        ReflectionTestUtils.setField(payoutProperties, "groupTopic", "payout_group_list");
+        ReflectionTestUtils.setField(payoutProperties, "groupReferenceTopic", "payout_group_reference");
         when(commandSender.send(anyString(), any(), anyString())).thenAnswer(call -> call.getArgument(2));
     }
 
@@ -112,7 +116,8 @@ class PayoutConfigurationServicesTest {
 
     @Test
     void referencesAreKeyedByScopeAndInvalidOnesAreRejectedBeforeSending() {
-        var service = new PayoutReferencesService(referenceDao, commandService);
+        var service = new PayoutReferencesService(referenceDao, commandService,
+                new PayoutReferenceToCommandConverter(), new PayoutReferenceModelToPayoutReferenceConverter());
 
         List<String> keys = service.insertReferences(List.of(
                 new PayoutReference()
@@ -162,7 +167,8 @@ class PayoutConfigurationServicesTest {
         stored.setWalletId("wallet-1");
         stored.setIsGlobal(false);
         when(referenceDao.getByScope("party-1", "wallet-1", false)).thenReturn(stored);
-        var service = new PayoutReferencesService(referenceDao, commandService);
+        var service = new PayoutReferencesService(referenceDao, commandService,
+                new PayoutReferenceToCommandConverter(), new PayoutReferenceModelToPayoutReferenceConverter());
 
         assertEquals("party:7:party-1:wallet:8:wallet-1", service.removeReference("party-1", "wallet-1", false, USER));
         Command sent = lastSent("payout_template_reference");
@@ -208,7 +214,7 @@ class PayoutConfigurationServicesTest {
     @Test
     void listRowsUsePayoutIdentityAndGreyRowsNeedACount() {
         var service = new PayoutListsService(mock(PayoutListDao.class), wbListCommandService,
-                mock(CountInfoApiUtils.class));
+                mock(PayoutListRecordToPayoutListRowConverter.class));
         ReflectionTestUtils.setField(service, "availableListNames", List.of("EMAIL", "CARD_TOKEN"));
         when(wbListCommandService.sendCommandSync(any(), any(), any(), anyString())).thenReturn("message-id");
 
@@ -255,7 +261,7 @@ class PayoutConfigurationServicesTest {
     @Test
     void namedListsTakeAnyNameWhileOtherListsTakeFieldNames() {
         var service = new PayoutListsService(mock(PayoutListDao.class), wbListCommandService,
-                mock(CountInfoApiUtils.class));
+                mock(PayoutListRecordToPayoutListRowConverter.class));
         ReflectionTestUtils.setField(service, "availableListNames", List.of("EMAIL"));
         var named = new PayoutRowListRequest()
                 .listType(ListType.NAMING)
@@ -285,7 +291,8 @@ class PayoutConfigurationServicesTest {
         stored.setModifiedByUser(USER);
         when(referenceDao.filter(any(), any(), eq("reference-1"), eq(SortOrder.DESC), eq(10)))
                 .thenReturn(List.of(stored));
-        var service = new PayoutReferencesService(referenceDao, commandService);
+        var service = new PayoutReferencesService(referenceDao, commandService,
+                new PayoutReferenceToCommandConverter(), new PayoutReferenceModelToPayoutReferenceConverter());
 
         var reference = service.filterReferences("party-1", null, "reference-1", "DESC", 10)
                 .getResult()
@@ -308,7 +315,8 @@ class PayoutConfigurationServicesTest {
         stored.setWalletId("");
         var listDao = mock(PayoutListDao.class);
         when(listDao.findById("row-1")).thenReturn(stored);
-        var service = new PayoutListsService(listDao, wbListCommandService, mock(CountInfoApiUtils.class));
+        var service = new PayoutListsService(listDao, wbListCommandService,
+                mock(PayoutListRecordToPayoutListRowConverter.class));
         ReflectionTestUtils.setField(service, "availableListNames", List.of("EMAIL"));
         when(wbListCommandService.sendCommandSync(any(), any(), any(), anyString())).thenReturn("message-id");
 
