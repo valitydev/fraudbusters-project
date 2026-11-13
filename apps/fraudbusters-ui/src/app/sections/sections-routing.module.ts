@@ -40,6 +40,10 @@ const ROUTES: Routes = [
         loadChildren: () => import('./create-group-reference').then((m) => m.CreateGroupReferenceModule),
     },
     {
+        path: 'payouts',
+        loadChildren: () => import('./payouts').then((m) => m.PayoutsModule),
+    },
+    {
         path: 'lists',
         loadChildren: () => import('./lists').then((m) => m.ListsModule),
     },

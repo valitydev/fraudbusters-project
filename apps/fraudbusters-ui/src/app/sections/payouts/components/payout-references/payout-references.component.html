@@ -1,0 +1,63 @@
+<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <div fxLayout fxLayoutAlign="space-between center">
+        <form fxLayout fxLayoutGap="16px" [formGroup]="searchForm">
+            <mat-form-field appearance="outline">
+                <input matInput placeholder="Search" formControlName="searchQuery" type="string" autocomplete="false" />
+            </mat-form-field>
+        </form>
+        <button mat-button color="primary" (click)="createReference()">CREATE REFERENCE</button>
+    </div>
+    <div *ngIf="references$ | async as references; else Empty" fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <div *ngIf="references.length; else Empty" fxLayout="column" [fxLayoutGap]="layoutGapM">
+            <fb-list-header>
+                <div class="fb-body-2" fxFlex fxGrow="2">Template ID</div>
+                <div class="fb-body-2" fxFlex>Party ID</div>
+                <div class="fb-body-2" fxFlex>Wallet ID</div>
+                <div class="fb-body-2" fxFlex>Global</div>
+                <div class="fb-body-2" fxFlex="0 0 160px">Last update</div>
+                <div class="fb-body-2" fxFlex>Modified by</div>
+                <div fxFlex="0 0 20px"></div>
+            </fb-list-header>
+            <div *ngFor="let reference of references" fxLayout="column" [fxLayoutGap]="layoutGapM">
+                <mat-card
+                    class="fb-list-item"
+                    fxLayout
+                    fxFlexFill
+                    fxLayoutAlign="center center"
+                    [fxLayoutGap]="layoutGapM"
+                >
+                    <div class="fb-body-2 wrap" fxFlex fxGrow="2">{{ reference.templateId }}</div>
+                    <div class="fb-body-2 wrap" fxFlex>{{ reference.partyId }}</div>
+                    <div class="fb-body-2 wrap" fxFlex>{{ reference.walletId }}</div>
+                    <div class="fb-body-2 wrap" fxFlex>{{ reference.isGlobal ? 'Yes' : '' }}</div>
+                    <div class="fb-body-2" fxFlex="0 0 160px">
+                        {{ reference.lastUpdateDate | date : 'yyyy-MM-dd HH:mm:ss' }}
+                    </div>
+                    <div class="fb-body-2 wrap" fxFlex>{{ reference.modifiedByUser }}</div>
+                    <button mat-icon-button fxFlex="0 0 20px" [matMenuTriggerFor]="menu">
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu">
+                        <button mat-menu-item (click)="removeReference(reference)">
+                            <span>Remove reference</span>
+                        </button>
+                        <button mat-menu-item (click)="goToTemplate(reference.templateId)">
+                            <span>Go to template</span>
+                        </button>
+                    </mat-menu>
+                </mat-card>
+            </div>
+            <fb-show-more-panel
+                *ngIf="hasMore$ | async"
+                [isLoading]="inProgress$ | async"
+                (showMore)="fetchMore()"
+            ></fb-show-more-panel>
+        </div>
+    </div>
+    <ng-template #Empty>
+        <div *ngIf="inProgress$ | async" fxLayout fxLayoutAlign="center">
+            <mat-progress-spinner color="primary" mode="indeterminate" diameter="48"></mat-progress-spinner>
+        </div>
+        <fb-empty-search-result *ngIf="!(inProgress$ | async)"></fb-empty-search-result>
+    </ng-template>
+</div>
