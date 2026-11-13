@@ -24,16 +24,8 @@ get:
         type: array
         items:
           type: string
-    - name: from
-      required: true
-      in: query
-      schema:
-        type: string
-    - name: to
-      required: true
-      in: query
-      schema:
-        type: string
+    - $ref: "../../components/parameters/from.yaml"
+    - $ref: "../../components/parameters/to.yaml"
 
   responses:
     '201':

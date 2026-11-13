@@ -1,0 +1,10 @@
+name: listType
+in: query
+required: true
+schema:
+  type: string
+  enum:
+    - white
+    - black
+    - grey
+    - naming

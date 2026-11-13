@@ -1,0 +1,24 @@
+delete:
+  summary: Удаление записи из списка выплат
+  operationId: removePayoutListRow
+  tags:
+    - payout-lists
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '201':
+      description: Sent list command
+      content:
+        application/json:
+          schema:
+            $ref: '../../../components/responses/IdResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found

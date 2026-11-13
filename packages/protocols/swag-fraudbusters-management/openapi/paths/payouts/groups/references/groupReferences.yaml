@@ -1,0 +1,58 @@
+post:
+  summary: Привязка группы шаблонов выплат
+  operationId: insertPayoutGroupReferences
+  tags:
+    - payout-group-reference
+  parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '../../../../components/schemas/PayoutGroupReference.yaml'
+  responses:
+    '201':
+      description: Created payout group references
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/responses/ListResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found
+delete:
+  summary: Удаление привязки группы шаблонов выплат
+  operationId: removePayoutGroupReference
+  tags:
+    - payout-group-reference
+  parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+    - $ref: "../../../../components/parameters/partyId.yaml"
+    - $ref: "../../../../components/parameters/walletId.yaml"
+  responses:
+    '201':
+      description: Removed payout group reference
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../components/responses/IdResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
+    '404':
+      description: Not Found

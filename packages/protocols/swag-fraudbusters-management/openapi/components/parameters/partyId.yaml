@@ -1,0 +1,4 @@
+name: partyId
+in: query
+schema:
+  type: string

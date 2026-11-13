@@ -1,0 +1,4 @@
+name: customerId
+in: query
+schema:
+  type: string

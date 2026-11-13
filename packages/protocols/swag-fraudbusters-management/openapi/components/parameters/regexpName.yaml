@@ -1,0 +1,4 @@
+name: regexpName
+in: query
+schema:
+  type: string

@@ -1,0 +1,4 @@
+name: cardToken
+in: query
+schema:
+  type: string

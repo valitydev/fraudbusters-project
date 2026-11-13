@@ -1,0 +1,4 @@
+name: maskedPan
+in: query
+schema:
+  type: string
