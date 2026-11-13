@@ -10,20 +10,8 @@ get:
     - $ref: "../../components/parameters/sortBy.yaml"
     - $ref: "../../components/parameters/sortFieldValue.yaml"
     - $ref: "../../components/parameters/size.yaml"
-    - name: commandTypes
-      in: query
-      required: true
-      schema:
-        type: array
-        items:
-          type: string
-    - name: objectTypes
-      required: true
-      in: query
-      schema:
-        type: array
-        items:
-          type: string
+    - $ref: "../../components/parameters/commandTypes.yaml"
+    - $ref: "../../components/parameters/objectTypes.yaml"
     - $ref: "../../components/parameters/from.yaml"
     - $ref: "../../components/parameters/to.yaml"
 

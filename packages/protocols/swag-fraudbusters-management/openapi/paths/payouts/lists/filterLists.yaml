@@ -5,12 +5,7 @@ get:
     - payout-lists
   parameters:
     - $ref: "../../../components/parameters/listType.yaml"
-    - name: listNames
-      in: query
-      schema:
-        type: array
-        items:
-          type: string
+    - $ref: "../../../components/parameters/listNames.yaml"
     - $ref: "../../../components/parameters/searchValue.yaml"
     - $ref: "../../../components/parameters/lastId.yaml"
     - $ref: "../../../components/parameters/sortOrder.yaml"

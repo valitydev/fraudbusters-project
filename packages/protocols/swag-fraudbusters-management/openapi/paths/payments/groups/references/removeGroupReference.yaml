@@ -4,11 +4,7 @@ delete:
   tags:
     - group-reference
   parameters:
-    - name: id
-      required: true
-      in: path
-      schema:
-        type: string
+    - $ref: "../../../../components/parameters/id.yaml"
     - name: groupId
       in: query
       schema:

@@ -4,11 +4,7 @@ delete:
   tags:
     - payout-lists
   parameters:
-    - name: id
-      in: path
-      required: true
-      schema:
-        type: string
+    - $ref: "../../../components/parameters/id.yaml"
   responses:
     '201':
       description: Sent list command

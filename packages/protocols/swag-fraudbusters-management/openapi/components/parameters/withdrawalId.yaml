@@ -1,0 +1,4 @@
+name: withdrawalId
+in: query
+schema:
+  type: string

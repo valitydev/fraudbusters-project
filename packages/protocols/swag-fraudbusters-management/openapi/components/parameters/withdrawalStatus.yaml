@@ -1,0 +1,8 @@
+name: status
+in: query
+schema:
+  type: string
+  enum:
+    - pending
+    - succeeded
+    - failed

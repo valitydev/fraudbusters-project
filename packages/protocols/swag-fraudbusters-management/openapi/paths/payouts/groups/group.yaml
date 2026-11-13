@@ -4,11 +4,7 @@ get:
   tags:
     - payout-group
   parameters:
-    - name: groupId
-      in: path
-      required: true
-      schema:
-        type: string
+    - $ref: "../../../components/parameters/groupId.yaml"
   responses:
     '201':
       description: Payout group
@@ -28,11 +24,7 @@ delete:
   tags:
     - payout-group
   parameters:
-    - name: groupId
-      in: path
-      required: true
-      schema:
-        type: string
+    - $ref: "../../../components/parameters/groupId.yaml"
   responses:
     '201':
       description: Removed payout group
