@@ -28,6 +28,7 @@ public class EventToPayoutListRecordConverter implements Converter<Event, Payout
         record.setListName(row.getListName());
         record.setValue(row.getValue());
         record.setRowInfo(rowUtilsService.initRowInfo(row));
+        record.setCreatedByUser(event.isSetUserInfo() ? event.getUserInfo().getUserId() : null);
         return record;
     }
 }

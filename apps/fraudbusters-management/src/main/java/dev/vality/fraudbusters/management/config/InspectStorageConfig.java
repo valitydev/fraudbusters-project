@@ -6,8 +6,10 @@ import dev.vality.fraudbusters.management.converter.CommandToTemplateModelConver
 import dev.vality.fraudbusters.management.converter.payment.CommandToPaymentGroupReferenceModelConverter;
 import dev.vality.fraudbusters.management.converter.payment.CommandToPaymentReferenceModelConverter;
 import dev.vality.fraudbusters.management.converter.payment.EventToListRecordConverter;
+import dev.vality.fraudbusters.management.converter.payout.CommandToPayoutGroupModelConverter;
 import dev.vality.fraudbusters.management.converter.payout.CommandToPayoutGroupReferenceModelConverter;
 import dev.vality.fraudbusters.management.converter.payout.CommandToPayoutReferenceModelConverter;
+import dev.vality.fraudbusters.management.converter.payout.CommandToPayoutTemplateModelConverter;
 import dev.vality.fraudbusters.management.converter.payout.EventToPayoutListRecordConverter;
 import dev.vality.fraudbusters.management.dao.GroupDao;
 import dev.vality.fraudbusters.management.dao.ReferenceDao;
@@ -55,8 +57,8 @@ public class InspectStorageConfig {
             PayoutReferenceDao payoutReferenceDao,
             PayoutGroupReferenceDao payoutGroupReferenceDao,
             PayoutListDao payoutListDao,
-            CommandToTemplateModelConverter templateConverter,
-            CommandToGroupModelConverter groupConverter,
+            CommandToPayoutTemplateModelConverter templateConverter,
+            CommandToPayoutGroupModelConverter groupConverter,
             CommandToPayoutReferenceModelConverter referenceConverter,
             CommandToPayoutGroupReferenceModelConverter groupReferenceConverter,
             EventToPayoutListRecordConverter listRecordConverter) {

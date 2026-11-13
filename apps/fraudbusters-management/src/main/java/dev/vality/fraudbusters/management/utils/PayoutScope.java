@@ -7,6 +7,10 @@ import org.springframework.util.StringUtils;
 @UtilityClass
 public class PayoutScope {
 
+    public static final String GLOBAL = "GLOBAL";
+
+    private static final int DEFAULT_PAGE_SIZE = 100;
+
     public static String replaceNullWithEmpty(String value) {
         return value == null ? "" : value;
     }
@@ -15,5 +19,19 @@ public class PayoutScope {
         if (StringUtils.hasText(walletId) && !StringUtils.hasText(partyId)) {
             throw new IllegalArgumentException("Invalid payout scope");
         }
+    }
+
+    /** The Kafka key of a payout reference; the same scope always gets the same key, as fraudbusters keys it. */
+    public static String generateKey(String partyId, String walletId) {
+        requirePartyForWallet(partyId, walletId);
+        if (!StringUtils.hasText(partyId)) {
+            return GLOBAL;
+        }
+        String party = "party:" + partyId.length() + ":" + partyId;
+        return StringUtils.hasText(walletId) ? party + ":wallet:" + walletId.length() + ":" + walletId : party;
+    }
+
+    public static int pageSize(Integer size) {
+        return size == null || size <= 0 ? DEFAULT_PAGE_SIZE : size;
     }
 }

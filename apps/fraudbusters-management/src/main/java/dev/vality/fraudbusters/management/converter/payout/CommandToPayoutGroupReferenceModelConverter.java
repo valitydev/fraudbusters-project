@@ -18,6 +18,7 @@ public class CommandToPayoutGroupReferenceModelConverter implements Converter<Co
         model.setPartyId(PayoutScope.replaceNullWithEmpty(reference.getPartyId()));
         model.setWalletId(PayoutScope.replaceNullWithEmpty(reference.getWalletId()));
         model.setGroupId(reference.getGroupId());
+        model.setModifiedByUser(command.isSetUserInfo() ? command.getUserInfo().getUserId() : null);
         return model;
     }
 }

@@ -16,6 +16,7 @@ public class CommandToPayoutReferenceModelConverter implements Converter<Command
         PayoutReferenceModel model = new PayoutReferenceModel();
         model.setIsGlobal(reference.isIsGlobal());
         model.setTemplateId(reference.getTemplateId());
+        model.setModifiedByUser(command.isSetUserInfo() ? command.getUserInfo().getUserId() : null);
         if (reference.isIsGlobal()) {
             model.setPartyId("");
             model.setWalletId("");
