@@ -5,20 +5,9 @@ delete:
     - group-reference
   parameters:
     - $ref: "../../../../components/parameters/id.yaml"
-    - name: groupId
-      in: query
-      schema:
-        type: string
-    - name: partyId
-      required: true
-      in: query
-      schema:
-        type: string
-    - name: shopId
-      required: true
-      in: query
-      schema:
-        type: string
+    - $ref: "../../../../components/parameters/optionalGroupId.yaml"
+    - $ref: "../../../../components/parameters/requiredPartyId.yaml"
+    - $ref: "../../../../components/parameters/requiredShopId.yaml"
 
   responses:
     '201':

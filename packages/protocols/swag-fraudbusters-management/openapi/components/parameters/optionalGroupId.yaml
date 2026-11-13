@@ -1,0 +1,4 @@
+name: groupId
+in: query
+schema:
+  type: string
