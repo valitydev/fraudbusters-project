@@ -13,20 +13,8 @@ get:
     - $ref: "../../../components/parameters/to.yaml"
     - $ref: "../../../components/parameters/partyId.yaml"
     - $ref: "../../../components/parameters/walletId.yaml"
-    - name: withdrawalId
-      required: false
-      in: query
-      schema:
-        type: string
-    - name: status
-      required: false
-      in: query
-      schema:
-        type: string
-        enum:
-          - pending
-          - succeeded
-          - failed
+    - $ref: "../../../components/parameters/withdrawalId.yaml"
+    - $ref: "../../../components/parameters/withdrawalStatus.yaml"
     - $ref: "../../../components/parameters/email.yaml"
     - $ref: "../../../components/parameters/providerCountry.yaml"
     - $ref: "../../../components/parameters/cardToken.yaml"

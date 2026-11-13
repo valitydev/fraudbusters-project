@@ -4,11 +4,7 @@ delete:
   tags:
     - template
   parameters:
-    - name: id
-      required: true
-      in: path
-      schema:
-        type: string
+    - $ref: "../../../components/parameters/id.yaml"
 
   responses:
     '201':

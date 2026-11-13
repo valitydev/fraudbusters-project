@@ -4,11 +4,7 @@ post:
   tags:
     - payout-group-reference
   parameters:
-    - name: groupId
-      in: path
-      required: true
-      schema:
-        type: string
+    - $ref: "../../../../components/parameters/groupId.yaml"
   requestBody:
     required: true
     content:
@@ -36,11 +32,7 @@ delete:
   tags:
     - payout-group-reference
   parameters:
-    - name: groupId
-      in: path
-      required: true
-      schema:
-        type: string
+    - $ref: "../../../../components/parameters/groupId.yaml"
     - $ref: "../../../../components/parameters/partyId.yaml"
     - $ref: "../../../../components/parameters/walletId.yaml"
   responses:
