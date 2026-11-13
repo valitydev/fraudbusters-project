@@ -11,13 +11,7 @@ get:
     - $ref: "../../../components/parameters/sortFieldValue.yaml"
     - $ref: "../../../components/parameters/size.yaml"
 
-    - name: listNames
-      required: true
-      in: query
-      schema:
-        type: array
-        items:
-          type: string
+    - $ref: "../../../components/parameters/requiredListNames.yaml"
 
     - $ref: "../../../components/parameters/listType.yaml"
 

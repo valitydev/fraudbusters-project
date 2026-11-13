@@ -4,25 +4,10 @@ delete:
   tags:
     - group-reference
   parameters:
-    - name: id
-      required: true
-      in: path
-      schema:
-        type: string
-    - name: groupId
-      in: query
-      schema:
-        type: string
-    - name: partyId
-      required: true
-      in: query
-      schema:
-        type: string
-    - name: shopId
-      required: true
-      in: query
-      schema:
-        type: string
+    - $ref: "../../../../components/parameters/id.yaml"
+    - $ref: "../../../../components/parameters/optionalGroupId.yaml"
+    - $ref: "../../../../components/parameters/requiredPartyId.yaml"
+    - $ref: "../../../../components/parameters/requiredShopId.yaml"
 
   responses:
     '201':
