@@ -7,6 +7,7 @@ import { HistoricalFraudPaymentsDataComponent } from './components/fraud-payment
 import { HistoricalInspectResultsDataComponent } from './components/inspect-results/historical-inspect-results-data.component';
 import { HistoricalPaymentsDataComponent } from './components/payments/historical-payments-data.component';
 import { HistoricalRefundsDataComponent } from './components/refunds/historical-refunds-data.component';
+import { HistoricalWithdrawalsDataComponent } from './components/withdrawals/historical-withdrawals-data.component';
 import { HistoricalDataComponent } from './historical-data.component';
 
 @NgModule({
@@ -45,6 +46,12 @@ import { HistoricalDataComponent } from './historical-data.component';
                     {
                         path: 'chargebacks',
                         component: HistoricalChargebacksDataComponent,
+                        canActivate: [AuthGuard],
+                        data: { roles: [Roles.FraudOfficer] },
+                    },
+                    {
+                        path: 'payouts',
+                        component: HistoricalWithdrawalsDataComponent,
                         canActivate: [AuthGuard],
                         data: { roles: [Roles.FraudOfficer] },
                     },
