@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 @Component
-public class PayoutReferenceModelToPayoutReferenceConverter implements Converter<PayoutReferenceModel, PayoutReference> {
+public class PayoutReferenceModelToPayoutReferenceConverter
+        implements Converter<PayoutReferenceModel, PayoutReference> {
 
     @Override
     public PayoutReference convert(PayoutReferenceModel model) {

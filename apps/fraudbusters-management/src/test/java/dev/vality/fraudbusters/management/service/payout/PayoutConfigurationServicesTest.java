@@ -13,6 +13,7 @@ import dev.vality.fraudbusters.management.converter.payment.GroupModelToGroupCon
 import dev.vality.fraudbusters.management.converter.payment.GroupToCommandConverter;
 import dev.vality.fraudbusters.management.converter.payment.TemplateModelToTemplateConverter;
 import dev.vality.fraudbusters.management.converter.payment.TemplateToCommandConverter;
+import dev.vality.fraudbusters.management.converter.payout.PayoutGroupReferenceModelToPayoutGroupReferenceConverter;
 import dev.vality.fraudbusters.management.converter.payout.PayoutListRecordToPayoutListRowConverter;
 import dev.vality.fraudbusters.management.converter.payout.PayoutReferenceModelToPayoutReferenceConverter;
 import dev.vality.fraudbusters.management.converter.payout.PayoutReferenceToCommandConverter;
@@ -183,7 +184,8 @@ class PayoutConfigurationServicesTest {
     @Test
     void groupsAndGroupReferencesGoToTheirTopics() {
         var service = new PayoutGroupsService(mock(PayoutGroupDao.class), mock(PayoutGroupReferenceDao.class),
-                commandService, new GroupToCommandConverter(), mock(GroupModelToGroupConverter.class));
+                commandService, new GroupToCommandConverter(), mock(GroupModelToGroupConverter.class),
+                new PayoutGroupReferenceModelToPayoutGroupReferenceConverter());
 
         service.insertGroup(new Group()
                 .groupId("group-1")

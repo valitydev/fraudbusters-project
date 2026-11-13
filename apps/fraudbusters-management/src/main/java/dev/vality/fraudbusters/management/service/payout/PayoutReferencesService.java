@@ -57,7 +57,8 @@ public class PayoutReferencesService {
             throw new NotFoundException("Payout reference not found");
         }
         return payoutCommandService.sendReference(
-                payoutReferenceToCommandConverter.convert(payoutReferenceModelToPayoutReferenceConverter.convert(stored)),
+                payoutReferenceToCommandConverter.convert(
+                        payoutReferenceModelToPayoutReferenceConverter.convert(stored)),
                 CommandType.DELETE, initiator);
     }
 }
