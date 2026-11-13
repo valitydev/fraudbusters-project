@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 @RequiredArgsConstructor
 public class EventToPayoutListRecordConverter implements Converter<Event, PayoutListRecord> {
@@ -22,6 +24,7 @@ public class EventToPayoutListRecordConverter implements Converter<Event, Payout
         PayoutId payoutId = row.getId().getPayoutId();
         PayoutScope.requirePartyForWallet(payoutId.getPartyId(), payoutId.getWalletId());
         PayoutListRecord record = new PayoutListRecord();
+        record.setId(UUID.randomUUID().toString());
         record.setPartyId(PayoutScope.replaceNullWithEmpty(payoutId.getPartyId()));
         record.setWalletId(PayoutScope.replaceNullWithEmpty(payoutId.getWalletId()));
         record.setListType(rowUtilsService.initListType(row));

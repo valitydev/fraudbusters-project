@@ -7,6 +7,8 @@ import dev.vality.fraudbusters.management.utils.PayoutScope;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 public class CommandToPayoutGroupReferenceModelConverter implements Converter<Command, PayoutGroupReferenceModel> {
 
@@ -15,6 +17,7 @@ public class CommandToPayoutGroupReferenceModelConverter implements Converter<Co
         GroupReference reference = command.getCommandBody().getGroupReference();
         PayoutScope.requirePartyForWallet(reference.getPartyId(), reference.getWalletId());
         PayoutGroupReferenceModel model = new PayoutGroupReferenceModel();
+        model.setId(UUID.randomUUID().toString());
         model.setPartyId(PayoutScope.replaceNullWithEmpty(reference.getPartyId()));
         model.setWalletId(PayoutScope.replaceNullWithEmpty(reference.getWalletId()));
         model.setGroupId(reference.getGroupId());

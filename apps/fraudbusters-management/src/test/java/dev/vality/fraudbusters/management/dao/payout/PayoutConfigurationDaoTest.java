@@ -21,6 +21,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -243,6 +244,7 @@ class PayoutConfigurationDaoTest {
     private static PayoutReferenceModel reference(String templateId, String partyId, String walletId,
                                                   boolean global) {
         var model = new PayoutReferenceModel();
+        model.setId(UUID.randomUUID().toString());
         model.setTemplateId(templateId);
         model.setPartyId(partyId);
         model.setWalletId(walletId);
@@ -252,6 +254,7 @@ class PayoutConfigurationDaoTest {
 
     private static PayoutGroupReferenceModel groupReference(String groupId, String partyId, String walletId) {
         var model = new PayoutGroupReferenceModel();
+        model.setId(UUID.randomUUID().toString());
         model.setGroupId(groupId);
         model.setPartyId(partyId);
         model.setWalletId(walletId);
@@ -268,6 +271,7 @@ class PayoutConfigurationDaoTest {
     private static PayoutListRecord listRecord(ListType type, String name, String value, String partyId,
                                                String walletId, String rowInfo) {
         var record = new PayoutListRecord();
+        record.setId(UUID.randomUUID().toString());
         record.setListType(type);
         record.setListName(name);
         record.setValue(value);
