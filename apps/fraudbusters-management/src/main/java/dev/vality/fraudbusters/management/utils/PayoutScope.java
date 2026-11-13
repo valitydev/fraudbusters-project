@@ -27,8 +27,9 @@ public class PayoutScope {
         if (!StringUtils.hasText(partyId)) {
             return GLOBAL;
         }
-        String party = "party:" + partyId.length() + ":" + partyId;
-        return StringUtils.hasText(walletId) ? party + ":wallet:" + walletId.length() + ":" + walletId : party;
+        String party = "party:%d:%s".formatted(partyId.length(), partyId);
+        return StringUtils.hasText(walletId)
+                ? "%s:wallet:%d:%s".formatted(party, walletId.length(), walletId) : party;
     }
 
     public static int pageSize(Integer size) {

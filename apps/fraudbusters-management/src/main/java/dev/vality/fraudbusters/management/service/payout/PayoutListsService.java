@@ -5,22 +5,20 @@ import dev.vality.damsel.wb_list.IdInfo;
 import dev.vality.damsel.wb_list.ListType;
 import dev.vality.damsel.wb_list.PayoutId;
 import dev.vality.damsel.wb_list.Row;
-import dev.vality.damsel.wb_list.RowInfo;
+import dev.vality.fraudbusters.management.converter.payout.PayoutListRecordToPayoutListRowConverter;
 import dev.vality.fraudbusters.management.dao.payout.wblist.PayoutListDao;
 import dev.vality.fraudbusters.management.domain.tables.pojos.PayoutListRecord;
 import dev.vality.fraudbusters.management.exception.NotFoundException;
 import dev.vality.fraudbusters.management.service.WbListCommandService;
-import dev.vality.fraudbusters.management.utils.CountInfoApiUtils;
 import dev.vality.fraudbusters.management.utils.FilterRequestUtils;
 import dev.vality.fraudbusters.management.utils.PagingDataUtils;
+import dev.vality.fraudbusters.management.utils.PayoutListUtils;
 import dev.vality.fraudbusters.management.utils.PayoutScope;
-import dev.vality.swag.fraudbusters.management.model.CountInfo;
 import dev.vality.swag.fraudbusters.management.model.PayoutCountInfo;
 import dev.vality.swag.fraudbusters.management.model.PayoutListRecordsResponse;
-import dev.vality.swag.fraudbusters.management.model.PayoutListRow;
 import dev.vality.swag.fraudbusters.management.model.PayoutRowListRequest;
-import java.time.ZoneOffset;
 import java.util.List;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -32,8 +30,9 @@ public class PayoutListsService {
 
     private final PayoutListDao payoutListDao;
     private final WbListCommandService wbListCommandService;
-    private final CountInfoApiUtils countInfoApiUtils;
+    private final PayoutListRecordToPayoutListRowConverter payoutListRecordToPayoutListRowConverter;
 
+    @Getter
     @Value("${parameters.payoutListNames}")
     private List<String> availableListNames;
 
@@ -46,7 +45,7 @@ public class PayoutListsService {
                 .result(payoutListDao.filter(type, listNames, pattern, lastId, PagingDataUtils.getSortOrder(sortOrder),
                                 size)
                         .stream()
-                        .map(this::toApi)
+                        .map(payoutListRecordToPayoutListRowConverter::convert)
                         .toList());
     }
 
@@ -78,36 +77,14 @@ public class PayoutListsService {
                 dev.vality.fraudbusters.management.domain.enums.ListType.valueOf(listType));
     }
 
-    public List<String> getAvailableListNames() {
-        return availableListNames;
-    }
-
     private Row toRow(ListType type, PayoutCountInfo record) {
         var listRecord = record.getListRecord();
         Row row = createRow(type, listRecord.getListName(), listRecord.getValue(), listRecord.getPartyId(),
                 listRecord.getWalletId());
         if (type == ListType.grey) {
-            row.setRowInfo(toRowInfo(record.getCountInfo()));
+            row.setRowInfo(PayoutListUtils.toRowInfo(record.getCountInfo()));
         }
         return row;
-    }
-
-    /** Without a start the grey list counts the whole history, as fraudbusters reads it. */
-    private static RowInfo toRowInfo(CountInfo countInfo) {
-        if (countInfo == null || countInfo.getCount() == null || countInfo.getEndCountTime() == null) {
-            throw new IllegalArgumentException("A grey list record needs a count and an end of the period");
-        }
-        var info = new dev.vality.damsel.wb_list.CountInfo()
-                .setCount(countInfo.getCount())
-                .setTimeToLive(countInfo.getEndCountTime()
-                        .toInstant(ZoneOffset.UTC)
-                        .toString());
-        if (countInfo.getStartCountTime() != null) {
-            info.setStartCountTime(countInfo.getStartCountTime()
-                    .toInstant(ZoneOffset.UTC)
-                    .toString());
-        }
-        return RowInfo.count_info(info);
     }
 
     private Row createRow(ListType type, String listName, String value, String partyId, String walletId) {
@@ -129,23 +106,5 @@ public class PayoutListsService {
                 .setId(IdInfo.payout_id(payoutId))
                 .setListName(listName)
                 .setValue(value);
-    }
-
-    private PayoutListRow toApi(PayoutListRecord record) {
-        var row = new PayoutListRow()
-                .id(record.getId())
-                .insertTime(record.getInsertTime())
-                .createdByUser(record.getCreatedByUser())
-                .listType(dev.vality.swag.fraudbusters.management.model.ListType.fromValue(
-                        record.getListType().getLiteral()))
-                .listRecord(new dev.vality.swag.fraudbusters.management.model.PayoutListRecord()
-                        .listName(record.getListName())
-                        .value(record.getValue())
-                        .partyId(StringUtils.hasText(record.getPartyId()) ? record.getPartyId() : null)
-                        .walletId(StringUtils.hasText(record.getWalletId()) ? record.getWalletId() : null));
-        if (StringUtils.hasText(record.getRowInfo())) {
-            row.countInfo(countInfoApiUtils.initExternalRowCountInfo(record.getRowInfo()));
-        }
-        return row;
     }
 }
