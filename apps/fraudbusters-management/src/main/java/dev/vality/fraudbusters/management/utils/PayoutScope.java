@@ -9,8 +9,6 @@ public class PayoutScope {
 
     public static final String GLOBAL = "GLOBAL";
 
-    private static final int DEFAULT_PAGE_SIZE = 100;
-
     public static String replaceNullWithEmpty(String value) {
         return value == null ? "" : value;
     }
@@ -30,9 +28,5 @@ public class PayoutScope {
         String party = "party:%d:%s".formatted(partyId.length(), partyId);
         return StringUtils.hasText(walletId)
                 ? "%s:wallet:%d:%s".formatted(party, walletId.length(), walletId) : party;
-    }
-
-    public static int pageSize(Integer size) {
-        return size == null || size <= 0 ? DEFAULT_PAGE_SIZE : size;
     }
 }

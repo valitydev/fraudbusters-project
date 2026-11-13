@@ -4,7 +4,6 @@ import dev.vality.fraudbusters.management.dao.AbstractDao;
 import dev.vality.fraudbusters.management.dao.CdDao;
 import dev.vality.fraudbusters.management.domain.enums.ListType;
 import dev.vality.fraudbusters.management.domain.tables.pojos.PayoutListRecord;
-import dev.vality.fraudbusters.management.utils.PayoutScope;
 import dev.vality.mapper.RecordRowMapper;
 import org.jooq.Condition;
 import org.jooq.SortOrder;
@@ -31,12 +30,9 @@ public class PayoutListDao extends AbstractDao implements CdDao<PayoutListRecord
 
     @Override
     public void saveListRecord(PayoutListRecord listRecord) {
-        var record = getDslContext().newRecord(PAYOUT_LIST_RECORD, listRecord);
-        record.changed(PAYOUT_LIST_RECORD.ID, false);
-        record.changed(PAYOUT_LIST_RECORD.INSERT_TIME, false);
         execute(getDslContext()
                 .insertInto(PAYOUT_LIST_RECORD)
-                .set(record)
+                .set(getDslContext().newRecord(PAYOUT_LIST_RECORD, listRecord))
                 .onConflict(PAYOUT_LIST_RECORD.PARTY_ID, PAYOUT_LIST_RECORD.WALLET_ID, PAYOUT_LIST_RECORD.LIST_TYPE,
                         PAYOUT_LIST_RECORD.LIST_NAME, PAYOUT_LIST_RECORD.VALUE)
                 .doUpdate()
@@ -73,7 +69,7 @@ public class PayoutListDao extends AbstractDao implements CdDao<PayoutListRecord
                 .selectFrom(PAYOUT_LIST_RECORD)
                 .where(filterCondition(listType, listNames, searchPattern));
         var sorted = addSortCondition(PAYOUT_LIST_RECORD.ID, sortOrder, where);
-        return fetch(addSeekIfNeed(lastId, PayoutScope.pageSize(size), sorted), recordRowMapper);
+        return fetch(addSeekIfNeed(lastId, size, sorted), recordRowMapper);
     }
 
     public Integer countFilter(ListType listType, List<String> listNames, String searchPattern) {

@@ -3,7 +3,6 @@ package dev.vality.fraudbusters.management.dao.payout.group;
 import dev.vality.fraudbusters.management.dao.AbstractDao;
 import dev.vality.fraudbusters.management.dao.CommandDao;
 import dev.vality.fraudbusters.management.domain.payout.PayoutGroupReferenceModel;
-import dev.vality.fraudbusters.management.utils.PayoutScope;
 import dev.vality.mapper.RecordRowMapper;
 import org.jooq.Condition;
 import org.jooq.SortOrder;
@@ -33,6 +32,7 @@ public class PayoutGroupReferenceDao extends AbstractDao implements CommandDao<P
     public void insert(PayoutGroupReferenceModel referenceModel) {
         execute(getDslContext()
                 .insertInto(PAYOUT_GROUP_REFERENCE)
+                .set(PAYOUT_GROUP_REFERENCE.ID, referenceModel.getId())
                 .set(PAYOUT_GROUP_REFERENCE.PARTY_ID, referenceModel.getPartyId())
                 .set(PAYOUT_GROUP_REFERENCE.WALLET_ID, referenceModel.getWalletId())
                 .set(PAYOUT_GROUP_REFERENCE.GROUP_ID, referenceModel.getGroupId())
@@ -61,7 +61,7 @@ public class PayoutGroupReferenceDao extends AbstractDao implements CommandDao<P
                 .selectFrom(PAYOUT_GROUP_REFERENCE)
                 .where(filterCondition(searchPattern));
         var sorted = addSortCondition(PAYOUT_GROUP_REFERENCE.ID, sortOrder, where);
-        return fetch(addSeekIfNeed(lastId, PayoutScope.pageSize(size), sorted), referenceRowMapper);
+        return fetch(addSeekIfNeed(lastId, size, sorted), referenceRowMapper);
     }
 
     public Integer countFilter(String searchPattern) {

@@ -3,7 +3,6 @@ package dev.vality.fraudbusters.management.dao.payout.reference;
 import dev.vality.fraudbusters.management.dao.AbstractDao;
 import dev.vality.fraudbusters.management.dao.CommandDao;
 import dev.vality.fraudbusters.management.domain.payout.PayoutReferenceModel;
-import dev.vality.fraudbusters.management.utils.PayoutScope;
 import dev.vality.mapper.RecordRowMapper;
 import org.jooq.Condition;
 import org.jooq.SortOrder;
@@ -33,6 +32,7 @@ public class PayoutReferenceDao extends AbstractDao implements CommandDao<Payout
     public void insert(PayoutReferenceModel referenceModel) {
         execute(getDslContext()
                 .insertInto(PAYOUT_REFERENCE)
+                .set(PAYOUT_REFERENCE.ID, referenceModel.getId())
                 .set(PAYOUT_REFERENCE.PARTY_ID, referenceModel.getPartyId())
                 .set(PAYOUT_REFERENCE.WALLET_ID, referenceModel.getWalletId())
                 .set(PAYOUT_REFERENCE.IS_GLOBAL, referenceModel.getIsGlobal())
@@ -71,7 +71,7 @@ public class PayoutReferenceDao extends AbstractDao implements CommandDao<Payout
                 .selectFrom(PAYOUT_REFERENCE)
                 .where(filterCondition(searchPattern, isGlobal));
         var sorted = addSortCondition(PAYOUT_REFERENCE.ID, sortOrder, where);
-        return fetch(addSeekIfNeed(lastId, PayoutScope.pageSize(size), sorted), referenceRowMapper);
+        return fetch(addSeekIfNeed(lastId, size, sorted), referenceRowMapper);
     }
 
     public Integer countFilter(String searchPattern, Boolean isGlobal) {
