@@ -5,6 +5,7 @@ import dev.vality.damsel.fraudbusters.Command;
 import dev.vality.fraudbusters.management.domain.enums.CommandType;
 import dev.vality.fraudbusters.management.domain.enums.ObjectType;
 import dev.vality.fraudbusters.management.domain.tables.pojos.CommandAudit;
+import dev.vality.fraudbusters.management.utils.PayoutAuditObjectTypes;
 import dev.vality.geck.common.util.TBaseUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,10 @@ public class CommandToAuditLogConverter implements Converter<Command, CommandAud
     public CommandAudit convert(Command command) {
         CommandAudit model = new CommandAudit();
         model.setCommandType(CommandType.valueOf(command.getCommandType().name()));
-        model.setObjectType(TBaseUtil.unionFieldToEnum(command.getCommandBody(), ObjectType.class));
+        ObjectType objectType = TBaseUtil.unionFieldToEnum(command.getCommandBody(), ObjectType.class);
+        model.setObjectType(PayoutAuditObjectTypes.isPayoutCommand(command.getCommandBody())
+                ? PayoutAuditObjectTypes.convertToPayoutObjectType(objectType)
+                : objectType);
         model.setObject(command.getCommandBody().getFieldValue().toString());
         model.setInitiator(command.getUserInfo() != null && StringUtils.hasLength(command.getUserInfo().getUserId())
                 ? command.getUserInfo().getUserId()

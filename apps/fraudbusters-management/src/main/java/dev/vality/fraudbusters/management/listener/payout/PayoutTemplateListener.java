@@ -16,7 +16,7 @@ public class PayoutTemplateListener extends ConfigurationCommandListener {
         super(payoutInspectStorage, auditService);
     }
 
-    @KafkaListener(topics = "${kafka.topic.fraudbusters.payout.template}",
+    @KafkaListener(topics = "#{payoutProperties.templateTopic}",
             containerFactory = "kafkaTemplateListenerContainerFactory")
     public void listen(Command command) {
         log.info("PayoutTemplateListener event: {}", command);

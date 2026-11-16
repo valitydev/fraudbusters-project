@@ -1,9 +1,11 @@
 package dev.vality.fraudbusters.management.converter;
 
 import dev.vality.damsel.wb_list.Event;
+import dev.vality.fraudbusters.management.config.InspectStorageConfig;
 import dev.vality.fraudbusters.management.domain.enums.CommandType;
 import dev.vality.fraudbusters.management.domain.enums.ObjectType;
 import dev.vality.fraudbusters.management.domain.tables.pojos.CommandAudit;
+import dev.vality.fraudbusters.management.utils.PayoutAuditObjectTypes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.converter.Converter;
@@ -21,7 +23,10 @@ public class EventToAuditLogConverter implements Converter<Event, CommandAudit> 
     public CommandAudit convert(Event event) {
         CommandAudit model = new CommandAudit();
         model.setCommandType(parseEventType(event));
-        model.setObjectType(ObjectType.valueOf(event.getRow().getListType().name()));
+        ObjectType objectType = ObjectType.valueOf(event.getRow().getListType().name());
+        model.setObjectType(InspectStorageConfig.isPayoutRow(event.getRow())
+                ? PayoutAuditObjectTypes.convertToPayoutObjectType(objectType)
+                : objectType);
         model.setObject(event.getRow().toString());
         model.setInitiator(event.getUserInfo() != null && StringUtils.hasLength(event.getUserInfo().getUserId())
                 ? event.getUserInfo().getUserId()

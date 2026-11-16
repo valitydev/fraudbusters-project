@@ -7,6 +7,8 @@ import org.springframework.util.StringUtils;
 @UtilityClass
 public class PayoutScope {
 
+    public static final String GLOBAL = "GLOBAL";
+
     public static String replaceNullWithEmpty(String value) {
         return value == null ? "" : value;
     }
@@ -15,5 +17,15 @@ public class PayoutScope {
         if (StringUtils.hasText(walletId) && !StringUtils.hasText(partyId)) {
             throw new IllegalArgumentException("Invalid payout scope");
         }
+    }
+
+    public static String generateKey(String partyId, String walletId) {
+        requirePartyForWallet(partyId, walletId);
+        if (!StringUtils.hasText(partyId)) {
+            return GLOBAL;
+        }
+        String party = "party:%d:%s".formatted(partyId.length(), partyId);
+        return StringUtils.hasText(walletId)
+                ? "%s:wallet:%d:%s".formatted(party, walletId.length(), walletId) : party;
     }
 }

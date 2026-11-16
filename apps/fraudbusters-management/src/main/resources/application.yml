@@ -113,3 +113,4 @@ spring.servlet.multipart.max-file-size: 10MB
 spring.servlet.multipart.max-request-size: 10MB
 
 parameters.listNames: EMAIL,IP,FINGERPRINT,CARD_TOKEN,BIN,PAN
+parameters.payoutListNames: EMAIL,IP,FINGERPRINT,USER_ID,CARD_TOKEN,BIN,LAST_DIGITS,MASKED_PAN,PHONE,COUNTRY_BANK,CURRENCY,PARTY_ID,WALLET_ID

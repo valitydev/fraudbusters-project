@@ -16,7 +16,7 @@ public class PayoutReferenceListener extends ConfigurationCommandListener {
         super(payoutInspectStorage, auditService);
     }
 
-    @KafkaListener(topics = "${kafka.topic.fraudbusters.payout.reference}",
+    @KafkaListener(topics = "#{payoutProperties.referenceTopic}",
             containerFactory = "kafkaReferenceListenerContainerFactory")
     public void listen(Command command) {
         log.info("PayoutReferenceListener command: {}", command);

@@ -13,8 +13,10 @@ import dev.vality.fraudbusters.management.config.InspectStorageConfig;
 import dev.vality.fraudbusters.management.config.PostgresqlJooqITest;
 import dev.vality.fraudbusters.management.converter.CommandToGroupModelConverter;
 import dev.vality.fraudbusters.management.converter.CommandToTemplateModelConverter;
+import dev.vality.fraudbusters.management.converter.payout.CommandToPayoutGroupModelConverter;
 import dev.vality.fraudbusters.management.converter.payout.CommandToPayoutGroupReferenceModelConverter;
 import dev.vality.fraudbusters.management.converter.payout.CommandToPayoutReferenceModelConverter;
+import dev.vality.fraudbusters.management.converter.payout.CommandToPayoutTemplateModelConverter;
 import dev.vality.fraudbusters.management.converter.payout.EventToPayoutListRecordConverter;
 import dev.vality.fraudbusters.management.dao.payout.group.PayoutGroupDao;
 import dev.vality.fraudbusters.management.dao.payout.group.PayoutGroupReferenceDao;
@@ -81,8 +83,10 @@ class PayoutInspectStorageTest {
                 mock(ModelProjection.class), mock(ModelProjection.class), mock(ModelProjection.class),
                 mock(ModelProjection.class));
         InspectStorage payout = new InspectStorage(InspectStorageConfig::isPayoutRow,
-                ModelProjection.fromCommandDao(new CommandToTemplateModelConverter(), payoutTemplateDao),
-                new ModelProjection<>(new CommandToGroupModelConverter(), payoutGroupDao::replaceGroupTemplates,
+                ModelProjection.fromCommandDao(new CommandToPayoutTemplateModelConverter(
+                        new CommandToTemplateModelConverter()), payoutTemplateDao),
+                new ModelProjection<>(new CommandToPayoutGroupModelConverter(new CommandToGroupModelConverter()),
+                        payoutGroupDao::replaceGroupTemplates,
                         payoutGroupDao::remove),
                 ModelProjection.fromCommandDao(new CommandToPayoutReferenceModelConverter(), payoutReferenceDao),
                 ModelProjection.fromCommandDao(new CommandToPayoutGroupReferenceModelConverter(),
@@ -103,10 +107,14 @@ class PayoutInspectStorageTest {
                 .setId("synthetic-id")
                 .setOperationType(OperationType.payout)
                 .setTemplate("rule:1=1->decline;".getBytes(StandardCharsets.UTF_8));
-        var command = createCommand(CommandBody.template(template));
+        var command = createCommand(CommandBody.template(template))
+                .setUserInfo(new dev.vality.damsel.fraudbusters.UserInfo()
+                        .setUserId("synthetic-user"));
         templateListener.listen(command);
         templateListener.listen(command);
         assertEquals(1, countRows("af.payout_template"));
+        assertEquals("synthetic-user", jdbc.queryForObject(
+                "SELECT modified_by_user FROM af.payout_template WHERE id = 'synthetic-id'", String.class));
         var deletedTemplate = new Template()
                 .setId("synthetic-id")
                 .setOperationType(OperationType.payout);
