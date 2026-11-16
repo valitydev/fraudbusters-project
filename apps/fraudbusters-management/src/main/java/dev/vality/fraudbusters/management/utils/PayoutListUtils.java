@@ -9,7 +9,6 @@ import java.time.ZoneOffset;
 @UtilityClass
 public class PayoutListUtils {
 
-    /** Without a start the grey list counts the whole history, as fraudbusters reads it. */
     public static RowInfo toRowInfo(CountInfo countInfo) {
         if (countInfo == null || countInfo.getCount() == null || countInfo.getEndCountTime() == null) {
             throw new IllegalArgumentException("A grey list record needs a count and an end of the period");

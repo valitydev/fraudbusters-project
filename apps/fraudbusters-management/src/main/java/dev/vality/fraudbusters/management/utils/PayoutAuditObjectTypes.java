@@ -9,7 +9,6 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class PayoutAuditObjectTypes {
 
-    /** A command without an operation type keeps its historical meaning: payment. */
     public static boolean isPayoutCommand(CommandBody commandBody) {
         OperationType operationType = switch (commandBody.getSetField()) {
             case TEMPLATE -> commandBody.getTemplate().getOperationType();

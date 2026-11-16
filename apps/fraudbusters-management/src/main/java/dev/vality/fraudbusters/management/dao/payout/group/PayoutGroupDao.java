@@ -59,9 +59,6 @@ public class PayoutGroupDao extends AbstractDao {
                 .where(PAYOUT_GROUP.GROUP_ID.eq(groupModel.getGroupId())));
     }
 
-    /**
-     * The group with its templates in priority order, or {@code null} when the group has no templates.
-     */
     public GroupModel getById(String groupId) {
         List<GroupModel> groups = toGroups(fetch(getDslContext()
                 .selectFrom(PAYOUT_GROUP)
@@ -70,7 +67,6 @@ public class PayoutGroupDao extends AbstractDao {
         return groups.isEmpty() ? null : groups.get(0);
     }
 
-    /** Groups whose ID or one of whose template IDs matches the LIKE pattern. */
     public List<GroupModel> filterGroup(String searchPattern) {
         var matchingGroups = getDslContext()
                 .selectDistinct(PAYOUT_GROUP.GROUP_ID)

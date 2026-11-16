@@ -19,7 +19,6 @@ public class PayoutScope {
         }
     }
 
-    /** The Kafka key of a payout reference; the same scope always gets the same key, as fraudbusters keys it. */
     public static String generateKey(String partyId, String walletId) {
         requirePartyForWallet(partyId, walletId);
         if (!StringUtils.hasText(partyId)) {

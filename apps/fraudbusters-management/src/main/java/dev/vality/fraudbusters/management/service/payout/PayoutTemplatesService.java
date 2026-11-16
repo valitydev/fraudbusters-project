@@ -51,7 +51,6 @@ public class PayoutTemplatesService {
         return payoutTemplateDao.getListNames(idPattern);
     }
 
-    /** Sends the template only when fraudbusters accepts it as a payout template. */
     public CreateTemplateResponse createTemplate(Template template, String initiator) {
         Command command = templateToCommandConverter.convert(template);
         List<TemplateValidateError> errors = validate(command.getCommandBody().getTemplate());
