@@ -62,9 +62,6 @@ public class PayoutReferenceDao extends AbstractDao implements CommandDao<Payout
                         .and(PAYOUT_REFERENCE.IS_GLOBAL.eq(isGlobal))), referenceRowMapper);
     }
 
-    /**
-     * Pages continue after {@code lastId}, as the payment references do.
-     */
     public List<PayoutReferenceModel> filter(String searchPattern, Boolean isGlobal, String lastId,
                                              SortOrder sortOrder, Integer size) {
         var where = getDslContext()

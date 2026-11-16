@@ -63,9 +63,6 @@ public class PayoutTemplateDao extends AbstractDao implements CommandDao<Templat
                 .orderBy(PAYOUT_TEMPLATE.ID), (resultSet, i) -> resultSet.getString(PAYOUT_TEMPLATE.ID.getName()));
     }
 
-    /**
-     * The search value is a LIKE pattern on the template ID; pages continue after {@code lastId}.
-     */
     public List<TemplateModel> filterModel(FilterRequest filterRequest) {
         var where = getDslContext()
                 .selectFrom(PAYOUT_TEMPLATE)

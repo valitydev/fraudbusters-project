@@ -77,7 +77,6 @@ public class PayoutGroupsService {
                         .toList());
     }
 
-    /** Without party and wallet the group applies to every payout. */
     public List<String> insertGroupReferences(String groupId, List<PayoutGroupReference> references,
                                               String initiator) {
         List<Command> commands = references.stream()

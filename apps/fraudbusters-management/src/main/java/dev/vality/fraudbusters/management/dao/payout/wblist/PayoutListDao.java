@@ -60,9 +60,6 @@ public class PayoutListDao extends AbstractDao implements CdDao<PayoutListRecord
                 .where(PAYOUT_LIST_RECORD.ID.eq(id)), recordRowMapper);
     }
 
-    /**
-     * Pages continue after {@code lastId}, as the payment lists do.
-     */
     public List<PayoutListRecord> filter(ListType listType, List<String> listNames, String searchPattern,
                                          String lastId, SortOrder sortOrder, Integer size) {
         var where = getDslContext()

@@ -37,12 +37,9 @@ public class PayoutReferencesService {
                         .toList());
     }
 
-    /** All references are checked before any is sent, so an invalid one does not leave the others half applied. */
     public List<String> insertReferences(List<PayoutReference> references, String initiator) {
-        List<Command> commands = references.stream()
+        return references.stream()
                 .map(payoutReferenceToCommandConverter::convert)
-                .toList();
-        return commands.stream()
                 .map(command -> payoutCommandService.sendReference(command, CommandType.CREATE, initiator))
                 .toList();
     }

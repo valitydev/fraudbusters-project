@@ -52,9 +52,6 @@ public class PayoutGroupReferenceDao extends AbstractDao implements CommandDao<P
                         .and(PAYOUT_GROUP_REFERENCE.WALLET_ID.eq(referenceModel.getWalletId()))));
     }
 
-    /**
-     * Pages continue after {@code lastId}, as the payment group references do.
-     */
     public List<PayoutGroupReferenceModel> filter(String searchPattern, String lastId, SortOrder sortOrder,
                                                   Integer size) {
         var where = getDslContext()

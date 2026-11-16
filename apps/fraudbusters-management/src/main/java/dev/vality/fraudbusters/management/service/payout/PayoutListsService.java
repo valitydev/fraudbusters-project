@@ -49,7 +49,6 @@ public class PayoutListsService {
                         .toList());
     }
 
-    /** All records are checked before any is sent, so an invalid one does not leave the others half applied. */
     public List<String> insertRows(PayoutRowListRequest request, String initiator) {
         ListType type = ListType.valueOf(request.getListType().getValue());
         List<Row> rows = request.getRecords().stream()
@@ -60,7 +59,6 @@ public class PayoutListsService {
                 .toList();
     }
 
-    /** The row is found by id, so its value never travels in the request. */
     public String removeRow(String id, String initiator) {
         PayoutListRecord record = payoutListDao.findById(id);
         if (record == null) {

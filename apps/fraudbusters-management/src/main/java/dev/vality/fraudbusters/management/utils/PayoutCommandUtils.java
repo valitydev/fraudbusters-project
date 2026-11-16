@@ -19,7 +19,6 @@ public class PayoutCommandUtils {
         return concrete;
     }
 
-    /** Without an operation type a command means payment, so payout commands name theirs. */
     private static void markAsPayout(CommandBody commandBody) {
         switch (commandBody.getSetField()) {
             case TEMPLATE -> commandBody.getTemplate().setOperationType(OperationType.payout);
