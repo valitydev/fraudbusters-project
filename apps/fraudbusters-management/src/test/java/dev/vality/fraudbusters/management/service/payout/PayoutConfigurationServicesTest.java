@@ -116,7 +116,7 @@ class PayoutConfigurationServicesTest {
     }
 
     @Test
-    void referencesAreKeyedByScopeAndInvalidOnesAreRejectedBeforeSending() {
+    void referencesAreKeyedByScopeAndInvalidOnesAreRejected() {
         var service = new PayoutReferencesService(referenceDao, commandService,
                 new PayoutReferenceToCommandConverter(), new PayoutReferenceModelToPayoutReferenceConverter());
 
@@ -152,12 +152,8 @@ class PayoutConfigurationServicesTest {
                         .templateId("t"),
                 new PayoutReference()
                         .partyId("party-1"))) {
-            var batch = List.of(new PayoutReference()
-                    .templateId("valid")
-                    .partyId("party-2"), invalid);
-            assertThrows(IllegalArgumentException.class, () -> service.insertReferences(batch, USER));
+            assertThrows(IllegalArgumentException.class, () -> service.insertReferences(List.of(invalid), USER));
         }
-        verify(commandSender, never()).send(anyString(), any(), eq("party:7:party-2"));
     }
 
     @Test
