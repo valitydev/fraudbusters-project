@@ -30,7 +30,6 @@ export class MenuListItemComponent implements OnInit {
 
     constructor(public router: Router, protected readonly keycloak: KeycloakService, private cdr: ChangeDetectorRef) {}
 
-    /** A group opens when one of its pages is opened, and stays as the user leaves it otherwise. */
     ngOnInit() {
         if (!this.hasChildren()) {
             return;
@@ -53,7 +52,6 @@ export class MenuListItemComponent implements OnInit {
         return !!this.item.children?.length;
     }
 
-    /** A group is shown when the user may open at least one of its items. */
     display(): boolean {
         return this.isAllowed(this.item);
     }
@@ -69,7 +67,6 @@ export class MenuListItemComponent implements OnInit {
         return item.roles.some((role) => this.keycloak.getUserRoles().includes(role));
     }
 
-    /** A group contains its items' pages and, when it has its own route, every page under that route. */
     private containsCurrentPage(item: NavItem): boolean {
         if (item.children?.length) {
             return this.isUnder(item.route) || item.children.some((child) => this.containsCurrentPage(child));

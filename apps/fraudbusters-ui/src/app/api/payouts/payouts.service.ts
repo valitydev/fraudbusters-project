@@ -201,7 +201,6 @@ export class PayoutsService {
             .pipe(map((response) => response.result));
     }
 
-    /** The row is removed by its id, so the listed value never goes into the URL. */
     removeListRow(id: string): Observable<string> {
         return this.http
             .delete<IdResponse>(`${this.endpoint}/payouts-lists/${encodeURIComponent(id)}`)
