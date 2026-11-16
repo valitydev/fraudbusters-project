@@ -57,3 +57,15 @@
         }
     }
 }
+
+.menu-spacer {
+    flex: 1 1 auto;
+}
+
+.menu-item .menu-content mat-icon.menu-expand {
+    margin-right: 0;
+}
+
+.menu-children .menu-item-wrapper {
+    margin-bottom: 0;
+}

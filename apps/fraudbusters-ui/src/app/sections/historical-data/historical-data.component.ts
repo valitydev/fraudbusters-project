@@ -35,6 +35,11 @@ export class HistoricalDataComponent {
             name: 'Fraud payments',
             otherActiveUrlFragments: [],
         },
+        {
+            path: 'payouts',
+            name: 'Payouts',
+            otherActiveUrlFragments: [],
+        },
     ];
 
     constructor(private router: Router, @Inject(LAYOUT_GAP_S) public layoutGapS: string) {}

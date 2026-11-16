@@ -1,0 +1,6 @@
+<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <fb-historical-data-withdrawals-header></fb-historical-data-withdrawals-header>
+    <div *ngFor="let withdrawal of withdrawals" fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <fb-historical-data-withdrawals-item [withdrawal]="withdrawal"></fb-historical-data-withdrawals-item>
+    </div>
+</div>

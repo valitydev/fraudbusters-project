@@ -1,8 +1,27 @@
 <div *ngIf="display()" class="menu-item-wrapper">
-    <a class="menu-item" [routerLink]="item.route" [routerLinkActive]="['active']">
-        <div class="menu-content">
-            <mat-icon>{{ item.iconName }}</mat-icon>
-            <span class="menu-text">{{ item.displayName }}</span>
+    <ng-container *ngIf="hasChildren(); else link">
+        <a class="menu-item" (click)="toggle()" [attr.aria-expanded]="expanded">
+            <div class="menu-content" [style.padding-left.px]="24 + depth * 16">
+                <mat-icon>{{ item.iconName }}</mat-icon>
+                <span class="menu-text">{{ item.displayName }}</span>
+                <span class="menu-spacer"></span>
+                <mat-icon class="menu-expand">{{ expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+            </div>
+        </a>
+        <div *ngIf="expanded" class="menu-children">
+            <fb-menu-list-item
+                *ngFor="let child of item.children"
+                [item]="child"
+                [depth]="depth + 1"
+            ></fb-menu-list-item>
         </div>
-    </a>
+    </ng-container>
+    <ng-template #link>
+        <a class="menu-item" [routerLink]="item.route" [routerLinkActive]="['active']">
+            <div class="menu-content" [style.padding-left.px]="24 + depth * 16">
+                <mat-icon>{{ item.iconName }}</mat-icon>
+                <span class="menu-text">{{ item.displayName }}</span>
+            </div>
+        </a>
+    </ng-template>
 </div>
