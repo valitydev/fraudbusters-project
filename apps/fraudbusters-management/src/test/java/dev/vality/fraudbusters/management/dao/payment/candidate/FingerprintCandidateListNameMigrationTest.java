@@ -17,10 +17,6 @@ import static dev.vality.fraudbusters.management.domain.tables.WbListCandidate.W
 import static dev.vality.fraudbusters.management.domain.tables.WbListCandidateBatch.WB_LIST_CANDIDATE_BATCH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * Flyway has already applied the migration to the empty test database, so the test applies its statement again to
- * candidates written in the misspelled list; the statement is idempotent.
- */
 @PostgresqlJooqITest
 @ContextConfiguration(classes = {WbListCandidateDaoImpl.class})
 class FingerprintCandidateListNameMigrationTest {

@@ -63,7 +63,6 @@ public abstract class AbstractDao extends AbstractGenericDao {
         return seekQuery;
     }
 
-    /** The page size comes from the request; a negative one would reach PostgreSQL as an invalid LIMIT. */
     private static void rejectNegativeSize(Integer size) {
         if (size != null && size < 0) {
             throw new IllegalArgumentException("size must not be negative: " + size);

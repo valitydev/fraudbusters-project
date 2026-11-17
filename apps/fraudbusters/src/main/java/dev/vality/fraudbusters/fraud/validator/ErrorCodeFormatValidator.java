@@ -15,12 +15,6 @@ import java.util.regex.Pattern;
 import static dev.vality.fraudo.FraudoRulesParser.*;
 import static dev.vality.fraudo.utils.TextUtil.safeGetText;
 
-/**
- * Finds error codes that history functions can never match. History stores a failure code as its parts joined by
- * ':' without spaces (for example {@code authorization_failed:expired}) and the functions compare the code exactly,
- * so a code with spaces at its edges or around ':' always counts zero. Spaces inside a part are allowed:
- * {@code unknown error} is a stored code.
- */
 public class ErrorCodeFormatValidator {
 
     private static final Pattern MISPLACED_SPACE = Pattern.compile("^\\s|\\s$|\\s:|:\\s");

@@ -9,9 +9,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
 
-/**
- * Answers invalid requests with the BadResponse body of the contract: {@code {code: invalidRequest, message}}.
- */
 @Slf4j
 @RestControllerAdvice
 public class InvalidRequestHandler {

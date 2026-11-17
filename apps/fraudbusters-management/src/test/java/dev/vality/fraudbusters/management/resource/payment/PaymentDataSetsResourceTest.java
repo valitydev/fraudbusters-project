@@ -114,7 +114,6 @@ class PaymentDataSetsResourceTest {
         when(historicalDataServiceSrv.applyRuleOnHistoricalDataSet(any()))
                 .thenReturn(DataSourceBeanUtils.createHistoricalResponse());
         when(paymentsDataSetService.insertCheckedDataSet(any(), any())).thenReturn(77L);
-        // The answer is the data set id that GET /checked-data-sets/{id} accepts, not the id of the check result.
         this.mockMvc.perform(post("/payments-data-set/data-sets/applyRuleOnHistoricalDataSet")
                         .content(objectMapper.writeValueAsString(DataSourceBeanUtils.createApplyRequst(payment)))
                         .contentType(MediaType.APPLICATION_JSON))

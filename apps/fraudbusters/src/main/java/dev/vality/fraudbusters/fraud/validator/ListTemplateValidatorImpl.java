@@ -45,7 +45,6 @@ public class ListTemplateValidatorImpl implements ListTemplateValidator {
             validate = errorCodeFormatValidator.findMisformattedErrorCodes(templateString);
         }
         if (CollectionUtils.isEmpty(validate) && storage.getOperationType() == OperationType.payment) {
-            // Payout templates check their history fields in their own validator.
             validate = paymentHistoryFieldValidator.findFieldsMissingInHistory(templateString);
         }
         if (!CollectionUtils.isEmpty(validate)) {

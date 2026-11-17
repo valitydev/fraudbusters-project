@@ -34,7 +34,6 @@ public class WithdrawalsRequestToWithdrawalsConverter implements Converter<Withd
 
     private Withdrawal mapWithdrawal(dev.vality.swag.fraudbusters.model.Withdrawal item) {
         if (!StringUtils.hasText(item.getPartyId()) && StringUtils.hasText(item.getWalletId())) {
-            // Payout rules are scoped by party and wallet; a wallet outside a party matches no scope.
             throw new InvalidRequestException("withdrawal " + item.getId() + ": walletId requires partyId");
         }
         return new Withdrawal()

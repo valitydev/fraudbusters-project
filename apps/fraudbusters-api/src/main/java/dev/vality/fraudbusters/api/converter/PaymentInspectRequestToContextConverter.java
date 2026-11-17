@@ -69,7 +69,6 @@ public class PaymentInspectRequestToContextConverter implements Converter<Paymen
             return null;
         }
         if (customer.getCustomerId() == null) {
-            // ClientIdentity requires customer_id; without it the Thrift call fails as a server error.
             throw new InvalidRequestException("customer.userId requires customer.customerId");
         }
         return new ClientIdentity()

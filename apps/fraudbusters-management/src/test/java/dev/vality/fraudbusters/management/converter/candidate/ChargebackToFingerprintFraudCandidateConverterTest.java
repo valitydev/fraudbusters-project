@@ -19,7 +19,6 @@ class ChargebackToFingerprintFraudCandidateConverterTest {
 
         FraudDataCandidate candidate = converter.toCandidate(chargeback, "batch-1");
 
-        // fraudbusters looks up inBlackList("fingerprint") in the list named after PaymentCheckedField.FINGERPRINT.
         assertEquals("FINGERPRINT", candidate.getType());
         assertEquals("fp-1", candidate.getValue());
     }

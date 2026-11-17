@@ -66,10 +66,6 @@ public class TimestampUtil {
         return generateTimePropertiesByInstant(instant);
     }
 
-    /**
-     * Parses {@code yyyy-MM-dd[ HH:mm:ss]} (management CSV) and ISO date-time (fraudbusters-api sends
-     * {@code Instant.toString()}); an ISO value with an offset is converted to UTC.
-     */
     @NotNull
     public static LocalDateTime parseDate(String eventTime) {
         LocalDateTime date = LocalDateTime.now();

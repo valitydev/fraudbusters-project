@@ -51,7 +51,6 @@ class PaymentInspectRequestToContextConverterTest {
         payment.setCustomer(new dev.vality.swag.fraudbusters.model.Customer().userId("Synthetic-User"));
         var request = new PaymentInspectRequest().payment(payment);
 
-        // ClientIdentity requires customer_id, so such a context would fail at the Thrift call as a server error.
         assertThrows(TProtocolException.class, () -> new TSerializer().serialize(
                 new dev.vality.damsel.domain.ClientIdentity().setUserId("Synthetic-User")));
         assertThrows(InvalidRequestException.class, () -> converter.convert(request));

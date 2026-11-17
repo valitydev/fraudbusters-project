@@ -57,8 +57,6 @@ public class PaymentDataSetsResource implements PaymentsDataSetApi {
                     createCheckedDataSet(request, userName, historicalDataSetCheckResult);
             Long resultId = paymentsDataSetService.insertCheckedDataSet(dataSetModel, userName);
             log.info("applyRuleOnHistoricalDataSet resultId: {} dataSetId: {}", resultId, request.getDataSetId());
-            // GET /checked-data-sets/{id} reads the latest check of a data set, so the caller needs the data set id;
-            // a check of unsaved records has no data set, and its result id is the only identifier.
             Long checkedDataSetId = request.getDataSetId() != null ? request.getDataSetId() : resultId;
             return ResponseEntity.ok().body(String.valueOf(checkedDataSetId));
         } catch (TException e) {

@@ -21,11 +21,6 @@ import java.util.stream.Collectors;
 import static dev.vality.fraudo.FraudoRulesParser.*;
 import static dev.vality.fraudo.utils.TextUtil.safeGetText;
 
-/**
- * Finds payment history functions over fields the payment history does not store, for example
- * {@code count("masked_pan", ...)}. Such a function fails on every inspection and its rule silently becomes a
- * notification, so a template with it is rejected when saved.
- */
 public class PaymentHistoryFieldValidator {
 
     private static final Set<Class<? extends ParserRuleContext>> PAYMENT_HISTORY_FUNCTIONS = Set.of(
@@ -36,7 +31,6 @@ public class PaymentHistoryFieldValidator {
     private final Set<String> fieldsStoredInHistory;
 
     public PaymentHistoryFieldValidator(DatabasePaymentFieldResolver databasePaymentFieldResolver) {
-        // The aggregators resolve fields with the same method, so the accepted set cannot drift from them.
         this.fieldsStoredInHistory = Arrays.stream(PaymentCheckedField.values())
                 .filter(field -> isStoredInHistory(databasePaymentFieldResolver, field))
                 .map(PaymentCheckedField::getValue)
@@ -67,7 +61,6 @@ public class PaymentHistoryFieldValidator {
         }
     }
 
-    /** The counted field, the unique field of unique, and the grouping fields; not the error code. */
     private static List<TerminalNode> collectAggregateFields(ParserRuleContext function) {
         List<TerminalNode> arguments = function.getTokens(STRING);
         int fieldCount = function instanceof UniqueContext ? 2 : 1;

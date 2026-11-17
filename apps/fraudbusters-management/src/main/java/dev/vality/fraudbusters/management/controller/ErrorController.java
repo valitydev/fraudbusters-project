@@ -78,7 +78,6 @@ public class ErrorController {
                 .build();
     }
 
-    /** Invalid request values: unknown enum names (sortOrder, listType), a negative page size, a bad CSV date. */
     @ExceptionHandler({IllegalArgumentException.class, DateFormatException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
