@@ -79,6 +79,15 @@ public class PaymentTemplateDaoTest {
     }
 
     @Test
+    void filterRejectsNegativeSize() {
+        FilterRequest filterRequest = FilterRequest.builder()
+                .size(-1)
+                .build();
+
+        assertThrows(IllegalArgumentException.class, () -> templateDao.filterModel(filterRequest));
+    }
+
+    @Test
     void filterTemplateTest() {
         TemplateModel templateModel = createTemplateModel("filter_id");
         templateDao.insert(templateModel);

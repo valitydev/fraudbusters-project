@@ -10,5 +10,5 @@ public class CandidateListName {
     public static final String IP = "IP";
     public static final String CARD_TOKEN = "CARD_TOKEN";
     public static final String BIN = "BIN";
-    public static final String FINGERPRRINT = "FINGERPRRINT";
+    public static final String FINGERPRINT = "FINGERPRINT";
 }

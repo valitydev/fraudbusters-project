@@ -102,6 +102,8 @@ public class PaymentHistoricalDataResourceTest {
         LinkedMultiValueMap<String, String> params = createParams();
         params.add("template", "shop-template");
         params.add("rule", "many_emails_per_card");
+        params.add("invoiceId", "invoice-1");
+        params.add("maskedPan", "4242");
         this.mockMvc.perform(get("/payments-historical-data/inspect-results")
                         .queryParams(params))
                 .andDo(print())
@@ -124,6 +126,8 @@ public class PaymentHistoricalDataResourceTest {
         verify(iface).getFraudResults(filterCaptor.capture(), any(), any());
         assertEquals("shop-template", filterCaptor.getValue().getTemplate());
         assertEquals("many_emails_per_card", filterCaptor.getValue().getRule());
+        assertEquals("invoice-1", filterCaptor.getValue().getInvoiceId());
+        assertEquals("4242", filterCaptor.getValue().getMaskedPan());
     }
 
     @Test

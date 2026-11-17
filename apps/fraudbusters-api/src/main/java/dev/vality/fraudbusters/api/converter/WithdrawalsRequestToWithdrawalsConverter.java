@@ -4,10 +4,12 @@ import dev.vality.damsel.domain.CurrencyRef;
 import dev.vality.damsel.fraudbusters.Account;
 import dev.vality.damsel.fraudbusters.Withdrawal;
 import dev.vality.damsel.fraudbusters.WithdrawalStatus;
+import dev.vality.fraudbusters.api.exceptions.InvalidRequestException;
 import dev.vality.swag.fraudbusters.model.WithdrawalsRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +33,10 @@ public class WithdrawalsRequestToWithdrawalsConverter implements Converter<Withd
     }
 
     private Withdrawal mapWithdrawal(dev.vality.swag.fraudbusters.model.Withdrawal item) {
+        if (!StringUtils.hasText(item.getPartyId()) && StringUtils.hasText(item.getWalletId())) {
+            // Payout rules are scoped by party and wallet; a wallet outside a party matches no scope.
+            throw new InvalidRequestException("withdrawal " + item.getId() + ": walletId requires partyId");
+        }
         return new Withdrawal()
                 .setCost(cachToInternalDtoConverter.convert(item.getCash()))
                 .setId(item.getId())

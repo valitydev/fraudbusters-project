@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -141,6 +142,12 @@ class ResourceTest extends AbstractKeycloakOpenIdAsWiremockConfig {
         request.withdrawals(List.of(ApiBeanGenerator.initWithdrawal()));
         restTemplate.postForEntity(initUrl(WITHDRAWALS), request, Void.class);
         verify(fraudbustersDataService, times(1)).insertWithdrawals(any());
+
+        request.withdrawals(List.of(ApiBeanGenerator.initWithdrawal().walletId("synthetic-wallet")));
+        var walletWithoutParty = assertThrows(HttpClientErrorException.BadRequest.class,
+                () -> restTemplate.postForEntity(initUrl(WITHDRAWALS), request, Void.class));
+        assertTrue(walletWithoutParty.getResponseBodyAsString().contains("\"code\":\"invalidRequest\""));
+        verify(fraudbustersDataService, times(1)).insertWithdrawals(any());
     }
 
     @Test
@@ -158,6 +165,13 @@ class ResourceTest extends AbstractKeycloakOpenIdAsWiremockConfig {
 
         request.payment(ApiBeanGenerator.initPayment());
         restTemplate.postForEntity(initUrl(INSPECTOR), request, RiskScoreResult.class);
+        verify(fraudbustersInspectorService, times(1)).inspectPayment(any());
+
+        request.getPayment().customer(new Customer().userId("synthetic-user"));
+        var userWithoutCustomer = assertThrows(HttpClientErrorException.BadRequest.class,
+                () -> restTemplate.postForEntity(initUrl(INSPECTOR), request, RiskScoreResult.class));
+        assertTrue(userWithoutCustomer.getResponseBodyAsString()
+                .contains("customer.userId requires customer.customerId"));
         verify(fraudbustersInspectorService, times(1)).inspectPayment(any());
     }
 

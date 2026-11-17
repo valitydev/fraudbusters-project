@@ -2,6 +2,7 @@ package dev.vality.fraudbusters.management.controller;
 
 import dev.vality.dao.DaoException;
 import dev.vality.fraudbusters.management.domain.response.ErrorResponse;
+import dev.vality.fraudbusters.management.exception.DateFormatException;
 import dev.vality.fraudbusters.management.exception.KafkaProduceException;
 import dev.vality.fraudbusters.management.exception.KafkaSerializationException;
 import dev.vality.fraudbusters.management.exception.NotificatorCallException;
@@ -73,6 +74,18 @@ public class ErrorController {
         log.error("KafkaProduceException exception e: ", e);
         return ErrorResponse.builder()
                 .code(KAFKA_PRODUCE_ERROR)
+                .message(e.getMessage())
+                .build();
+    }
+
+    /** Invalid request values: unknown enum names (sortOrder, listType), a negative page size, a bad CSV date. */
+    @ExceptionHandler({IllegalArgumentException.class, DateFormatException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorResponse handleInvalidParameter(RuntimeException e) {
+        log.warn("Invalid request parameter: {}", e.getMessage());
+        return ErrorResponse.builder()
+                .code(INVALID_PARAMETERS)
                 .message(e.getMessage())
                 .build();
     }

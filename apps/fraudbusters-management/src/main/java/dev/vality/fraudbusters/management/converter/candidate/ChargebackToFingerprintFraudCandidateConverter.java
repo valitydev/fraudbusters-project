@@ -14,7 +14,7 @@ public class ChargebackToFingerprintFraudCandidateConverter extends ChargebackTo
         FraudDataCandidate candidate = prepareCandidate(batchId, chargeback.getMerchantInfo());
         ClientInfo clientInfo = chargeback.getClientInfo();
         candidate.setValue(clientInfo.getFingerprint());
-        candidate.setType(CandidateListName.FINGERPRRINT);
+        candidate.setType(CandidateListName.FINGERPRINT);
         return candidate;
     }
 }

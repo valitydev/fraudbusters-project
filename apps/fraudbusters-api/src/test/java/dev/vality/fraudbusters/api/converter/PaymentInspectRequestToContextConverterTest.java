@@ -1,6 +1,7 @@
 package dev.vality.fraudbusters.api.converter;
 
 import dev.vality.damsel.proxy_inspector.Context;
+import dev.vality.fraudbusters.api.exceptions.InvalidRequestException;
 import dev.vality.fraudbusters.api.utils.ApiBeanGenerator;
 import dev.vality.swag.fraudbusters.model.PaymentInspectRequest;
 import org.apache.thrift.TException;
@@ -18,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class PaymentInspectRequestToContextConverterTest {
 
     @ParameterizedTest
-    @CsvSource({"synthetic-customer,Synthetic-User", "synthetic-customer,", ",Synthetic-User"})
+    @CsvSource({"synthetic-customer,Synthetic-User", "synthetic-customer,"})
     void invoiceIdentityIsPreserved(String customerId, String userId) {
         var converter = new PaymentInspectRequestToContextConverter(new CachToInternalDtoConverter());
         var payment = ApiBeanGenerator.initPayment();
@@ -44,15 +45,16 @@ class PaymentInspectRequestToContextConverterTest {
     }
 
     @Test
-    void missingCustomerIdIsValidatedByProtocol() {
+    void userIdWithoutCustomerIdIsAnInvalidRequest() {
         var converter = new PaymentInspectRequestToContextConverter(new CachToInternalDtoConverter());
         var payment = ApiBeanGenerator.initPayment();
         payment.setCustomer(new dev.vality.swag.fraudbusters.model.Customer().userId("Synthetic-User"));
-        var context = converter.convert(new PaymentInspectRequest().payment(payment));
-        var identity = context.getPayment().getInvoice().getClientIdentity();
+        var request = new PaymentInspectRequest().payment(payment);
 
-        assertEquals("Synthetic-User", identity.getUserId());
-        assertThrows(TProtocolException.class, () -> new TSerializer().serialize(identity));
+        // ClientIdentity requires customer_id, so such a context would fail at the Thrift call as a server error.
+        assertThrows(TProtocolException.class, () -> new TSerializer().serialize(
+                new dev.vality.damsel.domain.ClientIdentity().setUserId("Synthetic-User")));
+        assertThrows(InvalidRequestException.class, () -> converter.convert(request));
     }
 
     @Test
