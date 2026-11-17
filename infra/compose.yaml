@@ -284,6 +284,8 @@ services:
       fraudbusters.service.payment.networkTimeout: 30000
       fraudbusters.service.inspector.url: http://fraudbusters:8022/fraud_inspector/v1
       fraudbusters.service.inspector.networkTimeout: 30000
+      fraudbusters.service.user.inspector.url: http://fraudbusters:8022/inspector/v1/
+      fraudbusters.service.user.inspector.networkTimeout: 30000
       server.port: '8080'
       JAVA_OPTS: -Xmx768m
       auth.enabled: 'false'

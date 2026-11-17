@@ -1,0 +1,46 @@
+services:
+  fraudbusters:
+    image: ghcr.io/valitydev/fraudbusters:${FRAUDBUSTERS_TAG:?set FRAUDBUSTERS_TAG}
+    ports: !reset []
+  fraudbusters-api:
+    image: ghcr.io/valitydev/fraudbusters-api:${FRAUDBUSTERS_API_TAG:?set FRAUDBUSTERS_API_TAG}
+    ports: !reset []
+  fb-management:
+    image: ghcr.io/valitydev/fraudbusters-management:${FRAUDBUSTERS_MANAGEMENT_TAG:?set FRAUDBUSTERS_MANAGEMENT_TAG}
+    ports: !reset []
+  fb-notificator:
+    image: ghcr.io/valitydev/fraudbusters-notificator:${FRAUDBUSTERS_NOTIFICATOR_TAG:?set FRAUDBUSTERS_NOTIFICATOR_TAG}
+    ports: !reset []
+  fb-warehouse:
+    image: ghcr.io/valitydev/fraudbusters-warehouse:${FRAUDBUSTERS_WAREHOUSE_TAG:?set FRAUDBUSTERS_WAREHOUSE_TAG}
+    ports: !reset []
+  trusted-tokens-manager:
+    image: ghcr.io/valitydev/trusted-tokens-manager:${TRUSTED_TOKENS_MANAGER_TAG:?set TRUSTED_TOKENS_MANAGER_TAG}
+    ports: !reset []
+  wblist:
+    image: ghcr.io/valitydev/wb-list-manager:${WB_LIST_MANAGER_TAG:?set WB_LIST_MANAGER_TAG}
+    ports: !reset []
+  broker:
+    ports: !reset []
+  riak:
+    ports: !reset []
+  clickhouse:
+    ports: !reset []
+  grafana:
+    ports: !reset []
+  columbus:
+    ports: !reset []
+  postgres-fb:
+    ports: !reset []
+  postgres-notificator:
+    ports: !reset []
+  fraudbusters-ui:
+    ports: !reset []
+  keycloak:
+    ports: !reset []
+  postgres-wblist:
+    ports: !reset []
+  postgres-trusted-tokens:
+    ports: !reset []
+  fraudbusters-mg-connector:
+    ports: !reset []

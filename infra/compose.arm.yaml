@@ -1,6 +1,10 @@
 services:
   zookeeper:
     image: watershine/cp-zookeeper:6.1.0-arm64
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - cub zk-ready localhost:2181 10
   broker:
     image: watershine/cp-enterprise-kafka:6.1.0-arm64
   clickhouse:
