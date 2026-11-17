@@ -28,7 +28,10 @@ if (caseIds.length) {
     if (right && right.status === 'failed' && right.error) differences.push(right.error);
     const leftStatus = left ? left.status : 'absent';
     const rightStatus = right ? right.status : 'absent';
-    if (leftStatus === 'passed' && rightStatus !== 'passed') regressions.push(`${id}: passed → ${rightStatus}`);
+    if (leftStatus === 'passed' && !['passed', 'skipped'].includes(rightStatus)) {
+      regressions.push(`${id}: passed → ${rightStatus}`);
+    }
+    if (right && right.status === 'skipped' && right.error) differences.push(right.error);
     lines.push(`| ${id} | ${leftStatus} | ${rightStatus} | ${cell(differences.join('; '))} |`);
   });
   lines.push('');

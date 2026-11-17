@@ -4,7 +4,7 @@ import { payoutSteps } from '../../payouts/steps.js';
 export default {
   id: 'LC-06',
   title: 'Шаблон и список выплат после перезапуска',
-  applies: (fromVersion) => fromVersion === data.appliesFrom,
+  since: 'payouts',
   prepare(context) {
     const steps = payoutSteps(context);
     const scope = steps.scope();

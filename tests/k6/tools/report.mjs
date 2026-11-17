@@ -8,6 +8,7 @@ if (!directory) {
 const run = readRun(directory);
 const lines = [`# ${run.started.suite || 'k6'} / ${run.started.profile || '?'} / ${run.started.version || '?'}`, ''];
 lines.push(`Run id: \`${run.started.run_id || '?'}\``, '');
+if (run.started.features) lines.push(`Features: ${run.started.features.join(', ') || 'none'}`, '');
 
 if (run.cases.size || (run.started.cases || []).length) {
   const statuses = [...run.cases.values()].reduce((all, item) => ({ ...all, [item.status]: (all[item.status] || 0) + 1 }), {});

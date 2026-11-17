@@ -31,8 +31,6 @@ export default {
         ? [decision, { name: `${scenario.name} (REST)`, actual: rest, expected: REST_RESULT[status] }]
         : [decision];
     });
-    const spelling = outcomes.find((outcome) => outcome.name === 'code_spelling_decision');
-    outcomes.push({ name: 'code_without_space_counted_by_rule_with_space', actual: spelling.actual.startsWith('decline') });
     expectOutcomes(context, outcomes);
   },
 };

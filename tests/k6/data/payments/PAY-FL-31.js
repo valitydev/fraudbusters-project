@@ -12,15 +12,6 @@ export default {
       expected: 'fatal' },
     { role: 'phone', template: byField('phone'), payment: { phone: '79990001122' }, expected: 'fatal' },
     { role: 'bin', template: byField('bin'), payment: { bin: '431999' }, expected: 'fatal' },
-    { role: 'masked-pan', template: byField('masked_pan'), payment: { bin: '432999', lastDigits: '4321' } },
     { role: 'country-bank', template: byField('country_bank'), payment: { bankCountry: 'KAZ' } },
   ],
-  maskedPanWithCatch: {
-    template: `
-      rule: by_field: count("masked_pan", 1, days) > 2 -> decline catch: highRisk;
-      rule: other: amount() > 0 -> accept;
-    `,
-    payment: { bin: '433999', lastDigits: '4321' },
-    ready: { bin: '433999', lastDigits: '4321', decision: 'high' },
-  },
 };

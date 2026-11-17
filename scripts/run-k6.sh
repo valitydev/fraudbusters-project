@@ -15,8 +15,8 @@ compose() {
 settings=(K6_CASES RUN_ID RATE TARGET_RATE SPIKE_RATE DURATION RAMP_DURATION STEP_DURATION VUS MAX_VUS CONCURRENCY
     WAIT_TIMEOUT_MS POLL_INTERVAL_MS REQUEST_TIMEOUT_MS CASES_MAX_DURATION P95_LIMIT_MS SHARE_ACCEPT SHARE_AMOUNT
     SHARE_BLACK SHARE_VELOCITY SHARE_HISTORY_SEARCH SHARE_PAYOUT_ACCEPT SHARE_PAYOUT_BLACK RECONFIGURE RECONFIGURE_AT
-    STRESS_FACTORS K6_PHASE FROM_VERSION FB_MANAGEMENT_URL FB_API_URL FB_INSPECTOR_URL FB_AUTH_URL FB_AUTH_REALM
-    FB_AUTH_CLIENT READY_TIMEOUT)
+    STRESS_FACTORS K6_PHASE FEATURES FROM_FEATURES FB_MANAGEMENT_URL FB_API_URL FB_INSPECTOR_URL FB_AUTH_URL
+    FB_AUTH_REALM FB_AUTH_CLIENT READY_TIMEOUT)
 secrets=(FB_TOKEN FB_AUTH_USER FB_AUTH_PASSWORD)
 
 usage() {
@@ -34,6 +34,10 @@ USAGE
 
 version_file() {
     [[ -f "tests/k6/versions/$1.env" ]] || { echo "Unknown version $1; see tests/k6/versions" >&2; exit 2; }
+}
+
+features_of() {
+    sed -n 's/^FEATURES=//p' "tests/k6/versions/$1.env"
 }
 
 wait_ready() {
@@ -61,9 +65,10 @@ case "${1:-}" in
         [[ -f "tests/k6/suites/$suite/main.js" ]] || { echo "Unknown suite $suite" >&2; exit 2; }
         results="tests/k6/results/$suite-$profile-$version-$(date -u +%Y%m%dT%H%M%SZ)"
         mkdir -p "$results"
+        FEATURES=$(features_of "$version")
         passthrough=()
         for name in "${settings[@]}" "${secrets[@]}"; do
-            if [[ -n "${!name:-}" ]]; then passthrough+=(-e "$name=${!name}"); fi
+            if [[ -n "${!name+set}" ]]; then passthrough+=(-e "$name=${!name}"); fi
         done
         set +e
         docker run --rm --network "${project}_default" -u "$(id -u):$(id -g)" \
@@ -82,7 +87,8 @@ case "${1:-}" in
         version_file "$from"
         version_file "$to"
         export RUN_ID=${RUN_ID:-lc$(date +%H%M%S)}
-        export FROM_VERSION=$from
+        export FROM_FEATURES
+        FROM_FEATURES=$(features_of "$from")
         set +e
         K6_PHASE=prepare "$0" test "$from" lifecycle functional
         prepared=$?
@@ -123,7 +129,7 @@ case "${1:-}" in
             env_entry VERSION "$label"
             env_entry RESULTS_DIR /results
             for key in "${settings[@]}"; do
-                if [[ -n "${!key:-}" ]]; then env_entry "$key" "${!key}"; fi
+                if [[ -n "${!key+set}" ]]; then env_entry "$key" "${!key}"; fi
             done
         } > "$bundle/env.yaml"
         awk -v env_file="$bundle/env.yaml" '/^__ENV__$/ { while ((getline line < env_file) > 0) print line; next } { print }' \
@@ -142,7 +148,7 @@ case "${1:-}" in
         created=1
         "${kube[@]}" create configmap "$name" --from-file=tests.tgz="$bundle/tests.tgz" >/dev/null
         "${kube[@]}" apply -f "$bundle/job.yaml" >/dev/null
-        echo "Job $name in namespace ${namespace:-of the current context}"
+        echo "Job $name in namespace ${K8S_NAMESPACE:-of the current context}"
         pod=
         until [[ -n "$pod" ]]; do
             pod=$("${kube[@]}" get pods -l "job-name=$name" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
@@ -165,7 +171,8 @@ case "${1:-}" in
         exit "$status"
         ;;
     down)
-        compose before-payouts down -v --remove-orphans
+        any_version=$(ls tests/k6/versions | head -1)
+        compose "${any_version%.env}" down -v --remove-orphans
         ;;
     *)
         usage

@@ -4,7 +4,7 @@ import { paymentSteps } from '../steps.js';
 
 export default {
   id: 'PAY-FL-31',
-  title: 'Агрегаты по полям: email, ip, fingerprint, phone, bin, masked_pan, country_bank',
+  title: 'Агрегаты по полям: email, ip, fingerprint, phone, bin, country_bank',
   profiles: ['functional'],
   run(context) {
     const steps = paymentSteps(context);
@@ -16,15 +16,9 @@ export default {
     steps.loadAndAwait(variants.flatMap((variant) => data.loads.map(() => steps.payment({
       ...variant.scope, ...variant.payment,
     }))));
-    const caught = data.maskedPanWithCatch;
-    const caughtScope = steps.scope('masked-pan-catch');
-    steps.applyTemplate('template-masked-pan-catch', caught.template, caughtScope, caught.ready);
-    expectOutcomes(context, [
-      ...variants.map((variant) => ({
-        name: variant.role, actual: steps.inspect(steps.payment({ ...variant.scope, ...variant.payment })),
-        expected: variant.expected,
-      })),
-      { name: 'masked_pan_with_catch', actual: steps.inspect(steps.payment({ ...caughtScope, ...caught.payment })) },
-    ]);
+    expectOutcomes(context, variants.map((variant) => ({
+      name: variant.role, actual: steps.inspect(steps.payment({ ...variant.scope, ...variant.payment })),
+      expected: variant.expected,
+    })));
   },
 };

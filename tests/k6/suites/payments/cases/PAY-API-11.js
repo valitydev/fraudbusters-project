@@ -29,10 +29,11 @@ export default {
       return { done: Boolean(found), value: found };
     });
     const candidates = { email: candidateOf('email'), fingerprint: candidateOf('fingerprint'), ip: candidateOf('ip') };
-    expectEqual({ email: candidates.email.listName, ip: candidates.ip.listName, listType: candidates.email.listType },
-      data.expected, 'candidates from the chargeback');
+    expectEqual({
+      email: candidates.email.listName, ip: candidates.ip.listName, fingerprint: candidates.fingerprint.listName,
+      listType: candidates.email.listType,
+    }, data.expected, 'candidates from the chargeback');
     expectEqual(candidates.email.shopId, shopId, 'shop of the candidate');
-    context.observe('fingerprint_candidate_list_name', candidates.fingerprint.listName);
     const batches = expectSuccess(management.filterCandidateBatches({ size: 100, sortOrder: 'DESC' }), 'batches');
     context.observe('batches_found', (batches.result || []).length > 0);
     expectSuccess(management.approveListCandidates(data.approve.map((field) => Number(candidates[field].id))),
@@ -40,11 +41,6 @@ export default {
     steps.awaitListRow('black', candidates.email.listName, client.email);
     expectEqual(steps.findListRows('black', candidates.ip.listName, client.ip).length, 0,
       'not approved candidate is not in the list');
-    waitFor(connection, 'approved fingerprint row', () => {
-      const listName = ['FINGERPRINT', 'FINGERPRRINT'].find((name) => steps.findListRows('black', name,
-        client.fingerprint).length > 0);
-      context.observe('approved_fingerprint_list', listName || 'none');
-      return { done: Boolean(listName) };
-    });
+    steps.awaitListRow('black', data.expected.fingerprint, client.fingerprint);
   },
 };

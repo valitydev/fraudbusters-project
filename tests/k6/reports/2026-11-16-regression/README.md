@@ -13,8 +13,8 @@
 
 | Версия | Коммит | Образы |
 | --- | --- | --- |
-| [before-payouts](../../versions/before-payouts.env) | `bc0480a8` | `sha-bc0480a`, wb-list-manager `sha-4743641` |
-| [after-payouts](../../versions/after-payouts.env) | `18c71eab` | `sha-306afdb`, fraudbusters-management `sha-45f6deb` |
+| [before-payouts](../../versions/bc0480a8.env) | `bc0480a8` | `sha-bc0480a`, wb-list-manager `sha-4743641` |
+| [after-payouts](../../versions/18c71eab.env) | `18c71eab` | `sha-306afdb`, fraudbusters-management `sha-45f6deb` |
 
 ```bash
 scripts/run-k6.sh up before-payouts
@@ -78,5 +78,5 @@ fraudbusters пишет WARN, применяет остальные правил
 ## Не покрыто
 
 - PAY-FL-15, PAY-FL-21: именованные списки и глобальная привязка платежей через REST не создаются.
-- Путь machinegun → mg-connector → ClickHouse: локально выключен.
+- Загрузка истории из потока событий процессинга через mg-connector: локально выключена.
 - Нагрузка: [2026-11-17-load](../2026-11-17-load/README.md).

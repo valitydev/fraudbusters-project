@@ -1,6 +1,5 @@
 import data from '../../../data/payments/PAY-API-13.js';
-import { expectSuccess } from '../../../lib/assert.js';
-import { ANY_STATUS } from '../../../lib/http.js';
+import { expectEqual, expectSuccess } from '../../../lib/assert.js';
 import { waitFor } from '../../../lib/poll.js';
 import { historyTime, historyWindow } from '../../../lib/time.js';
 import { buildChargeback, buildRefund } from '../../../fixtures/payment.js';
@@ -27,21 +26,18 @@ export default {
     const csv = [data.csvHeader, ...byCsv.map((payment) =>
       [payment.id, historyTime(new Date()), fraud.type, fraud.comment].join(','))].join('\n');
     expectSuccess(management.uploadFraudPaymentsCsv(csv), 'upload fraud payments CSV');
-    const apiLoad = inspection.loadFraudPayments([{
-      paymentId: byApi.id, eventTime: new Date().toISOString(), ...fraud,
-    }], ANY_STATUS);
-    context.observe('fraud_payment_api_status', apiLoad.status);
+    expectSuccess(inspection.loadFraudPayments([{ paymentId: byApi.id, eventTime: new Date().toISOString(), ...fraud }]),
+      'load fraud payment');
     awaitOperationsInHistory(context, REFUNDS, scope.partyId, refunds.map((refund) => refund.id));
     awaitOperationsInHistory(context, CHARGEBACKS, scope.partyId, chargebacks.map((chargeback) => chargeback.id));
     const findFraudPayment = (payment) => (expectSuccess(management.filterFraudPaymentsHistory(
       { ...historyWindow(), paymentId: payment.id, size: 10 }), 'filter fraud payments').result || [])
       .find((item) => item.payment && item.payment.id === payment.id);
-    const stored = byCsv.map((payment) => waitFor(connection, `fraud payment ${payment.id}`, () => {
+    const stored = [...byCsv, byApi].map((payment) => waitFor(connection, `fraud payment ${payment.id}`, () => {
       const found = findFraudPayment(payment);
       return { done: Boolean(found), value: found };
     }));
-    context.observe('fraud_payment_type_and_comment_match', stored[0].type === fraud.type
-      && stored[0].comment === fraud.comment);
-    context.observe('fraud_payment_api_stored', Boolean(findFraudPayment(byApi)));
+    expectEqual(stored.map((item) => ({ type: item.type, comment: item.comment })),
+      stored.map(() => ({ type: fraud.type, comment: fraud.comment })), 'type and comment of fraud payments');
   },
 };

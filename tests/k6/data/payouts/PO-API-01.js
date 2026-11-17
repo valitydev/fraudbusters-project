@@ -6,4 +6,5 @@ export default {
       AND countPayoutsError("card_token", 24, hours, "k6_limit") > 0 -> decline;
   `,
   invalid: 'rule: amount( > 10 -> accept;',
+  spacedErrorCode: 'rule: countPayoutsError("card_token", 24, hours, "k6: limit") > 0 -> decline;',
 };

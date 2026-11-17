@@ -22,7 +22,7 @@ export default {
       const found = search({ paymentId: inspectResultId(payment.id) }).length;
       return { done: found === 1, observed: found };
     }));
-    context.observe('filter_invoice_id_count', search({ invoiceId: inspected[0].id }).length);
+    expectEqual(search({ invoiceId: inspected[0].id }).length, 1, 'filter by invoice id');
     context.observe('filter_plain_payment_id_count', search({ paymentId: inspected[0].id }).length);
     const byTemplate = search({ template: templateId });
     expectTrue(byTemplate.length >= inspected.length && byTemplate.every((item) => item.checkedTemplate === templateId),

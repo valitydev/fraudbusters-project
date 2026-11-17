@@ -5,5 +5,5 @@ export default {
   `,
   client: { userId: '{{user}}', customerId: '{{customer}}' },
   loadsInFirstParty: ['captured', 'captured', 'captured'],
-  expected: { firstParty: 'fatal', secondParty: 'low' },
+  expected: { firstParty: 'fatal', secondParty: 'low', withoutCustomer: 400 },
 };

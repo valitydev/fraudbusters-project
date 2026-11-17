@@ -5,7 +5,7 @@ import { paymentSteps } from '../../payments/steps.js';
 export default {
   id: 'LC-05',
   title: 'Шаблон со снятым синтаксисом isTrusted(paymentsConditions(...)) при обновлении',
-  applies: (fromVersion) => fromVersion === data.appliesFrom,
+  until: 'payouts',
   prepare(context) {
     const steps = paymentSteps(context);
     steps.applyTemplate('legacy', data.template, steps.scope(), { ...data.declined, decision: data.expected });

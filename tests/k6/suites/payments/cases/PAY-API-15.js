@@ -35,12 +35,10 @@ export default {
       dataSetId: Number(setId), records: dataSet.rows.map((row) => row.payment), template: data.template.trim(),
       reference: { partyId, shopId },
     }), 'apply rule on the data set');
-    const checked = expectSuccess(management.fetchCheckedDataSet(String(setId)), 'fetch checked data set');
+    expectEqual(String(checkedId), String(setId), 'apply rule returns the data set id');
+    const checked = expectSuccess(management.fetchCheckedDataSet(String(checkedId)), 'fetch checked data set');
     expectEqual(String(checked.testDataSetId), String(setId), 'checked data set belongs to the data set');
     expectEqual((checked.rows || []).length, payments.length, 'checked rows');
-    const byReturnedId = management.fetchCheckedDataSet(String(checkedId), ANY_STATUS);
-    context.observe('fetch_by_returned_id_gives_own_set', byReturnedId.status === 200
-      && String((byReturnedId.json() || {}).testDataSetId) === String(setId));
     const rowOf = new Map((checked.rows || []).map((row) => [row.payment && row.payment.paymentId, row]));
     const decisions = payments.map((payment) => {
       const row = rowOf.get(payment.id) || {};

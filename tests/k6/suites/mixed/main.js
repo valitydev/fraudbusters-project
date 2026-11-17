@@ -2,7 +2,7 @@ import cases from './cases/index.js';
 import { defineSuite } from '../../lib/suite.js';
 import { trafficOf } from '../traffic.js';
 
-const suite = defineSuite({ name: 'mixed', cases, traffic: trafficOf('mixed') });
+const suite = defineSuite({ name: 'mixed', since: 'payouts', cases, traffic: trafficOf('mixed') });
 
 export const options = suite.options;
 export const setup = suite.setup;

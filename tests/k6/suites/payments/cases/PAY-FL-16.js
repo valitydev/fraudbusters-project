@@ -5,6 +5,7 @@ export default {
   id: 'PAY-FL-16',
   title: 'Доверенная карта isTrusted',
   profiles: ['functional'],
+  until: 'payouts',
   run(context) {
     const steps = paymentSteps(context);
     const scope = steps.scope();

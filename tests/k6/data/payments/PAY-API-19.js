@@ -7,5 +7,4 @@ export default {
     templates_size_negative: { search: 'filterPaymentTemplates', query: { size: -1 } },
     templates_without_size: { search: 'filterPaymentTemplates', query: {} },
   },
-  knownServerErrors: ['templates_unknown_sort_order', 'lists_unknown_list_type', 'templates_size_negative'],
 };

@@ -13,5 +13,10 @@ export default {
     const invalid = validate('invalid', data.invalid);
     expectTrue(invalid.length > 0 && invalid.every((error) => String(error).length > 0),
       `invalid template must have error texts, got ${JSON.stringify(invalid)}`);
+    data.rejected.forEach((item, index) => {
+      const errors = validate(`rejected-${index}`, item.template);
+      expectTrue(errors.some((error) => String(error).includes(item.mentions)),
+        `${item.name} must be rejected with an error about ${item.mentions}, got ${JSON.stringify(errors)}`);
+    });
   },
 };

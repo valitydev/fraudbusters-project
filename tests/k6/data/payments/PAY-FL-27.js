@@ -1,5 +1,4 @@
-const EXPIRED = 'card_expired: k6';
-const EXPIRED_WITHOUT_SPACE = 'card_expired:k6';
+const EXPIRED = 'card_expired:k6';
 
 export default {
   template: `
@@ -15,7 +14,7 @@ rule: loyal_by_sum: amount() <= 500000 and (not in("email", "UNKNOWN")) and sumS
 rule: regular_monthly: sumSuccess("email", 30, days, "party_id") >= 200000 and not in("email", "UNKNOWN") -> accept;
 
 rule: pending_burst: countPending("email", 5, minutes, "party_id") > 2 and sumSuccess("email", 7, days, "party_id") < 100000 and not in("email", "UNKNOWN") -> decline;
-rule: pending_hour: countPending("email", 90, minutes) > 8 and countError("email", 5, days, "${EXPIRED_WITHOUT_SPACE}") > 15 and not in("email", "UNKNOWN") -> decline;
+rule: pending_hour: countPending("email", 90, minutes) > 8 and countError("email", 5, days, "${EXPIRED}") > 15 and not in("email", "UNKNOWN") -> decline;
 
 rule: expired_day: countError("email", 1, days, "${EXPIRED}") > 3 and sumSuccess("email", 10, days, "party_id") < 300000 and not in("email", "UNKNOWN") -> decline;
 rule: expired_two_weeks: countError("email", 14, days, "${EXPIRED}") > 6 and sumSuccess("email", 14, days, "party_id") < 250000 and not in("email", "UNKNOWN") -> decline;
@@ -37,13 +36,11 @@ rule: expired_two_weeks: countError("email", 14, days, "${EXPIRED}") > 6 and sum
     { client: 'loyal', count: 5, status: 'captured' },
     { client: 'loyal-expired', count: 5, status: 'captured' },
     { client: 'loyal-other-code', count: 5, status: 'captured' },
-    { client: 'loyal-code-spelling', count: 5, status: 'captured' },
     { client: 'unknown', count: 5, status: 'captured', with: { email: null } },
     { client: 'unknown-literal', count: 5, status: 'captured', with: { email: 'UNKNOWN' } },
     { client: 'loyal-sum', count: 2, status: 'captured', with: { amount: 200000 } },
     { client: 'loyal-expired', count: 4, status: 'failed', errorCode: EXPIRED },
     { client: 'loyal-other-code', count: 4, status: 'failed', errorCode: 'insufficient_funds' },
-    { client: 'loyal-code-spelling', count: 4, status: 'failed', errorCode: EXPIRED_WITHOUT_SPACE },
     { client: 'pending', count: 5, status: 'pending' },
   ],
   scenarios: [
@@ -83,6 +80,5 @@ rule: expired_two_weeks: countError("email", 14, days, "${EXPIRED}") > 6 and sum
     { name: 'pending burst', client: 'pending', expected: 'decline/pending_burst' },
     { name: 'rest_answer_for_trust', client: 'loyal', observe: 'rest' },
     { name: 'literal_unknown_email_decision', client: 'unknown-literal', with: { email: 'UNKNOWN' }, observe: 'decision' },
-    { name: 'code_spelling_decision', client: 'loyal-code-spelling', observe: 'decision' },
   ],
 };

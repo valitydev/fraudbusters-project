@@ -1,6 +1,7 @@
 import execution from 'k6/execution';
 import { connection, text } from './env.js';
 import { runCase } from './cases.js';
+import { featuresOf, unavailabilityReason, withAvailability } from './features.js';
 import { randomRunId } from './ids.js';
 import { expectSuccess } from './assert.js';
 import { executionOptions, selectedCases, splitCases, summaryFiles } from './profiles.js';
@@ -20,9 +21,13 @@ export function clients() {
   };
 }
 
-export function defineSuite({ name, cases, traffic, runId = () => __ENV.RUN_ID || randomRunId(), profile }) {
+export function defineSuite({
+  name, cases, traffic, since, features = featuresOf('FEATURES'), runId = () => __ENV.RUN_ID || randomRunId(), profile,
+}) {
   const version = text('VERSION', 'unknown');
-  const selected = selectedCases(cases);
+  const selected = withAvailability(selectedCases(cases), features, since);
+  const trafficUnavailable = traffic && unavailabilityReason({ since }, features);
+  if (trafficUnavailable && !selected.length) throw new Error(`Traffic of ${name} ${trafficUnavailable}`);
   const { parallel, sequential } = splitCases(selected);
   return {
     options: executionOptions(name, selected, { trafficProfiles: Boolean(traffic) }),
@@ -32,8 +37,8 @@ export function defineSuite({ name, cases, traffic, runId = () => __ENV.RUN_ID |
       expectSuccess(context.management.filterPaymentTemplates({ size: 1 }), 'management is reachable');
       const id = runId();
       console.log(JSON.stringify({
-        event: 'run_started', suite: name, run_id: id, version, profile: profile || text('K6_PROFILE', 'functional'),
-        cases: selected.map((item) => item.id),
+        event: 'run_started', suite: name, run_id: id, version, features,
+        profile: profile || text('K6_PROFILE', 'functional'), cases: selected.map((item) => item.id),
       }));
       const prepared = !selected.length && traffic ? traffic.prepare({ ...context, runId: id }) : undefined;
       return { runId: id, traffic: prepared };

@@ -20,7 +20,8 @@ export default {
     const now = Date.now();
     const greyCsv = [grey.header, [partyId, shopId, grey.listName, grey.value, grey.count, new Date(now).toISOString(),
       new Date(now + grey.durationMs).toISOString()].join(',')].join('\n');
-    context.observe('grey_csv_status', management.uploadPaymentListCsv('grey', greyCsv).status);
+    expectSuccess(management.uploadPaymentListCsv('grey', greyCsv), 'upload grey list CSV');
+    steps.awaitListRow('grey', grey.listName, grey.value);
     expectSuccess(management.removePaymentListCsv('black', csv), 'remove black list CSV');
     waitFor(connection, 'rows removed by CSV', () => ({ done: rows() === 0, observed: rows() }));
   },

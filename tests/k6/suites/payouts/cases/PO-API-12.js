@@ -15,6 +15,7 @@ export default {
     expectStatus(inspection.loadWithdrawals([ids.resolve(data.broken)], ANY_STATUS), [data.expected.broken],
       'withdrawal without required fields');
     const walletOnly = withdrawalRecord(steps.withdrawal(data.walletWithoutParty), 'succeeded');
-    context.observe('wallet_without_party_status', inspection.loadWithdrawals([walletOnly], ANY_STATUS).status);
+    expectStatus(inspection.loadWithdrawals([walletOnly], ANY_STATUS), [data.expected.walletWithoutParty],
+      'wallet without party');
   },
 };

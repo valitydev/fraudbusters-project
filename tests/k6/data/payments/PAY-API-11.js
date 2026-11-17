@@ -8,6 +8,6 @@ export default {
     payerType: 'payment_resource',
   },
   client: { email: '{{prefix}}-candidate@k6.test', fingerprint: '{{candidate-fingerprint}}' },
-  expected: { email: 'EMAIL', ip: 'IP', listType: 'black' },
+  expected: { email: 'EMAIL', ip: 'IP', fingerprint: 'FINGERPRINT', listType: 'black' },
   approve: ['email', 'fingerprint'],
 };

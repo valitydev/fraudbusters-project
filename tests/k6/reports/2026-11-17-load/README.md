@@ -1,6 +1,6 @@
 # Нагрузка до и после XYZ-598, 2026-11-16 — 2026-11-17
 
-Нагрузочные профили NF-03…NF-09 из [TEST_CASES.md](../../TEST_CASES.md) и разбор роста задержки.
+Нагрузочные профили NF-03…NF-09 из [описания наборов](../../suites/README.md#нагрузка-nf) и разбор роста задержки.
 
 ## Данные прогона
 
@@ -13,8 +13,8 @@
 
 | Версия | Коммит | Образы |
 | --- | --- | --- |
-| [before-payouts](../../versions/before-payouts.env) | `bc0480a8` | `sha-bc0480a`, wb-list-manager `sha-4743641` |
-| [after-payouts](../../versions/after-payouts.env) | `18c71eab` | `sha-306afdb`, fraudbusters-management `sha-45f6deb` |
+| [before-payouts](../../versions/bc0480a8.env) | `bc0480a8` | `sha-bc0480a`, wb-list-manager `sha-4743641` |
+| [after-payouts](../../versions/18c71eab.env) | `18c71eab` | `sha-306afdb`, fraudbusters-management `sha-45f6deb` |
 
 Трафик `payments`: новый платёж без риска с загрузкой в историю — 70%, отказ по сумме — 10%, карта из чёрного списка —
 10%, карта над лимитом `count` — 10%, 5% итераций ищут в истории. Каждая итерация проверяет ожидаемое решение.
