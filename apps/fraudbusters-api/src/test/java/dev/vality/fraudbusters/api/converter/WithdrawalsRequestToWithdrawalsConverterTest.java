@@ -2,6 +2,7 @@ package dev.vality.fraudbusters.api.converter;
 
 import dev.vality.damsel.fraudbusters.Withdrawal;
 import dev.vality.damsel.fraudbusters.WithdrawalStatus;
+import dev.vality.fraudbusters.api.exceptions.InvalidRequestException;
 import dev.vality.fraudbusters.api.utils.ApiBeanGenerator;
 import dev.vality.swag.fraudbusters.model.WithdrawalsRequest;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,14 @@ class WithdrawalsRequestToWithdrawalsConverterTest {
         assertNotNull(withdrawal.getEventTime());
         assertEquals(WithdrawalStatus.succeeded, withdrawal.getStatus());
         assertEquals(ApiBeanGenerator.ACCOUNT_ID, withdrawal.getAccount().getId());
+    }
+
+    @Test
+    void walletWithoutPartyIsAnInvalidRequest() {
+        var request = new WithdrawalsRequest().withdrawals(List.of(ApiBeanGenerator.initWithdrawal()
+                .walletId("synthetic-wallet")));
+
+        assertThrows(InvalidRequestException.class, () -> createConverter().convert(request));
     }
 
     @Test

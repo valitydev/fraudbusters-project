@@ -46,7 +46,7 @@ public class PaymentHistoricalDataResource implements PaymentsHistoricalDataApi 
                 continuationId, size, partyId, shopId, paymentId, status, email, providerCountry, cardToken,
                 fingerprint, terminal, template, rule);
         var filter = createFilter(createTimestampInterval(from, to), partyId, shopId, paymentId, status, email,
-                providerCountry, cardToken, fingerprint, terminal, customerId, userId)
+                providerCountry, cardToken, fingerprint, terminal, invoiceId, maskedPan, customerId, userId)
                 .setTemplate(template)
                 .setRule(rule);
         var payments = historicalDataServiceSrv.getPayments(
@@ -79,7 +79,7 @@ public class PaymentHistoricalDataResource implements PaymentsHistoricalDataApi 
                 terminal);
         var chargebacks = historicalDataServiceSrv.getChargebacks(
                 createFilter(createTimestampInterval(from, to), partyId, shopId, paymentId, status, email,
-                        providerCountry, cardToken, fingerprint, terminal, customerId, userId),
+                        providerCountry, cardToken, fingerprint, terminal, invoiceId, maskedPan, customerId, userId),
                 createPage(continuationId, size),
                 createSort(sortOrder, sortBy));
         var chargebacksResponse = new ChargebacksResponse()
@@ -111,7 +111,7 @@ public class PaymentHistoricalDataResource implements PaymentsHistoricalDataApi 
                 terminal);
         var fraudPayments = historicalDataServiceSrv.getFraudPayments(
                 createFilter(createTimestampInterval(from, to), partyId, shopId, paymentId, status, email,
-                        providerCountry, cardToken, fingerprint, terminal, customerId, userId),
+                        providerCountry, cardToken, fingerprint, terminal, invoiceId, maskedPan, customerId, userId),
                 createPage(continuationId, size),
                 createSort(sortOrder, sortBy));
         var fraudPaymentsResponse = new FraudPaymentsResponse()
@@ -144,7 +144,7 @@ public class PaymentHistoricalDataResource implements PaymentsHistoricalDataApi 
                 continuationId, size, partyId, shopId, paymentId, status, email, providerCountry, cardToken,
                 fingerprint, terminal, template, rule);
         var filter = createFilter(createTimestampInterval(from, to), partyId, shopId, paymentId, status, email,
-                providerCountry, cardToken, fingerprint, terminal, customerId, userId)
+                providerCountry, cardToken, fingerprint, terminal, invoiceId, maskedPan, customerId, userId)
                 .setTemplate(template)
                 .setRule(rule);
         var fraudResults = historicalDataServiceSrv.getFraudResults(
@@ -177,7 +177,7 @@ public class PaymentHistoricalDataResource implements PaymentsHistoricalDataApi 
                 terminal);
         var fraudResults = historicalDataServiceSrv.getRefunds(
                 createFilter(createTimestampInterval(from, to), partyId, shopId, paymentId, status, email,
-                        providerCountry, cardToken, fingerprint, terminal, customerId, userId),
+                        providerCountry, cardToken, fingerprint, terminal, invoiceId, maskedPan, customerId, userId),
                 createPage(continuationId, size),
                 createSort(sortOrder, sortBy));
         var refundsResponse = new RefundsResponse()
@@ -211,7 +211,8 @@ public class PaymentHistoricalDataResource implements PaymentsHistoricalDataApi 
 
     private Filter createFilter(TimestampInterval timestampInterval, String partyId, String shopId, String paymentId,
                                 String status, String email, String providerCountry, String cardToken,
-                                String fingerprint, String terminal, String customerId, String userId) {
+                                String fingerprint, String terminal, String invoiceId, String maskedPan,
+                                String customerId, String userId) {
         return new Filter()
                 .setInterval(timestampInterval)
                 .setEmail(email)
@@ -224,6 +225,8 @@ public class PaymentHistoricalDataResource implements PaymentsHistoricalDataApi 
                 .setProviderCountry(providerCountry)
                 .setShopId(shopId)
                 .setStatus(status)
-                .setTerminal(terminal);
+                .setTerminal(terminal)
+                .setInvoiceId(invoiceId)
+                .setMaskedPan(maskedPan);
     }
 }

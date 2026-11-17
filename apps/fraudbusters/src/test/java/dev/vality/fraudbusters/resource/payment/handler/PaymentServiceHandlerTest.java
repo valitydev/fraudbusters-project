@@ -6,8 +6,11 @@ import dev.vality.damsel.fraudbusters.ValidateTemplateResponse;
 import dev.vality.fraudbusters.config.payout.PayoutFraudoConfig;
 import dev.vality.fraudbusters.fraud.InspectStorageRegistry;
 import dev.vality.fraudbusters.fraud.payment.PaymentInspectStorage;
+import dev.vality.fraudbusters.fraud.payment.resolver.DatabasePaymentFieldResolver;
+import dev.vality.fraudbusters.fraud.payment.validator.PaymentHistoryFieldValidator;
 import dev.vality.fraudbusters.fraud.payment.validator.PaymentTemplateValidator;
 import dev.vality.fraudbusters.fraud.payout.PayoutInspectStorage;
+import dev.vality.fraudbusters.fraud.validator.ErrorCodeFormatValidator;
 import dev.vality.fraudbusters.fraud.validator.ListTemplateValidatorImpl;
 import dev.vality.fraudbusters.util.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +30,9 @@ class PaymentServiceHandlerTest {
                     new ListTemplateValidatorImpl(new InspectStorageRegistry(List.of(
                             new PaymentInspectStorage(null, null, null, null, new PaymentTemplateValidator()),
                             new PayoutInspectStorage(null, null, null, null,
-                                    BeanUtil.createPayoutTemplateValidator())))),
+                                    BeanUtil.createPayoutTemplateValidator()))),
+                            new ErrorCodeFormatValidator(),
+                            new PaymentHistoryFieldValidator(new DatabasePaymentFieldResolver())),
                     null, null, null, null, null
             );
 
@@ -72,6 +77,32 @@ class PaymentServiceHandlerTest {
         ValidateTemplateResponse validateTemplateResponse = paymentServiceHandler.validateCompilationTemplate(list);
         assertEquals(1, validateTemplateResponse.getErrors().size());
         assertEquals("payout", validateTemplateResponse.getErrors().get(0).getId());
+    }
+
+    @Test
+    void validateCompilationTemplateRejectsErrorCodeWithSpaceAroundColon() throws TException {
+        List<Template> list = List.of(
+                createTemplate("with_space",
+                        "rule: a: countError(\"email\", 1, days, \"authorization_failed: expired\") > 3 -> decline;"),
+                createTemplate("without_space",
+                        "rule: a: countError(\"email\", 1, days, \"authorization_failed:expired\") > 3 -> decline;"));
+
+        ValidateTemplateResponse validateTemplateResponse = paymentServiceHandler.validateCompilationTemplate(list);
+
+        assertEquals(1, validateTemplateResponse.getErrors().size());
+        assertEquals("with_space", validateTemplateResponse.getErrors().get(0).getId());
+    }
+
+    @Test
+    void validateCompilationTemplateRejectsPaymentAggregateOverMaskedPan() throws TException {
+        List<Template> list = List.of(
+                createTemplate("masked_pan", "rule: a: count(\"masked_pan\", 1, days) > 3 -> decline;"),
+                createTemplate("card_token", "rule: a: count(\"card_token\", 1, days) > 3 -> decline;"));
+
+        ValidateTemplateResponse validateTemplateResponse = paymentServiceHandler.validateCompilationTemplate(list);
+
+        assertEquals(1, validateTemplateResponse.getErrors().size());
+        assertEquals("masked_pan", validateTemplateResponse.getErrors().get(0).getId());
     }
 
     private Template createTemplate(String id, String template) {

@@ -56,8 +56,9 @@ public class PaymentDataSetsResource implements PaymentsDataSetApi {
             CheckedDataSetModel dataSetModel =
                     createCheckedDataSet(request, userName, historicalDataSetCheckResult);
             Long resultId = paymentsDataSetService.insertCheckedDataSet(dataSetModel, userName);
-            log.info("applyRuleOnHistoricalDataSet resultId: {}", resultId);
-            return ResponseEntity.ok().body(String.valueOf(resultId));
+            log.info("applyRuleOnHistoricalDataSet resultId: {} dataSetId: {}", resultId, request.getDataSetId());
+            Long checkedDataSetId = request.getDataSetId() != null ? request.getDataSetId() : resultId;
+            return ResponseEntity.ok().body(String.valueOf(checkedDataSetId));
         } catch (TException e) {
             throw new RuntimeException(e);
         }

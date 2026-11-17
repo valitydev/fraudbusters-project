@@ -113,12 +113,13 @@ class PaymentDataSetsResourceTest {
         Payment payment = DataSourceBeanUtils.createPayment();
         when(historicalDataServiceSrv.applyRuleOnHistoricalDataSet(any()))
                 .thenReturn(DataSourceBeanUtils.createHistoricalResponse());
+        when(paymentsDataSetService.insertCheckedDataSet(any(), any())).thenReturn(77L);
         this.mockMvc.perform(post("/payments-data-set/data-sets/applyRuleOnHistoricalDataSet")
                         .content(objectMapper.writeValueAsString(DataSourceBeanUtils.createApplyRequst(payment)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().string("0"));
+                .andExpect(content().string("1"));
     }
 
     @Test

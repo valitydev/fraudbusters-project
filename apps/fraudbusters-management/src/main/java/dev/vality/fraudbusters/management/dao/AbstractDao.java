@@ -36,6 +36,7 @@ public abstract class AbstractDao extends AbstractGenericDao {
     protected <T extends Record, E, P> SelectForUpdateStep<T> addSeekIfNeed(E lastId, P sortId,
                                                                             Integer size,
                                                                             SelectSeekStep2<T, P, E> orderQuery) {
+        rejectNegativeSize(size);
         SelectForUpdateStep<T> seekQuery;
         if (lastId != null && sortId != null) {
             seekQuery = orderQuery
@@ -50,6 +51,7 @@ public abstract class AbstractDao extends AbstractGenericDao {
     protected <T extends Record> SelectForUpdateStep<T> addSeekIfNeed(String lastId,
                                                                       Integer size,
                                                                       SelectSeekStep1<T, String> orderQuery) {
+        rejectNegativeSize(size);
         SelectForUpdateStep<T> seekQuery;
         if (StringUtils.hasText(lastId)) {
             seekQuery = orderQuery
@@ -59,6 +61,12 @@ public abstract class AbstractDao extends AbstractGenericDao {
             seekQuery = orderQuery.limit(size);
         }
         return seekQuery;
+    }
+
+    private static void rejectNegativeSize(Integer size) {
+        if (size != null && size < 0) {
+            throw new IllegalArgumentException("size must not be negative: " + size);
+        }
     }
 
     protected <T extends Record, E> SelectSeekStep1<T, E> addSortCondition(Field<E> sortField,

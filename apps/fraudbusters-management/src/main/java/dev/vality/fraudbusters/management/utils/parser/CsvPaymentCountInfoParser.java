@@ -19,7 +19,7 @@ public class CsvPaymentCountInfoParser implements CsvParser<PaymentCountInfo> {
 
     private static void isValidFormat(String value) {
         try {
-            LocalDateTime.parse(value, DateTimeFormatter.ISO_INSTANT);
+            LocalDateTime.parse(value, DateTimeFormatter.ISO_DATE_TIME);
         } catch (Exception ex) {
             log.error("validation error when parse date: {}", value);
             throw new DateFormatException(String.format("validation error when parse date: %s", value), ex);

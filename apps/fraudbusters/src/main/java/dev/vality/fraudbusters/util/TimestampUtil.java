@@ -9,8 +9,11 @@ import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
 
 import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoUnit.HOURS;
@@ -67,11 +70,20 @@ public class TimestampUtil {
     public static LocalDateTime parseDate(String eventTime) {
         LocalDateTime date = LocalDateTime.now();
         if (StringUtils.hasLength(eventTime)) {
-            date = LocalDateTime.parse(eventTime, DATE_TIME_FORMATTER);
+            date = eventTime.indexOf('T') > 0
+                    ? parseIsoDateTimeInUtc(eventTime)
+                    : LocalDateTime.parse(eventTime, DATE_TIME_FORMATTER);
         } else {
             log.warn("parseDate() eventTime can't parse: {}", eventTime);
         }
         return date;
+    }
+
+    private static LocalDateTime parseIsoDateTimeInUtc(String eventTime) {
+        TemporalAccessor parsed = DateTimeFormatter.ISO_DATE_TIME.parse(eventTime);
+        return parsed.isSupported(ChronoField.OFFSET_SECONDS)
+                ? OffsetDateTime.from(parsed).withOffsetSameInstant(UTC).toLocalDateTime()
+                : LocalDateTime.from(parsed);
     }
 
     public static String getStringDate(Long time) {

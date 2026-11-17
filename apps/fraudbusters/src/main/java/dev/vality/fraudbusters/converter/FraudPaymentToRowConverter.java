@@ -68,6 +68,8 @@ public class FraudPaymentToRowConverter implements Converter<FraudPayment, Fraud
         payment.setCheckedResultsJson(checkedPayment.getCheckedResultsJson());
         payment.setMobile(checkedPayment.isMobile());
         payment.setRecurrent(checkedPayment.isRecurrent());
+        payment.setType(fraudPayment.getType());
+        payment.setComment(fraudPayment.getComment());
         return payment;
     }
 

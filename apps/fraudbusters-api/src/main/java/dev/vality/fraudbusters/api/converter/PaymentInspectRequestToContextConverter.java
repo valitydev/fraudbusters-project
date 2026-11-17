@@ -6,6 +6,7 @@ import dev.vality.damsel.proxy_inspector.*;
 import dev.vality.damsel.proxy_inspector.Invoice;
 import dev.vality.damsel.proxy_inspector.InvoicePayment;
 import dev.vality.damsel.proxy_inspector.Shop;
+import dev.vality.fraudbusters.api.exceptions.InvalidRequestException;
 import dev.vality.swag.fraudbusters.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
@@ -66,6 +67,9 @@ public class PaymentInspectRequestToContextConverter implements Converter<Paymen
         Customer customer = payment.getCustomer();
         if (customer == null || (customer.getCustomerId() == null && customer.getUserId() == null)) {
             return null;
+        }
+        if (customer.getCustomerId() == null) {
+            throw new InvalidRequestException("customer.userId requires customer.customerId");
         }
         return new ClientIdentity()
                 .setCustomerId(customer.getCustomerId())
