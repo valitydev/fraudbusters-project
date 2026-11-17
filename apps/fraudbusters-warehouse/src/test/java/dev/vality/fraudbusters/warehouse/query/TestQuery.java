@@ -23,7 +23,7 @@ public class TestQuery {
             "            t," +
             "            currency," +
             "            shopId" +
-            ")    " +
+            ") as refunds_sum " +
             "ANY LEFT JOIN " +
             "(" +
             "        SELECT" +
@@ -42,7 +42,7 @@ public class TestQuery {
             "            shopId" +
             "        HAVING (sm_all > 1 and currency = 'RUB') OR(sm_all > 1 and currency = 'USD') " +
             "OR (sm_all > 1 and currency = 'EUR')" +
-            ") USING " +
+            ") as payments_sum USING " +
             "        t," +
             "        shopId," +
             "        currency" +
@@ -70,7 +70,7 @@ public class TestQuery {
             "            t," +
             "            currency," +
             "            shopId" +
-            ")    " +
+            ") as refunds_sum " +
             "ANY LEFT JOIN " +
             "(" +
             "        SELECT" +
@@ -89,7 +89,7 @@ public class TestQuery {
             "            shopId" +
             "        HAVING (sm_all > 1 and currency = 'RUB') OR(sm_all > 1 and currency = 'USD') " +
             "OR (sm_all > 1 and currency = 'EUR')" +
-            ") USING " +
+            ") as payments_sum USING " +
             "        t," +
             "        shopId," +
             "        currency" +

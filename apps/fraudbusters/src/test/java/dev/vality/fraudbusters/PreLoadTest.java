@@ -1,5 +1,6 @@
 package dev.vality.fraudbusters;
 
+import com.clickhouse.jdbc.ClickHouseDataSource;
 import dev.vality.damsel.domain.RiskScore;
 import dev.vality.damsel.fraudbusters.Command;
 import dev.vality.damsel.proxy_inspector.Context;
@@ -28,7 +29,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import ru.yandex.clickhouse.ClickHouseDataSource;
 
 import java.net.URI;
 import java.net.URISyntaxException;

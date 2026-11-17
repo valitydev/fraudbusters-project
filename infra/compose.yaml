@@ -139,7 +139,7 @@ services:
     - apps
     - e2e
   clickhouse:
-    image: yandex/clickhouse-server:20.6.7.4
+    image: clickhouse/clickhouse-server:25.7.5
     hostname: clickhouse
     environment:
       CLICKHOUSE_USER: user
@@ -319,6 +319,7 @@ services:
       card-token-pool.filePath: card-tokens
       clickhouse.db.user: user
       clickhouse.db.password: password
+      clickhouse.flyway.enabled: 'false'
       fraud.management.url: http://fb-management:8080/fb-management/v1
       result.full.check.enabled: 'false'
       spring.profiles.active: full-prod

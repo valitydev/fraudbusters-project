@@ -103,6 +103,10 @@ clickhouse.db:
   distributed-connections-pool-size: 50
   max-distributed-connections: 50
 
+clickhouse.flyway:
+  enabled: true
+  repair-before-migrate: false
+
 geo.ip.service.url: "http://localhost:29092/v1/columbus"
 
 wb.list.service.url: "http://localhost:29092/v1/wb_list"

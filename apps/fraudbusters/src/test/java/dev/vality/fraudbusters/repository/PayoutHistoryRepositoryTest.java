@@ -17,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.jdbc.core.JdbcTemplate;
-import ru.yandex.clickhouse.ClickHouseDataSource;
 
 import java.time.Instant;
 import java.util.List;
@@ -38,8 +37,7 @@ class PayoutHistoryRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        jdbc = new JdbcTemplate(new ClickHouseDataSource("jdbc:clickhouse://localhost:" +
-                ClickHouseContainerExtension.CLICKHOUSE_CONTAINER.getFirstMappedPort() + "/default"));
+        jdbc = new JdbcTemplate(ClickHouseContainerExtension.createDataSource());
         jdbc.execute("TRUNCATE TABLE fraud.withdrawal");
         aggregates = new PayoutAggregators<>(new PayoutHistoryRepository(jdbc),
                 new TimeBoundaryServiceImpl(), BeanUtil.createPayoutFieldsInPayoutHistory());

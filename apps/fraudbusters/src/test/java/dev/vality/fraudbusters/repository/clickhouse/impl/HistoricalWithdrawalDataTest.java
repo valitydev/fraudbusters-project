@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import ru.yandex.clickhouse.ClickHouseDataSource;
 
 import java.util.List;
 import java.util.Set;
@@ -46,8 +45,7 @@ class HistoricalWithdrawalDataTest {
 
     @BeforeEach
     void setUp() {
-        JdbcTemplate jdbc = new JdbcTemplate(new ClickHouseDataSource("jdbc:clickhouse://localhost:" +
-                ClickHouseContainerExtension.CLICKHOUSE_CONTAINER.getFirstMappedPort() + "/default"));
+        JdbcTemplate jdbc = new JdbcTemplate(ClickHouseContainerExtension.createDataSource());
         jdbc.execute("TRUNCATE TABLE fraud.withdrawal");
         repository = new WithdrawalRepositoryImpl(jdbc, new NamedParameterJdbcTemplate(jdbc), new WithdrawalMapper());
         // A payout is created before party and wallet are known, then succeeds.

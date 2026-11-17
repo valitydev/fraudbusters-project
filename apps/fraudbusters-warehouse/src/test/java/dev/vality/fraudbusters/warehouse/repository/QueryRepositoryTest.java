@@ -13,9 +13,11 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ClickhouseTestcontainer(migrations = {
-        "sql/db_init.sql",
-        "sql/data/inserts_event_sink.sql"})
+@ClickhouseTestcontainer(
+        dbNameShouldBeDropped = "analytic",
+        migrations = {
+                "sql/db_init.sql",
+                "sql/data/inserts_event_sink.sql"})
 class QueryRepositoryTest extends AbstractIntegrationTest {
 
     @Autowired

@@ -65,7 +65,7 @@ public class WithdrawalBatchPreparedStatementSetter implements BatchPreparedStat
         ps.setString(l++, withdrawal.getAccount().getId());
         ps.setString(l++, withdrawal.getAccount().getCurrency().getSymbolicCode());
 
-        ps.setObject(l++, withdrawal.getStatus());
+        ps.setString(l++, withdrawal.getStatus().name());
         ps.setObject(l++, withdrawal.isSetError() ? withdrawal.getError().getErrorCode() : null);
         ps.setObject(l++, withdrawal.isSetError() ? withdrawal.getError().getErrorReason() : null);
         ps.setString(l++, destinationResource.isSetBankCard()
