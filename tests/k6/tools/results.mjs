@@ -40,5 +40,8 @@ export function milliseconds(value) {
 }
 
 export function cell(value) {
-  return String(value === undefined || value === null ? '' : value).replace(/\|/g, '\\|').replace(/\n/g, ' ');
+  return String(value === undefined || value === null ? '' : value)
+    .replace(/\\/g, '\\\\')
+    .replace(/\|/g, '\\|')
+    .replace(/\r?\n/g, ' ');
 }
