@@ -8,9 +8,12 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static dev.vality.fraudo.FraudoRulesParser.*;
 import static dev.vality.fraudo.utils.TextUtil.safeGetText;
@@ -26,33 +29,38 @@ public class ErrorCodeFormatValidator {
         FraudoRulesParser parser = new FraudoRulesParser(
                 new CommonTokenStream(new FraudoRulesLexer(CharStreams.fromString(template))));
         parser.removeErrorListeners();
-        List<String> errors = new ArrayList<>();
-        collectMisformattedErrorCodes(parser.parse(), errors);
-        return errors;
+        return findMisformattedErrorCodes(parser.parse());
     }
 
-    private void collectMisformattedErrorCodes(ParseTree tree, List<String> errors) {
-        if (tree instanceof Count_errorContext
+    private List<String> findMisformattedErrorCodes(ParseTree tree) {
+        Stream<String> ownError = isErrorCodeFunction(tree)
+                ? findMisformattedErrorCode((ParserRuleContext) tree).stream()
+                : Stream.empty();
+        Stream<String> childErrors = IntStream.range(0, tree.getChildCount())
+                .mapToObj(tree::getChild)
+                .flatMap(child -> findMisformattedErrorCodes(child).stream());
+        return Stream.concat(ownError, childErrors)
+                .collect(Collectors.toList());
+    }
+
+    private static boolean isErrorCodeFunction(ParseTree tree) {
+        return tree instanceof Count_errorContext
                 || tree instanceof Sum_errorContext
                 || tree instanceof Count_payouts_errorContext
-                || tree instanceof Sum_payouts_errorContext) {
-            checkErrorCode((ParserRuleContext) tree, errors);
-        }
-        for (int i = 0; i < tree.getChildCount(); i++) {
-            collectMisformattedErrorCodes(tree.getChild(i), errors);
-        }
+                || tree instanceof Sum_payouts_errorContext;
     }
 
-    private void checkErrorCode(ParserRuleContext function, List<String> errors) {
+    private Optional<String> findMisformattedErrorCode(ParserRuleContext function) {
         List<TerminalNode> arguments = function.getTokens(STRING);
         if (arguments.size() < 2) {
-            return;
+            return Optional.empty();
         }
         String errorCode = safeGetText(arguments.get(1));
-        if (MISPLACED_SPACE.matcher(errorCode).find()) {
-            errors.add(String.format(MISPLACED_SPACE_ERROR,
-                    function.getStart().getLine(), errorCode, function.getStart().getText()));
+        if (!MISPLACED_SPACE.matcher(errorCode).find()) {
+            return Optional.empty();
         }
+        return Optional.of(String.format(MISPLACED_SPACE_ERROR,
+                function.getStart().getLine(), errorCode, function.getStart().getText()));
     }
 
 }

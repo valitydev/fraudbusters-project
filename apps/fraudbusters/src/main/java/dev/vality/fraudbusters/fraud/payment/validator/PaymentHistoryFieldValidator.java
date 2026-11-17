@@ -17,6 +17,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static dev.vality.fraudo.FraudoRulesParser.*;
 import static dev.vality.fraudo.utils.TextUtil.safeGetText;
@@ -27,6 +29,8 @@ public class PaymentHistoryFieldValidator {
             CountContext.class, Count_successContext.class, Count_pendingContext.class, Count_errorContext.class,
             Count_chargebackContext.class, Count_refundContext.class, SumContext.class, Sum_successContext.class,
             Sum_errorContext.class, Sum_chargebackContext.class, Sum_refundContext.class, UniqueContext.class);
+    private static final String MISSING_FIELD_ERROR =
+            "line %d: field %s is not stored in payment history, %s cannot use it";
 
     private final Set<String> fieldsStoredInHistory;
 
@@ -41,24 +45,26 @@ public class PaymentHistoryFieldValidator {
         FraudoRulesParser parser = new FraudoRulesParser(
                 new CommonTokenStream(new FraudoRulesLexer(CharStreams.fromString(template))));
         parser.removeErrorListeners();
-        List<String> errors = new ArrayList<>();
-        collectFieldsMissingInHistory(parser.parse(), errors);
-        return errors;
+        return findFieldsMissingInHistory(parser.parse());
     }
 
-    private void collectFieldsMissingInHistory(ParseTree tree, List<String> errors) {
-        if (tree instanceof ParserRuleContext function && PAYMENT_HISTORY_FUNCTIONS.contains(function.getClass())) {
-            for (TerminalNode node : collectAggregateFields(function)) {
-                String field = safeGetText(node);
-                if (!fieldsStoredInHistory.contains(field)) {
-                    errors.add(String.format("line %d: field %s is not stored in payment history, %s cannot use it",
-                            node.getSymbol().getLine(), field, function.getStart().getText()));
-                }
-            }
-        }
-        for (int i = 0; i < tree.getChildCount(); i++) {
-            collectFieldsMissingInHistory(tree.getChild(i), errors);
-        }
+    private List<String> findFieldsMissingInHistory(ParseTree tree) {
+        Stream<String> ownErrors = tree instanceof ParserRuleContext function
+                && PAYMENT_HISTORY_FUNCTIONS.contains(function.getClass())
+                ? findFunctionFieldsMissingInHistory(function)
+                : Stream.empty();
+        Stream<String> childErrors = IntStream.range(0, tree.getChildCount())
+                .mapToObj(tree::getChild)
+                .flatMap(child -> findFieldsMissingInHistory(child).stream());
+        return Stream.concat(ownErrors, childErrors)
+                .collect(Collectors.toList());
+    }
+
+    private Stream<String> findFunctionFieldsMissingInHistory(ParserRuleContext function) {
+        return collectAggregateFields(function).stream()
+                .filter(node -> !fieldsStoredInHistory.contains(safeGetText(node)))
+                .map(node -> String.format(MISSING_FIELD_ERROR,
+                        node.getSymbol().getLine(), safeGetText(node), function.getStart().getText()));
     }
 
     private static List<TerminalNode> collectAggregateFields(ParserRuleContext function) {
