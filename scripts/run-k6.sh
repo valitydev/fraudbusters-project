@@ -188,7 +188,8 @@ Usage:
                                                       run each step on fresh stacks of both versions and compare them
   scripts/run-k6.sh down [<version>]                  remove the regression stack and its volumes
   scripts/run-k6.sh k8s <suite> <profile>             run a suite as a Kubernetes Job; settings come from
-                                                      ConfigMap and Secret k6-regression of the namespace
+                                                      ConfigMap and Secret k6-regression of the namespace;
+                                                      K6_TESTS_IMAGE runs the tests built into that image
 USAGE
     exit 2
 }
@@ -276,6 +277,12 @@ case "${1:-}" in
         [[ -n "${K8S_NAMESPACE:-}" ]] && kube+=(-n "$K8S_NAMESPACE")
         name=$(printf 'k6-%s-%s-%s' "$suite" "$profile" "$(date -u +%m%d%H%M%S)" | tr '[:upper:]_' '[:lower:]-')
         results="tests/k6/results/$suite-$profile-$label-$(date -u +%Y%m%dT%H%M%SZ)"
+        job_template=tests/k6/k8s/job.yaml
+        job_image=$k6_image
+        if [[ -n "${K6_TESTS_IMAGE:-}" ]]; then
+            job_template=tests/k6/k8s/job-image.yaml
+            job_image=$K6_TESTS_IMAGE
+        fi
         bundle=$(mktemp -d)
         created=
         cleanup() {
@@ -296,9 +303,9 @@ case "${1:-}" in
             done
         } > "$bundle/env.yaml"
         awk -v env_file="$bundle/env.yaml" '/^__ENV__$/ { while ((getline line < env_file) > 0) print line; next } { print }' \
-            tests/k6/k8s/job.yaml \
+            "$job_template" \
             | sed -e "s|__NAME__|$name|g" -e "s|__SUITE__|$suite|g" -e "s|__PROFILE__|$profile|g" \
-                -e "s|__IMAGE__|$k6_image|g" -e "s|__CPU__|${K8S_CPU:-1}|g" -e "s|__MEMORY__|${K8S_MEMORY:-1Gi}|g" \
+                -e "s|__IMAGE__|$job_image|g" -e "s|__CPU__|${K8S_CPU:-1}|g" -e "s|__MEMORY__|${K8S_MEMORY:-1Gi}|g" \
                 -e "s|__CONFIG__|$config|g" -e "s|__SECRET__|$secret|g" \
             > "$bundle/job.yaml"
         if [[ "${K8S_DRY_RUN:-}" == 1 ]]; then
@@ -307,9 +314,11 @@ case "${1:-}" in
         fi
         "${kube[@]}" get configmap "$config" >/dev/null \
             || { echo "ConfigMap $config with FB_* settings of the environment is required" >&2; exit 2; }
-        tar czf "$bundle/tests.tgz" -C tests/k6 --exclude ./results --exclude ./reports .
         created=1
-        "${kube[@]}" create configmap "$name" --from-file=tests.tgz="$bundle/tests.tgz" >/dev/null
+        if [[ -z "${K6_TESTS_IMAGE:-}" ]]; then
+            tar czf "$bundle/tests.tgz" -C tests/k6 --exclude ./results --exclude ./reports .
+            "${kube[@]}" create configmap "$name" --from-file=tests.tgz="$bundle/tests.tgz" >/dev/null
+        fi
         "${kube[@]}" apply -f "$bundle/job.yaml" >/dev/null
         echo "Job $name in namespace ${K8S_NAMESPACE:-of the current context}"
         pod=

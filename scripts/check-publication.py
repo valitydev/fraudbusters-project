@@ -16,6 +16,7 @@ def failures(needs, event, ref_name, default_branch):
     required = {
         "java-images": release and bool(json.loads(outputs["java_apps"])),
         "ui-image": release and outputs["ui_changed"] == "true",
+        "k6-image": release and outputs["k6_changed"] == "true",
         "publish-packages": release and bool(json.loads(outputs["publish"])),
     }
     for job, selected in required.items():

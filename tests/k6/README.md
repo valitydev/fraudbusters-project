@@ -32,6 +32,7 @@ lib/ clients/ fixtures/ общий код: профили, проверки, о�
 versions/              версии стенда
 tools/                 готовность стенда, отчёт прогона, сравнение двух прогонов
 k8s/                   запуск в Kubernetes
+Dockerfile             образ с тестами для запуска в кластере
 reports/               отчёты сравнений
 ```
 
@@ -133,6 +134,31 @@ K8S_NAMESPACE=<namespace> VERSION=<подпись> scripts/run-k6.sh k8s payment
 **Как это работает.** Скрипт упаковывает `tests/k6` в ConfigMap и запускает Job по [k8s/job.yaml](k8s/job.yaml).
 Результаты он забирает в `tests/k6/results/`, а Job и ConfigMap удаляет.
 
+**Образ с тестами.** CI собирает `tests/k6` в образ `ghcr.io/valitydev/fraudbusters-k6:sha-<коммит>` по
+[Dockerfile](Dockerfile) и публикует его из master, когда меняется `tests/k6`. С `K6_TESTS_IMAGE` Job запускает
+тесты из образа по [k8s/job-image.yaml](k8s/job-image.yaml), без упаковки в ConfigMap:
+
+```bash
+K6_TESTS_IMAGE=ghcr.io/valitydev/fraudbusters-k6:sha-<коммит> K8S_NAMESPACE=<namespace> VERSION=<подпись> \
+    scripts/run-k6.sh k8s payments functional
+```
+
+Скрипт и инструменты отчёта берутся из checkout, поэтому его коммит должен совпадать с коммитом образа. Образ можно
+собрать и проверить локально:
+
+```bash
+docker build -t ghcr.io/valitydev/fraudbusters-k6:local tests/k6
+scripts/check-k6-image.sh ghcr.io/valitydev/fraudbusters-k6:local
+```
+
+**Запуск без скрипта.** Среда может запускать образ своим Job-ом, например из своего CI:
+- команда `sh /k6/k8s/run-in-pod.sh`, пользователь 12345;
+- переменные `SUITE`, `K6_PROFILE`, `VERSION`, `RESULTS_DIR=/results` и ConfigMap и Secret из таблицы ниже; профили
+  и кейсы задаются теми же переменными, что и в `run-k6.sh`;
+- под пишет в `/results` файлы `run.log`, `summary.json` и `exit-code`, в конце создаёт `done` и ждёт
+  `HOLD_SECONDS` (3600), чтобы результаты успели забрать `kubectl cp`;
+- `node tools/report.mjs <результаты>` строит `report.md`, `node tools/compare.mjs` сравнивает два прогона.
+
 **Что нужно от среды.**
 - Адреса и учётные данные Job берёт из своего namespace:
 
@@ -148,6 +174,7 @@ K8S_NAMESPACE=<namespace> VERSION=<подпись> scripts/run-k6.sh k8s payment
 | --- | --- |
 | `K8S_NAMESPACE` | namespace; по умолчанию namespace текущего контекста |
 | `VERSION` | подпись прогона (`k8s`) |
+| `K6_TESTS_IMAGE` | образ с тестами; без переменной тесты упаковываются в ConfigMap из checkout |
 | `K8S_CPU`, `K8S_MEMORY` | ресурсы пода k6 (`1`, `1Gi`) |
 | `K8S_CONFIG`, `K8S_SECRET` | другие имена ConfigMap и Secret |
 | `K8S_DRY_RUN=1` | напечатать манифест и ничего не создавать |
