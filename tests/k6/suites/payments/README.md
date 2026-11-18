@@ -222,7 +222,7 @@
   `amount() > 0 -> decline`. `POST /inspect-user` с этим пользователем и тремя магазинами.
 - **Ожидание:** заблокирован магазин с правилом по `userId`, магазин без срабатывания — нет. Наблюдение: магазин с
   правилом по сумме не блокируется — модель проверки пользователя не содержит суммы, ip и fingerprint, правило падает
-  с NPE и становится уведомлением. Локально нужен `fraudbusters.service.user.inspector.url` в `infra/compose.yaml`.
+  с NPE и становится уведомлением. fraudbusters-api нужен `fraudbusters.service.user.inspector.url`.
 
 ### PAY-FL-26. Загрузка fraud-платежей
 - **Статус:** покрыт PAY-API-13 (загрузка fraud-платежей через CSV и fraudbusters-api, поиск в истории).
