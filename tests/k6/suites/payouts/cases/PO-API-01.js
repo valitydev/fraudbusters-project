@@ -1,0 +1,19 @@
+import data from '../../../data/payouts/PO-API-01.js';
+import { expectEqual, expectSuccess, expectTrue, validationErrors } from '../../../lib/assert.js';
+
+export default {
+  id: 'PO-API-01',
+  title: 'Валидация шаблона выплаты',
+  profiles: ['functional'],
+  run(context) {
+    const { payouts, ids } = context;
+    const validate = (role) => validationErrors(expectSuccess(payouts.validatePayoutTemplate(
+      { id: ids.name(role), template: data[role].trim() }), `validate ${role}`));
+    expectEqual(validate('valid'), [], 'errors of a valid template');
+    expectEqual(validate('withPayoutHistory'), [], 'errors of a template with payout history');
+    expectTrue(validate('invalid').length > 0, 'invalid template must have error texts');
+    const spaced = validate('spacedErrorCode');
+    expectTrue(spaced.some((error) => String(error).includes('k6: limit')),
+      `error code with a space after the colon must be rejected, got ${JSON.stringify(spaced)}`);
+  },
+};

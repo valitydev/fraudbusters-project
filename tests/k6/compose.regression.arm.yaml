@@ -1,0 +1,6 @@
+services:
+  zookeeper:
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - cub zk-ready localhost:2181 10

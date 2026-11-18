@@ -39,6 +39,7 @@ class SelectionTests(unittest.TestCase):
         self.assertEqual(len(result["java_apps"]), 8)
         self.assertEqual(len(result["java"]), 19)
         self.assertTrue(result["ui_changed"])
+        self.assertTrue(result["k6_changed"])
         self.assertEqual(result["publish"], [])
 
     def test_docs_and_infra_are_independent(self):
@@ -46,6 +47,15 @@ class SelectionTests(unittest.TestCase):
         self.assertTrue(result["docs_changed"])
         self.assertTrue(result["infra_changed"])
         self.assertEqual(result["java"], [])
+        self.assertFalse(result["k6_changed"])
+
+    def test_k6_tests_build_only_their_image(self):
+        result = affected.select(["tests/k6/suites/payments/main.js"])
+        self.assertTrue(result["k6_changed"])
+        self.assertEqual(result["java"], [])
+        self.assertEqual(result["java_apps"], [])
+        self.assertFalse(result["ui_changed"])
+        self.assertFalse(result["infra_changed"])
 
     def test_manual_modes(self):
         contracts = affected.select([], "contracts")
@@ -55,7 +65,9 @@ class SelectionTests(unittest.TestCase):
         self.assertEqual(len(images["java_apps"]), 8)
         self.assertEqual(len(images["java"]), 8)
         self.assertTrue(images["ui_changed"])
+        self.assertTrue(images["k6_changed"])
         self.assertEqual(images["publish"], [])
+        self.assertFalse(contracts["k6_changed"])
 
 
 class GitDiffTests(unittest.TestCase):

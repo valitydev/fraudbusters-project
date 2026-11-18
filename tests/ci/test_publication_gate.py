@@ -10,26 +10,29 @@ spec.loader.exec_module(gate)
 
 
 class PublicationGateTests(unittest.TestCase):
-    def needs(self, apps=True, ui=True, packages=True):
+    def needs(self, apps=True, ui=True, packages=True, k6=True):
         return {
             "affected": {"result": "success", "outputs": {
                 "java_apps": json.dumps(["fraudbusters"] if apps else []),
                 "ui_changed": "true" if ui else "false",
+                "k6_changed": "true" if k6 else "false",
                 "publish": json.dumps([{"path": "packages/example"}] if packages else []),
             }},
             "checks": {"result": "success"},
             "java-images": {"result": "success" if apps else "skipped"},
             "ui-image": {"result": "success" if ui else "skipped"},
+            "k6-image": {"result": "success" if k6 else "skipped"},
             "publish-packages": {"result": "success" if packages else "skipped"},
         }
 
     def test_success_and_legitimate_skips(self):
-        for selection in [(True, True, True), (True, True, False), (False, False, True), (False, False, False)]:
+        for selection in [(True, True, True, True), (True, True, False, False), (False, False, True, True),
+                          (False, False, False, True), (False, False, False, False)]:
             for event in ["push", "workflow_dispatch"]:
                 self.assertEqual(gate.failures(self.needs(*selection), event, "master", "master"), [])
 
     def test_selected_publishers_cannot_be_silently_skipped_or_fail(self):
-        for job in ["java-images", "ui-image", "publish-packages"]:
+        for job in ["java-images", "ui-image", "k6-image", "publish-packages"]:
             for result in ["skipped", "failure", "cancelled"]:
                 needs = self.needs()
                 needs[job]["result"] = result
@@ -37,7 +40,7 @@ class PublicationGateTests(unittest.TestCase):
 
     def test_pr_and_non_default_branch_do_not_require_publications(self):
         needs = self.needs()
-        for job in ["java-images", "ui-image", "publish-packages"]:
+        for job in ["java-images", "ui-image", "k6-image", "publish-packages"]:
             needs[job]["result"] = "skipped"
         self.assertEqual(gate.failures(needs, "pull_request", "123/merge", "master"), [])
         self.assertEqual(gate.failures(needs, "workflow_dispatch", "feature", "master"), [])
@@ -50,7 +53,7 @@ class PublicationGateTests(unittest.TestCase):
 
     def test_workflow_publishers_override_skip_propagation_and_guard_validation(self):
         workflow = (ROOT / ".github/workflows/ci.yml").read_text()
-        for job in ["java-images", "ui-image", "publish-packages"]:
+        for job in ["java-images", "ui-image", "k6-image", "publish-packages"]:
             block = workflow.split("\n  " + job + ":\n", 1)[1].split("    permissions:", 1)[0]
             # publish-packages has no permissions block; only inspect its if expression.
             condition = block.split("    if: >-\n", 1)[1].split("    runs-on:", 1)[0]

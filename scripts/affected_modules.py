@@ -20,15 +20,18 @@ def select(paths, mode="changed"):
     openapi = set()
     ui = False
     infra = False
+    k6 = False
     docs = False
     for path in paths:
         if path in {"pom.xml", "package.json", ".dockerignore"} or path.startswith(("scripts/", ".github/workflows/", "tests/ci/", "infra/docker/")):
             selected.update(m["path"] for m in modules if "java" in m)
             images.update(m["name"] for m in modules if m["kind"] == "service")
             openapi.update(m["path"] for m in modules if m["kind"] == "openapi")
-            ui = infra = True
+            ui = infra = k6 = True
         if path.startswith(("infra/", "tests/e2e/")):
             infra = True
+        if path.startswith("tests/k6/"):
+            k6 = True
         if path.startswith("docs/"):
             docs = True
         for module in modules:
@@ -50,7 +53,7 @@ def select(paths, mode="changed"):
     if mode in {"all", "images"}:
         images.update(m["name"] for m in modules if m["kind"] == "service")
         selected.update(m["path"] for m in modules if m["kind"] == "service")
-        ui = True
+        ui = k6 = True
     if mode in {"all", "contracts"}:
         publish.update(m["path"] for m in modules if "publish" in m)
         selected.update(m["path"] for m in modules if "publish" in m)
@@ -72,6 +75,7 @@ def select(paths, mode="changed"):
         "erlang": [m for m in modules if m["path"] in selected and m.get("erlang")],
         "ui_changed": ui,
         "infra_changed": infra,
+        "k6_changed": k6,
         "docs_changed": docs,
     }
 
