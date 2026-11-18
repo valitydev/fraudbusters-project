@@ -2,6 +2,8 @@ package dev.vality.fraudbusters.config;
 
 import com.clickhouse.client.api.ClientConfigProperties;
 import com.clickhouse.jdbc.ClickHouseDataSource;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import dev.vality.fraudbusters.config.properties.ClickhouseProperties;
 import lombok.RequiredArgsConstructor;
 import org.flywaydb.core.Flyway;
@@ -23,12 +25,12 @@ public class ClickhouseConfig {
     private final ClickhouseProperties clickhouseProperties;
 
     @Bean
-    public ClickHouseDataSource clickHouseDataSource() throws SQLException {
+    public DataSource clickHouseDataSource() throws SQLException {
         Properties info = new Properties();
         info.put(ClientConfigProperties.USER.getKey(), clickhouseProperties.getUser());
         info.put(ClientConfigProperties.PASSWORD.getKey(), clickhouseProperties.getPassword());
         info.put(ClientConfigProperties.COMPRESS_SERVER_RESPONSE.getKey(), clickhouseProperties.getCompress());
-        return new ClickHouseDataSource(clickhouseProperties.getUrl(), info);
+        return createPooledDataSource(new ClickHouseDataSource(clickhouseProperties.getUrl(), info));
     }
 
     @Bean
@@ -48,14 +50,14 @@ public class ClickhouseConfig {
     }
 
     @Bean
-    public NamedParameterJdbcTemplate namedParameterJdbcTemplate(ClickHouseDataSource clickHouseDataSource) {
+    public NamedParameterJdbcTemplate namedParameterJdbcTemplate(DataSource clickHouseDataSource) {
         return new NamedParameterJdbcTemplate(clickHouseDataSource);
     }
 
     @Bean
     @ConditionalOnProperty(prefix = "clickhouse.flyway", name = "enabled", havingValue = "true", matchIfMissing = true)
     public Flyway clickHouseFlyway(
-            ClickHouseDataSource clickHouseDataSource,
+            DataSource clickHouseDataSource,
             @Value("${clickhouse.flyway.repair-before-migrate:false}") boolean repairBeforeMigrate) {
         Flyway flyway = ClickhouseFlywayFactory.createFlyway(clickHouseDataSource);
         if (repairBeforeMigrate) {
@@ -63,6 +65,15 @@ public class ClickhouseConfig {
         }
         flyway.migrate();
         return flyway;
+    }
+
+    private HikariDataSource createPooledDataSource(DataSource clickHouseDataSource) {
+        HikariConfig config = new HikariConfig();
+        config.setDataSource(clickHouseDataSource);
+        config.setPoolName("clickhouse");
+        config.setMaximumPoolSize(clickhouseProperties.getMaximumPoolSize());
+        config.setInitializationFailTimeout(-1);
+        return new HikariDataSource(config);
     }
 
 }

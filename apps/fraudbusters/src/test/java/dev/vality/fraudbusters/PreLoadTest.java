@@ -1,6 +1,5 @@
 package dev.vality.fraudbusters;
 
-import com.clickhouse.jdbc.ClickHouseDataSource;
 import dev.vality.damsel.domain.RiskScore;
 import dev.vality.damsel.fraudbusters.Command;
 import dev.vality.damsel.proxy_inspector.Context;
@@ -30,6 +29,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
+import javax.sql.DataSource;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -57,7 +57,7 @@ class PreLoadTest {
     private static final String TEST = "test";
 
     @MockitoBean
-    ClickHouseDataSource clickHouseDataSource;
+    DataSource clickHouseDataSource;
     @MockitoBean
     FraudResultRepository paymentRepository;
 

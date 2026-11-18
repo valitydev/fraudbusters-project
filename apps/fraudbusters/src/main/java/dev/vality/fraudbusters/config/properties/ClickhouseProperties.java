@@ -15,5 +15,6 @@ public class ClickhouseProperties {
     private String compress;
     private String connectionTimeout;
     private String socketTimeout;
+    private int maximumPoolSize;
 
 }
