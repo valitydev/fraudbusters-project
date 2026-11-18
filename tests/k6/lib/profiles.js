@@ -73,6 +73,12 @@ function trafficScenario(profile) {
 export const COMPARED_STAGES = ['api_inspect_payment', 'api_load_payments', 'mgmt_filter_payments_history',
   'thrift_inspect_withdrawal', 'api_load_withdrawals'];
 
+export function withGlobalCasesPermission(cases) {
+  if (text('K6_GLOBAL_CASES', 'off') === 'on') return cases;
+  return cases.map((item) => (item.global && !item.skip
+    ? { ...item, skip: 'global cases change the whole system: set K6_GLOBAL_CASES=on' } : item));
+}
+
 export function splitCases(cases) {
   return { parallel: cases.filter((item) => !item.global), sequential: cases.filter((item) => item.global) };
 }

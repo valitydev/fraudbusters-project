@@ -34,6 +34,7 @@ export default {
       keyOf: (item) => item.id, order: 'ASC', expectedCount: references.length, what: 'payout references',
     });
 
+    const originalReference = steps.findGlobalReference();
     steps.bindTemplate(templateId, { isGlobal: true });
     try {
       const globals = waitFor(connection, 'global reference', () => {
@@ -46,7 +47,7 @@ export default {
       expectTrue(search({ isGlobal: false, size: 100 }).result.every((item) => item.isGlobal !== true),
         'isGlobal=false returns no global references');
     } finally {
-      expectSuccess(payouts.removePayoutReference({ isGlobal: true }), 'remove global reference');
+      steps.restoreGlobalReference(originalReference);
     }
     expectSuccess(payouts.removePayoutReference({ partyId: parties[0], walletId }), 'remove reference by scope');
     waitForCount(connection, 'references after removal', () => search({ size: 100 }), references.length - 1);

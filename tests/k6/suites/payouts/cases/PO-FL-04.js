@@ -1,5 +1,4 @@
 import data from '../../../data/payouts/PO-FL-04.js';
-import { expectSuccess } from '../../../lib/assert.js';
 import { payoutSteps } from '../steps.js';
 
 export default {
@@ -9,7 +8,7 @@ export default {
   global: true,
   run(context) {
     const steps = payoutSteps(context);
-    const { ids, payouts } = context;
+    const { ids } = context;
     const { expected } = data;
     const target = steps.scope('target');
     const other = steps.scope('other');
@@ -20,21 +19,29 @@ export default {
       steps.expectDecision(steps.withdrawal(other), expected.other, `${what} does not touch other parties`);
     };
 
+    const originalReference = steps.findGlobalReference();
+    const originalGroupReference = steps.findGlobalGroupReference();
+    const awaitWithoutGlobals = (what) => {
+      if (!originalReference && !originalGroupReference) {
+        steps.awaitDecision(what, () => steps.withdrawal(target), expected.afterRemoval);
+      }
+    };
+
     steps.bindTemplate(globalTemplate, { isGlobal: true });
     try {
       expectGlobalApplied('global template');
     } finally {
-      expectSuccess(payouts.removePayoutReference({ isGlobal: true }), 'remove global reference');
+      steps.restoreGlobalReference(originalReference);
     }
-    steps.awaitDecision('global reference removed', () => steps.withdrawal(target), expected.afterRemoval);
+    awaitWithoutGlobals('global reference removed');
 
     const groupId = steps.saveGroup(ids.name('global-group'), [[globalTemplate, 1]]);
     steps.bindGroup(groupId, {});
     try {
       expectGlobalApplied('global group');
     } finally {
-      expectSuccess(payouts.removePayoutGroupReference(groupId, undefined, undefined), 'remove global group reference');
+      steps.restoreGlobalGroupReference(originalGroupReference, groupId);
     }
-    steps.awaitDecision('global group reference removed', () => steps.withdrawal(target), expected.afterRemoval);
+    awaitWithoutGlobals('global group reference removed');
   },
 };

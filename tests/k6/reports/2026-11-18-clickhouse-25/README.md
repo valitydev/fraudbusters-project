@@ -5,14 +5,15 @@
 | | Версия | Что внутри |
 | --- | --- | --- |
 | Эталон | [1119c3f1](../../versions/1119c3f1.env) | ClickHouse 20.6, драйвер `ru.yandex`, Kafka с ZooKeeper, Riak |
-| Кандидат | [f8049ae0](../../versions/f8049ae0.env) | схема через Flyway, ClickHouse 25.7.5, драйвер `com.clickhouse` 0.11.2 с пулом HikariCP, Kafka 4.0 KRaft, без Riak |
+| Кандидат | `f8049ae0` | схема через Flyway, ClickHouse 25.7.5, драйвер `com.clickhouse` 0.11.2 с пулом HikariCP, Kafka 4.0 KRaft, без Riak |
 
-Нагрузку мерили до перехода на KRaft, функциональные наборы — после.
+Кандидат вошёл в master как [7a79e109](../../versions/7a79e109.env). Кроме него там только миграции ClickHouse,
+которые стенд не выполняет. Нагрузку мерили до перехода на KRaft, функциональные наборы — после.
 
 ## Как повторить
 
 ```bash
-scripts/run-k6.sh series 1119c3f1 f8049ae0 payments:functional payouts:functional payments:load payments:spike mixed:load
+scripts/run-k6.sh series 1119c3f1 7a79e109 payments:functional payouts:functional payments:load payments:spike mixed:load
 ```
 
 ## Итог
@@ -41,6 +42,4 @@ scripts/run-k6.sh series 1119c3f1 f8049ae0 payments:functional payouts:functiona
 4. **На `spike` уверенной разницы нет.** В первой паре кандидат шёл первым на холодном стеке. Во второй паре p95
    проверки отличается на 10%, но `compare.mjs` отмечает рост p95 загрузки платежей (16,8 → 24,1 мс) и поиска
    в истории (87,5 → 107,6 мс) выше допуска.
-5. **Осталось проверить.**
-   - Нагрузку на KRaft.
-   - После слияния — заменить `f8049ae0` версией с опубликованными образами.
+5. **Осталось проверить** нагрузку на KRaft.

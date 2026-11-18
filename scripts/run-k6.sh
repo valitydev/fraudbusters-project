@@ -175,7 +175,7 @@ settings=(K6_CASES RUN_ID RATE TARGET_RATE SPIKE_RATE DURATION RAMP_DURATION STE
     WAIT_TIMEOUT_MS POLL_INTERVAL_MS REQUEST_TIMEOUT_MS CASES_MAX_DURATION P95_LIMIT_MS SHARE_ACCEPT SHARE_AMOUNT
     SHARE_BLACK SHARE_VELOCITY SHARE_HISTORY_SEARCH SHARE_PAYOUT_ACCEPT SHARE_PAYOUT_BLACK RECONFIGURE RECONFIGURE_AT
     STRESS_FACTORS K6_PHASE FEATURES FROM_FEATURES FB_MANAGEMENT_URL FB_API_URL FB_INSPECTOR_URL FB_AUTH_URL
-    FB_AUTH_REALM FB_AUTH_CLIENT READY_TIMEOUT)
+    FB_AUTH_REALM FB_AUTH_CLIENT READY_TIMEOUT K6_GLOBAL_CASES)
 secrets=(FB_TOKEN FB_AUTH_USER FB_AUTH_PASSWORD)
 
 usage() {
@@ -228,6 +228,7 @@ case "${1:-}" in
         results="tests/k6/results/$suite-$profile-$version-$(date -u +%Y%m%dT%H%M%SZ)"
         mkdir -p "$results"
         FEATURES=$(features_of "$version")
+        K6_GLOBAL_CASES=${K6_GLOBAL_CASES:-on}
         passthrough=()
         for name in "${settings[@]}" "${secrets[@]}"; do
             if [[ -n "${!name+set}" ]]; then passthrough+=(-e "$name=${!name}"); fi

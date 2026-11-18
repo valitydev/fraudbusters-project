@@ -51,8 +51,40 @@ export function payoutSteps(context) {
   };
 
   const steps = ruleSteps(context, channel);
+
+  const findGlobalReference = () => (expectSuccess(payouts.filterPayoutReferences({ isGlobal: true, size: 100 }),
+    'filter global payout references').result || []).find((item) => item.isGlobal === true);
+
+  const findGlobalGroupReference = (lastId) => {
+    const page = expectSuccess(payouts.filterPayoutGroupReferences({ size: 100, sortOrder: 'ASC', lastId }),
+      'filter payout group references').result || [];
+    const global = page.find((item) => !item.partyId && !item.walletId);
+    if (global || page.length < 100) return global;
+    return findGlobalGroupReference(page[page.length - 1].id);
+  };
+
+  const restoreGlobalReference = (original) => {
+    if (original) {
+      steps.bindTemplate(original.templateId, { isGlobal: true });
+    } else {
+      expectSuccess(payouts.removePayoutReference({ isGlobal: true }), 'remove global reference');
+    }
+  };
+
+  const restoreGlobalGroupReference = (original, groupId) => {
+    if (original) {
+      steps.bindGroup(original.groupId, {});
+    } else {
+      expectSuccess(payouts.removePayoutGroupReference(groupId, undefined, undefined), 'remove global group reference');
+    }
+  };
+
   return Object.assign(steps, {
     withdrawal: steps.operation,
     findWithdrawalsHistory,
+    findGlobalReference,
+    findGlobalGroupReference,
+    restoreGlobalReference,
+    restoreGlobalGroupReference,
   });
 }

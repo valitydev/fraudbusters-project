@@ -4,7 +4,9 @@ import { runCase } from './cases.js';
 import { featuresOf, unavailabilityReason, withAvailability } from './features.js';
 import { randomRunId } from './ids.js';
 import { expectSuccess } from './assert.js';
-import { executionOptions, selectedCases, splitCases, summaryFiles } from './profiles.js';
+import {
+  executionOptions, selectedCases, splitCases, summaryFiles, withGlobalCasesPermission,
+} from './profiles.js';
 import { managementClient } from '../clients/management.js';
 import { inspectionClient } from '../clients/inspection.js';
 import { payoutManagementClient } from '../clients/payouts.js';
@@ -25,7 +27,7 @@ export function defineSuite({
   name, cases, traffic, since, features = featuresOf('FEATURES'), runId = () => __ENV.RUN_ID || randomRunId(), profile,
 }) {
   const version = text('VERSION', 'unknown');
-  const selected = withAvailability(selectedCases(cases), features, since);
+  const selected = withAvailability(withGlobalCasesPermission(selectedCases(cases)), features, since);
   const trafficUnavailable = traffic && unavailabilityReason({ since }, features);
   if (trafficUnavailable && !selected.length) throw new Error(`Traffic of ${name} ${trafficUnavailable}`);
   const { parallel, sequential } = splitCases(selected);
