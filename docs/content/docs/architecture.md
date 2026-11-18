@@ -16,7 +16,7 @@ category: architecture
 Основной задачей при построении системы было обеспечить максимальный уровень доступности и возможность 
 горизонтального масштабирования. Для этого критически важные сервисы, 
 были реализованы на основе паттерна **event-sourcing**. В качестве **event-store** был выбран [**kafka-cluster**](https://kafka.apache.org/). 
-А в качестве БД выбран [**basho-riak**](https://riak.com/) и [**clickhouse**](https://clickhouse.com/),
+А в качестве БД выбраны [**postgresql**](https://www.postgresql.org/) и [**clickhouse**](https://clickhouse.com/),
 которые также предоставляют высокий уровень доступности при хорошей производительности.
 
 #### Интерфейсы взаимодействия
@@ -53,7 +53,7 @@ category: architecture
 
 **wblist-manager** - [сервис](https://github.com/valitydev/wb-list-manager), 
 предоставляющий возможность создавать записи в черных, белых и серых списках. Сервис слушает команды из 
-**fraudbusters-management** и создает записи в списках в базе **riak**, по результату отправляет подтверждение в
+**fraudbusters-management** и создает записи в списках в базе **postgresql**, по результату отправляет подтверждение в
 **fraudbusters-management** о результате создания, что позволяет поддерживать **eventually-consistent** для клиента.
 
 **trusted-token-manager** - [сервис](https://github.com/valitydev/trusted-tokens-manager), 

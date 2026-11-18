@@ -52,11 +52,6 @@ management:
       exposure:
         include: health,info,prometheus
 
-riak-config:
-  address: localhost
-  port: 8087
-  bucket: wblist
-
 retry:
   timeout: 2000
   max.attempts: 3

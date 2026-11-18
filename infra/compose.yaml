@@ -1,50 +1,27 @@
 # Local application images are prepared with scripts/build-local-images.sh.
 services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:5.0.1
-    hostname: zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    volumes:
-    - zookeeper-data:/var/lib/zookeeper/data
-    - zookeeper-log:/var/lib/zookeeper/log
-    profiles:
-    - core
-    - apps
-    - e2e
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - cub zk-ready localhost 2181 10
-      interval: 5s
-      timeout: 15s
-      retries: 30
-      start_period: 10s
   broker:
-    image: confluentinc/cp-enterprise-kafka:5.0.1
+    image: confluentinc/cp-kafka:8.0.9
     hostname: broker
-    depends_on:
-      zookeeper:
-        condition: service_healthy
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker:29093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://broker:29092,PLAINTEXT://broker:9092
-      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:9092
-      CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper:2181
-      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
-      CONFLUENT_METRICS_ENABLE: 'true'
-      CONFLUENT_SUPPORT_CUSTOMER_ID: anonymous
     ports:
     - 9092:9092
     - 29092:29092
     volumes:
-    - broker:/var/lib/kafka/data
+    - kafka-data:/var/lib/kafka/data
     profiles:
     - core
     - apps
@@ -58,56 +35,54 @@ services:
       retries: 30
       start_period: 10s
   kafka-setup:
-    image: confluentinc/cp-kafka:5.1.1
+    image: confluentinc/cp-kafka:8.0.9
     hostname: kafka-setup
     depends_on:
       broker:
         condition: service_healthy
     command: bash -c 'echo Waiting for Kafka to be ready... && cub kafka-ready -b
-      broker:9092 1 60 && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      broker:9092 1 60 && kafka-topics --create --if-not-exists --bootstrap-server broker:9092
       --partitions 1 --replication-factor 1 --topic wb-list-command  && kafka-topics
-      --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor
-      1 --topic wb-list-event-sink && kafka-topics --create --if-not-exists --zookeeper
-      zookeeper:2181 --partitions 1 --replication-factor 1 --topic result  && kafka-topics
-      --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor
-      1 --topic fraud_payment && kafka-topics --create --if-not-exists --zookeeper
-      zookeeper:2181 --partitions 1 --replication-factor 1 --topic payment_event &&
-      kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions
+      --create --if-not-exists --bootstrap-server broker:9092 --partitions 1 --replication-factor
+      1 --topic wb-list-event-sink && kafka-topics --create --if-not-exists --bootstrap-server broker:9092 --partitions 1 --replication-factor 1 --topic result  && kafka-topics
+      --create --if-not-exists --bootstrap-server broker:9092 --partitions 1 --replication-factor
+      1 --topic fraud_payment && kafka-topics --create --if-not-exists --bootstrap-server broker:9092 --partitions 1 --replication-factor 1 --topic payment_event &&
+      kafka-topics --create --if-not-exists --bootstrap-server broker:9092 --partitions
       1 --replication-factor 1 --topic filtered_payment && kafka-topics --create --if-not-exists
-      --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic refund_event
-      && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions
+      --bootstrap-server broker:9092 --partitions 1 --replication-factor 1 --topic refund_event
+      && kafka-topics --create --if-not-exists --bootstrap-server broker:9092 --partitions
       1 --replication-factor 1 --topic chargeback_event && kafka-topics --create --if-not-exists
-      --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic withdrawal
-      && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181 --partitions
+      --bootstrap-server broker:9092 --partitions 1 --replication-factor 1 --topic withdrawal
+      && kafka-topics --create --if-not-exists --bootstrap-server broker:9092 --partitions
       1 --replication-factor 1 --topic filtered_withdrawal && kafka-topics --create
-      --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor
+      --if-not-exists --bootstrap-server broker:9092 --partitions 1 --replication-factor
       1 --topic unknown_initiating_entity && kafka-topics --create --if-not-exists
-      --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1  --config cleanup.policy=compact
-      --topic template && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      --bootstrap-server broker:9092 --partitions 1 --replication-factor 1  --config cleanup.policy=compact
+      --topic template && kafka-topics --create --if-not-exists --bootstrap-server broker:9092
       --partitions 1 --replication-factor 1  --config cleanup.policy=compact --topic
-      template_reference && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      template_reference && kafka-topics --create --if-not-exists --bootstrap-server broker:9092
       --partitions 1 --replication-factor 1  --config cleanup.policy=compact --topic
-      group_list && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      group_list && kafka-topics --create --if-not-exists --bootstrap-server broker:9092
       --partitions 1 --replication-factor 1  --config cleanup.policy=compact --topic
-      group_reference && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      group_reference && kafka-topics --create --if-not-exists --bootstrap-server broker:9092
       --partitions 1 --replication-factor 1  --config cleanup.policy=compact --topic
-      payout_template && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      payout_template && kafka-topics --create --if-not-exists --bootstrap-server broker:9092
       --partitions 1 --replication-factor 1  --config cleanup.policy=compact --topic
-      payout_template_reference && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      payout_template_reference && kafka-topics --create --if-not-exists --bootstrap-server broker:9092
       --partitions 1 --replication-factor 1  --config cleanup.policy=compact --topic
-      payout_group_list && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      payout_group_list && kafka-topics --create --if-not-exists --bootstrap-server broker:9092
       --partitions 1 --replication-factor 1  --config cleanup.policy=compact --topic
-      payout_group_reference && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      payout_group_reference && kafka-topics --create --if-not-exists --bootstrap-server broker:9092
       --partitions 1 --replication-factor 1 --topic payout_result && kafka-topics --create
-      --if-not-exists --zookeeper zookeeper:2181
+      --if-not-exists --bootstrap-server broker:9092
       --partitions 1 --replication-factor 1 --topic wb-list-candidate && kafka-topics
-      --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor
-      1 --topic mg-event && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      --create --if-not-exists --bootstrap-server broker:9092 --partitions 1 --replication-factor
+      1 --topic mg-event && kafka-topics --create --if-not-exists --bootstrap-server broker:9092
       --partitions 1 --replication-factor 1 --topic mg-withdrawal && kafka-topics
-      --create --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor
-      1 --topic payment && kafka-topics --create --if-not-exists --zookeeper zookeeper:2181
+      --create --if-not-exists --bootstrap-server broker:9092 --partitions 1 --replication-factor
+      1 --topic payment && kafka-topics --create --if-not-exists --bootstrap-server broker:9092
       --partitions 1 --replication-factor 1 --topic refund && kafka-topics --create
-      --if-not-exists --zookeeper zookeeper:2181 --partitions 1 --replication-factor
+      --if-not-exists --bootstrap-server broker:9092 --partitions 1 --replication-factor
       1 --topic chargeback && touch /tmp/topics-ready && tail -f /dev/null'
     profiles:
     - core
@@ -120,24 +95,6 @@ services:
       interval: 2s
       timeout: 2s
       retries: 300
-  riak:
-    image: basho/riak-kv
-    hostname: riak
-    ports:
-    - 8087:8087
-    - 8098:8098
-    environment:
-    - CLUSTER_NAME=riakts
-    - WAIT_FOR_ERLANG=500
-    - TZ=Europe/Moscow
-    labels:
-    - com.basho.riak.cluster.name=riakts
-    volumes:
-    - /tmp/docker/riak/data:/etc/riak/schemas
-    profiles:
-    - core
-    - apps
-    - e2e
   clickhouse:
     image: clickhouse/clickhouse-server:25.7.5
     hostname: clickhouse
@@ -195,8 +152,6 @@ services:
     mem_reservation: 128M
     environment:
       kafka.bootstrap-servers: broker:9092
-      riak.address: riak
-      riak.port: 8087
       management.metrics.export.statsd.enabled: 'false'
       logging.level.com.rbkmoney.woody: ERROR
       kafka.wblist.topic.command: wb-list-command
@@ -211,8 +166,6 @@ services:
       OTEL_METRICS_EXPORTER: none
       OTEL_LOGS_EXPORTER: none
     depends_on:
-      riak:
-        condition: service_started
       broker:
         condition: service_healthy
       postgres-wblist:
@@ -240,8 +193,6 @@ services:
       kafka.topics.withdrawal.consume.enabled: 'true'
       kafka.topics.withdrawal.id: withdrawal
       kafka.num-stream-threads: 1
-      riak-config.address: riak
-      riak-config.port: 8087
       management.metrics.export.statsd.enabled: 'false'
       logging.config: tmp/logback-test.xml
       JAVA_OPTS: -Xmx768m
@@ -254,8 +205,6 @@ services:
       OTEL_METRICS_EXPORTER: none
       OTEL_LOGS_EXPORTER: none
     depends_on:
-      riak:
-        condition: service_started
       broker:
         condition: service_healthy
       postgres-trusted-tokens:
@@ -663,8 +612,6 @@ volumes:
   postgres-trusted-tokens: {}
   postgres-fb: {}
   postgres-notificator: {}
-  broker: {}
+  kafka-data: {}
   clickhouse-data: {}
-  zookeeper-data: {}
-  zookeeper-log: {}
 name: fraudbusters-project
