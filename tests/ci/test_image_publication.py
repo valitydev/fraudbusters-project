@@ -1,3 +1,4 @@
+import base64
 import contextlib
 import importlib.util
 import io
@@ -67,6 +68,27 @@ class ImagePublicationTests(unittest.TestCase):
         with patch.object(images.urllib.request, "urlopen", side_effect=error):
             with self.assertRaises(urllib.error.HTTPError):
                 images.manifest_digest(IMAGE)
+
+    def test_publication_check_with_job_token_sees_a_new_package_as_missing(self):
+        error = urllib.error.HTTPError("https://registry.invalid", 404, "missing", {}, None)
+        output = io.StringIO()
+        with patch.dict(images.os.environ, {"REGISTRY_TOKEN": "job-test-token", "GITHUB_ACTOR": "ci"}), \
+                patch("sys.argv", ["images", IMAGE, "--platform", "linux/amd64", "--github-output"]), \
+                patch.object(images.urllib.request, "urlopen", side_effect=[self.token(), error]) as request, \
+                contextlib.redirect_stdout(output):
+            images.main()
+        token_request = request.call_args_list[0].args[0]
+        self.assertIn("pull%2Cpush", token_request.full_url)
+        self.assertEqual(token_request.get_header("Authorization"),
+                         "Basic " + base64.b64encode(b"ci:job-test-token").decode())
+        self.assertEqual(output.getvalue(), "exists=false\ndigest=\n")
+
+    def test_post_publication_check_stays_anonymous(self):
+        with patch.dict(images.os.environ, {"REGISTRY_TOKEN": "job-test-token"}), \
+                patch("sys.argv", ["images", IMAGE, "--require"]), \
+                patch.object(images, "manifest_digest", return_value=DIGEST) as digest:
+            images.main()
+        self.assertIsNone(digest.call_args.args[2])
 
     def test_network_failure_does_not_allow_overwriting_a_tag(self):
         with patch.object(images.urllib.request, "urlopen", side_effect=urllib.error.URLError("offline")):

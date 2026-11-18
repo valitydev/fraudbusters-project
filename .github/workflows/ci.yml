@@ -259,6 +259,7 @@ jobs:
       - id: registry
         env:
           IMAGE: ${{ steps.image.outputs.tag }}
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 scripts/image-publication.py "$IMAGE" --platform linux/amd64 --platform linux/arm64 --github-output >> "$GITHUB_OUTPUT"
       - run: scripts/setup-ci-maven.sh
         if: steps.registry.outputs.exists != 'true'
@@ -319,6 +320,7 @@ jobs:
       - id: registry
         env:
           IMAGE: ${{ steps.image.outputs.tag }}
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 scripts/image-publication.py "$IMAGE" --platform linux/amd64 --platform linux/arm64 --github-output >> "$GITHUB_OUTPUT"
       - run: npm run ui:install && npm run ui:build
         if: steps.registry.outputs.exists != 'true'
@@ -364,6 +366,7 @@ jobs:
       - id: registry
         env:
           IMAGE: ${{ steps.image.outputs.tag }}
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 scripts/image-publication.py "$IMAGE" --platform linux/amd64 --platform linux/arm64 --github-output >> "$GITHUB_OUTPUT"
       - uses: docker/build-push-action@v6
         if: steps.registry.outputs.exists != 'true'

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Read public GHCR manifests so retries never replace an existing SHA tag."""
 import argparse
+import base64
 import json
+import os
 import re
 import time
 import urllib.error
@@ -16,13 +18,23 @@ ACCEPT = ", ".join([
 ])
 
 
-def manifest_digest(image, required_platforms=()):
+def registry_credentials_from_environment():
+    token = os.environ.get("REGISTRY_TOKEN", "")
+    return os.environ.get("GITHUB_ACTOR", "github-actions") + ":" + token if token else None
+
+
+def manifest_digest(image, required_platforms=(), registry_credentials=None):
     match = re.fullmatch(r"ghcr\.io/([a-z0-9_.-]+/[a-z0-9_.-]+):(sha-[a-f0-9]{7,40})", image)
     if not match:
         raise ValueError("Expected ghcr.io/<owner>/<app>:sha-<commit>")
     repository, tag = match.groups()
-    query = urllib.parse.urlencode({"service": "ghcr.io", "scope": "repository:" + repository + ":pull"})
-    with urllib.request.urlopen("https://ghcr.io/token?" + query, timeout=30) as response:
+    access = "pull,push" if registry_credentials else "pull"
+    query = urllib.parse.urlencode({"service": "ghcr.io", "scope": "repository:" + repository + ":" + access})
+    token_request = urllib.request.Request("https://ghcr.io/token?" + query)
+    if registry_credentials:
+        token_request.add_header("Authorization",
+                                 "Basic " + base64.b64encode(registry_credentials.encode()).decode())
+    with urllib.request.urlopen(token_request, timeout=30) as response:
         token = json.load(response)["token"]
     request = urllib.request.Request("https://ghcr.io/v2/" + repository + "/manifests/" + tag,
                                      headers={"Accept": ACCEPT, "Authorization": "Bearer " + token},
@@ -59,8 +71,10 @@ def main():
     parser.add_argument("--platform", action="append", default=[],
                         help="Require a platform in the image index (repeat for each platform)")
     args = parser.parse_args()
+    registry_credentials = None if args.require else registry_credentials_from_environment()
+
     def check_manifest():
-        return manifest_digest(args.image, args.platform) if args.platform else manifest_digest(args.image)
+        return manifest_digest(args.image, args.platform, registry_credentials)
 
     digest = check_manifest()
     if args.require:
