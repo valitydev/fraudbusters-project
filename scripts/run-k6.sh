@@ -4,12 +4,171 @@ cd "$(dirname "$0")/.."
 project=${REGRESSION_PROJECT:-fb-regression}
 k6_image=${K6_IMAGE:-grafana/k6:0.54.0}
 services=(fraudbusters-api fraudbusters fb-management fb-notificator fb-warehouse wblist trusted-tokens-manager columbus)
+series_steps_default=(payments:smoke payouts:smoke payments:functional payouts:functional mixed:functional
+    payments:baseline payments:load payments:spike payments:stress mixed:load)
+load_profiles=(baseline load stress spike soak)
+
+is_arm() {
+    [[ "$(uname -m)" == arm64 || "$(uname -m)" == aarch64 ]]
+}
+
+infra_directory_of() {
+    local commit
+    commit=$(sed -n 's/^INFRA_COMMIT=//p' "tests/k6/versions/$1.env")
+    if [[ -z "$commit" ]]; then
+        echo infra
+        return
+    fi
+    local directory="tests/k6/.infra/$commit"
+    if [[ ! -f "$directory/infra/compose.yaml" ]]; then
+        rm -rf "$directory"
+        mkdir -p "$directory"
+        git archive "$commit" infra | tar -x -C "$directory" \
+            || { echo "Cannot read infra of commit $commit" >&2; exit 2; }
+    fi
+    echo "$directory/infra"
+}
+
+keep_existing_services() {
+    awk 'NR == FNR { existing[$0] = 1; next }
+        /^[^ ]/ { shown = 1 }
+        /^  [^ #]/ { name = $1; sub(/:$/, "", name); shown = (name in existing) }
+        shown' "$1" "$2" > "$3"
+}
 
 compose() {
-    local files=(-f infra/compose.yaml)
-    if [[ "$(uname -m)" == arm64 || "$(uname -m)" == aarch64 ]]; then files+=(-f infra/compose.arm.yaml); fi
-    files+=(-f tests/k6/compose.regression.yaml)
+    local infra
+    infra=$(infra_directory_of "$1")
+    local files=(-f "$infra/compose.yaml")
+    if is_arm; then files+=(-f "$infra/compose.arm.yaml"); fi
+    local overrides="tests/k6/.infra/overrides/$project"
+    mkdir -p "$overrides"
+    docker compose -p "$project" --env-file "tests/k6/versions/$1.env" "${files[@]}" --profile core --profile apps \
+        config --services > "$overrides/services"
+    local regression_files=(tests/k6/compose.regression.yaml)
+    if is_arm; then regression_files+=(tests/k6/compose.regression.arm.yaml); fi
+    local source target
+    for source in "${regression_files[@]}"; do
+        target="$overrides/$(basename "$source")"
+        keep_existing_services "$overrides/services" "$source" "$target"
+        if grep -q '^  [^ #]' "$target"; then files+=(-f "$target"); fi
+    done
     docker compose -p "$project" --env-file "tests/k6/versions/$1.env" "${files[@]}" --profile core --profile apps "${@:2}"
+}
+
+remove_stack() {
+    compose "$1" down -v --remove-orphans
+    local volumes
+    volumes=$(docker volume ls -q --filter "label=com.docker.compose.project=$project")
+    if [[ -n "$volumes" ]]; then
+        docker volume rm $volumes >/dev/null
+    fi
+}
+
+series_log() {
+    echo "$(date -u +%FT%TZ) $*" | tee -a "$series_directory/series.log"
+}
+
+sample_container_stats() {
+    echo 'time,container,cpu,memory' > "$1"
+    while true; do
+        local containers
+        containers=$(docker ps -q --filter "label=com.docker.compose.project=$project" || true)
+        if [[ -n "$containers" ]]; then
+            docker stats --no-stream --format '{{.Name}},{{.CPUPerc}},{{.MemUsage}}' $containers 2>/dev/null \
+                | sed "s/^/$(date -u +%H:%M:%S),/" >> "$1" || true
+        fi
+        sleep "${STATS_INTERVAL:-15}"
+    done
+}
+
+summarize_clickhouse_queries() {
+    compose "$1" exec -T clickhouse sh -c \
+        'clickhouse-client -u "${CLICKHOUSE_USER:-default}" --password "${CLICKHOUSE_PASSWORD:-}" -n --query "$0"' "
+        SYSTEM FLUSH LOGS;
+        SELECT
+            version() AS server_version,
+            count() AS queries,
+            countIf(query ILIKE 'SELECT%') AS selects,
+            countIf(query ILIKE 'INSERT%') AS inserts,
+            round(avgIf(query_duration_ms, query ILIKE 'SELECT%'), 2) AS select_avg_ms,
+            round(quantileIf(0.95)(query_duration_ms, query ILIKE 'SELECT%'), 2) AS select_p95_ms,
+            max(memory_usage) AS max_query_memory
+        FROM system.query_log
+        WHERE type = 'QueryFinish'
+        FORMAT Vertical"
+}
+
+run_series_step() {
+    local version=$1 suite=$2 profile=$3
+    series_run=$((series_run + 1))
+    local label
+    label=$(printf '%02d-%s-%s-%s' "$series_run" "$suite" "$profile" "$version")
+    series_log "START $label"
+    remove_stack "$version" >> "$series_directory/$label.compose.log" 2>&1 || true
+    if ! "$0" up "$version" >> "$series_directory/$label.compose.log" 2>&1; then
+        series_log "UP FAILED $label, see $label.compose.log"
+        remove_stack "$version" >> "$series_directory/$label.compose.log" 2>&1 || true
+        return 1
+    fi
+    sample_container_stats "$series_directory/$label.stats.csv" &
+    local sampler=$!
+    local status=0
+    "$0" test "$version" "$suite" "$profile" > "$series_directory/$label.k6.log" 2>&1 || status=$?
+    kill "$sampler" 2>/dev/null || true
+    wait "$sampler" 2>/dev/null || true
+    summarize_clickhouse_queries "$version" > "$series_directory/$label.clickhouse.txt" 2>&1 || true
+    remove_stack "$version" >> "$series_directory/$label.compose.log" 2>&1 || true
+    series_results=$(sed -n 's/^Results: //p' "$series_directory/$label.k6.log" | tail -1)
+    printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$label" "$version" "$suite" "$profile" "$status" "$series_results" \
+        >> "$series_directory/runs.tsv"
+    series_log "DONE $label status=$status $series_results"
+}
+
+compare_series_pair() {
+    local label=$1 reference_results=$2 candidate_results=$3
+    if [[ -z "$reference_results" || -z "$candidate_results" ]]; then
+        series_log "COMPARE SKIPPED $label: a run has no results"
+        return 1
+    fi
+    if node tests/k6/tools/compare.mjs "$reference_results" "$candidate_results" > "$series_directory/$label.compare.md"; then
+        printf '%s\t%s\n' "$label" "no regressions" >> "$series_directory/compares.tsv"
+        series_log "COMPARE $label: no regressions"
+        return 0
+    fi
+    printf '%s\t%s\n' "$label" "regressions" >> "$series_directory/compares.tsv"
+    series_log "COMPARE $label: regressions, see $label.compare.md"
+    return 1
+}
+
+write_series_summary() {
+    {
+        echo "# Серия $1 → $2"
+        echo
+        echo '| Прогон | Версия | Набор | Профиль | Код выхода | Результаты |'
+        echo '| --- | --- | --- | --- | --- | --- |'
+        if [[ -f "$series_directory/runs.tsv" ]]; then
+            while IFS=$'\t' read -r label version suite profile status results; do
+                echo "| $label | $version | $suite | $profile | $status | ${results:+$results/report.md} |"
+            done < "$series_directory/runs.tsv"
+        fi
+        echo
+        echo '| Сравнение | Итог |'
+        echo '| --- | --- |'
+        if [[ -f "$series_directory/compares.tsv" ]]; then
+            while IFS=$'\t' read -r label outcome; do
+                echo "| [$label]($label.compare.md) | $outcome |"
+            done < "$series_directory/compares.tsv"
+        fi
+    } > "$series_directory/summary.md"
+}
+
+is_load_profile() {
+    local profile
+    for profile in "${load_profiles[@]}"; do
+        [[ "$profile" == "$1" ]] && return 0
+    done
+    return 1
 }
 
 settings=(K6_CASES RUN_ID RATE TARGET_RATE SPIKE_RATE DURATION RAMP_DURATION STEP_DURATION VUS MAX_VUS CONCURRENCY
@@ -25,7 +184,9 @@ Usage:
   scripts/run-k6.sh up <version>                      start the regression stack from tests/k6/versions/<version>.env
   scripts/run-k6.sh test <version> <suite> <profile>  run tests/k6/suites/<suite> with a profile
   scripts/run-k6.sh lifecycle <version> [<to>]        prepare, restart or upgrade to <to>, verify
-  scripts/run-k6.sh down                              remove the regression stack and its volumes
+  scripts/run-k6.sh series <reference> <candidate> [<suite>:<profile> ...]
+                                                      run each step on fresh stacks of both versions and compare them
+  scripts/run-k6.sh down [<version>]                  remove the regression stack and its volumes
   scripts/run-k6.sh k8s <suite> <profile>             run a suite as a Kubernetes Job; settings come from
                                                       ConfigMap and Secret k6-regression of the namespace
 USAGE
@@ -86,6 +247,8 @@ case "${1:-}" in
         to=${3:-$from}
         version_file "$from"
         version_file "$to"
+        [[ "$(infra_directory_of "$from")" == "$(infra_directory_of "$to")" ]] \
+            || { echo "Versions $from and $to use different INFRA_COMMIT; lifecycle needs one infrastructure" >&2; exit 2; }
         export RUN_ID=${RUN_ID:-lc$(date +%H%M%S)}
         export FROM_FEATURES
         FROM_FEATURES=$(features_of "$from")
@@ -170,9 +333,59 @@ case "${1:-}" in
         echo "Results: $results"
         exit "$status"
         ;;
+    series)
+        reference=${2:?Usage: run-k6.sh series <reference> <candidate> [<suite>:<profile> ...]}
+        candidate=${3:?Usage: run-k6.sh series <reference> <candidate> [<suite>:<profile> ...]}
+        version_file "$reference"
+        version_file "$candidate"
+        steps=("${@:4}")
+        if (( ${#steps[@]} == 0 )); then steps=("${series_steps_default[@]}"); fi
+        for step in "${steps[@]}"; do
+            [[ "$step" == *:* && -f "tests/k6/suites/${step%%:*}/main.js" ]] \
+                || { echo "Step $step must be <suite>:<profile> with a suite from tests/k6/suites" >&2; exit 2; }
+        done
+        series_directory="tests/k6/results/_series-$reference-$candidate-$(date -u +%Y%m%dT%H%M%SZ)"
+        mkdir -p "$series_directory"
+        series_run=0
+        pair=0
+        stopped=
+        series_log "SERIES $reference → $candidate: ${steps[*]}"
+        for step in "${steps[@]}"; do
+            suite=${step%%:*}
+            profile=${step#*:}
+            pairs=1
+            if is_load_profile "$profile"; then pairs=${LOAD_PAIRS:-2}; fi
+            for (( repeat = 1; repeat <= pairs; repeat++ )); do
+                if (( pair % 2 == 0 )); then order=("$reference" "$candidate"); else order=("$candidate" "$reference"); fi
+                pair=$((pair + 1))
+                reference_results=
+                candidate_results=
+                for version in "${order[@]}"; do
+                    run_series_step "$version" "$suite" "$profile" || { stopped="stand of $version did not start"; break; }
+                    if [[ "$version" == "$reference" ]]; then reference_results=$series_results; fi
+                    if [[ "$version" == "$candidate" ]]; then candidate_results=$series_results; fi
+                done
+                [[ -z "$stopped" ]] || break
+                if ! compare_series_pair "$(printf '%02d-%s-%s' "$pair" "$suite" "$profile")" \
+                    "$reference_results" "$candidate_results"; then
+                    if ! is_load_profile "$profile" && [[ "${SERIES_CONTINUE:-}" != 1 ]]; then
+                        stopped="regression in $suite $profile"
+                        break
+                    fi
+                fi
+            done
+            [[ -z "$stopped" ]] || break
+        done
+        write_series_summary "$reference" "$candidate"
+        if [[ -n "$stopped" ]]; then
+            series_log "SERIES STOPPED: $stopped"
+            exit 1
+        fi
+        series_log "SERIES COMPLETE: $series_directory/summary.md"
+        ;;
     down)
-        any_version=$(ls tests/k6/versions | head -1)
-        compose "${any_version%.env}" down -v --remove-orphans
+        version=${2:-$(ls tests/k6/versions | head -1)}
+        remove_stack "${version%.env}"
         ;;
     *)
         usage

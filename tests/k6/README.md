@@ -51,6 +51,16 @@ scripts/run-k6.sh down
 
 Версия — файл [versions](versions)`/<версия>.env`: теги опубликованных образов каждого сервиса и `FEATURES`,
 функциональности этой версии. Кейсы, которым нужна отсутствующая функциональность, получают статус `skipped`.
+`INFRA_COMMIT` — коммит, из которого берётся `infra/` стенда (ClickHouse, Kafka, базы): версия запускается на своей
+инфраструктуре, а не на текущей. Скрипт выгружает её в `tests/k6/.infra/<коммит>`. Без `INFRA_COMMIT` берётся
+`infra/` текущего дерева. `lifecycle` требует одной инфраструктуры у обеих версий.
+
+Образы версии, ещё не опубликованные CI (CI публикует только master), собираются локально и получают тег версии:
+
+```bash
+scripts/build-local-images.sh fraudbusters fraudbusters-warehouse
+docker tag ghcr.io/valitydev/fraudbusters:local ghcr.io/valitydev/fraudbusters:sha-<коммит>
+```
 
 | Профиль | Что запускает |
 | --- | --- |
@@ -107,6 +117,37 @@ Job, ConfigMap, `pods/log` и `pods/exec` в namespace.
 
 `lifecycle` в кластере запускается по этапам с одним `RUN_ID`: `K6_PHASE=prepare` до смены версии и
 `K6_PHASE=verify` после неё, с `FROM_FEATURES` — функциональностями версии, на которой шла подготовка.
+
+## Серия: сравнение двух версий от smoke до нагрузки
+
+```bash
+scripts/run-k6.sh series <эталон> <кандидат>
+scripts/run-k6.sh series <эталон> <кандидат> payments:functional payments:load
+```
+
+Шаг — `<набор>:<профиль>`. По умолчанию шаги идут от быстрых к тяжёлым: `payments:smoke`, `payouts:smoke`,
+`payments:functional`, `payouts:functional`, `mixed:functional`, `payments:baseline`, `payments:load`,
+`payments:spike`, `payments:stress`, `mixed:load`; на локальном стенде это около 5 часов. `soak` в серию по умолчанию не входит:
+`DURATION=15m scripts/run-k6.sh series <эталон> <кандидат> payments:soak`.
+
+Каждый прогон идёт на свежем стеке своей версии: `down`, `up`, `test`, снимок ClickHouse, `down`. Шаг выполняется
+на обеих версиях и сравнивается `compare.mjs`. Нагрузочные шаги повторяются `LOAD_PAIRS` раз (2), порядок версий
+меняется в каждой паре, поэтому ни одна версия не идёт всегда первой. Регресс в `smoke` или `functional`
+останавливает серию (`SERIES_CONTINUE=1` — продолжить); регресс нагрузки только отмечается, решение — по всем парам.
+Остальные переменные (`RATE`, `DURATION`, …) действуют на все прогоны серии.
+
+Серия пишет в `tests/k6/results/_series-<эталон>-<кандидат>-<время>/`:
+
+| Файл | Содержимое |
+| --- | --- |
+| `series.log` | строка на событие: START, DONE с кодом выхода и папкой результатов, COMPARE, SERIES COMPLETE или STOPPED |
+| `summary.md` | таблица прогонов со ссылками на `report.md` и таблица сравнений, пишется в конце |
+| `<NN>-<набор>-<профиль>-<версия>.k6.log` | вывод k6 прогона; `.compose.log` — подъём и остановка стека |
+| `<NN>-<набор>-<профиль>-<версия>.stats.csv` | CPU и память контейнеров стека каждые `STATS_INTERVAL` секунд (15) |
+| `<NN>-<набор>-<профиль>-<версия>.clickhouse.txt` | версия ClickHouse, число запросов, p95 SELECT, пик памяти запроса |
+| `<NN>-<набор>-<профиль>.compare.md` | вывод `compare.mjs` по паре |
+
+Ход серии: `tail -f tests/k6/results/_series-*/series.log`. Итог серии оформляется отчётом в [reports](reports).
 
 ## Результаты и сравнение прогонов
 

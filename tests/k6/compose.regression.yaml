@@ -4,6 +4,9 @@ services:
     ports: !reset []
   fraudbusters-api:
     image: ghcr.io/valitydev/fraudbusters-api:${FRAUDBUSTERS_API_TAG:?set FRAUDBUSTERS_API_TAG}
+    environment:
+      fraudbusters.service.user.inspector.url: http://fraudbusters:8022/inspector/v1/
+      fraudbusters.service.user.inspector.networkTimeout: 30000
     ports: !reset []
   fb-management:
     image: ghcr.io/valitydev/fraudbusters-management:${FRAUDBUSTERS_MANAGEMENT_TAG:?set FRAUDBUSTERS_MANAGEMENT_TAG}
