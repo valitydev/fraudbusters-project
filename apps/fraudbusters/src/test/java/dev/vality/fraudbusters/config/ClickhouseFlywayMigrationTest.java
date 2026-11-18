@@ -15,6 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ClickhouseFlywayMigrationTest {
 
     private static final String CURRENT_PRODUCTION_SCHEMA_SCRIPT = "sql/current_production_schema.sql";
+    private static final List<String> CLIENT_IDENTITY_TABLES =
+            List.of("events_unique", "payment", "refund", "chargeback", "fraud_payment");
 
     private JdbcTemplate jdbc;
 
@@ -26,8 +28,8 @@ class ClickhouseFlywayMigrationTest {
 
     @Test
     void cleanDatabaseIsCreatedByAllMigrations() {
-        assertEquals(2, migrate().migrationsExecuted);
-        assertEquals(List.of("1 SQL", "2 SQL"), findAppliedVersions());
+        assertEquals(3, migrate().migrationsExecuted);
+        assertEquals(List.of("1 SQL", "2 SQL", "3 SQL"), findAppliedVersions());
         assertEquals(List.of(
                         "chargeback ReplicatedReplacingMergeTree",
                         "events_unique ReplicatedMergeTree",
@@ -44,6 +46,17 @@ class ClickhouseFlywayMigrationTest {
     }
 
     @Test
+    void schemaHistoryIsReplicatedAcrossCluster() {
+        migrate();
+
+        assertEquals("/clickhouse/fraud_cluster/tables/01/fraud/clickhouse_flyway_schema_history",
+                jdbc.queryForObject("""
+                        SELECT zookeeper_path FROM system.replicas
+                        WHERE database = 'fraud' AND table = 'clickhouse_flyway_schema_history'
+                        """, String.class));
+    }
+
+    @Test
     void currentProductionDatabaseIsBaselinedAndUpgradedToCleanSchema() {
         migrate();
         final List<String> cleanSchema = describeFraudSchema();
@@ -55,13 +68,29 @@ class ClickhouseFlywayMigrationTest {
                 VALUES ('2026-01-01', 1767225600000, 1767225600000, 'existing', 'succeeded')
                 """);
 
-        assertEquals(1, migrate().migrationsExecuted);
+        assertEquals(2, migrate().migrationsExecuted);
 
-        assertEquals(List.of("1 BASELINE", "2 SQL"), findAppliedVersions());
+        assertEquals(List.of("1 BASELINE", "2 SQL", "3 SQL"), findAppliedVersions());
         assertEquals(cleanSchema, describeFraudSchema());
         assertEquals(1, jdbc.queryForObject("""
                 SELECT count() FROM fraud.withdrawal WHERE id = 'existing' AND partyId IS NULL
                 """, Integer.class));
+    }
+
+    @Test
+    void databaseWithoutClientIdentityIsBaselinedAndUpgradedToCleanSchema() {
+        migrate();
+        final List<String> cleanSchema = describeFraudSchema();
+        jdbc.execute("DROP DATABASE fraud SYNC");
+        jdbc.execute("CREATE DATABASE fraud");
+        ClickHouseContainerExtension.executeScripts(List.of(CURRENT_PRODUCTION_SCHEMA_SCRIPT));
+        CLIENT_IDENTITY_TABLES.forEach(table -> jdbc.execute(
+                "ALTER TABLE fraud." + table + " DROP COLUMN customerId, DROP COLUMN userId"));
+
+        assertEquals(2, migrate().migrationsExecuted);
+
+        assertEquals(List.of("1 BASELINE", "2 SQL", "3 SQL"), findAppliedVersions());
+        assertEquals(cleanSchema, describeFraudSchema());
     }
 
     private MigrateResult migrate() {

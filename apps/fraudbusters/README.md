@@ -43,12 +43,21 @@ clickhouse.flyway:
 The scripts target a replicated cluster: tables use `Replicated*` engines with the
 replication path `/clickhouse/{cluster}/tables/{shard}/fraud/<table>` and DDL runs
 `ON CLUSTER '{cluster}'`, so the server needs ZooKeeper or ClickHouse Keeper and the
-`cluster`, `shard` and `replica` macros.
+`cluster`, `shard` and `replica` macros. The history table is created the same way, as
+a `ReplicatedMergeTree` under `/clickhouse/{cluster}/tables/{shard}/fraud/clickhouse_flyway_schema_history`,
+so every replica sees one migration history.
 
-`V1` is the schema that existed before Flyway was introduced. On an empty or missing
-`fraud` database Flyway applies every script. On a database that already holds the
-`fraud` tables but has no history table, Flyway records a baseline at version 1 and
-applies only the later scripts, so existing data is kept. Every script uses
+ClickHouse has no locks, so Flyway does not serialize migrations: every service
+instance that starts at the same time applies the pending scripts itself. A script
+must therefore be safe to run several times and concurrently: use `IF NOT EXISTS` and
+`IF EXISTS`, and do not change data in migrations.
+
+`V1` is the oldest schema still found on existing servers, before the `customerId` and
+`userId` columns were added; `V2` adds them and `V3` adds the payout identity columns.
+On an empty or missing `fraud` database Flyway applies every script. On a database that
+already holds the `fraud` tables but has no history table, Flyway records a baseline at
+version 1 and applies only the later scripts, so existing data is kept and a server
+that lacks the client identity columns receives them. Every script uses
 `IF NOT EXISTS`, so repeating it on an already migrated server is safe.
 
 The Flyway history table uses the `Bool` type and requires ClickHouse 21.12 or newer.

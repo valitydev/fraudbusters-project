@@ -26,9 +26,7 @@ CREATE TABLE IF NOT EXISTS fraud.events_unique ON CLUSTER '{cluster}' (
     mobile UInt8,
     recurrent UInt8,
     checkedTemplate String,
-    id String,
-    customerId Nullable(String),
-    userId Nullable(String)
+    id String
 ) ENGINE = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{shard}/fraud/events_unique', '{replica}')
 PARTITION BY toYYYYMM(timestamp)
 ORDER BY (eventTimeHour, partyId, shopId, bin, resultStatus, cardToken, email, ip, fingerprint)
@@ -61,9 +59,7 @@ CREATE TABLE IF NOT EXISTS fraud.fraud_payment ON CLUSTER '{cluster}' (
     errorCode String,
     paymentCountry String,
     phone String,
-    cardCategory String,
-    customerId Nullable(String),
-    userId Nullable(String)
+    cardCategory String
 ) ENGINE = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{shard}/fraud/fraud_payment', '{replica}')
 PARTITION BY toYYYYMM(timestamp)
 ORDER BY (eventTimeHour, partyId, shopId, paymentTool, status, currency, providerId, fingerprint, cardToken, eventTime, id);
@@ -101,9 +97,7 @@ CREATE TABLE IF NOT EXISTS fraud.payment ON CLUSTER '{cluster}' (
     errorCode String,
     paymentCountry String,
     phone String,
-    cardCategory String,
-    customerId Nullable(String),
-    userId Nullable(String)
+    cardCategory String
 ) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/{cluster}/tables/{shard}/fraud/payment', '{replica}')
 PARTITION BY toYYYYMM(timestamp)
 ORDER BY (eventTimeHour, partyId, shopId, paymentTool, status, currency, providerId, fingerprint, cardToken, id);
@@ -133,9 +127,7 @@ CREATE TABLE IF NOT EXISTS fraud.refund ON CLUSTER '{cluster}' (
     status Enum8('pending' = 1, 'succeeded' = 2, 'failed' = 3),
     errorReason String,
     errorCode String,
-    paymentId String,
-    customerId Nullable(String),
-    userId Nullable(String)
+    paymentId String
 ) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/{cluster}/tables/{shard}/fraud/refund', '{replica}')
 PARTITION BY toYYYYMM(timestamp)
 ORDER BY (eventTimeHour, partyId, shopId, status, currency, providerId, fingerprint, cardToken, id, paymentId);
@@ -165,9 +157,7 @@ CREATE TABLE IF NOT EXISTS fraud.chargeback ON CLUSTER '{cluster}' (
     status Enum8('accepted' = 1, 'rejected' = 2, 'cancelled' = 3),
     category Enum8('fraud' = 1, 'dispute' = 2, 'authorisation' = 3, 'processing_error' = 4),
     chargebackCode String,
-    paymentId String,
-    customerId Nullable(String),
-    userId Nullable(String)
+    paymentId String
 ) ENGINE = ReplicatedReplacingMergeTree('/clickhouse/{cluster}/tables/{shard}/fraud/chargeback', '{replica}')
 PARTITION BY toYYYYMM(timestamp)
 ORDER BY (eventTimeHour, partyId, shopId, category, status, currency, providerId, fingerprint, cardToken, id, paymentId);
