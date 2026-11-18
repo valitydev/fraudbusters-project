@@ -32,7 +32,8 @@ lib/ clients/ fixtures/ общий код: профили, проверки, о�
 versions/              версии стенда
 tools/                 готовность стенда, отчёт прогона, сравнение двух прогонов
 k8s/                   запуск в Kubernetes
-Dockerfile             образ с тестами для запуска в кластере
+runner/                раннер: HTTP-сервис, который запускает наборы по запросу
+Dockerfile             образ с тестами и раннером для запуска в кластере
 reports/               отчёты сравнений
 ```
 
@@ -201,6 +202,59 @@ scripts/check-k6-image.sh ghcr.io/valitydev/fraudbusters-k6:local
 `lifecycle` в кластере идёт в два этапа с одним `RUN_ID`:
 - `K6_PHASE=prepare` — до смены версии;
 - `K6_PHASE=verify` — после смены, с `FROM_FEATURES` версии, на которой шла подготовка.
+
+## Раннер в кластере
+
+Образ по умолчанию запускает раннер [runner/server.mjs](runner/server.mjs): HTTP-сервис на порту 8080. Он
+запускает наборы по запросу и хранит их результаты. Среде нужно только развернуть образ как сервис
+`fraudbusters-k6` и задать ему адреса. Всё остальное делает `run-k6.sh` с машины разработчика через
+`kubectl port-forward`.
+
+```bash
+K8S_NAMESPACE=<namespace> FEATURES= FB_AUTH_USER=<пользователь> FB_AUTH_PASSWORD=<пароль> \
+    scripts/run-k6.sh remote payments functional
+```
+
+`remote` запускает набор и ждёт его конца, затем скачивает результаты в `tests/k6/results/<run-id>-<версия>/` и
+печатает `report.md`. Код выхода 0 значит, что прогон `passed`. Длинную нагрузку удобнее запускать с `K6_DETACH=1`:
+команда вернёт id прогона, а результаты потом заберёт `scripts/run-k6.sh remote-fetch <run-id>`. Остановить прогон —
+`scripts/run-k6.sh remote-cancel <run-id>`.
+
+**Что передаёт клиент.** Переменные профилей и кейсов из таблицы `run-k6.sh` (`FEATURES`, `RATE`, `K6_CASES`,
+`RUN_ID`, `K6_PHASE`, `K6_GLOBAL_CASES` и другие), если они заданы в окружении. Учётные данные `FB_AUTH_USER`,
+`FB_AUTH_PASSWORD` или `FB_TOKEN` раннер передаёт только k6 и на диск не пишет. Если `VERSION` не задана, раннер
+подписывает прогон своей `VERSION`.
+
+| Переменная клиента | Значение |
+| --- | --- |
+| `K8S_NAMESPACE` | namespace раннера; по умолчанию namespace текущего контекста |
+| `K6_RUNNER_SERVICE` | имя сервиса (`fraudbusters-k6`) |
+| `K6_RUNNER_LOCAL_PORT` | локальный порт `port-forward` (18080) |
+| `K6_RUNNER_URL` | адрес раннера без `port-forward`, например изнутри кластера |
+| `K6_POLL_SECONDS` | как часто спрашивать состояние прогона (15) |
+
+**Развёртывание.** Образ `ghcr.io/valitydev/fraudbusters-k6:sha-<коммит>`, пользователь 12345, порт 8080, проверка
+`GET /health`. Окружение пода задаёт значения по умолчанию для всех прогонов; запрос их переопределяет.
+
+| Переменная пода | Значение |
+| --- | --- |
+| `FB_MANAGEMENT_URL`, `FB_API_URL`, `FB_INSPECTOR_URL` | адреса сервисов, как в таблице `k8s` выше |
+| `FB_AUTH_URL`, `FB_AUTH_REALM`, `FB_AUTH_CLIENT` | keycloak, realm и клиент для токена |
+| `K6_GLOBAL_CASES` | `on` только в изолированной среде, см. «Общие среды» |
+| `VERSION` | подпись прогонов по умолчанию |
+| `K6_RUNNER_RESULTS` | каталог результатов (`/results`); без тома результаты живут до перезапуска пода |
+
+**API.** Одновременно идёт один прогон: второй запрос получает 409 с id активного прогона.
+
+| Запрос | Ответ |
+| --- | --- |
+| `GET /health` | `status` и id активного прогона |
+| `GET /suites` | наборы и профили |
+| `POST /runs` | `{ "suite", "profile", "version", "settings": {…}, "secrets": {…} }` → прогон в состоянии `waiting` |
+| `GET /runs`, `GET /runs/<id>` | прогоны: `waiting` (ждёт готовности среды) → `running` → `passed`, `failed`, `cancelled`, `interrupted` |
+| `POST /runs/<id>/cancel` | остановить прогон |
+| `GET /runs/<id>/files/<файл>` | `run.log`, `ready.log`, `report.md`, `summary.json`, `run.json` |
+| `GET /runs/<id>/archive` | все файлы прогона в `tar.gz` |
 
 ## Как добавить кейс или набор
 
