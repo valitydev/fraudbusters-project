@@ -19,16 +19,15 @@
     <properties>
         <java.version>25</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
-        <testcontainers.version>1.21.4</testcontainers.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <server.port>8022</server.port>
         <management.port>8023</management.port>
         <exposed.ports>${server.port} ${management.port}</exposed.ports>
         <warehouse.proto.version>1.12-afdcd48</warehouse.proto.version>
-        <clickhouse-jdbc.version>0.3.1</clickhouse-jdbc.version>
+        <clickhouse-jdbc.version>0.11.2</clickhouse-jdbc.version>
         <testcontainers.annotations.version>1.3.0</testcontainers.annotations.version>
-        <commons.io.version>2.14.0</commons.io.version>
+        <commons.io.version>2.20.0</commons.io.version>
     </properties>
 
     <dependencies>
@@ -89,15 +88,9 @@
             <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>ru.yandex.clickhouse</groupId>
+            <groupId>com.clickhouse</groupId>
             <artifactId>clickhouse-jdbc</artifactId>
             <version>${clickhouse-jdbc.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -120,7 +113,7 @@
         <dependency>
             <groupId>dev.vality</groupId>
             <artifactId>testcontainers-annotations</artifactId>
-            <version>1.4.3</version>
+            <version>4.2.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

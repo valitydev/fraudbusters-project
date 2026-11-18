@@ -1,6 +1,5 @@
 package dev.vality.fraudbusters.repository;
 
-import dev.vality.clickhouse.initializer.ChInitializer;
 import dev.vality.columbus.ColumbusServiceSrv;
 import dev.vality.fraudbusters.config.TestClickhouseConfig;
 import dev.vality.fraudbusters.config.properties.ClickhouseProperties;
@@ -69,7 +68,7 @@ public class FraudResultRepositoryTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        ChInitializer.initAllScripts(ClickHouseContainerExtension.CLICKHOUSE_CONTAINER, List.of(
+        ClickHouseContainerExtension.executeScripts(List.of(
                 "sql/db_init.sql",
                 "sql/V3__create_fraud_payments.sql",
                 "sql/V4__create_payment.sql",

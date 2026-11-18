@@ -1,6 +1,5 @@
 package dev.vality.fraudbusters.repository;
 
-import dev.vality.clickhouse.initializer.ChInitializer;
 import dev.vality.damsel.fraudbusters.Chargeback;
 import dev.vality.fraudbusters.config.TestClickhouseConfig;
 import dev.vality.fraudbusters.config.properties.ClickhouseProperties;
@@ -164,7 +163,7 @@ class HistoricalChargebackDataTest {
         @SneakyThrows
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            ChInitializer.initAllScripts(ClickHouseContainerExtension.CLICKHOUSE_CONTAINER, List.of(
+            ClickHouseContainerExtension.executeScripts(List.of(
                     "sql/data/insert_history_chargebacks.sql"
             ));
         }

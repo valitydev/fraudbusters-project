@@ -28,6 +28,43 @@ enough free disk space to start Kafka and ClickHouse.
 
 Instruction for testing in https://github.com/valitydev/fraudbusters-compose
 
+### ClickHouse schema
+
+The service owns the `fraud` ClickHouse database and migrates it with Flyway on
+startup. Scripts live in `src/main/resources/db/migration-clickhouse`; the history
+table is `fraud.clickhouse_flyway_schema_history`.
+
+```yaml
+clickhouse.flyway:
+  enabled: true
+  repair-before-migrate: false
+```
+
+The scripts target a replicated cluster: tables use `Replicated*` engines with the
+replication path `/clickhouse/{cluster}/tables/{shard}/fraud/<table>` and DDL runs
+`ON CLUSTER '{cluster}'`, so the server needs ZooKeeper or ClickHouse Keeper and the
+`cluster`, `shard` and `replica` macros. The history table is created the same way, as
+a `ReplicatedMergeTree` under `/clickhouse/{cluster}/tables/{shard}/fraud/clickhouse_flyway_schema_history`,
+so every replica sees one migration history.
+
+ClickHouse has no locks, so Flyway does not serialize migrations: every service
+instance that starts at the same time applies the pending scripts itself. A script
+must therefore be safe to run several times and concurrently: use `IF NOT EXISTS` and
+`IF EXISTS`, and do not change data in migrations.
+
+`V1` is the oldest schema still found on existing servers, before the `customerId` and
+`userId` columns were added; `V2` adds them and `V3` adds the payout identity columns.
+On an empty or missing `fraud` database Flyway applies every script. On a database that
+already holds the `fraud` tables but has no history table, Flyway records a baseline at
+version 1 and applies only the later scripts, so existing data is kept and a server
+that lacks the client identity columns receives them. Every script uses
+`IF NOT EXISTS`, so repeating it on an already migrated server is safe.
+
+The Flyway history table uses the `Bool` type and requires ClickHouse 21.12 or newer.
+The local Compose environment runs a single ClickHouse server without Keeper and sets
+`clickhouse.flyway.enabled=false`; there the schema comes from
+`infra/clickhouse/docker-entrypoint-initdb.d`.
+
 ### Tracing
 
 The Docker runtime starts the OpenTelemetry Java agent. Configure tracing through

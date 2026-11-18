@@ -1,6 +1,5 @@
 package dev.vality.fraudbusters.repository.clickhouse.impl;
 
-import dev.vality.clickhouse.initializer.ChInitializer;
 import dev.vality.fraudbusters.config.TestClickhouseConfig;
 import dev.vality.fraudbusters.config.properties.ClickhouseProperties;
 import dev.vality.fraudbusters.constant.FraudResultField;
@@ -51,7 +50,8 @@ class HistoricalPaymentDataTest {
 
     @BeforeAll
     static void setUp() throws Exception {
-        ChInitializer.initAllScripts(ClickHouseContainerExtension.CLICKHOUSE_CONTAINER, List.of(
+        ClickHouseContainerExtension.removeEventsRetention();
+        ClickHouseContainerExtension.executeScripts(List.of(
                 "sql/data/insert_history_payments.sql",
                 "sql/data/insert_history_fraud_results.sql",
                 "sql/data/insert_recent_payment_rule_filter.sql"

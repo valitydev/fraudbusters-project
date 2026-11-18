@@ -81,7 +81,7 @@ public class RefundBatchPreparedStatementSetter implements BatchPreparedStatemen
         ps.setLong(l++, event.getCost().getAmount());
         ps.setString(l++, event.getCost().getCurrency().getSymbolicCode());
 
-        ps.setObject(l++, event.getStatus());
+        ps.setString(l++, event.getStatus().name());
 
         Error error = event.getError();
         ps.setString(l++, error == null ? null : error.getErrorCode());

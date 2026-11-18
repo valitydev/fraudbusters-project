@@ -100,8 +100,13 @@ clickhouse.db:
   connection-timeout: 300000
   socket-timeout: 300000
   compress: false
+  maximum-pool-size: 50
   distributed-connections-pool-size: 50
   max-distributed-connections: 50
+
+clickhouse.flyway:
+  enabled: true
+  repair-before-migrate: false
 
 geo.ip.service.url: "http://localhost:29092/v1/columbus"
 

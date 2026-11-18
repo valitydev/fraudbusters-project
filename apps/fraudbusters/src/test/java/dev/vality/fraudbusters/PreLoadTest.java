@@ -28,8 +28,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import ru.yandex.clickhouse.ClickHouseDataSource;
 
+import javax.sql.DataSource;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -57,7 +57,7 @@ class PreLoadTest {
     private static final String TEST = "test";
 
     @MockitoBean
-    ClickHouseDataSource clickHouseDataSource;
+    DataSource clickHouseDataSource;
     @MockitoBean
     FraudResultRepository paymentRepository;
 

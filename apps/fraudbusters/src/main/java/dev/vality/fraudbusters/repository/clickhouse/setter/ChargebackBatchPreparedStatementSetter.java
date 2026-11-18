@@ -86,9 +86,9 @@ public class ChargebackBatchPreparedStatementSetter implements BatchPreparedStat
         ps.setLong(l++, event.getCost().getAmount());
         ps.setString(l++, event.getCost().getCurrency().getSymbolicCode());
 
-        ps.setObject(l++, event.getStatus());
+        ps.setString(l++, event.getStatus().name());
 
-        ps.setObject(l++, event.getCategory());
+        ps.setString(l++, event.getCategory().name());
         ps.setString(l++, event.getChargebackCode());
 
         ps.setString(l++, event.getPaymentId());

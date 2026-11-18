@@ -1,0 +1,219 @@
+CREATE TABLE fraud.chargeback
+(
+    `timestamp` Date,
+    `eventTime` UInt64,
+    `eventTimeHour` UInt64,
+    `id` String,
+    `email` String,
+    `ip` String,
+    `fingerprint` String,
+    `bin` String,
+    `lastDigits` String,
+    `cardToken` String,
+    `paymentSystem` String,
+    `paymentTool` String,
+    `terminal` String,
+    `providerId` String,
+    `bankCountry` String,
+    `partyId` String,
+    `shopId` String,
+    `amount` UInt64,
+    `currency` String,
+    `payerType` String,
+    `tokenProvider` String,
+    `status` Enum8('accepted' = 1, 'rejected' = 2, 'cancelled' = 3),
+    `category` Enum8('fraud' = 1, 'dispute' = 2, 'authorisation' = 3, 'processing_error' = 4),
+    `chargebackCode` String,
+    `paymentId` String,
+    `customerId` Nullable(String),
+    `userId` Nullable(String)
+)
+ENGINE = ReplicatedReplacingMergeTree('/clickhouse/{cluster}/tables/{shard}/fraud/chargeback', '{replica}')
+PARTITION BY toYYYYMM(timestamp)
+ORDER BY (eventTimeHour, partyId, shopId, category, status, currency, providerId, fingerprint, cardToken, id, paymentId)
+SETTINGS index_granularity = 8192;
+
+CREATE TABLE fraud.events_unique
+(
+    `timestamp` Date,
+    `eventTimeHour` UInt64,
+    `eventTime` UInt64,
+    `payerType` String,
+    `tokenProvider` String,
+    `partyId` String,
+    `shopId` String,
+    `ip` String,
+    `email` String,
+    `bin` String,
+    `fingerprint` String,
+    `resultStatus` String,
+    `amount` UInt64,
+    `country` String,
+    `checkedRule` String,
+    `bankCountry` String,
+    `currency` String,
+    `invoiceId` String,
+    `lastDigits` String,
+    `bankName` String,
+    `cardToken` String,
+    `paymentId` String,
+    `mobile` UInt8,
+    `recurrent` UInt8,
+    `checkedTemplate` String,
+    `id` String,
+    `customerId` Nullable(String),
+    `userId` Nullable(String)
+)
+ENGINE = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{shard}/fraud/events_unique', '{replica}')
+PARTITION BY toYYYYMM(timestamp)
+ORDER BY (eventTimeHour, partyId, shopId, bin, resultStatus, cardToken, email, ip, fingerprint)
+TTL timestamp + toIntervalMonth(3)
+SETTINGS index_granularity = 8192;
+
+CREATE TABLE fraud.fraud_payment
+(
+    `timestamp` Date,
+    `id` String,
+    `eventTime` UInt64,
+    `eventTimeHour` UInt64,
+    `fraudType` String,
+    `comment` String,
+    `email` String,
+    `ip` String,
+    `fingerprint` String,
+    `bin` String,
+    `lastDigits` String,
+    `cardToken` String,
+    `paymentSystem` String,
+    `paymentTool` String,
+    `terminal` String,
+    `providerId` String,
+    `bankCountry` String,
+    `partyId` String,
+    `shopId` String,
+    `amount` UInt64,
+    `currency` String,
+    `status` Enum8('pending' = 1, 'processed' = 2, 'captured' = 3, 'cancelled' = 4, 'failed' = 5),
+    `errorReason` String,
+    `errorCode` String,
+    `paymentCountry` String,
+    `phone` String,
+    `cardCategory` String,
+    `customerId` Nullable(String),
+    `userId` Nullable(String)
+)
+ENGINE = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{shard}/fraud/fraud_payment', '{replica}')
+PARTITION BY toYYYYMM(timestamp)
+ORDER BY (eventTimeHour, partyId, shopId, paymentTool, status, currency, providerId, fingerprint, cardToken, eventTime, id)
+SETTINGS index_granularity = 8192;
+
+CREATE TABLE fraud.payment
+(
+    `timestamp` Date,
+    `eventTime` UInt64,
+    `eventTimeHour` UInt64,
+    `id` String,
+    `email` String,
+    `ip` String,
+    `fingerprint` String,
+    `bin` String,
+    `lastDigits` String,
+    `cardToken` String,
+    `paymentSystem` String,
+    `paymentTool` String,
+    `terminal` String,
+    `providerId` String,
+    `bankCountry` String,
+    `partyId` String,
+    `shopId` String,
+    `payerType` String,
+    `tokenProvider` String,
+    `amount` UInt64,
+    `currency` String,
+    `checkedTemplate` String,
+    `checkedRule` String,
+    `resultStatus` String,
+    `checkedResultsJson` String,
+    `mobile` UInt8,
+    `recurrent` UInt8,
+    `status` Enum8('pending' = 1, 'processed' = 2, 'captured' = 3, 'cancelled' = 4, 'failed' = 5),
+    `errorReason` String,
+    `errorCode` String,
+    `paymentCountry` String,
+    `phone` String,
+    `cardCategory` String,
+    `customerId` Nullable(String),
+    `userId` Nullable(String)
+)
+ENGINE = ReplicatedReplacingMergeTree('/clickhouse/{cluster}/tables/{shard}/fraud/payment', '{replica}')
+PARTITION BY toYYYYMM(timestamp)
+ORDER BY (eventTimeHour, partyId, shopId, paymentTool, status, currency, providerId, fingerprint, cardToken, id)
+SETTINGS index_granularity = 8192;
+
+CREATE TABLE fraud.refund
+(
+    `timestamp` Date,
+    `eventTime` UInt64,
+    `eventTimeHour` UInt64,
+    `id` String,
+    `email` String,
+    `ip` String,
+    `fingerprint` String,
+    `bin` String,
+    `lastDigits` String,
+    `cardToken` String,
+    `paymentSystem` String,
+    `paymentTool` String,
+    `terminal` String,
+    `providerId` String,
+    `bankCountry` String,
+    `partyId` String,
+    `shopId` String,
+    `amount` UInt64,
+    `currency` String,
+    `payerType` String,
+    `tokenProvider` String,
+    `status` Enum8('pending' = 1, 'succeeded' = 2, 'failed' = 3),
+    `errorReason` String,
+    `errorCode` String,
+    `paymentId` String,
+    `customerId` Nullable(String),
+    `userId` Nullable(String)
+)
+ENGINE = ReplicatedReplacingMergeTree('/clickhouse/{cluster}/tables/{shard}/fraud/refund', '{replica}')
+PARTITION BY toYYYYMM(timestamp)
+ORDER BY (eventTimeHour, partyId, shopId, status, currency, providerId, fingerprint, cardToken, id, paymentId)
+SETTINGS index_granularity = 8192;
+
+CREATE TABLE fraud.withdrawal
+(
+    `timestamp` Date,
+    `eventTime` UInt64,
+    `eventTimeHour` UInt64,
+    `id` String,
+    `amount` UInt64,
+    `currency` String,
+    `bin` String,
+    `lastDigits` String,
+    `cardToken` String,
+    `paymentSystem` String,
+    `paymentTool` String,
+    `bankName` String,
+    `cardHolderName` String,
+    `issuerCountry` String,
+    `cryptoWalletId` String,
+    `cryptoWalletCurrency` String,
+    `terminal` String,
+    `providerId` String,
+    `bankCountry` String,
+    `identityId` String,
+    `accountId` String,
+    `accountCurrency` String,
+    `status` Enum8('pending' = 1, 'succeeded' = 2, 'failed' = 3),
+    `errorReason` String,
+    `errorCode` String
+)
+ENGINE = ReplicatedReplacingMergeTree('/clickhouse/{cluster}/tables/{shard}/fraud/withdrawal', '{replica}')
+PARTITION BY toYYYYMM(timestamp)
+ORDER BY (eventTimeHour, identityId, status, currency, paymentSystem, providerId, cardToken, id)
+SETTINGS index_granularity = 8192;

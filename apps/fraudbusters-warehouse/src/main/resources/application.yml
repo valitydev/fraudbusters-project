@@ -45,4 +45,4 @@ clickhouse:
 
 testcontainers:
   clickhouse:
-    tag: '19.17'
+    tag: '25.7.5'

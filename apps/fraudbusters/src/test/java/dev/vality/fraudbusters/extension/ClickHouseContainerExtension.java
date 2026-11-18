@@ -1,40 +1,67 @@
 package dev.vality.fraudbusters.extension;
 
-import dev.vality.clickhouse.initializer.ChInitializer;
+import com.clickhouse.jdbc.ClickHouseDataSource;
+import dev.vality.fraudbusters.config.ClickhouseFlywayFactory;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.testcontainers.containers.ClickHouseContainer;
+import org.testcontainers.utility.MountableFile;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
 public class ClickHouseContainerExtension implements BeforeAllCallback, AfterAllCallback {
 
-    private static final String VERSION = "clickhouse/clickhouse-server:22.3.4";
+    private static final String VERSION = "clickhouse/clickhouse-server:25.7.5";
+    private static final String REPLICATED_CLUSTER_CONFIG = "clickhouse/replicated-cluster.xml";
+    private static final String REPLICATED_CLUSTER_CONFIG_PATH =
+            "/etc/clickhouse-server/config.d/replicated-cluster.xml";
 
     public static ClickHouseContainer CLICKHOUSE_CONTAINER;
 
     @Override
     public void beforeAll(ExtensionContext context) throws Exception {
         CLICKHOUSE_CONTAINER = new ClickHouseContainer(VERSION);
+        CLICKHOUSE_CONTAINER.withEnv("CLICKHOUSE_SKIP_USER_SETUP", "1");
+        CLICKHOUSE_CONTAINER.withCopyFileToContainer(MountableFile.forClasspathResource(REPLICATED_CLUSTER_CONFIG),
+                REPLICATED_CLUSTER_CONFIG_PATH);
         CLICKHOUSE_CONTAINER.start();
         log.info("{}", CLICKHOUSE_CONTAINER.getFirstMappedPort());
-        ChInitializer.initAllScripts(CLICKHOUSE_CONTAINER, List.of(
-                "sql/db_init.sql",
-                "sql/V3__create_fraud_payments.sql",
-                "sql/V4__create_payment.sql",
-                "sql/V5__add_fields.sql",
-                "sql/V6__add_result_fields_payment.sql",
-                "sql/V7__add_fields.sql",
-                "sql/V8__create_withdrawal.sql",
-                "sql/V9__add_phone_category_card.sql",
-                "sql/V10__add_id_inspect_result.sql",
-                "sql/V11__rename_masked_pan.sql",
-                "sql/V12__add_client_identity.sql",
-                "sql/V13__add_payout_identity.sql"
-        ));
+        ClickhouseFlywayFactory.createFlyway(createDataSource())
+                .migrate();
+    }
+
+    @SneakyThrows
+    public static ClickHouseDataSource createDataSource() {
+        return new ClickHouseDataSource("jdbc:clickhouse://localhost:" +
+                CLICKHOUSE_CONTAINER.getFirstMappedPort() + "/default");
+    }
+
+    public static void executeScripts(List<String> scripts) {
+        JdbcTemplate jdbc = new JdbcTemplate(createDataSource());
+        scripts.stream()
+                .map(ClickHouseContainerExtension::readScript)
+                .flatMap(script -> Arrays.stream(script.split(";")))
+                .map(String::trim)
+                .filter(statement -> !statement.isEmpty())
+                .forEach(jdbc::execute);
+    }
+
+    @SneakyThrows
+    private static String readScript(String path) {
+        return new ClassPathResource(path).getContentAsString(StandardCharsets.UTF_8);
+    }
+
+    public static void removeEventsRetention() {
+        new JdbcTemplate(createDataSource())
+                .execute("ALTER TABLE fraud.events_unique REMOVE TTL");
     }
 
     @Override

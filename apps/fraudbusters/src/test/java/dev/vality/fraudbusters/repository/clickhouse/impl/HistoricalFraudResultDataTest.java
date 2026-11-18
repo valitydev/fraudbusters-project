@@ -1,6 +1,5 @@
 package dev.vality.fraudbusters.repository.clickhouse.impl;
 
-import dev.vality.clickhouse.initializer.ChInitializer;
 import dev.vality.fraudbusters.config.TestClickhouseConfig;
 import dev.vality.fraudbusters.config.properties.ClickhouseProperties;
 import dev.vality.fraudbusters.constant.FraudResultField;
@@ -53,7 +52,8 @@ class HistoricalFraudResultDataTest {
 
     @BeforeAll
     static void setUp() throws Exception {
-        ChInitializer.initAllScripts(ClickHouseContainerExtension.CLICKHOUSE_CONTAINER, List.of(
+        ClickHouseContainerExtension.removeEventsRetention();
+        ClickHouseContainerExtension.executeScripts(List.of(
                 "sql/data/insert_history_fraud_results.sql"
         ));
     }
@@ -185,7 +185,7 @@ class HistoricalFraudResultDataTest {
         List<Event> fraudResults = fraudResultRepository.getByFilter(filter);
 
         assertFalse(fraudResults.isEmpty());
-        assertEquals(3, fraudResults.size());
+        assertEquals(4, fraudResults.size());
     }
 
     @Test
@@ -217,7 +217,7 @@ class HistoricalFraudResultDataTest {
         @SneakyThrows
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            ChInitializer.initAllScripts(ClickHouseContainerExtension.CLICKHOUSE_CONTAINER, List.of(
+            ClickHouseContainerExtension.executeScripts(List.of(
                     "sql/data/insert_history_fraud_results.sql"
             ));
         }

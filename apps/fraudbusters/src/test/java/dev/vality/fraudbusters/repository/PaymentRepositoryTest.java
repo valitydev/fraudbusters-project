@@ -1,6 +1,5 @@
 package dev.vality.fraudbusters.repository;
 
-import dev.vality.clickhouse.initializer.ChInitializer;
 import dev.vality.columbus.ColumbusServiceSrv;
 import dev.vality.fraudbusters.config.TestClickhouseConfig;
 import dev.vality.fraudbusters.config.properties.ClickhouseProperties;
@@ -203,7 +202,7 @@ public class PaymentRepositoryTest {
         @SneakyThrows
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            ChInitializer.initAllScripts(CLICKHOUSE_CONTAINER, List.of(
+            ClickHouseContainerExtension.executeScripts(List.of(
                     "sql/data/inserts_event_sink.sql"
             ));
         }
