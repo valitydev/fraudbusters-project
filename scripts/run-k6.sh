@@ -190,6 +190,10 @@ Usage:
   scripts/run-k6.sh k8s <suite> <profile>             run a suite as a Kubernetes Job; settings come from
                                                       ConfigMap and Secret k6-regression of the namespace;
                                                       K6_TESTS_IMAGE runs the tests built into that image
+  scripts/run-k6.sh remote <suite> <profile>          run a suite on the k6 runner service of the namespace and
+                                                      download its results; K6_DETACH=1 returns the run id at once
+  scripts/run-k6.sh remote-fetch <run-id>             wait for a runner run and download its results
+  scripts/run-k6.sh remote-cancel <run-id>            stop a runner run
 USAGE
     exit 2
 }
@@ -209,6 +213,104 @@ wait_ready() {
         (( SECONDS < deadline )) || { echo "Stack $project is not ready after ${READY_TIMEOUT:-600}s" >&2; exit 1; }
         sleep 10
     done
+}
+
+runner_url=
+port_forward_pid=
+
+close_runner() {
+    if [[ -n "$port_forward_pid" ]]; then
+        kill "$port_forward_pid" 2>/dev/null || true
+        wait "$port_forward_pid" 2>/dev/null || true
+        port_forward_pid=
+    fi
+}
+
+open_runner() {
+    if [[ -n "${K6_RUNNER_URL:-}" ]]; then
+        runner_url=${K6_RUNNER_URL%/}
+        return
+    fi
+    if [[ -n "$port_forward_pid" ]] && kill -0 "$port_forward_pid" 2>/dev/null; then
+        return
+    fi
+    local kube=(kubectl) port=${K6_RUNNER_LOCAL_PORT:-18080}
+    [[ -n "${K8S_NAMESPACE:-}" ]] && kube+=(-n "$K8S_NAMESPACE")
+    "${kube[@]}" port-forward "svc/${K6_RUNNER_SERVICE:-fraudbusters-k6}" "$port:8080" >/dev/null 2>&1 &
+    port_forward_pid=$!
+    runner_url="http://127.0.0.1:$port"
+    for _ in $(seq 1 20); do
+        curl -fsS "$runner_url/health" >/dev/null 2>&1 && return
+        kill -0 "$port_forward_pid" 2>/dev/null || break
+        sleep 1
+    done
+    close_runner
+    echo "k6 runner svc/${K6_RUNNER_SERVICE:-fraudbusters-k6} does not answer in namespace ${K8S_NAMESPACE:-of the current context}" >&2
+    exit 1
+}
+
+runner_call() {
+    local method=$1 path=$2 body=${3:-} output
+    for _ in 1 2; do
+        open_runner
+        if output=$(curl -sS -X "$method" -H 'Content-Type: application/json' ${body:+--data "$body"} \
+            -w '\n%{http_code}' "$runner_url$path" 2>/dev/null); then
+            local status=${output##*$'\n'}
+            output=${output%$'\n'*}
+            if [[ "$status" == 2* ]]; then
+                printf '%s\n' "$output"
+                return 0
+            fi
+            echo "k6 runner answered $status to $method $path: $output" >&2
+            return 1
+        fi
+        close_runner
+    done
+    echo "k6 runner is unreachable for $method $path" >&2
+    return 1
+}
+
+json_field() {
+    node -e 'let text = ""; process.stdin.on("data", (chunk) => { text += chunk; }).on("end", () => {
+        const value = JSON.parse(text)[process.argv[1]];
+        console.log(value === undefined || value === null ? "" : value); });' "$1"
+}
+
+runner_request() {
+    node -e 'const [suite, profile, version, settingNames, secretNames] = process.argv.slice(1);
+        const pick = (names) => Object.fromEntries(names.split(" ").filter((name) => process.env[name] !== undefined)
+            .map((name) => [name, process.env[name]]));
+        console.log(JSON.stringify({ suite, profile, ...(version ? { version } : {}),
+            settings: pick(settingNames), secrets: pick(secretNames) }));' \
+        "$1" "$2" "${VERSION:-}" "${settings[*]}" "${secrets[*]}"
+}
+
+fetch_runner_run() {
+    local id=$1 run state previous=
+    while true; do
+        run=$(runner_call GET "/runs/$id") || exit 1
+        state=$(json_field state <<< "$run")
+        if [[ "$state" != "$previous" ]]; then
+            echo "$(date -u +%H:%M:%S) run $id: $state"
+            previous=$state
+        fi
+        case "$state" in
+            passed|failed|cancelled|interrupted) break ;;
+        esac
+        sleep "${K6_POLL_SECONDS:-15}"
+    done
+    local error
+    error=$(json_field error <<< "$run")
+    [[ -z "$error" ]] || echo "Run $id: $error" >&2
+    local results
+    results="tests/k6/results/$id-$(json_field version <<< "$run")"
+    mkdir -p "$results"
+    open_runner
+    curl -fsS "$runner_url/runs/$id/archive" | tar -xz -C "$results"
+    close_runner
+    if [[ -f "$results/report.md" ]]; then cat "$results/report.md"; fi
+    echo "Results: $results"
+    [[ "$state" == passed ]]
 }
 
 case "${1:-}" in
@@ -342,6 +444,28 @@ case "${1:-}" in
         node tests/k6/tools/report.mjs "$results" | tee "$results/report.md"
         echo "Results: $results"
         exit "$status"
+        ;;
+    remote)
+        suite=${2:?Usage: run-k6.sh remote <suite> <profile>}
+        profile=${3:?Usage: run-k6.sh remote <suite> <profile>}
+        trap close_runner EXIT
+        run=$(runner_call POST /runs "$(runner_request "$suite" "$profile")") || exit 1
+        id=$(json_field id <<< "$run")
+        echo "Run $id started on the k6 runner"
+        if [[ "${K6_DETACH:-}" == 1 ]]; then
+            echo "Fetch it later: scripts/run-k6.sh remote-fetch $id"
+            exit 0
+        fi
+        fetch_runner_run "$id"
+        ;;
+    remote-fetch)
+        trap close_runner EXIT
+        fetch_runner_run "${2:?Usage: run-k6.sh remote-fetch <run-id>}"
+        ;;
+    remote-cancel)
+        trap close_runner EXIT
+        runner_call POST "/runs/${2:?Usage: run-k6.sh remote-cancel <run-id>}/cancel" >/dev/null || exit 1
+        echo "Run $2 is being cancelled"
         ;;
     series)
         reference=${2:?Usage: run-k6.sh series <reference> <candidate> [<suite>:<profile> ...]}
