@@ -73,6 +73,8 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ?  and status in (?, ?, ?)
                 group by %1$s""", fieldName, TABLE);
         List<Object> params =
@@ -95,6 +97,8 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ? and status in (?, ?, ?)""", fieldName, EventSource.FRAUD_EVENTS_PAYMENT.getTable()));
         StringBuilder sqlGroupBy = new StringBuilder(String.format("group by %1$s", fieldName));
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
@@ -118,6 +122,8 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ? and status in (?, ?, ?) """, fieldName, EventSource.FRAUD_EVENTS_PAYMENT.getTable()));
         StringBuilder sqlGroupBy = new StringBuilder(String.format("group by %1$s", fieldName));
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
@@ -137,6 +143,8 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ? and status in (?,?,?)
                 group by %1$s""", fieldNameBy, fieldNameCount, TABLE);
         List<Object> params =
@@ -156,6 +164,8 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
                         and timestamp <= ?
                         and eventTime >= ?
                         and eventTime <= ?
+                        and eventTimeHour >= ?
+                        and eventTimeHour <= ?
                         and %1$s = ?  and status in (?,?,?)""",
                 fieldNameBy,
                 fieldNameCount,
@@ -182,6 +192,8 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ? and status = ?""", fieldName, EventSource.FRAUD_EVENTS_PAYMENT.getTable()));
         StringBuilder sqlGroupBy = new StringBuilder(String.format("group by %1$s", fieldName));
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
@@ -201,6 +213,8 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ? and status = ?""", fieldName, EventSource.FRAUD_EVENTS_PAYMENT.getTable()));
         StringBuilder sqlGroupBy = new StringBuilder(String.format("group by %1$s", fieldName));
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
@@ -224,6 +238,8 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
                         and timestamp <= ?
                         and eventTime >= ?
                         and eventTime <= ?
+                        and eventTimeHour >= ?
+                        and eventTimeHour <= ?
                         and %1$s = ? and status = ? and errorCode = ?""",
                 fieldName,
                 EventSource.FRAUD_EVENTS_PAYMENT.getTable()
@@ -249,6 +265,8 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
                         and timestamp <= ?
                         and eventTime >= ?
                         and eventTime <= ?
+                        and eventTimeHour >= ?
+                        and eventTimeHour <= ?
                         and %1$s = ? and status = ?""",
                 fieldName,
                 EventSource.FRAUD_EVENTS_PAYMENT.getTable()
@@ -272,6 +290,8 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ? and status = ?""", fieldName, EventSource.FRAUD_EVENTS_PAYMENT.getTable()));
         StringBuilder sqlGroupBy = new StringBuilder(String.format("group by %1$s", fieldName));
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
@@ -295,6 +315,8 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
                         and timestamp <= ?
                         and eventTime >= ?
                         and eventTime <= ?
+                        and eventTimeHour >= ?
+                        and eventTimeHour <= ?
                         and %1$s = ? and status = ? and errorCode = ?""",
                 fieldName,
                 EventSource.FRAUD_EVENTS_PAYMENT.getTable()
@@ -320,6 +342,8 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
                         and timestamp <= ?
                         and eventTime >= ?
                         and eventTime <= ?
+                        and eventTimeHour >= ?
+                        and eventTimeHour <= ?
                         and %1$s = ? and status = ?""",
                 fieldName,
                 EventSource.FRAUD_EVENTS_PAYMENT.getTable()
@@ -341,6 +365,8 @@ public class PaymentRepositoryImpl implements Repository<CheckedPayment>, Paymen
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ?
                 limit 1""", fieldName, TABLE);
         List<Object> params = AggregationUtil.generateParams(from, to, value);
