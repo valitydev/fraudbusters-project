@@ -427,6 +427,11 @@ struct HistoricalDataSetCheckResult {
     1: required set<HistoricalTransactionCheck> historical_transaction_check
 }
 
+struct HistoricalWithdrawalCheck {
+    1: required Withdrawal withdrawal
+    2: required CheckResult check_result
+}
+
 union HistoricalData {
    1: list<Payment> payments
    2: list<Refund> refunds
@@ -434,6 +439,7 @@ union HistoricalData {
    4: list<HistoricalTransactionCheck> fraud_results
    5: list<FraudPaymentInfo> fraud_payments
    6: list<Withdrawal> withdrawals
+   7: list<HistoricalWithdrawalCheck> withdrawal_checks
 }
 
 /**
@@ -551,6 +557,8 @@ service HistoricalDataService {
     * Получение исторических данных по выплатам: последнее состояние каждой выплаты за период
     **/
     HistoricalDataResponse getWithdrawals(1: Filter filter, 2: Page page, 3: Sort sort)
+
+    HistoricalDataResponse getWithdrawalChecks(1: Filter filter, 2: Page page, 3: Sort sort)
 
     /**
     * Применение нового правила к историческим данным
