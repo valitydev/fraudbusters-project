@@ -4,6 +4,7 @@ package dev.vality.fraudbusters.repository.clickhouse.util;
 import dev.vality.fraudbusters.constant.FraudResultField;
 import dev.vality.fraudbusters.constant.PaymentField;
 import dev.vality.fraudbusters.constant.QueryParamName;
+import dev.vality.fraudbusters.constant.WithdrawalCheckField;
 import dev.vality.fraudbusters.constant.WithdrawalField;
 import dev.vality.fraudbusters.repository.clickhouse.query.FraudResultQuery;
 import dev.vality.fraudbusters.service.dto.FieldType;
@@ -83,7 +84,9 @@ public class FilterUtil {
      * Columns of the queried table itself; fraud result fields go through their own conditions.
      */
     private static boolean isOperationField(SearchFieldDto searchField) {
-        return searchField.getField() instanceof PaymentField || searchField.getField() instanceof WithdrawalField;
+        return searchField.getField() instanceof PaymentField
+                || searchField.getField() instanceof WithdrawalField
+                || searchField.getField() instanceof WithdrawalCheckField;
     }
 
     private static void addPaymentFraudResultSearchFields(StringBuilder filters, Set<SearchFieldDto> searchFields) {

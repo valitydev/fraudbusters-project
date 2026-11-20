@@ -6,6 +6,7 @@ import dev.vality.damsel.fraudbusters.Withdrawal;
 import dev.vality.fraudbusters.domain.CheckedPayment;
 import dev.vality.fraudbusters.domain.Event;
 import dev.vality.fraudbusters.domain.FraudPaymentRow;
+import dev.vality.fraudbusters.domain.PayoutResult;
 import dev.vality.fraudbusters.factory.TestObjectsFactory;
 import dev.vality.fraudbusters.repository.Repository;
 import dev.vality.fraudbusters.service.dto.*;
@@ -43,6 +44,8 @@ class HistoricalDataServiceImplTest {
     private Repository<FraudPaymentRow> fraudPaymentRepository;
     @MockitoBean
     private Repository<Withdrawal> withdrawalRepository;
+    @MockitoBean
+    private Repository<PayoutResult> withdrawalCheckRepository;
 
     @Test
     void getPaymentsWithoutPayments() {
@@ -301,5 +304,28 @@ class HistoricalDataServiceImplTest {
         when(withdrawalRepository.getByFilter(filterDto)).thenReturn(List.of(new Withdrawal().setId("a")));
 
         assertNull(historicalDataService.getWithdrawals(filterDto).getLastId());
+    }
+
+    @Test
+    void getWithdrawalChecksContinuesAfterAFullPage() {
+        FilterDto filterDto = new FilterDto();
+        filterDto.setSize(2L);
+        filterDto.setLastId("2");
+        List<PayoutResult> results = List.of(new PayoutResult(), new PayoutResult());
+        when(withdrawalCheckRepository.getByFilter(filterDto)).thenReturn(results);
+
+        HistoricalWithdrawalChecksDto dto = historicalDataService.getWithdrawalChecks(filterDto);
+
+        assertEquals(results, dto.getWithdrawalChecks());
+        assertEquals("4", dto.getLastId());
+    }
+
+    @Test
+    void getWithdrawalChecksStopsAfterAShortPage() {
+        FilterDto filterDto = new FilterDto();
+        filterDto.setSize(2L);
+        when(withdrawalCheckRepository.getByFilter(filterDto)).thenReturn(List.of(new PayoutResult()));
+
+        assertNull(historicalDataService.getWithdrawalChecks(filterDto).getLastId());
     }
 }

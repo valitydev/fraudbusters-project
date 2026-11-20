@@ -123,6 +123,6 @@ export class FraudUploaderComponent {
     }
 
     back() {
-        this.router.navigate([`/historical-data/fraud-payments`]);
+        this.router.navigate([`/historical-data/payments/fraud-payments`]);
     }
 }

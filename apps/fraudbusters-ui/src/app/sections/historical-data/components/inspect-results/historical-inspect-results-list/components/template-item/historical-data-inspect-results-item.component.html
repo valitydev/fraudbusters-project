@@ -11,10 +11,11 @@
             <div class="fb-body-2" fxFlex>{{ inspectResult.payment.merchantInfo.partyId }}</div>
             <div class="fb-body-2" fxFlex>{{ inspectResult.payment.merchantInfo.shopId }}</div>
             <div class="fb-body-2" fxFlex>{{ inspectResult.payment.clientInfo.email }}</div>
+            <div class="fb-body-2" fxFlex>{{ inspectResult.payment.clientInfo?.userId }}</div>
             <div class="fb-body-2" fxFlex>
                 <a
                     *ngIf="inspectResult.checkedTemplate !== 'RULE_NOT_CHECKED'"
-                    href="../template/{{ inspectResult.checkedTemplate }}"
+                    href="/template/{{ inspectResult.checkedTemplate }}"
                     >{{ inspectResult.checkedTemplate }}</a
                 >
                 <div *ngIf="inspectResult.checkedTemplate === 'RULE_NOT_CHECKED'">-</div>
