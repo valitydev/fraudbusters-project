@@ -27,7 +27,7 @@
         <clickhouse-jdbc.version>0.11.2</clickhouse-jdbc.version>
         <flyway.version>10.22.0</flyway.version>
         <flyway-database-clickhouse.version>10.24.0</flyway-database-clickhouse.version>
-        <fraudbusters-proto.version>1.138-f41fd7d</fraudbusters-proto.version>
+        <fraudbusters-proto.version>1.139-a082dea</fraudbusters-proto.version>
         <trusted.tokens.proto.version>1.7-6d29f86</trusted.tokens.proto.version>
         <wb.list.proto.version>1.52-e01057a</wb.list.proto.version>
         <columbus-proto.version>1.3-979c2b6</columbus-proto.version>

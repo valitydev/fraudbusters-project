@@ -16,6 +16,7 @@ export class HistoryDataSearchComponent {
     @Input() showRuleFilters = false;
     /** Payouts have a wallet instead of a shop and a fixed set of statuses. */
     @Input() operation: 'payment' | 'payout' = 'payment';
+    @Input() showWithdrawalStatuses = true;
     @Output() valueChanges: EventEmitter<string> = new EventEmitter();
 
     form: FormGroup = this.fb.group({
@@ -41,6 +42,10 @@ export class HistoryDataSearchComponent {
 
     get isPayout(): boolean {
         return this.operation === 'payout';
+    }
+
+    get hasWithdrawalStatusSelect(): boolean {
+        return this.isPayout && this.showWithdrawalStatuses;
     }
 
     constructor(

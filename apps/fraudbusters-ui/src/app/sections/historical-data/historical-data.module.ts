@@ -37,6 +37,8 @@ import { HistoricalPaymentsDataComponent } from './components/payments/historica
 import { HistoricalRefundsDataComponent } from './components/refunds/historical-refunds-data.component';
 import { HistoricalDataRefundsListModule } from './components/refunds/historical-refunds-list';
 import { HistoryDataSearchComponent } from './components/search/history-data-search.component';
+import { HistoricalWithdrawalInspectResultsDataComponent } from './components/withdrawal-inspect-results/historical-withdrawal-inspect-results-data.component';
+import { HistoricalDataWithdrawalInspectResultsListModule } from './components/withdrawal-inspect-results/historical-withdrawal-inspect-results-list';
 import { HistoricalWithdrawalsDataComponent } from './components/withdrawals/historical-withdrawals-data.component';
 import { HistoricalDataWithdrawalsListModule } from './components/withdrawals/historical-withdrawals-list';
 import { HistoricalDataRoutingModule } from './historical-data-routing.module';
@@ -46,6 +48,7 @@ import { FetchHistoricalFraudPaymentsService } from './services/fetch-historical
 import { FetchHistoricalInspectResultsService } from './services/fetch-historical-inspect-results.service';
 import { FetchHistoricalPaymentsService } from './services/fetch-historical-payments.service';
 import { FetchHistoricalRefundsService } from './services/fetch-historical-refunds.service';
+import { FetchHistoricalWithdrawalInspectResultsService } from './services/fetch-historical-withdrawal-inspect-results.service';
 import { FetchHistoricalWithdrawalsService } from './services/fetch-historical-withdrawals.service';
 import { DataSetService } from '../../api/payments/data-set';
 import { HistoricalDataService } from '../../api/payments/historical-data';
@@ -65,6 +68,7 @@ import { SearchFieldService } from '../../shared/services/utils/search-field.ser
         HistoricalFraudPaymentsDataComponent,
         HistoricalRefundsDataComponent,
         HistoricalWithdrawalsDataComponent,
+        HistoricalWithdrawalInspectResultsDataComponent,
     ],
     imports: [
         FlexModule,
@@ -103,6 +107,7 @@ import { SearchFieldService } from '../../shared/services/utils/search-field.ser
         HistoricalDataInspectResultsListModule,
         HistoricalDataFraudPaymentsListModule,
         HistoricalDataWithdrawalsListModule,
+        HistoricalDataWithdrawalInspectResultsListModule,
         ShowMoreContinuationPanelModule,
     ],
     providers: [
@@ -112,6 +117,7 @@ import { SearchFieldService } from '../../shared/services/utils/search-field.ser
         FetchHistoricalFraudPaymentsService,
         FetchHistoricalRefundsService,
         FetchHistoricalWithdrawalsService,
+        FetchHistoricalWithdrawalInspectResultsService,
         HistoricalDataService,
         PayoutsService,
         DatePipe,

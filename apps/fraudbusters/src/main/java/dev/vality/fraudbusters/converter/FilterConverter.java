@@ -6,6 +6,7 @@ import dev.vality.damsel.fraudbusters.Sort;
 import dev.vality.fraudbusters.constant.FilterField;
 import dev.vality.fraudbusters.constant.FraudResultField;
 import dev.vality.fraudbusters.constant.PaymentField;
+import dev.vality.fraudbusters.constant.WithdrawalCheckField;
 import dev.vality.fraudbusters.constant.WithdrawalField;
 import dev.vality.fraudbusters.constant.SortOrder;
 import dev.vality.fraudbusters.service.dto.FieldType;
@@ -19,8 +20,10 @@ import org.springframework.util.StringUtils;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class FilterConverter {
@@ -59,6 +62,44 @@ public class FilterConverter {
         }
         filterDto.setSearchFields(searchFields);
         return filterDto;
+    }
+
+    public FilterDto convertWithdrawalChecks(Filter filter, Page page, Sort sort) {
+        FilterDto filterDto = buildFilter(filter, page, sort, true);
+        filterDto.setSearchFields(assembleWithdrawalCheckSearchFields(filter));
+        return filterDto;
+    }
+
+    private Set<SearchFieldDto> assembleWithdrawalCheckSearchFields(Filter filter) {
+        String resultStatus = StringUtils.hasLength(filter.getStatus())
+                ? resolveResultStatus(filter.getStatus())
+                : null;
+        return Stream.of(
+                        buildSearchField(WithdrawalCheckField.ID, FieldType.STRING, filter.getPaymentId()),
+                        buildSearchField(WithdrawalCheckField.PARTY_ID, FieldType.STRING, filter.getPartyId()),
+                        buildSearchField(WithdrawalCheckField.WALLET_ID, FieldType.STRING, filter.getWalletId()),
+                        buildSearchField(WithdrawalCheckField.EMAIL, FieldType.STRING, filter.getEmail()),
+                        buildSearchField(WithdrawalCheckField.CARD_TOKEN, FieldType.STRING, filter.getCardToken()),
+                        buildSearchField(WithdrawalCheckField.FINGERPRINT, FieldType.STRING, filter.getFingerprint()),
+                        buildSearchField(WithdrawalCheckField.LAST_DIGITS, FieldType.STRING, filter.getMaskedPan()),
+                        buildSearchField(WithdrawalCheckField.CUSTOMER_ID, FieldType.STRING, filter.getCustomerId()),
+                        buildSearchField(WithdrawalCheckField.USER_ID, FieldType.STRING, filter.getUserId()),
+                        buildSearchField(WithdrawalCheckField.RESULT_STATUS, FieldType.ENUM, resultStatus),
+                        buildSearchField(WithdrawalCheckField.CHECKED_RULE, FieldType.ENUM, filter.getRule()),
+                        buildSearchField(WithdrawalCheckField.CHECKED_TEMPLATE, FieldType.ENUM, filter.getTemplate()))
+                .flatMap(Optional::stream)
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    private static Optional<SearchFieldDto> buildSearchField(FilterField field, FieldType type, String value) {
+        if (!StringUtils.hasLength(value)) {
+            return Optional.empty();
+        }
+        return Optional.of(SearchFieldDto.builder()
+                .field(field)
+                .type(type)
+                .value(value)
+                .build());
     }
 
     private FilterDto buildFilter(Filter filter, Page page, Sort sort, boolean fraudResults) {

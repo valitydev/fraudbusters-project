@@ -8,6 +8,7 @@ public enum EventSource {
 
     FRAUD_EVENTS_PAYMENT("fraud.payment"),
     FRAUD_EVENTS_WITHDRAWAL("fraud.withdrawal"),
+    FRAUD_WITHDRAWAL_CHECK("fraud.withdrawal_check"),
     FRAUD_EVENTS_FRAUD_PAYMENT("fraud.fraud_payment"),
     FRAUD_EVENTS_REFUND("fraud.refund"),
     FRAUD_EVENTS_CHARGEBACK("fraud.chargeback"),

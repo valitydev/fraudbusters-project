@@ -7,56 +7,58 @@ import { HistoricalFraudPaymentsDataComponent } from './components/fraud-payment
 import { HistoricalInspectResultsDataComponent } from './components/inspect-results/historical-inspect-results-data.component';
 import { HistoricalPaymentsDataComponent } from './components/payments/historical-payments-data.component';
 import { HistoricalRefundsDataComponent } from './components/refunds/historical-refunds-data.component';
+import { HistoricalWithdrawalInspectResultsDataComponent } from './components/withdrawal-inspect-results/historical-withdrawal-inspect-results-data.component';
 import { HistoricalWithdrawalsDataComponent } from './components/withdrawals/historical-withdrawals-data.component';
 import { HistoricalDataComponent } from './historical-data.component';
+
+const OFFICER = { canActivate: [AuthGuard], data: { roles: [Roles.FraudOfficer] } };
 
 @NgModule({
     imports: [
         RouterModule.forChild([
             {
-                path: '',
+                path: 'payments',
                 component: HistoricalDataComponent,
                 canActivate: [AuthGuard],
-                data: { roles: [Roles.FraudOfficer] },
+                data: {
+                    roles: [Roles.FraudOfficer],
+                    title: 'Payment historical data',
+                    links: [
+                        { path: 'inspect-results', name: 'Inspect results', otherActiveUrlFragments: [] },
+                        { path: 'payments', name: 'Payments', otherActiveUrlFragments: [] },
+                        { path: 'refunds', name: 'Refunds', otherActiveUrlFragments: [] },
+                        { path: 'chargebacks', name: 'Chargebacks', otherActiveUrlFragments: [] },
+                        { path: 'fraud-payments', name: 'Fraud payments', otherActiveUrlFragments: [] },
+                    ],
+                },
                 children: [
-                    {
-                        path: 'inspect-results',
-                        component: HistoricalInspectResultsDataComponent,
-                        canActivate: [AuthGuard],
-                        data: { roles: [Roles.FraudOfficer] },
-                    },
-                    {
-                        path: 'payments',
-                        component: HistoricalPaymentsDataComponent,
-                        canActivate: [AuthGuard],
-                        data: { roles: [Roles.FraudOfficer] },
-                    },
-                    {
-                        path: 'refunds',
-                        component: HistoricalRefundsDataComponent,
-                        canActivate: [AuthGuard],
-                        data: { roles: [Roles.FraudOfficer] },
-                    },
-                    {
-                        path: 'fraud-payments',
-                        component: HistoricalFraudPaymentsDataComponent,
-                        canActivate: [AuthGuard],
-                        data: { roles: [Roles.FraudOfficer] },
-                    },
-                    {
-                        path: 'chargebacks',
-                        component: HistoricalChargebacksDataComponent,
-                        canActivate: [AuthGuard],
-                        data: { roles: [Roles.FraudOfficer] },
-                    },
-                    {
-                        path: 'payouts',
-                        component: HistoricalWithdrawalsDataComponent,
-                        canActivate: [AuthGuard],
-                        data: { roles: [Roles.FraudOfficer] },
-                    },
+                    { path: 'inspect-results', component: HistoricalInspectResultsDataComponent, ...OFFICER },
+                    { path: 'payments', component: HistoricalPaymentsDataComponent, ...OFFICER },
+                    { path: 'refunds', component: HistoricalRefundsDataComponent, ...OFFICER },
+                    { path: 'fraud-payments', component: HistoricalFraudPaymentsDataComponent, ...OFFICER },
+                    { path: 'chargebacks', component: HistoricalChargebacksDataComponent, ...OFFICER },
+                    { path: '', redirectTo: 'inspect-results', pathMatch: 'full' },
                 ],
             },
+            {
+                path: 'payouts',
+                component: HistoricalDataComponent,
+                canActivate: [AuthGuard],
+                data: {
+                    roles: [Roles.FraudOfficer],
+                    title: 'Payout historical data',
+                    links: [
+                        { path: 'withdrawals', name: 'Payouts', otherActiveUrlFragments: [] },
+                        { path: 'inspect-results', name: 'Inspect results', otherActiveUrlFragments: [] },
+                    ],
+                },
+                children: [
+                    { path: 'withdrawals', component: HistoricalWithdrawalsDataComponent, ...OFFICER },
+                    { path: 'inspect-results', component: HistoricalWithdrawalInspectResultsDataComponent, ...OFFICER },
+                    { path: '', redirectTo: 'withdrawals', pathMatch: 'full' },
+                ],
+            },
+            { path: '', redirectTo: 'payments', pathMatch: 'full' },
         ]),
     ],
     exports: [RouterModule],

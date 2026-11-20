@@ -16,4 +16,6 @@ public interface HistoricalDataService {
 
     HistoricalWithdrawalsDto getWithdrawals(FilterDto filter);
 
+    HistoricalWithdrawalChecksDto getWithdrawalChecks(FilterDto filter);
+
 }

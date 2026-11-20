@@ -5,11 +5,14 @@ import dev.vality.fraudbusters.constant.PaymentToolType;
 import dev.vality.fraudbusters.converter.*;
 import dev.vality.fraudbusters.domain.CheckedPayment;
 import dev.vality.fraudbusters.domain.CheckedResultModel;
+import dev.vality.fraudbusters.domain.ConcreteResultModel;
 import dev.vality.fraudbusters.domain.Event;
 import dev.vality.fraudbusters.domain.FraudPaymentRow;
+import dev.vality.fraudbusters.domain.PayoutResult;
 import dev.vality.fraudbusters.exception.InvalidTemplateException;
 import dev.vality.fraudbusters.factory.TestObjectsFactory;
 import dev.vality.fraudbusters.fraud.model.PaymentModel;
+import dev.vality.fraudbusters.fraud.model.PayoutModel;
 import dev.vality.fraudbusters.service.HistoricalDataService;
 import dev.vality.fraudbusters.service.RuleCheckingService;
 import dev.vality.fraudbusters.service.dto.*;
@@ -38,7 +41,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {HistoricalDataHandler.class, CheckedPaymentToPaymentConverter.class,
         FilterConverter.class, HistoricalDataResponseConverter.class, EventToHistoricalTransactionCheckConverter.class,
-        CheckedPaymentToFraudPaymentInfoConverter.class, ResultStatusConverter.class})
+        CheckedPaymentToFraudPaymentInfoConverter.class, ResultStatusConverter.class,
+        HistoricalWithdrawalCheckConverter.class})
 class HistoricalDataHandlerTest {
 
     @Autowired
@@ -644,6 +648,73 @@ class HistoricalDataHandlerTest {
                         .type(FieldType.STRING)
                         .value("wallet")
                         .build()),
+                captor.getValue().getSearchFields());
+    }
+
+    @Test
+    void getWithdrawalChecksSearchesWithdrawalChecksByResultAndWallet() {
+        PayoutModel model = new PayoutModel();
+        model.setWithdrawalId("withdrawal");
+        model.setPartyId("party");
+        model.setWalletId("wallet");
+        model.setAmount(1000L);
+        model.setCurrency("RUB");
+        model.setTimestamp(Instant.parse("2034-01-01T10:05:00Z").toEpochMilli());
+        model.setCardToken("token");
+        model.setBin("411111");
+        model.setLastDigits("1111");
+        model.setUserId("user");
+        CheckedResultModel result = new CheckedResultModel();
+        result.setCheckedTemplate("template");
+        result.setResultModel(new ConcreteResultModel(
+                dev.vality.fraudo.constant.ResultStatus.DECLINE, "card_velocity", null));
+        when(service.getWithdrawalChecks(any(FilterDto.class))).thenReturn(HistoricalWithdrawalChecksDto.builder()
+                .withdrawalChecks(List.of(new PayoutResult(model, result)))
+                .lastId("1")
+                .build());
+
+        HistoricalDataResponse response = handler.getWithdrawalChecks(
+                new Filter()
+                        .setWalletId("wallet")
+                        .setStatus("decline")
+                        .setRule("card_velocity")
+                        .setShopId("shop"),
+                new Page(),
+                new Sort().setOrder(SortOrder.DESC));
+
+        assertEquals("1", response.getContinuationId());
+        HistoricalWithdrawalCheck check = response.getData().getWithdrawalChecks().get(0);
+        Withdrawal withdrawal = check.getWithdrawal();
+        assertEquals("withdrawal", withdrawal.getId());
+        assertEquals("2034-01-01T10:05:00Z", withdrawal.getEventTime());
+        assertEquals("party", withdrawal.getPartyId());
+        assertEquals("wallet", withdrawal.getWalletId());
+        assertEquals(1000L, withdrawal.getCost().getAmount());
+        assertTrue(check.getCheckResult().getConcreteCheckResult().getResultStatus().isSetDecline());
+        assertEquals("card_velocity", check.getCheckResult().getConcreteCheckResult().getRuleChecked());
+        assertEquals("template", check.getCheckResult().getCheckedTemplate());
+        assertEquals("token", withdrawal.getDestinationResource().getBankCard().getToken());
+        assertEquals("user", withdrawal.getClientInfo().getUserId());
+        assertEquals(WithdrawalStatus.pending, withdrawal.getStatus());
+        assertEquals("RUB", withdrawal.getAccount().getCurrency().getSymbolicCode());
+        ArgumentCaptor<FilterDto> captor = ArgumentCaptor.forClass(FilterDto.class);
+        verify(service).getWithdrawalChecks(captor.capture());
+        assertEquals(Set.of(
+                        SearchFieldDto.builder()
+                                .field(dev.vality.fraudbusters.constant.WithdrawalCheckField.WALLET_ID)
+                                .type(FieldType.STRING)
+                                .value("wallet")
+                                .build(),
+                        SearchFieldDto.builder()
+                                .field(dev.vality.fraudbusters.constant.WithdrawalCheckField.RESULT_STATUS)
+                                .type(FieldType.ENUM)
+                                .value("DECLINE")
+                                .build(),
+                        SearchFieldDto.builder()
+                                .field(dev.vality.fraudbusters.constant.WithdrawalCheckField.CHECKED_RULE)
+                                .type(FieldType.ENUM)
+                                .value("card_velocity")
+                                .build()),
                 captor.getValue().getSearchFields());
     }
 }
