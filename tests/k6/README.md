@@ -22,6 +22,10 @@ scripts/run-k6.sh series <эталон> <кандидат>
 Стенд — отдельный Compose-проект `fb-regression` без проброса портов, поэтому рядом может работать обычный локальный
 стек. Числа стенда годятся для сравнения версий между собой, но не говорят о ёмкости реальной среды.
 
+Образы сервисов не передают `JAVA_OPTS` в JVM, поэтому стенд задаёт настройки JVM через `JAVA_TOOL_OPTIONS`:
+`-Xmx768m -XX:+UseG1GC`, другие — переменной `STAND_JAVA_OPTIONS` при `up`. Отчёты до 2026-11-20 сняты с JVM по
+умолчанию: куча 256 МБ и Serial GC.
+
 ## Структура
 
 ```
@@ -67,6 +71,9 @@ docker tag ghcr.io/valitydev/<сервис>:local ghcr.io/valitydev/<серви�
 | `stress` | ступени `RATE` × `STRESS_FACTORS` (1,2,3,4) |
 | `spike` | всплеск до `SPIKE_RATE` (4×`RATE`) |
 | `soak` | `RATE` в течение `DURATION` (1h) |
+
+Нагрузка агрегатами на большой истории — набор [aggregates](suites/aggregates/README.md): перед прогоном
+`scripts/run-k6.sh seed <версия>` записывает в ClickHouse 20 млн платежей за 14 дней.
 
 Отдельные кейсы: `K6_CASES=PAY-FL-19,PAY-FL-20`. Доли трафика задаются переменными `SHARE_<поток>`, описанными в
 [data/traffic.js](data/traffic.js).

@@ -9,6 +9,7 @@
 | `payouts` | PO-FL, PO-API | `payouts` | [payouts](payouts/README.md) |
 | `mixed` | MIX | `payouts` | [mixed](mixed/README.md) |
 | `lifecycle` | LC | по кейсам | [lifecycle](lifecycle/README.md) |
+| `aggregates` | — | — | [aggregates](aggregates/README.md): нагрузка агрегатами на истории из `run-k6.sh seed` |
 
 ## Функциональности и версии
 
