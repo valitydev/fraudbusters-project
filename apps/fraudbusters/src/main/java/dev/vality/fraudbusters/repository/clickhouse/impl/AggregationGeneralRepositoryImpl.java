@@ -28,6 +28,8 @@ public class AggregationGeneralRepositoryImpl implements AggregationGeneralRepos
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ?
                 group by %1$s""", fieldName, table);
         List<Object> params = AggregationUtil.generateParams(from, to, value);
@@ -48,6 +50,8 @@ public class AggregationGeneralRepositoryImpl implements AggregationGeneralRepos
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ?""", fieldName, table));
         StringBuilder sqlGroupBy = new StringBuilder(String.format(" group by %1$s ", fieldName));
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
@@ -73,6 +77,8 @@ public class AggregationGeneralRepositoryImpl implements AggregationGeneralRepos
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ?""", fieldName, table));
         StringBuilder sqlGroupBy = new StringBuilder(String.format("group by %1$s", fieldName));
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
@@ -101,6 +107,8 @@ public class AggregationGeneralRepositoryImpl implements AggregationGeneralRepos
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ?
                 group by %1$s""", fieldNameBy, fieldNameCount, table);
         List<Object> params = AggregationUtil.generateParams(from, to, value);
@@ -119,6 +127,8 @@ public class AggregationGeneralRepositoryImpl implements AggregationGeneralRepos
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ?""", fieldNameBy, fieldNameCount, table));
         StringBuilder sqlGroupBy = new StringBuilder(String.format("group by %1$s", fieldNameBy));
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);

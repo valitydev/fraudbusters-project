@@ -34,6 +34,8 @@ public class AggregationStatusGeneralRepositoryImpl implements AggregationStatus
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ? and status = ?
                 group by %1$s""", fieldName, table);
         List<Object> params = AggregationUtil.generateStatusParams(from, to, value, status);
@@ -58,6 +60,8 @@ public class AggregationStatusGeneralRepositoryImpl implements AggregationStatus
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ? and status = ?""", fieldName, table));
         StringBuilder sqlGroupBy = new StringBuilder(String.format(" group by %1$s ", fieldName));
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
@@ -83,6 +87,8 @@ public class AggregationStatusGeneralRepositoryImpl implements AggregationStatus
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ? and status = ?""", fieldName, table));
         StringBuilder sqlGroupBy = new StringBuilder(String.format("group by %1$s", fieldName));
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
@@ -107,6 +113,8 @@ public class AggregationStatusGeneralRepositoryImpl implements AggregationStatus
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ? and status = ?
                 group by %1$s""", fieldNameBy, fieldNameCount, table);
         List<Object> params = AggregationUtil.generateStatusParams(from, to, value, status);
@@ -125,6 +133,8 @@ public class AggregationStatusGeneralRepositoryImpl implements AggregationStatus
                 and timestamp <= ?
                 and eventTime >= ?
                 and eventTime <= ?
+                and eventTimeHour >= ?
+                and eventTimeHour <= ?
                 and %1$s = ? and status = ?""", fieldNameBy, fieldNameCount, table));
         StringBuilder sqlGroupBy = new StringBuilder(String.format("group by %1$s", fieldNameBy));
         StringBuilder resultSql = AggregationUtil.appendGroupingFields(fieldModels, sql, sqlGroupBy);
