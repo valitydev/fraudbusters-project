@@ -42,6 +42,8 @@ public class PayoutHistoryQuery {
                     and timestamp <= ?
                     and eventTime >= ?
                     and eventTime <= ?
+                    and eventTimeHour >= ?
+                    and eventTimeHour <= ?
                     group by id
                 )
             )""", EventSource.FRAUD_EVENTS_WITHDRAWAL.getTable());

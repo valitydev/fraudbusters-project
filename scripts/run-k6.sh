@@ -184,6 +184,8 @@ Usage:
   scripts/run-k6.sh up <version>                      start the regression stack from tests/k6/versions/<version>.env
   scripts/run-k6.sh test <version> <suite> <profile>  run tests/k6/suites/<suite> with a profile
   scripts/run-k6.sh lifecycle <version> [<to>]        prepare, restart or upgrade to <to>, verify
+  scripts/run-k6.sh seed <version>                    insert the payment history of the aggregates suite into
+                                                      ClickHouse; SEED_ROWS and SEED_DAYS override its shape
   scripts/run-k6.sh series <reference> <candidate> [<suite>:<profile> ...]
                                                       run each step on fresh stacks of both versions and compare them
   scripts/run-k6.sh down [<version>]                  remove the regression stack and its volumes
@@ -345,6 +347,27 @@ case "${1:-}" in
         node tests/k6/tools/report.mjs "$results" | tee "$results/report.md"
         echo "Results: $results"
         exit "$status"
+        ;;
+    seed)
+        version=${2:?Usage: run-k6.sh seed <version>}
+        version_file "$version"
+        shape=tests/k6/data/aggregates/shape.json
+        parameters=()
+        while IFS= read -r parameter; do parameters+=("$parameter"); done < <(node -e '
+            const shape = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+            if (process.env.SEED_ROWS) shape.rows = Number(process.env.SEED_ROWS);
+            if (process.env.SEED_DAYS) shape.days = Number(process.env.SEED_DAYS);
+            Object.entries(shape).forEach(([name, value]) => console.log(`--param_${name}=${value}`));' "$shape")
+        clickhouse_client=(exec -T clickhouse sh -c
+            'exec clickhouse-client -u "$CLICKHOUSE_USER" --password "$CLICKHOUSE_PASSWORD" "$@"' clickhouse-client)
+        started=$SECONDS
+        compose "$version" "${clickhouse_client[@]}" "${parameters[@]}" --multiquery < tests/k6/data/aggregates/seed.sql
+        echo "Seeded in $((SECONDS - started))s: ${parameters[*]}"
+        compose "$version" "${clickhouse_client[@]}" --query "
+            SELECT status, count() AS payments, uniq(cardToken) AS cards, uniq(email) AS emails,
+                min(toDateTime(eventTime)) AS first, max(toDateTime(eventTime)) AS last
+            FROM fraud.payment WHERE id LIKE 'seed-payment-%' GROUP BY status ORDER BY payments DESC
+            FORMAT PrettyCompactMonoBlock"
         ;;
     lifecycle)
         from=${2:?Usage: run-k6.sh lifecycle <version> [<to-version>]}

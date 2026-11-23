@@ -1,0 +1,13 @@
+{
+  "rows": 20000000,
+  "days": 14,
+  "parties": 100,
+  "shops": 10,
+  "cards": 300000,
+  "emails": 200000,
+  "fingerprints": 200000,
+  "ips": 100000,
+  "homeShop": 0.8,
+  "homeEmail": 0.85,
+  "homeFingerprint": 0.8
+}

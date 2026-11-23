@@ -150,6 +150,8 @@ public class FraudResultRepository implements Repository<Event>, PaymentReposito
                         and timestamp <= ?
                         and eventTime >= ?
                         and eventTime <= ?
+                        and eventTimeHour >= ?
+                        and eventTimeHour <= ?
                         and %1$s = ? and resultStatus != ?""",
                 fieldName,
                 EventSource.FRAUD_EVENTS_UNIQUE.getTable()
@@ -171,6 +173,8 @@ public class FraudResultRepository implements Repository<Event>, PaymentReposito
                         and timestamp <= ?
                         and eventTime >= ?
                         and eventTime <= ?
+                        and eventTimeHour >= ?
+                        and eventTimeHour <= ?
                         and %1$s = ? and resultStatus = ?""",
                 fieldName,
                 EventSource.FRAUD_EVENTS_UNIQUE.getTable()
@@ -198,6 +202,8 @@ public class FraudResultRepository implements Repository<Event>, PaymentReposito
                         and timestamp <= ?
                         and eventTime >= ?
                         and eventTime <= ?
+                        and eventTimeHour >= ?
+                        and eventTimeHour <= ?
                         and %1$s = ? and resultStatus = ?""",
                 fieldName,
                 EventSource.FRAUD_EVENTS_UNIQUE.getTable()
@@ -229,6 +235,8 @@ public class FraudResultRepository implements Repository<Event>, PaymentReposito
                         and timestamp <= ?
                         and eventTime >= ?
                         and eventTime <= ?
+                        and eventTimeHour >= ?
+                        and eventTimeHour <= ?
                         and %1$s = ? and resultStatus != ?""",
                 fieldName,
                 EventSource.FRAUD_EVENTS_UNIQUE.getTable()
@@ -256,6 +264,8 @@ public class FraudResultRepository implements Repository<Event>, PaymentReposito
                         and timestamp <= ?
                         and eventTime >= ?
                         and eventTime <= ?
+                        and eventTimeHour >= ?
+                        and eventTimeHour <= ?
                         and %1$s = ? and resultStatus = ?""",
                 fieldName,
                 EventSource.FRAUD_EVENTS_UNIQUE.getTable()
