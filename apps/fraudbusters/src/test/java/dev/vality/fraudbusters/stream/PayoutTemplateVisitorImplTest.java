@@ -28,7 +28,7 @@ class PayoutTemplateVisitorImplTest {
     private static final String PARTY_KEY = PayoutScope.generateKey(PARTY, null);
     private static final String WALLET_KEY = PayoutScope.generateKey(PARTY, WALLET);
 
-    /** The order in which a withdrawal meets its templates. */
+    /** The order in which a payout meets its templates. */
     private static final List<String> CASCADE = List.of(
             "global-template",
             "global-group-template",

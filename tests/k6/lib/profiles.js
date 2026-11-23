@@ -71,7 +71,7 @@ function trafficScenario(profile) {
 }
 
 export const COMPARED_STAGES = ['api_inspect_payment', 'api_load_payments', 'mgmt_filter_payments_history',
-  'thrift_inspect_withdrawal', 'api_load_withdrawals'];
+  'thrift_inspect_payout', 'api_load_payouts'];
 
 export function withGlobalCasesPermission(cases) {
   if (text('K6_GLOBAL_CASES', 'off') === 'on') return cases;

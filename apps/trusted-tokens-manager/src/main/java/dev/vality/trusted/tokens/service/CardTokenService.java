@@ -9,7 +9,7 @@ public interface CardTokenService {
 
     CardTokenData get(String token);
 
-    CardTokenData addWithdrawal(CardTokenData cardTokenData, CardTokensTransactionInfo cardTokensTransactionInfo);
+    CardTokenData addPayout(CardTokenData cardTokenData, CardTokensTransactionInfo cardTokensTransactionInfo);
 
     CardTokenData addPayment(CardTokenData cardTokenData, CardTokensTransactionInfo cardTokensTransactionInfo);
 

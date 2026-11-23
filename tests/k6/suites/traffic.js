@@ -7,7 +7,7 @@ import { scopedIds } from '../lib/ids.js';
 import { waitFor } from '../lib/poll.js';
 import { historyWindow } from '../lib/time.js';
 import { paymentChange } from '../fixtures/payment.js';
-import { withdrawalRecord } from '../fixtures/withdrawal.js';
+import { payoutRecord } from '../fixtures/payout.js';
 import { paymentSteps } from './payments/steps.js';
 import { payoutSteps } from './payouts/steps.js';
 
@@ -54,7 +54,7 @@ function prepare(context, mix) {
     const wallet = { partyId: target.partyId, walletId: target.walletId };
     payouts.bindNewTemplate('payout-template', data.payoutTemplate, { partyId: target.partyId });
     payouts.addListRow('black', 'CARD_TOKEN', target.cards.black, { partyId: target.partyId });
-    payouts.awaitDecision('payout black card', () => payouts.withdrawal({ ...wallet, cardToken: target.cards.black }),
+    payouts.awaitDecision('payout black card', () => payouts.payout({ ...wallet, cardToken: target.cards.black }),
       'fatal');
     payouts.awaitReady('payout template is applied', wallet, { cardToken: ids.unique('card') });
   }
@@ -67,13 +67,13 @@ function inspectFlow(context, target, name) {
   const cardToken = flow.card ? target.cards[flow.card] : ids.unique('card');
   const tags = { flow: name };
   if (flow.payout) {
-    const withdrawal = payouts.withdrawal({ partyId: target.partyId, walletId: target.walletId, cardToken });
-    const answer = context.payoutInspector.inspectWithdrawal(withdrawal);
+    const payout = payouts.payout({ partyId: target.partyId, walletId: target.walletId, cardToken });
+    const answer = context.payoutInspector.inspectWithdrawal(payout);
     const decided = check(answer.score || answer.failure, { [`${name} decision`]: (value) => value === flow.decision },
       tags);
     if (!flow.loaded) return decided;
-    const loaded = context.inspection.loadWithdrawals([withdrawalRecord(withdrawal, 'succeeded')]);
-    return check(loaded, { 'withdrawal loaded': (value) => value.status === 201 }, tags) && decided;
+    const loaded = context.inspection.loadPayouts([payoutRecord(payout, 'succeeded')]);
+    return check(loaded, { 'payout loaded': (value) => value.status === 201 }, tags) && decided;
   }
   const payment = payments.payment({ partyId: target.partyId, shopId: target.shopId, cardToken, ...flow.with });
   const response = context.inspection.inspectPayment(payment);

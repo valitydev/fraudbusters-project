@@ -29,16 +29,16 @@ export default {
     payouts.awaitReady('payout template is applied', wallet);
     payments.awaitDecision('payment template is the payment one', () => payments.payment({
       ...shop, amount: data.paymentOnlyAmount }), expected.paymentOnlyAmount.payment);
-    payouts.expectDecision(payouts.withdrawal({ ...wallet, amount: data.paymentOnlyAmount }),
+    payouts.expectDecision(payouts.payout({ ...wallet, amount: data.paymentOnlyAmount }),
       expected.paymentOnlyAmount.payout, 'payout inspection does not use the payment template');
 
     payments.addListRow('black', 'CARD_TOKEN', shop.cardToken, shop);
     payouts.addListRow('black', 'CARD_TOKEN', wallet.cardToken, wallet);
     payments.awaitDecision('payment black list', () => payments.payment(shop), expected.ownList);
-    payouts.awaitDecision('payout black list', () => payouts.withdrawal(wallet), expected.ownList);
+    payouts.awaitDecision('payout black list', () => payouts.payout(wallet), expected.ownList);
     payments.expectDecision(payments.payment({ ...shop, cardToken: wallet.cardToken }), expected.otherList,
       'payout black list does not touch payments');
-    payouts.expectDecision(payouts.withdrawal({ ...wallet, cardToken: shop.cardToken }), expected.otherList,
+    payouts.expectDecision(payouts.payout({ ...wallet, cardToken: shop.cardToken }), expected.otherList,
       'payment black list does not touch payouts');
   },
 };

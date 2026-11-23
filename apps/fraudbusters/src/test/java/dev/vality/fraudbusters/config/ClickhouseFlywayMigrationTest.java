@@ -28,16 +28,16 @@ class ClickhouseFlywayMigrationTest {
 
     @Test
     void cleanDatabaseIsCreatedByAllMigrations() {
-        assertEquals(4, migrate().migrationsExecuted);
-        assertEquals(List.of("1 SQL", "2 SQL", "3 SQL", "4 SQL"), findAppliedVersions());
+        assertEquals(5, migrate().migrationsExecuted);
+        assertEquals(List.of("1 SQL", "2 SQL", "3 SQL", "4 SQL", "5 SQL"), findAppliedVersions());
         assertEquals(List.of(
                         "chargeback ReplicatedReplacingMergeTree",
                         "events_unique ReplicatedMergeTree",
                         "fraud_payment ReplicatedMergeTree",
                         "payment ReplicatedReplacingMergeTree",
-                        "refund ReplicatedReplacingMergeTree",
-                        "withdrawal ReplicatedReplacingMergeTree",
-                        "withdrawal_check ReplicatedMergeTree"),
+                        "payout ReplicatedReplacingMergeTree",
+                        "payout_check ReplicatedMergeTree",
+                        "refund ReplicatedReplacingMergeTree"),
                 jdbc.queryForList("""
                         SELECT concat(name, ' ', engine) FROM system.tables
                         WHERE database = 'fraud' AND name != 'clickhouse_flyway_schema_history'
@@ -73,12 +73,12 @@ class ClickhouseFlywayMigrationTest {
                 VALUES ('2026-01-01', 1767225600000, 1767225600000, 'existing', 'succeeded')
                 """);
 
-        assertEquals(3, migrate().migrationsExecuted);
+        assertEquals(4, migrate().migrationsExecuted);
 
-        assertEquals(List.of("1 BASELINE", "2 SQL", "3 SQL", "4 SQL"), findAppliedVersions());
+        assertEquals(List.of("1 BASELINE", "2 SQL", "3 SQL", "4 SQL", "5 SQL"), findAppliedVersions());
         assertEquals(cleanSchema, describeFraudSchema());
         assertEquals(1, jdbc.queryForObject("""
-                SELECT count() FROM fraud.withdrawal WHERE id = 'existing' AND partyId IS NULL
+                SELECT count() FROM fraud.payout WHERE id = 'existing' AND partyId IS NULL
                 """, Integer.class));
     }
 
@@ -92,9 +92,9 @@ class ClickhouseFlywayMigrationTest {
         CLIENT_IDENTITY_TABLES.forEach(table -> jdbc.execute(
                 "ALTER TABLE fraud." + table + " DROP COLUMN customerId, DROP COLUMN userId"));
 
-        assertEquals(3, migrate().migrationsExecuted);
+        assertEquals(4, migrate().migrationsExecuted);
 
-        assertEquals(List.of("1 BASELINE", "2 SQL", "3 SQL", "4 SQL"), findAppliedVersions());
+        assertEquals(List.of("1 BASELINE", "2 SQL", "3 SQL", "4 SQL", "5 SQL"), findAppliedVersions());
         assertEquals(cleanSchema, describeFraudSchema());
     }
 

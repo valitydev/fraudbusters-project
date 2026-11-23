@@ -66,4 +66,4 @@ Configure it using `OTEL_JAVAAGENT_ENABLED`, `OTEL_SERVICE_NAME` and
 `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`. Set `OTEL_METRICS_EXPORTER=none` and
 `OTEL_LOGS_EXPORTER=none` to keep metrics and logging on the existing service paths.
 Production deployment must configure PostgreSQL and Kafka endpoints and enable
-payment/withdrawal consumers as needed; they are disabled in the default configuration.
+payment/payout consumers as needed; they are disabled in the default configuration.

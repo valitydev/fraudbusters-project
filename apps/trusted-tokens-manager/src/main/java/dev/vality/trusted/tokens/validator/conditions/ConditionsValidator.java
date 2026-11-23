@@ -27,9 +27,9 @@ public abstract class ConditionsValidator {
         }
     }
 
-    protected void requireNonSumInWithDrawal(long sum) throws InvalidRequest {
+    protected void requireNonSumInPayout(long sum) throws InvalidRequest {
         if (sum > 0) {
-            throw new InvalidRequest(INVALID_SUM_IN_WITHDRAWAL);
+            throw new InvalidRequest(INVALID_SUM_IN_PAYOUT);
         }
     }
 }

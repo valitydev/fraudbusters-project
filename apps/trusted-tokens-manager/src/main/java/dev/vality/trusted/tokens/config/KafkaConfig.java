@@ -1,9 +1,9 @@
 package dev.vality.trusted.tokens.config;
 
 import dev.vality.damsel.fraudbusters.Payment;
-import dev.vality.damsel.fraudbusters.Withdrawal;
+import dev.vality.damsel.fraudbusters.Payout;
 import dev.vality.trusted.tokens.serde.deserializer.PaymentDeserializer;
-import dev.vality.trusted.tokens.serde.deserializer.WithdrawalDeserializer;
+import dev.vality.trusted.tokens.serde.deserializer.PayoutDeserializer;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Deserializer;
@@ -32,11 +32,11 @@ public class KafkaConfig {
     @Value("${kafka.topics.payment.consume.concurrency}")
     private int paymentConcurrency;
 
-    @Value("${kafka.topics.withdrawal.consume.max-poll-records}")
-    private String withdrawalMaxPollRecords;
+    @Value("${kafka.topics.payout.consume.max-poll-records}")
+    private String payoutMaxPollRecords;
 
-    @Value("${kafka.topics.withdrawal.consume.concurrency}")
-    private int withdrawalConcurrency;
+    @Value("${kafka.topics.payout.consume.concurrency}")
+    private int payoutConcurrency;
 
     private final KafkaProperties kafkaProperties;
 
@@ -53,14 +53,14 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Withdrawal> withdrawalListenerContainerFactory() {
-        var containerFactory = new ConcurrentKafkaListenerContainerFactory<String, Withdrawal>();
+    public ConcurrentKafkaListenerContainerFactory<String, Payout> payoutListenerContainerFactory() {
+        var containerFactory = new ConcurrentKafkaListenerContainerFactory<String, Payout>();
         configureContainerFactory(
                 containerFactory,
-                new WithdrawalDeserializer(),
-                clientId + "-withdrawal",
-                withdrawalMaxPollRecords);
-        containerFactory.setConcurrency(withdrawalConcurrency);
+                new PayoutDeserializer(),
+                clientId + "-payout",
+                payoutMaxPollRecords);
+        containerFactory.setConcurrency(payoutConcurrency);
         return containerFactory;
     }
 

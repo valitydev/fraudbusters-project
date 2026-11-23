@@ -46,7 +46,7 @@ public class IsTrustedTest extends AbstractPaymentTest {
     @ValueSource(strings = {
             "paymentsConditions(condition(\"RUB\", 1, 2))",
             "payoutsConditions(condition(\"RUB\", 1, 2))",
-            "withdrawalsConditions(condition(\"RUB\", 1, 2))",
+            "payoutsConditions(condition(\"RUB\", 1, 2))",
             "paymentsConditions(condition(\"RUB\", 1, 2)), payoutsConditions(condition(\"RUB\", 1, 2))"})
     void rejectsInlineConditions(String conditions) {
         var parser = new FraudoRulesParser(new CommonTokenStream(

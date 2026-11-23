@@ -14,7 +14,7 @@ export default {
     payouts.bindNewTemplate('payout', data.payoutTemplate, { partyId: target.partyId });
     payouts.awaitReady('user without payments', target, { decision: data.expected.withoutPayments });
     payments.loadAndAwait([payments.payment({ partyId: target.partyId, shopId: ids.name('shop'), ...data.client })]);
-    payouts.awaitDecision('user with a captured payment', () => payouts.withdrawal(target),
+    payouts.awaitDecision('user with a captured payment', () => payouts.payout(target),
       data.expected.afterCapturedPayment);
   },
 };

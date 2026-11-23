@@ -16,7 +16,7 @@ import java.util.Properties;
 @RequiredArgsConstructor
 public class KafkaConfig {
 
-    public static final String WITHDRAWAL_SUFFIX = "-withdrawal";
+    public static final String PAYOUT_SUFFIX = "-payout";
 
     private final KafkaProperties kafkaProperties;
 
@@ -34,11 +34,11 @@ public class KafkaConfig {
     }
 
     @Bean
-    public Properties mgWithdrawalEventStreamProperties() {
+    public Properties mgPayoutEventStreamProperties() {
         final Map<String, Object> props = kafkaProperties.buildStreamsProperties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG,
-                kafkaProperties.getStreams().getApplicationId() + WITHDRAWAL_SUFFIX);
-        props.put(StreamsConfig.CLIENT_ID_CONFIG, kafkaProperties.getClientId() + WITHDRAWAL_SUFFIX);
+                kafkaProperties.getStreams().getApplicationId() + PAYOUT_SUFFIX);
+        props.put(StreamsConfig.CLIENT_ID_CONFIG, kafkaProperties.getClientId() + PAYOUT_SUFFIX);
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, MachineEventSerde.class);
         addDefaultProperties(props);

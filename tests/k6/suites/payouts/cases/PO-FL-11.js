@@ -11,7 +11,7 @@ export default {
     const { payouts } = context;
     const { expected } = data;
     const scope = steps.scope('a');
-    const next = () => steps.withdrawal(scope);
+    const next = () => steps.payout(scope);
     const templateId = steps.applyTemplate('template', data.templates.accepts, scope, { decision: expected.accepts });
     steps.saveTemplate(templateId, data.templates.declines);
     steps.awaitDecision('changed template declines', next, expected.changedDeclines);

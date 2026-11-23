@@ -30,7 +30,7 @@ class Boot4ConfigurationTest {
                 .run(context -> {
                     assertThat(context).hasNotFailed().hasSingleBean(JsonMapper.class);
                     assertThat(context).hasBean("kafkaPaymentResultListenerContainerFactory")
-                            .hasBean("kafkaWithdrawalResultListenerContainerFactory")
+                            .hasBean("kafkaPayoutResultListenerContainerFactory")
                             .hasBean("kafkaRefundResultListenerContainerFactory")
                             .hasBean("kafkaChargebackResultListenerContainerFactory")
                             .hasBean("kafkaFraudPaymentListenerContainerFactory");

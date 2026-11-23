@@ -14,8 +14,8 @@ public interface HistoricalDataService {
 
     HistoricalPaymentsDto getFraudPayments(FilterDto filter);
 
-    HistoricalWithdrawalsDto getWithdrawals(FilterDto filter);
+    HistoricalPayoutsDto getPayouts(FilterDto filter);
 
-    HistoricalWithdrawalChecksDto getWithdrawalChecks(FilterDto filter);
+    HistoricalPayoutChecksDto getPayoutChecks(FilterDto filter);
 
 }

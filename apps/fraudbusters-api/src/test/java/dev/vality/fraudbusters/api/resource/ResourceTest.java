@@ -34,7 +34,7 @@ class ResourceTest extends AbstractKeycloakOpenIdAsWiremockConfig {
     public static final String REFUNDS = "/refunds";
     public static final String PAYMENTS = "/payments";
     public static final String FRAUD_PAYMENTS = "/fraud-payments";
-    public static final String WITHDRAWALS = "/withdrawals";
+    public static final String PAYOUTS = "/payouts";
     public static final String INSPECTOR = "/inspect-payment";
     public static final String INSPECT_USER = "/inspect-user";
     public static final String BASE_URL = "http://localhost:";
@@ -129,25 +129,25 @@ class ResourceTest extends AbstractKeycloakOpenIdAsWiremockConfig {
     }
 
     @Test
-    void insertWithdrawalsTest() {
-        WithdrawalsRequest request = new WithdrawalsRequest();
-        restTemplate.postForEntity(initUrl(WITHDRAWALS), request, Void.class);
-        verify(fraudbustersDataService, times(0)).insertWithdrawals(any());
+    void insertPayoutsTest() {
+        PayoutsRequest request = new PayoutsRequest();
+        restTemplate.postForEntity(initUrl(PAYOUTS), request, Void.class);
+        verify(fraudbustersDataService, times(0)).insertPayouts(any());
 
-        request.withdrawals(List.of(new Withdrawal()));
+        request.payouts(List.of(new Payout()));
         assertThrows(HttpClientErrorException.BadRequest.class,
-                () -> restTemplate.postForEntity(initUrl(WITHDRAWALS), request, Void.class)
+                () -> restTemplate.postForEntity(initUrl(PAYOUTS), request, Void.class)
         );
 
-        request.withdrawals(List.of(ApiBeanGenerator.initWithdrawal()));
-        restTemplate.postForEntity(initUrl(WITHDRAWALS), request, Void.class);
-        verify(fraudbustersDataService, times(1)).insertWithdrawals(any());
+        request.payouts(List.of(ApiBeanGenerator.initPayout()));
+        restTemplate.postForEntity(initUrl(PAYOUTS), request, Void.class);
+        verify(fraudbustersDataService, times(1)).insertPayouts(any());
 
-        request.withdrawals(List.of(ApiBeanGenerator.initWithdrawal().walletId("synthetic-wallet")));
+        request.payouts(List.of(ApiBeanGenerator.initPayout().walletId("synthetic-wallet")));
         var walletWithoutParty = assertThrows(HttpClientErrorException.BadRequest.class,
-                () -> restTemplate.postForEntity(initUrl(WITHDRAWALS), request, Void.class));
+                () -> restTemplate.postForEntity(initUrl(PAYOUTS), request, Void.class));
         assertTrue(walletWithoutParty.getResponseBodyAsString().contains("\"code\":\"invalidRequest\""));
-        verify(fraudbustersDataService, times(1)).insertWithdrawals(any());
+        verify(fraudbustersDataService, times(1)).insertPayouts(any());
     }
 
     @Test

@@ -50,7 +50,7 @@ export function payoutManagementClient(connection) {
     fetchCurrentPayoutListNames: (listType) => call('GET', '/payouts-lists/currentListNames',
       { query: { listType }, stage: 'mgmt_current_payout_list_names' }),
 
-    filterWithdrawalsHistory: (query, expectedStatuses) => call('GET', '/withdrawals-historical-data/withdrawals',
-      { query, stage: 'mgmt_filter_withdrawals_history', expectedStatuses }),
+    filterPayoutsHistory: (query, expectedStatuses) => call('GET', '/payouts-historical-data/payouts',
+      { query, stage: 'mgmt_filter_payouts_history', expectedStatuses }),
   };
 }

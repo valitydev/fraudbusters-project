@@ -6,7 +6,7 @@ import dev.vality.damsel.proxy_inspector.*;
 import dev.vality.damsel.wb_list.*;
 import dev.vality.fraudbusters.converter.CheckedResultToRiskScoreConverter;
 import dev.vality.fraudbusters.converter.ContextToFraudRequestConverter;
-import dev.vality.fraudbusters.converter.WithdrawalContextToModelConverter;
+import dev.vality.fraudbusters.converter.PayoutContextToModelConverter;
 import dev.vality.fraudbusters.domain.CheckedResultModel;
 import dev.vality.fraudbusters.domain.FraudRequest;
 import dev.vality.fraudbusters.domain.FraudResult;
@@ -31,7 +31,7 @@ public class FraudInspectorHandler implements InspectorProxySrv.Iface {
     private final TemplateVisitor<PaymentModel, CheckedResultModel> templateVisitor;
     private final KafkaTemplate<String, FraudResult> kafkaFraudResultTemplate;
     private final WbListServiceSrv.Iface wbListServiceSrv;
-    private final WithdrawalContextToModelConverter withdrawalContextToModelConverter;
+    private final PayoutContextToModelConverter payoutContextToModelConverter;
     private final TemplateVisitor<PayoutModel, CheckedResultModel> payoutTemplateVisitor;
     private final String payoutResultTopic;
     private final KafkaTemplate<String, PayoutResult> kafkaPayoutResultTemplate;
@@ -40,20 +40,20 @@ public class FraudInspectorHandler implements InspectorProxySrv.Iface {
     public RiskScore inspectWithdrawal(WithdrawalContext context) throws InvalidRequest, TException {
         try {
             context.validate();
-            PayoutModel model = withdrawalContextToModelConverter.convert(context);
-            log.info("Check withdrawal withdrawalId: {} partyId: {} walletId: {}",
-                    model.getWithdrawalId(), model.getPartyId(), model.getWalletId());
+            PayoutModel model = payoutContextToModelConverter.convert(context);
+            log.info("Check payout payoutId: {} partyId: {} walletId: {}",
+                    model.getPayoutId(), model.getPartyId(), model.getWalletId());
             CheckedResultModel result = payoutTemplateVisitor.visit(model);
-            kafkaPayoutResultTemplate.send(payoutResultTopic, model.getWithdrawalId(), new PayoutResult(model, result));
-            log.info("Checked withdrawal withdrawalId: {} result: {}", model.getWithdrawalId(), result);
+            kafkaPayoutResultTemplate.send(payoutResultTopic, model.getPayoutId(), new PayoutResult(model, result));
+            log.info("Checked payout payoutId: {} result: {}", model.getPayoutId(), result);
             return checkedResultToRiskScoreConverter.convert(result);
         } catch (IllegalArgumentException e) {
-            log.warn("Invalid withdrawal context withdrawalId: {} error: {}",
+            log.warn("Invalid payout context payoutId: {} error: {}",
                     context.getWithdrawalId(), e.getMessage());
             throw new InvalidRequest().setErrors(List.of(e.getMessage()));
         } catch (Exception e) {
-            log.error("Error when inspectWithdrawal() withdrawalId: {} e: ", context.getWithdrawalId(), e);
-            throw new TException("Unable to inspect withdrawal", e);
+            log.error("Error when inspectWithdrawal() payoutId: {} e: ", context.getWithdrawalId(), e);
+            throw new TException("Unable to inspect payout", e);
         }
     }
 

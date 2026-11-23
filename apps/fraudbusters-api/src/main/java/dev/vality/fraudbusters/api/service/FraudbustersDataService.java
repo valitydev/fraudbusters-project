@@ -46,9 +46,9 @@ public class FraudbustersDataService {
         }
     }
 
-    public void insertWithdrawals(List<Withdrawal> withdrawals) {
+    public void insertPayouts(List<Payout> payouts) {
         try {
-            paymentServiceSrv.insertWithdrawals(withdrawals);
+            paymentServiceSrv.insertPayouts(payouts);
         } catch (TException ex) {
             throw new RemoteInvocationException(ex);
         }

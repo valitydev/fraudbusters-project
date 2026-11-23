@@ -40,19 +40,19 @@
 ## Сквозные сценарии (PO-FL)
 
 Проверка выплаты — Thrift `InspectorProxySrv.inspectWithdrawal(WithdrawalContext)`.
-Загрузка истории — `POST /withdrawals` в fraudbusters-api со статусами `pending`, `succeeded`, `failed`.
+Загрузка истории — `POST /payouts` в fraudbusters-api со статусами `pending`, `succeeded`, `failed`.
 Шаблон привязывается к party+wallet кейса, если не сказано иное.
 
 ### PO-FL-01. Выплата без риска: проверка, история
 - **Предусловия:** шаблон выплаты `rule: amount() >= 100000 -> decline; rule: amount() < 100000 -> accept;`.
 - **Шаги:** проверить выплату на 5000; загрузить её со статусом `succeeded`; найти в
-  `GET /withdrawals-historical-data/withdrawals` по `withdrawalId`; проверить выплату на 150000.
+  `GET /payouts-historical-data/payouts` по `payoutId`; проверить выплату на 150000.
 - **Ожидание:** `low`; запись найдена с party, wallet, суммой и статусом `succeeded`; вторая проверка — `fatal`.
 
 ### PO-FL-02. Нет привязки и неполный контекст
 - **Шаги:** проверить выплату party+wallet без привязок; проверить выплату без `wallet_id`; без `party_id`.
 - **Ожидание:** без привязок — `high`; пустые `party_id`/`wallet_id` — исключение `InvalidRequest`
-  с текстом `party_id and wallet_id are required for withdrawal inspection`. Отсутствующее поле Thrift отклоняется
+  с текстом `party_id and wallet_id are required for payout inspection`. Отсутствующее поле Thrift отклоняется
   ещё на уровне протокола (`Required field 'id' was not present`).
 
 ### PO-FL-03. Каскад шаблонов и групп выплат
@@ -177,9 +177,9 @@
 - **Предусловия:** 12 выплат кейса с разными party, wallet, статусами, email, card_token, fingerprint, terminal,
   maskedPan, providerCountry, customerId, userId.
 - **Шаги:**
-  1. `GET /withdrawals-historical-data/withdrawals` с каждым фильтром.
-  2. Загрузить выплату со статусом `pending`, затем ту же со `succeeded`; искать по `withdrawalId`,
-     по `withdrawalStatus=pending` и `succeeded`.
+  1. `GET /payouts-historical-data/payouts` с каждым фильтром.
+  2. Загрузить выплату со статусом `pending`, затем ту же со `succeeded`; искать по `payoutId`,
+     по `payoutStatus=pending` и `succeeded`.
   3. Узкое окно `from`/`to`; `sortBy`/`sortOrder`; постранично по `continuationId` с `size=5`.
 - **Ожидание:** каждый фильтр возвращает только подходящие выплаты; выплата возвращается один раз в последнем
   состоянии (`succeeded`), фильтр `pending` её не находит; PG-1…PG-6.
@@ -195,5 +195,5 @@
 - **Ожидание:** 4xx, ни одного 5xx. Коды ответов — наблюдения.
 
 ### PO-API-12. Загрузка выплат в fraudbusters-api
-- **Шаги:** `POST /withdrawals` с пустым списком, с записью без обязательных полей, с `walletId` без `partyId`.
+- **Шаги:** `POST /payouts` с пустым списком, с записью без обязательных полей, с `walletId` без `partyId`.
 - **Ожидание:** пустой список — 201; без обязательных полей — 400; wallet без party — 400.

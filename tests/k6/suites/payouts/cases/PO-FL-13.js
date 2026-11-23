@@ -13,8 +13,8 @@ export default {
     steps.bindNewTemplate('template', data.template, { partyId });
     steps.awaitReady('template is applied', wallet('a'));
     steps.loadEach(wallet('a'), data.loadsInFirstWallet);
-    steps.expectDecision(steps.withdrawal(wallet('a')), data.expected.firstWallet, 'card over the limit in wallet A');
-    steps.expectDecision(steps.withdrawal(wallet('b')), data.expected.secondWallet,
+    steps.expectDecision(steps.payout(wallet('a')), data.expected.firstWallet, 'card over the limit in wallet A');
+    steps.expectDecision(steps.payout(wallet('b')), data.expected.secondWallet,
       'same card in wallet B of the same party');
   },
 };

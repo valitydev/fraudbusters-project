@@ -1,7 +1,7 @@
 package dev.vality.trusted.tokens.config;
 
 import dev.vality.trusted.tokens.serde.PaymentSerde;
-import dev.vality.trusted.tokens.serde.WithdrawalSerde;
+import dev.vality.trusted.tokens.serde.PayoutSerde;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsConfig;
@@ -19,7 +19,7 @@ import java.util.Properties;
 public class KafkaStreamsConfig {
 
     public static final String PAYMENT_SUFFIX = "-payment";
-    public static final String WITHDRAWAL_SUFFIX = "-withdrawal";
+    public static final String PAYOUT_SUFFIX = "-payout";
     private static final String APP_ID = "trusted-tokens";
 
     @Value("${spring.kafka.client-id}")
@@ -41,12 +41,12 @@ public class KafkaStreamsConfig {
     }
 
     @Bean
-    public Properties withdrawalEventStreamProperties() {
+    public Properties payoutEventStreamProperties() {
         final Map<String, Object> props = kafkaProperties.buildStreamsProperties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, APP_ID + WITHDRAWAL_SUFFIX);
-        props.put(StreamsConfig.CLIENT_ID_CONFIG, clientId + WITHDRAWAL_SUFFIX);
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, APP_ID + PAYOUT_SUFFIX);
+        props.put(StreamsConfig.CLIENT_ID_CONFIG, clientId + PAYOUT_SUFFIX);
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, WithdrawalSerde.class);
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, PayoutSerde.class);
         addDefaultStreamsProperties(props);
         var properties = new Properties();
         properties.putAll(props);

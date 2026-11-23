@@ -1,6 +1,6 @@
 import http from 'k6/http';
 import { decodeReply, encodeCall, TYPE } from '../lib/thrift.js';
-import { withdrawalContextFields } from '../fixtures/withdrawal.js';
+import { payoutContextFields } from '../fixtures/payout.js';
 
 const RISK_SCORES = { 0: 'trusted', 1: 'low', 100: 'high', 9999: 'fatal' };
 
@@ -39,9 +39,9 @@ export function payoutInspectorClient(connection) {
   }
 
   return {
-    inspectWithdrawal(withdrawal) {
-      const answer = call('InspectWithdrawal', [{ id: 1, type: TYPE.STRUCT, value: withdrawalContextFields(withdrawal) }],
-        'thrift_inspect_withdrawal');
+    inspectWithdrawal(payout) {
+      const answer = call('InspectWithdrawal', [{ id: 1, type: TYPE.STRUCT, value: payoutContextFields(payout) }],
+        'thrift_inspect_payout');
       if (answer.failure) return answer;
       if (answer.result[1]) return { status: answer.status, invalidRequest: answer.result[1][1] || [] };
       if (answer.result[0] === undefined) return { status: answer.status, failure: 'no result' };

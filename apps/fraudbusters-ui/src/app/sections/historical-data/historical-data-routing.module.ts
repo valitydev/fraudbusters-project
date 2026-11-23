@@ -6,9 +6,9 @@ import { HistoricalChargebacksDataComponent } from './components/chargebacks/his
 import { HistoricalFraudPaymentsDataComponent } from './components/fraud-payments/historical-fraud-payments-data.component';
 import { HistoricalInspectResultsDataComponent } from './components/inspect-results/historical-inspect-results-data.component';
 import { HistoricalPaymentsDataComponent } from './components/payments/historical-payments-data.component';
+import { HistoricalPayoutInspectResultsDataComponent } from './components/payout-inspect-results/historical-payout-inspect-results-data.component';
+import { HistoricalPayoutsDataComponent } from './components/payouts/historical-payouts-data.component';
 import { HistoricalRefundsDataComponent } from './components/refunds/historical-refunds-data.component';
-import { HistoricalWithdrawalInspectResultsDataComponent } from './components/withdrawal-inspect-results/historical-withdrawal-inspect-results-data.component';
-import { HistoricalWithdrawalsDataComponent } from './components/withdrawals/historical-withdrawals-data.component';
 import { HistoricalDataComponent } from './historical-data.component';
 
 const OFFICER = { canActivate: [AuthGuard], data: { roles: [Roles.FraudOfficer] } };
@@ -48,14 +48,14 @@ const OFFICER = { canActivate: [AuthGuard], data: { roles: [Roles.FraudOfficer] 
                     roles: [Roles.FraudOfficer],
                     title: 'Payout historical data',
                     links: [
-                        { path: 'withdrawals', name: 'Payouts', otherActiveUrlFragments: [] },
+                        { path: 'payouts', name: 'Payouts', otherActiveUrlFragments: [] },
                         { path: 'inspect-results', name: 'Inspect results', otherActiveUrlFragments: [] },
                     ],
                 },
                 children: [
-                    { path: 'withdrawals', component: HistoricalWithdrawalsDataComponent, ...OFFICER },
-                    { path: 'inspect-results', component: HistoricalWithdrawalInspectResultsDataComponent, ...OFFICER },
-                    { path: '', redirectTo: 'withdrawals', pathMatch: 'full' },
+                    { path: 'payouts', component: HistoricalPayoutsDataComponent, ...OFFICER },
+                    { path: 'inspect-results', component: HistoricalPayoutInspectResultsDataComponent, ...OFFICER },
+                    { path: '', redirectTo: 'payouts', pathMatch: 'full' },
                 ],
             },
             { path: '', redirectTo: 'payments', pathMatch: 'full' },

@@ -42,9 +42,9 @@ public class AggregatorKafkaConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Withdrawal> kafkaWithdrawalResultListenerContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, Payout> kafkaPayoutResultListenerContainerFactory() {
         return listenersConfigurationService.createFactory(
-                new WithdrawalDeserializer(),
+                new PayoutDeserializer(),
                 GroupPostfix.RESULT_AGGREGATOR,
                 fetchMinBytes
         );
@@ -92,7 +92,7 @@ public class AggregatorKafkaConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, Withdrawal> fraudWithdrawalKafkaTemplate() {
+    public KafkaTemplate<String, Payout> fraudPayoutKafkaTemplate() {
         return new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(kafkaTemplateConfigurationService.producerThriftConfigs()));
     }
 

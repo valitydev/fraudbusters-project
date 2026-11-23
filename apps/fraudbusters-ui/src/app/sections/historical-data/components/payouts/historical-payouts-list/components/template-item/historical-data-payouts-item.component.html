@@ -1,0 +1,87 @@
+<mat-expansion-panel>
+    <mat-expansion-panel-header>
+        <div fxLayout fxFlexFill fxLayoutAlign="start center" [fxLayoutGap]="layoutGapM">
+            <div class="fb-body-2" fxFlex="0 0 120px">{{ payout.id }}</div>
+            <div class="fb-body-2" fxFlex="0 0 120px">
+                <fb-tag [color]="payout.status | payoutStatusToColor" [title]="payout.status"></fb-tag>
+            </div>
+            <div class="fb-body-2" fxFlex>{{ payout.partyId }}</div>
+            <div class="fb-body-2" fxFlex>{{ payout.walletId }}</div>
+            <div class="fb-body-2" fxFlex="0 0 120px">{{ payout.amount }}</div>
+            <div class="fb-body-2" fxFlex="0 0 120px">{{ payout.currency }}</div>
+            <div class="fb-body-2" fxFlex>{{ payout.clientInfo?.email }}</div>
+            <div class="fb-body-2" fxFlex>{{ payout.clientInfo?.userId }}</div>
+            <div class="fb-body-2" fxFlex="0 0 160px">
+                {{ payout.eventTime | date : 'yyyy-MM-dd HH:mm:ss' }}
+            </div>
+        </div>
+    </mat-expansion-panel-header>
+    <div class="panel-content" fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <mat-divider></mat-divider>
+        <div fxLayout="row">
+            <div fxFlex>Destination:</div>
+            <div fxFlex>{{ payout.destinationType }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="payout.cardToken">
+            <div fxFlex>Token:</div>
+            <div fxFlex>{{ payout.cardToken }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="payout.bin">
+            <div fxFlex>BIN:</div>
+            <div fxFlex>{{ payout.bin }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="payout.lastDigits">
+            <div fxFlex>Last Digits:</div>
+            <div fxFlex>{{ payout.lastDigits }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="payout.paymentSystem">
+            <div fxFlex>Payment System:</div>
+            <div fxFlex>{{ payout.paymentSystem }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="payout.issuerCountry">
+            <div fxFlex>Issuer Country:</div>
+            <div fxFlex>{{ payout.issuerCountry }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="payout.accountId">
+            <div fxFlex>Account:</div>
+            <div fxFlex>{{ payout.accountId }} {{ payout.accountCurrency }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="payout.clientInfo?.customerId">
+            <div fxFlex>Customer ID:</div>
+            <div fxFlex>{{ payout.clientInfo.customerId }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="payout.clientInfo?.userId">
+            <div fxFlex>User ID:</div>
+            <div fxFlex>{{ payout.clientInfo.userId }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="payout.clientInfo?.fingerprint">
+            <div fxFlex>Fingerprint:</div>
+            <div fxFlex>{{ payout.clientInfo.fingerprint }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="payout.clientInfo?.ip">
+            <div fxFlex>IP:</div>
+            <div fxFlex>{{ payout.clientInfo.ip }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="payout.provider?.providerId">
+            <div fxFlex>Provider:</div>
+            <div fxFlex>{{ payout.provider.providerId }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="payout.provider?.terminalId">
+            <div fxFlex>Terminal:</div>
+            <div fxFlex>{{ payout.provider.terminalId }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="payout.provider?.country">
+            <div fxFlex>Country:</div>
+            <div fxFlex>{{ payout.provider.country }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="payout.error?.errorCode">
+            <div fxFlex>Error code:</div>
+            <div fxFlex>{{ payout.error.errorCode }}</div>
+        </div>
+        <div fxLayout="row" *ngIf="payout.error?.errorReason">
+            <div fxFlex>Error reason:</div>
+            <div fxFlex>{{ payout.error.errorReason }}</div>
+        </div>
+        <mat-divider></mat-divider>
+    </div>
+</mat-expansion-panel>

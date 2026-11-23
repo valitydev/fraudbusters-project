@@ -8,7 +8,7 @@ import lombok.Data;
 public class CardTokensTransactionInfo {
 
     public String lastPaymentId;
-    public String lastWithdrawalId;
+    public String lastPayoutId;
     public String token;
     public String currency;
     public long amount;

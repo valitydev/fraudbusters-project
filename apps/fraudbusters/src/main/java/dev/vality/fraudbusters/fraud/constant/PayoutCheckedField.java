@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Rule fields that a withdrawal inspection request (proxy_inspector.WithdrawalContext) carries. */
+/** Rule fields that a payout inspection request (proxy_inspector.WithdrawalContext) carries. */
 @AllArgsConstructor
 public enum PayoutCheckedField {
 

@@ -35,14 +35,14 @@ public class CardTokenServiceImpl implements CardTokenService {
     }
 
     @Override
-    public CardTokenData addWithdrawal(CardTokenData cardTokenData,
+    public CardTokenData addPayout(CardTokenData cardTokenData,
                                        CardTokensTransactionInfo cardTokensTransactionInfo) {
         Map<String, CardTokenData.CurrencyData> currencyDataMap = cardTokenDataUpdater.updateCurrencyData(
                 cardTokensTransactionInfo,
-                Optional.ofNullable(cardTokenData.getWithdrawals())
+                Optional.ofNullable(cardTokenData.getPayouts())
                         .orElse(new HashMap<>()));
-        cardTokenData.setWithdrawals(currencyDataMap);
-        cardTokenData.setLastWithdrawalId(cardTokensTransactionInfo.getLastWithdrawalId());
+        cardTokenData.setPayouts(currencyDataMap);
+        cardTokenData.setLastPayoutId(cardTokensTransactionInfo.getLastPayoutId());
         return cardTokenData;
     }
 

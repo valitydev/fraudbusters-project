@@ -66,11 +66,11 @@ public class ApiBeanGenerator {
                 .customer(initCustomer());
     }
 
-    public static Withdrawal initWithdrawal() {
-        return new Withdrawal()
+    public static Payout initPayout() {
+        return new Payout()
                 .eventTime(OffsetDateTime.now())
                 .id(ID)
-                .status(WithdrawalStatus.SUCCEEDED)
+                .status(PayoutStatus.SUCCEEDED)
                 .provider(initProvider())
                 .paymentResource(initBankCard())
                 .cash(initCash())

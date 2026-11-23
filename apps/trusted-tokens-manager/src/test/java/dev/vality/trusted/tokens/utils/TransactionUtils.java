@@ -27,15 +27,15 @@ public class TransactionUtils {
                 .setClientInfo(new ClientInfo());
     }
 
-    public static Withdrawal createWithdrawal() {
-        return new Withdrawal()
+    public static Payout createPayout() {
+        return new Payout()
                 .setId(ValuesGenerator.generateId())
                 .setEventTime(String.valueOf(LocalDateTime.now()))
                 .setDestinationResource(Resource.bank_card(createBankCard()))
                 .setCost(new Cash()
                         .setCurrency(createCurrency())
                         .setAmount(1000))
-                .setStatus(WithdrawalStatus.pending)
+                .setStatus(PayoutStatus.pending)
                 .setAccount(createAccount());
     }
 
@@ -50,7 +50,6 @@ public class TransactionUtils {
     public static Account createAccount() {
         return new Account()
                 .setId("account_id")
-                .setIdentity("account_identity")
                 .setCurrency(createCurrency());
 
     }

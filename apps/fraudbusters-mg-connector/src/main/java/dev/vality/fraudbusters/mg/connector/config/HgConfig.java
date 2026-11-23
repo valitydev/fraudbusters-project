@@ -25,9 +25,9 @@ public class HgConfig {
     }
 
     @Bean
-    public ManagementSrv.Iface withdrawalClient(
-            @Value("${service.withdrawal.url}") Resource resource,
-            @Value("${service.withdrawal.networkTimeout}") int networkTimeout) throws IOException {
+    public ManagementSrv.Iface payoutClient(
+            @Value("${service.payout.url}") Resource resource,
+            @Value("${service.payout.networkTimeout}") int networkTimeout) throws IOException {
         return new THSpawnClientBuilder()
                 .withNetworkTimeout(networkTimeout)
                 .withAddress(resource.getURI())

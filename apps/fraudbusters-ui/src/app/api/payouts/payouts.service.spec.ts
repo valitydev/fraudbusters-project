@@ -72,7 +72,7 @@ describe('PayoutsService', () => {
 
     it('searches payout history with only the filled filters', () => {
         service
-            .filterWithdrawals({
+            .filterPayouts({
                 from: '2034-01-01 00:00:00',
                 to: '2034-01-02 00:00:00',
                 sortOrder: 'DESC',
@@ -80,7 +80,7 @@ describe('PayoutsService', () => {
                 status: undefined,
             })
             .subscribe();
-        const request = http.expectOne((r) => r.url === `${endpoint}/withdrawals-historical-data/withdrawals`);
+        const request = http.expectOne((r) => r.url === `${endpoint}/payouts-historical-data/payouts`);
         expect(request.request.method).toBe('GET');
         expect(request.request.params.get('walletId')).toBe('wallet-1');
         expect(request.request.params.get('from')).toBe('2034-01-01 00:00:00');
@@ -88,9 +88,9 @@ describe('PayoutsService', () => {
         request.flush({ result: [] });
     });
 
-    it('searches withdrawal inspect results by result and rule with only the filled filters', () => {
+    it('searches payout inspect results by result and rule with only the filled filters', () => {
         service
-            .filterWithdrawalInspectResults({
+            .filterPayoutInspectResults({
                 from: '2034-01-01 00:00:00',
                 to: '2034-01-02 00:00:00',
                 sortOrder: 'DESC',
@@ -99,7 +99,7 @@ describe('PayoutsService', () => {
                 walletId: undefined,
             })
             .subscribe();
-        const request = http.expectOne((r) => r.url === `${endpoint}/withdrawals-historical-data/inspect-results`);
+        const request = http.expectOne((r) => r.url === `${endpoint}/payouts-historical-data/inspect-results`);
         expect(request.request.method).toBe('GET');
         expect(request.request.params.get('status')).toBe('decline');
         expect(request.request.params.get('rule')).toBe('card_velocity');

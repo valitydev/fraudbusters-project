@@ -159,7 +159,7 @@
 
 ### PAY-FL-16. Доверенная карта
 - **Доступность:** до `payouts`: функциональность убрала из грамматики формы `isTrusted(paymentsConditions(...))` и
-  `isTrusted(withdrawalsConditions(...))`.
+  `isTrusted(payoutsConditions(...))`.
 - **Предусловия:** шаблон `rule: isTrusted(paymentsConditions(condition("RUB", 1, 1, 1))) -> accept;`.
 - **Шаги:** проверить платёж; загрузить успешные платежи по card_token, достаточные для условия; проверить снова (с ожиданием).
 - **Ожидание:** `high` → `low`.

@@ -5,7 +5,7 @@ import dev.vality.fraudbusters.config.service.KafkaTemplateConfigurationService;
 import dev.vality.fraudbusters.config.service.ListenersConfigurationService;
 import dev.vality.fraudbusters.constant.GroupPostfix;
 import dev.vality.fraudbusters.domain.PayoutResult;
-import dev.vality.fraudbusters.serde.WithdrawalCheckDeserializer;
+import dev.vality.fraudbusters.serde.PayoutCheckDeserializer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -68,10 +68,10 @@ public class PayoutKafkaConfig {
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, PayoutResult>
-            kafkaWithdrawalCheckListenerContainerFactory() {
+            kafkaPayoutCheckListenerContainerFactory() {
         return listenersConfigurationService.createFactory(
-                new WithdrawalCheckDeserializer(),
-                GroupPostfix.WITHDRAWAL_CHECK_AGGREGATOR
+                new PayoutCheckDeserializer(),
+                GroupPostfix.PAYOUT_CHECK_AGGREGATOR
         );
     }
 

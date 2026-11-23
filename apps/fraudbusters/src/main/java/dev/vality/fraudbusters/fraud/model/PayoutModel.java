@@ -9,7 +9,7 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class PayoutModel extends OperationModel {
 
-    private String withdrawalId;
+    private String payoutId;
     private String walletId;
 
 }

@@ -37,11 +37,11 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 public abstract class KafkaAbstractTest {
 
     public static final String MG_EVENT = "mg-event";
-    public static final String MG_WITHDRAWAL = "mg-withdrawal";
+    public static final String MG_PAYOUT = "mg-withdrawal";
     public static final String PAYMENT = "payment";
     public static final String REFUND = "refund";
     public static final String CHARGEBACK = "chargeback";
-    public static final String WITHDRAWAL = "withdrawal";
+    public static final String PAYOUT = "payout";
 
     public static <T> Consumer<String, T> createConsumer() {
         Properties props = new Properties();
@@ -94,8 +94,8 @@ public abstract class KafkaAbstractTest {
             initTopic(PAYMENT);
             initTopic(REFUND);
             initTopic(CHARGEBACK);
-            initTopic(MG_WITHDRAWAL);
-            initTopic(WITHDRAWAL);
+            initTopic(MG_PAYOUT);
+            initTopic(PAYOUT);
         }
 
         private <T> Consumer<String, T> initTopic(String topicName) {

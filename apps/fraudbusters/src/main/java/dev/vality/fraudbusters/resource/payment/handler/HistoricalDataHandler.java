@@ -71,17 +71,17 @@ public class HistoricalDataHandler implements HistoricalDataServiceSrv.Iface {
     }
 
     @Override
-    public HistoricalDataResponse getWithdrawals(Filter filter, Page page, Sort sort) {
-        FilterDto filterDto = filterConverter.convertWithdrawals(filter, page, sort);
-        HistoricalWithdrawalsDto historicalWithdrawalsDto = historicalDataService.getWithdrawals(filterDto);
-        return resultConverter.convertWithdrawal(historicalWithdrawalsDto);
+    public HistoricalDataResponse getPayouts(Filter filter, Page page, Sort sort) {
+        FilterDto filterDto = filterConverter.convertPayouts(filter, page, sort);
+        HistoricalPayoutsDto historicalPayoutsDto = historicalDataService.getPayouts(filterDto);
+        return resultConverter.convertPayout(historicalPayoutsDto);
     }
 
     @Override
-    public HistoricalDataResponse getWithdrawalChecks(Filter filter, Page page, Sort sort) {
-        FilterDto filterDto = filterConverter.convertWithdrawalChecks(filter, page, sort);
-        HistoricalWithdrawalChecksDto withdrawalChecksDto = historicalDataService.getWithdrawalChecks(filterDto);
-        return resultConverter.convertWithdrawalChecks(withdrawalChecksDto);
+    public HistoricalDataResponse getPayoutChecks(Filter filter, Page page, Sort sort) {
+        FilterDto filterDto = filterConverter.convertPayoutChecks(filter, page, sort);
+        HistoricalPayoutChecksDto payoutChecksDto = historicalDataService.getPayoutChecks(filterDto);
+        return resultConverter.convertPayoutChecks(payoutChecksDto);
     }
 
     @Override

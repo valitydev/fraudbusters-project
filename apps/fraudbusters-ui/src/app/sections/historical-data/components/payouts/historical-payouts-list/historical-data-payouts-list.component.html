@@ -1,0 +1,6 @@
+<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <fb-historical-data-payouts-header></fb-historical-data-payouts-header>
+    <div *ngFor="let payout of payouts" fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <fb-historical-data-payouts-item [payout]="payout"></fb-historical-data-payouts-item>
+    </div>
+</div>

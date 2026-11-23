@@ -52,7 +52,7 @@ service:
   invoicing:
     url: http://hellgate:8022/v1/processing/invoicing
     networkTimeout: 5000
-  withdrawal:
+  payout:
     url: http://hellgate:8022/v1/processing/invoicing
     networkTimeout: 5000
   dominant:
@@ -66,13 +66,13 @@ kafka:
   topic:
     source:
       invoicing: mg-event
-      withdrawal: mg-withdrawal
+      payout: mg-withdrawal
     sink:
       payment: payment
       refund: refund
       chargeback: chargeback
-      withdrawal: withdrawal
+      payout: payout
 
 fb.stream:
-  withdrawalEnabled: true
+  payoutEnabled: true
   invoiceEnabled: true

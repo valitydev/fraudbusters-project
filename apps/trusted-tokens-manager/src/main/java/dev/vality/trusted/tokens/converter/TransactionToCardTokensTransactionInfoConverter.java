@@ -1,7 +1,7 @@
 package dev.vality.trusted.tokens.converter;
 
 import dev.vality.damsel.fraudbusters.Payment;
-import dev.vality.damsel.fraudbusters.Withdrawal;
+import dev.vality.damsel.fraudbusters.Payout;
 import dev.vality.trusted.tokens.model.CardTokensTransactionInfo;
 import org.springframework.stereotype.Component;
 
@@ -23,12 +23,12 @@ public class TransactionToCardTokensTransactionInfoConverter {
                 .build();
     }
 
-    public CardTokensTransactionInfo convertWithdrawal(Withdrawal withdrawal) {
-        LocalDateTime localDateTime = LocalDateTime.parse(withdrawal.getEventTime(), DateTimeFormatter.ISO_DATE_TIME);
+    public CardTokensTransactionInfo convertPayout(Payout payout) {
+        LocalDateTime localDateTime = LocalDateTime.parse(payout.getEventTime(), DateTimeFormatter.ISO_DATE_TIME);
         return CardTokensTransactionInfo.builder()
-                .lastWithdrawalId(withdrawal.getId())
-                .token(withdrawal.getDestinationResource().getBankCard().getToken())
-                .currency(withdrawal.getCost().getCurrency().getSymbolicCode())
+                .lastPayoutId(payout.getId())
+                .token(payout.getDestinationResource().getBankCard().getToken())
+                .currency(payout.getCost().getCurrency().getSymbolicCode())
                 .year(localDateTime.getYear())
                 .month(localDateTime.getMonth().getValue())
                 .build();

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 
 import static dev.vality.trusted.tokens.utils.CardTokenDataUtils.createCardTokenData;
 import static dev.vality.trusted.tokens.utils.TransactionUtils.createPayment;
-import static dev.vality.trusted.tokens.utils.TransactionUtils.createWithdrawal;
+import static dev.vality.trusted.tokens.utils.TransactionUtils.createPayout;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -35,13 +35,13 @@ class CardTokensTransactionInfoDataUpdaterTest {
 
     private CardTokenData cardTokenData;
     private CardTokensTransactionInfo paymentCardTokensTransactionInfo;
-    private CardTokensTransactionInfo withdrawalCardTokensTransactionInfo;
+    private CardTokensTransactionInfo payoutCardTokensTransactionInfo;
 
     @BeforeEach
     public void init() {
         cardTokenData = createCardTokenData();
         paymentCardTokensTransactionInfo = createPaymentCardToken();
-        withdrawalCardTokensTransactionInfo = createWithdrawalCardToken();
+        payoutCardTokensTransactionInfo = createPayoutCardToken();
     }
 
     @Test
@@ -62,13 +62,13 @@ class CardTokensTransactionInfoDataUpdaterTest {
     }
 
     @Test
-    void convertWithdrawalTest() {
-        cardTokenDataUpdater.updateCurrencyData(withdrawalCardTokensTransactionInfo, cardTokenData.getWithdrawals());
-        assertFalse(cardTokenData.getWithdrawals().get("RUB").getYears()
+    void convertPayoutTest() {
+        cardTokenDataUpdater.updateCurrencyData(payoutCardTokensTransactionInfo, cardTokenData.getPayouts());
+        assertFalse(cardTokenData.getPayouts().get("RUB").getYears()
                 .containsKey(currentYear - 3));
-        assertEquals(79, cardTokenData.getWithdrawals().get("RUB").getYears()
+        assertEquals(79, cardTokenData.getPayouts().get("RUB").getYears()
                 .get(currentYear).getYearCount());
-        assertEquals(currentMonth + 1, cardTokenData.getWithdrawals().get("RUB").getYears()
+        assertEquals(currentMonth + 1, cardTokenData.getPayouts().get("RUB").getYears()
                 .get(currentYear)
                 .getMonths().get(currentMonth).getMonthCount());
     }
@@ -77,8 +77,8 @@ class CardTokensTransactionInfoDataUpdaterTest {
         return transactionToCardTokensTransactionInfoConverter.convertPayment(createPayment());
     }
 
-    private CardTokensTransactionInfo createWithdrawalCardToken() {
-        return transactionToCardTokensTransactionInfoConverter.convertWithdrawal(createWithdrawal());
+    private CardTokensTransactionInfo createPayoutCardToken() {
+        return transactionToCardTokensTransactionInfoConverter.convertPayout(createPayout());
     }
 
 }

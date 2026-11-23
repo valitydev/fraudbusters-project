@@ -15,15 +15,15 @@ export default {
     steps.applyTemplate('other-accept', data.otherTemplate, other, { decision: expected.other });
     const globalTemplate = steps.saveTemplate(ids.name('global'), data.globalTemplate);
     const expectGlobalApplied = (what) => {
-      steps.awaitDecision(`${what} declines its party`, () => steps.withdrawal(target), expected.targetDeclined);
-      steps.expectDecision(steps.withdrawal(other), expected.other, `${what} does not touch other parties`);
+      steps.awaitDecision(`${what} declines its party`, () => steps.payout(target), expected.targetDeclined);
+      steps.expectDecision(steps.payout(other), expected.other, `${what} does not touch other parties`);
     };
 
     const originalReference = steps.findGlobalReference();
     const originalGroupReference = steps.findGlobalGroupReference();
     const awaitWithoutGlobals = (what) => {
       if (!originalReference && !originalGroupReference) {
-        steps.awaitDecision(what, () => steps.withdrawal(target), expected.afterRemoval);
+        steps.awaitDecision(what, () => steps.payout(target), expected.afterRemoval);
       }
     };
 

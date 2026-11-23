@@ -34,22 +34,22 @@ import { HistoricalInspectResultsDataComponent } from './components/inspect-resu
 import { HistoricalDataInspectResultsListModule } from './components/inspect-results/historical-inspect-results-list';
 import { HistoricalDataPaymentListModule } from './components/payments/historical-payment-list';
 import { HistoricalPaymentsDataComponent } from './components/payments/historical-payments-data.component';
+import { HistoricalPayoutInspectResultsDataComponent } from './components/payout-inspect-results/historical-payout-inspect-results-data.component';
+import { HistoricalDataPayoutInspectResultsListModule } from './components/payout-inspect-results/historical-payout-inspect-results-list';
+import { HistoricalPayoutsDataComponent } from './components/payouts/historical-payouts-data.component';
+import { HistoricalDataPayoutsListModule } from './components/payouts/historical-payouts-list';
 import { HistoricalRefundsDataComponent } from './components/refunds/historical-refunds-data.component';
 import { HistoricalDataRefundsListModule } from './components/refunds/historical-refunds-list';
 import { HistoryDataSearchComponent } from './components/search/history-data-search.component';
-import { HistoricalWithdrawalInspectResultsDataComponent } from './components/withdrawal-inspect-results/historical-withdrawal-inspect-results-data.component';
-import { HistoricalDataWithdrawalInspectResultsListModule } from './components/withdrawal-inspect-results/historical-withdrawal-inspect-results-list';
-import { HistoricalWithdrawalsDataComponent } from './components/withdrawals/historical-withdrawals-data.component';
-import { HistoricalDataWithdrawalsListModule } from './components/withdrawals/historical-withdrawals-list';
 import { HistoricalDataRoutingModule } from './historical-data-routing.module';
 import { HistoricalDataComponent } from './historical-data.component';
 import { FetchHistoricalChargebacksService } from './services/fetch-historical-chargebacks.service';
 import { FetchHistoricalFraudPaymentsService } from './services/fetch-historical-fraud-payments.service';
 import { FetchHistoricalInspectResultsService } from './services/fetch-historical-inspect-results.service';
 import { FetchHistoricalPaymentsService } from './services/fetch-historical-payments.service';
+import { FetchHistoricalPayoutInspectResultsService } from './services/fetch-historical-payout-inspect-results.service';
+import { FetchHistoricalPayoutsService } from './services/fetch-historical-payouts.service';
 import { FetchHistoricalRefundsService } from './services/fetch-historical-refunds.service';
-import { FetchHistoricalWithdrawalInspectResultsService } from './services/fetch-historical-withdrawal-inspect-results.service';
-import { FetchHistoricalWithdrawalsService } from './services/fetch-historical-withdrawals.service';
 import { DataSetService } from '../../api/payments/data-set';
 import { HistoricalDataService } from '../../api/payments/historical-data';
 import { PayoutsService } from '../../api/payouts';
@@ -67,8 +67,8 @@ import { SearchFieldService } from '../../shared/services/utils/search-field.ser
         HistoricalInspectResultsDataComponent,
         HistoricalFraudPaymentsDataComponent,
         HistoricalRefundsDataComponent,
-        HistoricalWithdrawalsDataComponent,
-        HistoricalWithdrawalInspectResultsDataComponent,
+        HistoricalPayoutsDataComponent,
+        HistoricalPayoutInspectResultsDataComponent,
     ],
     imports: [
         FlexModule,
@@ -106,8 +106,8 @@ import { SearchFieldService } from '../../shared/services/utils/search-field.ser
         HistoricalDataRefundsListModule,
         HistoricalDataInspectResultsListModule,
         HistoricalDataFraudPaymentsListModule,
-        HistoricalDataWithdrawalsListModule,
-        HistoricalDataWithdrawalInspectResultsListModule,
+        HistoricalDataPayoutsListModule,
+        HistoricalDataPayoutInspectResultsListModule,
         ShowMoreContinuationPanelModule,
     ],
     providers: [
@@ -116,8 +116,8 @@ import { SearchFieldService } from '../../shared/services/utils/search-field.ser
         FetchHistoricalChargebacksService,
         FetchHistoricalFraudPaymentsService,
         FetchHistoricalRefundsService,
-        FetchHistoricalWithdrawalsService,
-        FetchHistoricalWithdrawalInspectResultsService,
+        FetchHistoricalPayoutsService,
+        FetchHistoricalPayoutInspectResultsService,
         HistoricalDataService,
         PayoutsService,
         DatePipe,

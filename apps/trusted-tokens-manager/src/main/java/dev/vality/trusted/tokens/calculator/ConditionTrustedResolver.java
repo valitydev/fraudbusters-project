@@ -14,7 +14,7 @@ public class ConditionTrustedResolver {
     public boolean isTrusted(CardTokenData cardTokenData, ConditionTemplate conditionTemplate) {
         return cardTokenData != null
                 && (isPaymentConditionTrusted(cardTokenData, conditionTemplate)
-                || isWithdrawalConditionTrusted(cardTokenData, conditionTemplate));
+                || isPayoutConditionTrusted(cardTokenData, conditionTemplate));
     }
 
     private boolean isPaymentConditionTrusted(CardTokenData cardTokenData, ConditionTemplate conditionTemplate) {
@@ -23,11 +23,11 @@ public class ConditionTrustedResolver {
                 cardTokenData.getPayments());
     }
 
-    private boolean isWithdrawalConditionTrusted(CardTokenData cardTokenData,
+    private boolean isPayoutConditionTrusted(CardTokenData cardTokenData,
                                                  ConditionTemplate conditionTemplate) {
-        return conditionTemplate.getWithdrawalsConditions() != null
-                && isConditionsTrusted(conditionTemplate.getWithdrawalsConditions().getConditions(),
-                cardTokenData.getWithdrawals());
+        return conditionTemplate.getPayoutsConditions() != null
+                && isConditionsTrusted(conditionTemplate.getPayoutsConditions().getConditions(),
+                cardTokenData.getPayouts());
     }
 
     private boolean isConditionsTrusted(List<Condition> conditions,

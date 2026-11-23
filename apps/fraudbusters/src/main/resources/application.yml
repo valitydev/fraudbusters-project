@@ -88,7 +88,7 @@ kafka:
       payment: payment_event
       refund: refund_event
       chargeback: chargeback_event
-      withdrawal: withdrawal
+      payout: payout
     fraud:
       payment: fraud_payment
   aggr.payment.min.bytes: 50000

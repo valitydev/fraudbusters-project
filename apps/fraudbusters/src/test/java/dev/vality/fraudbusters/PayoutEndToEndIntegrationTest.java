@@ -10,8 +10,8 @@ import dev.vality.damsel.domain.WalletConfigRef;
 import dev.vality.damsel.fraudbusters.Account;
 import dev.vality.damsel.fraudbusters.Resource;
 import dev.vality.damsel.fraudbusters.TemplateReference;
-import dev.vality.damsel.fraudbusters.Withdrawal;
-import dev.vality.damsel.fraudbusters.WithdrawalStatus;
+import dev.vality.damsel.fraudbusters.Payout;
+import dev.vality.damsel.fraudbusters.PayoutStatus;
 import dev.vality.damsel.proxy_inspector.Context;
 import dev.vality.damsel.proxy_inspector.InspectorProxySrv;
 import dev.vality.damsel.proxy_inspector.Party;
@@ -24,8 +24,8 @@ import dev.vality.fraudbusters.constant.PaymentField;
 import dev.vality.fraudbusters.constant.SortOrder;
 import dev.vality.fraudbusters.domain.PayoutResult;
 import dev.vality.fraudbusters.extension.ClickHouseContainerExtension;
-import dev.vality.fraudbusters.repository.clickhouse.impl.WithdrawalCheckRepository;
-import dev.vality.fraudbusters.repository.clickhouse.impl.WithdrawalRepositoryImpl;
+import dev.vality.fraudbusters.repository.clickhouse.impl.PayoutCheckRepository;
+import dev.vality.fraudbusters.repository.clickhouse.impl.PayoutRepositoryImpl;
 import dev.vality.fraudbusters.service.dto.FieldType;
 import dev.vality.fraudbusters.service.dto.FilterDto;
 import dev.vality.fraudbusters.service.dto.SearchFieldDto;
@@ -107,9 +107,9 @@ class PayoutEndToEndIntegrationTest {
     @Autowired
     private KafkaTopics kafkaTopics;
     @Autowired
-    private WithdrawalRepositoryImpl withdrawalRepository;
+    private PayoutRepositoryImpl payoutRepository;
     @Autowired
-    private WithdrawalCheckRepository withdrawalCheckRepository;
+    private PayoutCheckRepository payoutCheckRepository;
 
     @LocalServerPort
     private int serverPort;
@@ -121,7 +121,7 @@ class PayoutEndToEndIntegrationTest {
                 .withNetworkTimeout(300_000)
                 .build(InspectorProxySrv.Iface.class);
 
-        assertEquals(RiskScore.high, client.inspectWithdrawal(withdrawal(PARTY, WALLET, CARD, 100)));
+        assertEquals(RiskScore.high, client.inspectWithdrawal(payout(PARTY, WALLET, CARD, 100)));
 
         publishPayoutTemplate(SHARED_TEMPLATE_ID, """
                 rule:card_velocity: countPayoutsSuccess("card_token", 24, hours, "party_id") >= 2 -> decline;
@@ -141,42 +141,42 @@ class PayoutEndToEndIntegrationTest {
                 rule:payout_velocity: countPayouts("card_token", 24, hours) >= 2 -> decline;
                 """);
 
-        awaitRisk(RiskScore.low, () -> client.inspectWithdrawal(withdrawal(PARTY, WALLET, CARD, 100)));
-        assertEquals(RiskScore.high, client.inspectWithdrawal(withdrawal(PARTY, WALLET, CARD, 5000)));
-        assertEquals(RiskScore.high, client.inspectWithdrawal(withdrawal(PARTY, "other-" + WALLET, CARD, 100)));
+        awaitRisk(RiskScore.low, () -> client.inspectWithdrawal(payout(PARTY, WALLET, CARD, 100)));
+        assertEquals(RiskScore.high, client.inspectWithdrawal(payout(PARTY, WALLET, CARD, 5000)));
+        assertEquals(RiskScore.high, client.inspectWithdrawal(payout(PARTY, "other-" + WALLET, CARD, 100)));
 
         Instant now = Instant.now();
-        withdrawalRepository.insertBatch(List.of(
-                history("succeeded-1", now.minusSeconds(60), WithdrawalStatus.succeeded),
-                history("succeeded-2", now.minusSeconds(30), WithdrawalStatus.succeeded),
-                history("failed", now.minusSeconds(20), WithdrawalStatus.failed)));
+        payoutRepository.insertBatch(List.of(
+                history("succeeded-1", now.minusSeconds(60), PayoutStatus.succeeded),
+                history("succeeded-2", now.minusSeconds(30), PayoutStatus.succeeded),
+                history("failed", now.minusSeconds(20), PayoutStatus.failed)));
 
-        assertEquals(RiskScore.fatal, client.inspectWithdrawal(withdrawal(PARTY, WALLET, CARD, 100)));
-        assertEquals(RiskScore.low, client.inspectWithdrawal(withdrawal(PARTY, WALLET, OTHER_CARD, 100)));
-        assertEquals(RiskScore.high, client.inspectWithdrawal(withdrawal(OTHER_PARTY, WALLET, CARD, 100)));
+        assertEquals(RiskScore.fatal, client.inspectWithdrawal(payout(PARTY, WALLET, CARD, 100)));
+        assertEquals(RiskScore.low, client.inspectWithdrawal(payout(PARTY, WALLET, OTHER_CARD, 100)));
+        assertEquals(RiskScore.high, client.inspectWithdrawal(payout(OTHER_PARTY, WALLET, CARD, 100)));
 
         awaitRisk(RiskScore.fatal, () -> client.inspectPayment(payment(CARD)));
         assertEquals(RiskScore.high, client.inspectPayment(payment(OTHER_CARD)));
 
         InvalidRequest invalid = assertThrows(InvalidRequest.class,
-                () -> client.inspectWithdrawal(withdrawal(PARTY, "", CARD, 100)));
+                () -> client.inspectWithdrawal(payout(PARTY, "", CARD, 100)));
         assertFalse(invalid.getErrors().isEmpty());
 
-        awaitWithdrawalCheck(ResultStatus.DECLINE, "card_velocity", SHARED_TEMPLATE_ID);
-        awaitWithdrawalCheck(ResultStatus.HIGH_RISK, "big", WALLET_TEMPLATE_ID);
+        awaitPayoutCheck(ResultStatus.DECLINE, "card_velocity", SHARED_TEMPLATE_ID);
+        awaitPayoutCheck(ResultStatus.HIGH_RISK, "big", WALLET_TEMPLATE_ID);
     }
 
-    private void awaitWithdrawalCheck(ResultStatus status, String rule, String template) throws Exception {
+    private void awaitPayoutCheck(ResultStatus status, String rule, String template) throws Exception {
         long deadline = System.currentTimeMillis() + AWAIT_MILLIS;
-        boolean stored = isWithdrawalCheckStored(status, rule, template);
+        boolean stored = isPayoutCheckStored(status, rule, template);
         while (!stored && System.currentTimeMillis() < deadline) {
             Thread.sleep(250);
-            stored = isWithdrawalCheckStored(status, rule, template);
+            stored = isPayoutCheckStored(status, rule, template);
         }
-        assertTrue(stored, "withdrawal check " + status + " " + rule + " is not stored");
+        assertTrue(stored, "payout check " + status + " " + rule + " is not stored");
     }
 
-    private boolean isWithdrawalCheckStored(ResultStatus status, String rule, String template) {
+    private boolean isPayoutCheckStored(ResultStatus status, String rule, String template) {
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.SECONDS);
         FilterDto filter = new FilterDto();
         filter.setTimeFrom(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.minusDays(1)));
@@ -190,7 +190,7 @@ class PayoutEndToEndIntegrationTest {
                 .type(FieldType.STRING)
                 .value(PARTY)
                 .build()));
-        List<PayoutResult> results = withdrawalCheckRepository.getByFilter(filter);
+        List<PayoutResult> results = payoutCheckRepository.getByFilter(filter);
         return results.stream()
                 .map(PayoutResult::getResultModel)
                 .anyMatch(result -> result.getResultModel().getResultStatus() == status
@@ -225,7 +225,7 @@ class PayoutEndToEndIntegrationTest {
         assertEquals(expected, actual);
     }
 
-    private static WithdrawalContext withdrawal(String party, String wallet, String card, long amount) {
+    private static WithdrawalContext payout(String party, String wallet, String card, long amount) {
         return new WithdrawalContext()
                 .setParty(new Party(new PartyConfigRef(party)))
                 .setWalletRef(new WalletConfigRef(wallet))
@@ -236,8 +236,8 @@ class PayoutEndToEndIntegrationTest {
                         .setDestination(Destination.bank_card(new BankCard(card, "400000", "0000"))));
     }
 
-    private static Withdrawal history(String id, Instant eventTime, WithdrawalStatus status) {
-        return new Withdrawal()
+    private static Payout history(String id, Instant eventTime, PayoutStatus status) {
+        return new Payout()
                 .setId(id + "-" + RUN)
                 .setEventTime(eventTime.toString())
                 .setCost(new Cash(100, new CurrencyRef("RUB")))

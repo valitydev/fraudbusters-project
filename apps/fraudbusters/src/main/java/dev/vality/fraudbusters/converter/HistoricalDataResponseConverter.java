@@ -4,9 +4,9 @@ import dev.vality.damsel.fraudbusters.*;
 import dev.vality.fraudbusters.service.dto.HistoricalChargebacksDto;
 import dev.vality.fraudbusters.service.dto.HistoricalFraudResultsDto;
 import dev.vality.fraudbusters.service.dto.HistoricalPaymentsDto;
-import dev.vality.fraudbusters.service.dto.HistoricalWithdrawalChecksDto;
+import dev.vality.fraudbusters.service.dto.HistoricalPayoutChecksDto;
 import dev.vality.fraudbusters.service.dto.HistoricalRefundsDto;
-import dev.vality.fraudbusters.service.dto.HistoricalWithdrawalsDto;
+import dev.vality.fraudbusters.service.dto.HistoricalPayoutsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +20,7 @@ public class HistoricalDataResponseConverter {
     private final CheckedPaymentToPaymentConverter paymentConverter;
     private final EventToHistoricalTransactionCheckConverter transactionCheckConverter;
     private final CheckedPaymentToFraudPaymentInfoConverter fraudPaymentInfoConverter;
-    private final HistoricalWithdrawalCheckConverter withdrawalCheckConverter;
+    private final HistoricalPayoutCheckConverter payoutCheckConverter;
 
     public HistoricalDataResponse convertPayment(HistoricalPaymentsDto historicalPaymentsDto) {
         List<Payment> payments = historicalPaymentsDto.getPayments().stream()
@@ -71,22 +71,22 @@ public class HistoricalDataResponseConverter {
                 .setData(historicalData);
     }
 
-    public HistoricalDataResponse convertWithdrawal(HistoricalWithdrawalsDto historicalWithdrawalsDto) {
+    public HistoricalDataResponse convertPayout(HistoricalPayoutsDto historicalPayoutsDto) {
         HistoricalData historicalData = new HistoricalData();
-        historicalData.setWithdrawals(historicalWithdrawalsDto.getWithdrawals());
+        historicalData.setPayouts(historicalPayoutsDto.getPayouts());
         return new HistoricalDataResponse()
-                .setContinuationId(historicalWithdrawalsDto.getLastId())
+                .setContinuationId(historicalPayoutsDto.getLastId())
                 .setData(historicalData);
     }
 
-    public HistoricalDataResponse convertWithdrawalChecks(HistoricalWithdrawalChecksDto historicalWithdrawalChecksDto) {
-        List<HistoricalWithdrawalCheck> withdrawalChecks = historicalWithdrawalChecksDto.getWithdrawalChecks().stream()
-                .map(withdrawalCheckConverter::convert)
+    public HistoricalDataResponse convertPayoutChecks(HistoricalPayoutChecksDto historicalPayoutChecksDto) {
+        List<HistoricalPayoutCheck> payoutChecks = historicalPayoutChecksDto.getPayoutChecks().stream()
+                .map(payoutCheckConverter::convert)
                 .collect(Collectors.toList());
         HistoricalData historicalData = new HistoricalData();
-        historicalData.setWithdrawalChecks(withdrawalChecks);
+        historicalData.setPayoutChecks(payoutChecks);
         return new HistoricalDataResponse()
-                .setContinuationId(historicalWithdrawalChecksDto.getLastId())
+                .setContinuationId(historicalPayoutChecksDto.getLastId())
                 .setData(historicalData);
     }
 }

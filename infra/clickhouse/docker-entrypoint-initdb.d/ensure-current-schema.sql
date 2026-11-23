@@ -58,3 +58,6 @@ ALTER TABLE fraud.withdrawal ADD COLUMN IF NOT EXISTS ip Nullable(String);
 ALTER TABLE fraud.withdrawal ADD COLUMN IF NOT EXISTS fingerprint Nullable(String);
 ALTER TABLE fraud.withdrawal ADD COLUMN IF NOT EXISTS email Nullable(String);
 ALTER TABLE fraud.withdrawal ADD COLUMN IF NOT EXISTS phone Nullable(String);
+
+-- V5__rename_payout_tables.sql
+RENAME TABLE fraud.withdrawal TO fraud.payout;

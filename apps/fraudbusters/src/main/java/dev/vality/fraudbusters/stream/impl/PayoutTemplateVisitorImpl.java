@@ -20,7 +20,7 @@ public class PayoutTemplateVisitorImpl implements TemplateVisitor<PayoutModel, C
     @Override
     public CheckedResultModel visit(PayoutModel model) {
         if (!StringUtils.hasText(model.getPartyId()) || !StringUtils.hasText(model.getWalletId())) {
-            throw new IllegalArgumentException("party_id and wallet_id are required for withdrawal inspection");
+            throw new IllegalArgumentException("party_id and wallet_id are required for payout inspection");
         }
         String partyKey = PayoutScope.generateKey(model.getPartyId(), null);
         String walletKey = PayoutScope.generateKey(model.getPartyId(), model.getWalletId());

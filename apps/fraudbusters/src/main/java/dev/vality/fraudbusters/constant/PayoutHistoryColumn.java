@@ -7,8 +7,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Columns of fraud.withdrawal that rules may filter by, keyed by the rule field name; SQL column names are taken
- * only from here, never from rule text. Only data that fraudbusters-mg-connector writes from fistful withdrawal
+ * Columns of fraud.payout that rules may filter by, keyed by the rule field name; SQL column names are taken
+ * only from here, never from rule text. Only data that fraudbusters-mg-connector writes from fistful payout
  * events is listed.
  */
 public enum PayoutHistoryColumn {

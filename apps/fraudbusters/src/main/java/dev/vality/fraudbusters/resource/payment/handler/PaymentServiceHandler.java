@@ -21,7 +21,7 @@ public class PaymentServiceHandler implements PaymentServiceSrv.Iface {
     private final KafkaTemplate<String, Refund> refundKafkaTemplate;
     private final KafkaTemplate<String, Chargeback> chargebackKafkaTemplate;
     private final KafkaTemplate<String, FraudPayment> kafkaFraudPaymentTemplate;
-    private final KafkaTemplate<String, Withdrawal> kafkaFraudWithdrawalTemplate;
+    private final KafkaTemplate<String, Payout> kafkaFraudPayoutTemplate;
 
     @Value("${kafka.topic.event.sink.payment}")
     public String paymentEventTopic;
@@ -29,8 +29,8 @@ public class PaymentServiceHandler implements PaymentServiceSrv.Iface {
     public String refundEventTopic;
     @Value("${kafka.topic.event.sink.chargeback}")
     public String chargebackEventTopic;
-    @Value("${kafka.topic.event.sink.withdrawal}")
-    public String withdrawalEventTopic;
+    @Value("${kafka.topic.event.sink.payout}")
+    public String payoutEventTopic;
     @Value("${kafka.topic.fraud.payment}")
     private String fraudPaymentTopic;
 
@@ -58,10 +58,10 @@ public class PaymentServiceHandler implements PaymentServiceSrv.Iface {
     }
 
     @Override
-    public void insertWithdrawals(List<Withdrawal> list) throws TException {
-        log.debug("InsertWithdrawals list: {}", list);
-        for (Withdrawal withdrawal : list) {
-            send(kafkaFraudWithdrawalTemplate, withdrawalEventTopic, withdrawal.getId(), withdrawal);
+    public void insertPayouts(List<Payout> list) throws TException {
+        log.debug("InsertPayouts list: {}", list);
+        for (Payout payout : list) {
+            send(kafkaFraudPayoutTemplate, payoutEventTopic, payout.getId(), payout);
         }
     }
 

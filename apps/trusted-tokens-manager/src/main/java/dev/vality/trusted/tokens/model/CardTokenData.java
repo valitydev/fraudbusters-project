@@ -11,9 +11,9 @@ import java.util.Map;
 public class CardTokenData {
 
     private String lastPaymentId;
-    private String lastWithdrawalId;
+    private String lastPayoutId;
     private Map<String, CurrencyData> payments;
-    private Map<String, CurrencyData> withdrawals;
+    private Map<String, CurrencyData> payouts;
 
     @Data
     @Builder

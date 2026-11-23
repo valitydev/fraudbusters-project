@@ -52,9 +52,9 @@ services:
       --bootstrap-server broker:9092 --partitions 1 --replication-factor 1 --topic refund_event
       && kafka-topics --create --if-not-exists --bootstrap-server broker:9092 --partitions
       1 --replication-factor 1 --topic chargeback_event && kafka-topics --create --if-not-exists
-      --bootstrap-server broker:9092 --partitions 1 --replication-factor 1 --topic withdrawal
+      --bootstrap-server broker:9092 --partitions 1 --replication-factor 1 --topic payout
       && kafka-topics --create --if-not-exists --bootstrap-server broker:9092 --partitions
-      1 --replication-factor 1 --topic filtered_withdrawal && kafka-topics --create
+      1 --replication-factor 1 --topic filtered_payout && kafka-topics --create
       --if-not-exists --bootstrap-server broker:9092 --partitions 1 --replication-factor
       1 --topic unknown_initiating_entity && kafka-topics --create --if-not-exists
       --bootstrap-server broker:9092 --partitions 1 --replication-factor 1  --config cleanup.policy=compact
@@ -190,8 +190,8 @@ services:
       kafka.client-id: trusted-tokens-manager
       kafka.topics.payment.id: payment_event
       kafka.topics.payment.consume.enabled: 'true'
-      kafka.topics.withdrawal.consume.enabled: 'true'
-      kafka.topics.withdrawal.id: withdrawal
+      kafka.topics.payout.consume.enabled: 'true'
+      kafka.topics.payout.id: payout
       kafka.num-stream-threads: 1
       management.metrics.export.statsd.enabled: 'false'
       logging.config: tmp/logback-test.xml
@@ -590,9 +590,9 @@ services:
       spring.kafka.bootstrap-servers: broker:9092
       spring.kafka.streams.properties.num.stream.threads: '1'
       fb.stream.invoiceEnabled: 'false'
-      fb.stream.withdrawalEnabled: 'false'
+      fb.stream.payoutEnabled: 'false'
       service.invoicing.url: ${INVOICING_URL:-http://hellgate:8022/v1/processing/invoicing}
-      service.withdrawal.url: ${WITHDRAWAL_URL:-http://hellgate:8022/v1/processing/invoicing}
+      service.payout.url: ${PAYOUT_URL:-http://hellgate:8022/v1/processing/invoicing}
       service.dominant.url: ${DOMINANT_URL:-http://dominant:8022/v1/test}
       service.destination.url: ${DESTINATION_URL:-http://hellgate:8022/v1/processing/invoicing}
       OTEL_TRACES_EXPORTER: none

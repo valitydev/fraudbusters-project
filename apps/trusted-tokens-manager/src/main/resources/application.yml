@@ -70,9 +70,9 @@ kafka:
         enabled: false
         max-poll-records: 50
         concurrency: 1
-    withdrawal:
-      id: withdrawal
-      dest: filtered_withdrawal
+    payout:
+      id: payout
+      dest: filtered_payout
       consume:
         enabled: false
         max-poll-records: 50

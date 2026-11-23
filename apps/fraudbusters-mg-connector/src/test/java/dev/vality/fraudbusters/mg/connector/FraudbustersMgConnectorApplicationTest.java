@@ -8,14 +8,14 @@ import dev.vality.damsel.payment_processing.InvoicingSrv;
 import dev.vality.fistful.withdrawal.ManagementSrv;
 import dev.vality.fistful.withdrawal.WithdrawalState;
 import dev.vality.fraudbusters.mg.connector.factory.EventRangeFactory;
-import dev.vality.fraudbusters.mg.connector.mapper.impl.WithdrawalBeanUtils;
+import dev.vality.fraudbusters.mg.connector.mapper.impl.PayoutBeanUtils;
 import dev.vality.fraudbusters.mg.connector.serde.deserializer.ChargebackDeserializer;
 import dev.vality.fraudbusters.mg.connector.serde.deserializer.PaymentDeserializer;
 import dev.vality.fraudbusters.mg.connector.serde.deserializer.RefundDeserializer;
-import dev.vality.fraudbusters.mg.connector.serde.deserializer.WithdrawalDeserializer;
+import dev.vality.fraudbusters.mg.connector.serde.deserializer.PayoutDeserializer;
 import dev.vality.fraudbusters.mg.connector.utils.BuildUtils;
 import dev.vality.fraudbusters.mg.connector.utils.MgEventSinkFlowGenerator;
-import dev.vality.fraudbusters.mg.connector.utils.WithdrawalFlowGenerator;
+import dev.vality.fraudbusters.mg.connector.utils.PayoutFlowGenerator;
 import dev.vality.machinegun.eventsink.SinkEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -42,7 +42,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = FraudbustersMgConnectorApplication.class,
         properties = {
-                "stream.withdrawal.debug=false",
+                "stream.payout.debug=false",
                 "spring.kafka.streams.properties.retries=1",
                 "spring.kafka.streams.properties.retry.backoff.ms=100",
                 "spring.kafka.streams.properties.fixed.rate.timeout.ms=100"
@@ -101,19 +101,19 @@ public class FraudbustersMgConnectorApplicationTest extends KafkaAbstractTest {
     }
 
     @Test
-    public void withdrawalStreamTest() throws TException, InterruptedException {
+    public void payoutStreamTest() throws TException, InterruptedException {
         when(fistfulClient.get(any(), any())).thenReturn(new WithdrawalState()
-                .setBody(WithdrawalBeanUtils.createCash()));
-        when(destinationClient.get(any(), any())).thenReturn(WithdrawalBeanUtils.createDestinationState());
+                .setBody(PayoutBeanUtils.createCash()));
+        when(destinationClient.get(any(), any())).thenReturn(PayoutBeanUtils.createDestinationState());
         DomainObject domainObject = new DomainObject();
-        domainObject.setWalletConfig(WithdrawalBeanUtils.createWalletConfigObject());
+        domainObject.setWalletConfig(PayoutBeanUtils.createWalletConfigObject());
         when(dominantClient.checkoutObject(any(), any()))
-                .thenReturn(WithdrawalBeanUtils.createVersionedObject(domainObject));
+                .thenReturn(PayoutBeanUtils.createVersionedObject(domainObject));
 
-        List<SinkEvent> sinkEvents = WithdrawalFlowGenerator.generateSuccessFlow(SOURCE_ID);
-        sinkEvents.forEach(sinkEvent -> produceMessageToEventSink(MG_WITHDRAWAL, sinkEvent));
+        List<SinkEvent> sinkEvents = PayoutFlowGenerator.generateSuccessFlow(SOURCE_ID);
+        sinkEvents.forEach(sinkEvent -> produceMessageToEventSink(MG_PAYOUT, sinkEvent));
 
-        checkMessageInTopic(WITHDRAWAL, WithdrawalDeserializer.class, 2);
+        checkMessageInTopic(PAYOUT, PayoutDeserializer.class, 2);
     }
 
     private void checkMessageInTopic(String topicName, Class<?> clazz, int size) throws InterruptedException {

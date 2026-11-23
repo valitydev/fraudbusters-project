@@ -156,15 +156,15 @@ class LoadDataIntegrationTest {
         await().atMost(DEFAULT_TIMEOUT, SECONDS).until(() -> jdbcTemplate.queryForList("SELECT * from " +
                 EventSource.FRAUD_EVENTS_REFUND.getTable()).size() == 2);
 
-        //Withdrawal
-        client.insertWithdrawals(List.of(
-                createChargeback(WithdrawalStatus.pending),
-                createChargeback(WithdrawalStatus.failed),
-                createChargeback(WithdrawalStatus.succeeded)
+        //Payout
+        client.insertPayouts(List.of(
+                createChargeback(PayoutStatus.pending),
+                createChargeback(PayoutStatus.failed),
+                createChargeback(PayoutStatus.succeeded)
         ));
 
         await().atMost(DEFAULT_TIMEOUT, SECONDS).until(() -> jdbcTemplate.queryForList("SELECT * from " +
-                EventSource.FRAUD_EVENTS_WITHDRAWAL.getTable()).size() == 3);
+                EventSource.FRAUD_EVENTS_PAYOUT.getTable()).size() == 3);
     }
 
     private void checkInsertingBatch(PaymentServiceSrv.Iface client) throws TException, InterruptedException {

@@ -12,7 +12,7 @@ import dev.vality.damsel.proxy_inspector.WithdrawalContext;
 import dev.vality.damsel.withdrawals.domain.Destination;
 import dev.vality.fraudbusters.config.payout.PayoutFraudoConfig;
 import dev.vality.fraudbusters.converter.CheckedResultToRiskScoreConverter;
-import dev.vality.fraudbusters.converter.WithdrawalContextToModelConverter;
+import dev.vality.fraudbusters.converter.PayoutContextToModelConverter;
 import dev.vality.fraudbusters.domain.CheckedResultModel;
 import dev.vality.fraudbusters.domain.PayoutResult;
 import dev.vality.fraudbusters.fraud.InspectStorage;
@@ -81,7 +81,7 @@ class PayoutInspectionTest {
             new PayoutGroupReferenceListener(new GroupReferenceCommandHandler(payoutStorage));
     @SuppressWarnings("unchecked")
     private final PayoutAggregators<PayoutModel, PayoutCheckedField> payouts = mock(PayoutAggregators.class);
-    private final WithdrawalContextToModelConverter converter = new WithdrawalContextToModelConverter();
+    private final PayoutContextToModelConverter converter = new PayoutContextToModelConverter();
     private final PayoutTemplateVisitorImpl inspector = createInspector(new PayoutFraudoConfig().payoutRuleVisitor(
             null, null, null, null, null, new PayoutModelFieldResolver(), payouts));
     private final CheckedResultToRiskScoreConverter risk = new CheckedResultToRiskScoreConverter();
@@ -100,7 +100,7 @@ class PayoutInspectionTest {
         assertEquals(RiskScore.fatal, handler.inspectWithdrawal(context()));
         verifyNoInteractions(paymentProducer);
         var result = org.mockito.ArgumentCaptor.forClass(PayoutResult.class);
-        verify(payoutProducer, times(2)).send(eq("payout-result"), eq("synthetic-withdrawal"), result.capture());
+        verify(payoutProducer, times(2)).send(eq("payout-result"), eq("synthetic-payout"), result.capture());
         assertEquals("synthetic-wallet", result.getValue().getPayoutModel().getWalletId());
         assertEquals("global", result.getValue().getResultModel().getCheckedTemplate());
     }
@@ -111,7 +111,7 @@ class PayoutInspectionTest {
         var model = converter.convert(context);
         assertNull(model.getUserId());
         assertEquals("synthetic-wallet", model.getWalletId());
-        assertEquals("synthetic-withdrawal", model.getWithdrawalId());
+        assertEquals("synthetic-payout", model.getPayoutId());
         assertEquals(RiskScore.high, risk.convert(inspect(context)));
     }
 
@@ -315,7 +315,7 @@ class PayoutInspectionTest {
         return new WithdrawalContext()
                 .setParty(new Party(new PartyConfigRef("synthetic-party")))
                 .setWalletRef(new WalletConfigRef("synthetic-wallet"))
-                .setWithdrawalId("synthetic-withdrawal")
+                .setWithdrawalId("synthetic-payout")
                 .setWithdrawal(new dev.vality.damsel.withdrawals.domain.Withdrawal()
                         .setBody(new Cash(100, new CurrencyRef("RUB")))
                         .setDestination(Destination.digital_wallet(new dev.vality.damsel.domain.DigitalWallet()

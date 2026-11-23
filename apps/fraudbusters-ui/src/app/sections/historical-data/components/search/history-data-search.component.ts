@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, map, take } from 'rxjs/operators';
 
-import { Withdrawal } from '../../../../api/fb-management/swagger-codegen/model/withdrawal';
+import { Payout } from '../../../../api/fb-management/swagger-codegen/model/payout';
 import { SearchFieldService } from '../../../../shared/services/utils/search-field.service';
 import { removeEmptyProperties } from '../../../../shared/utils/remove-empty-properties';
 
@@ -16,7 +16,7 @@ export class HistoryDataSearchComponent {
     @Input() showRuleFilters = false;
     /** Payouts have a wallet instead of a shop and a fixed set of statuses. */
     @Input() operation: 'payment' | 'payout' = 'payment';
-    @Input() showWithdrawalStatuses = true;
+    @Input() showPayoutStatuses = true;
     @Output() valueChanges: EventEmitter<string> = new EventEmitter();
 
     form: FormGroup = this.fb.group({
@@ -38,14 +38,14 @@ export class HistoryDataSearchComponent {
         to: new Date().toISOString(),
     });
 
-    payoutStatuses = Object.values(Withdrawal.StatusEnum);
+    payoutStatuses = Object.values(Payout.StatusEnum);
 
     get isPayout(): boolean {
         return this.operation === 'payout';
     }
 
-    get hasWithdrawalStatusSelect(): boolean {
-        return this.isPayout && this.showWithdrawalStatuses;
+    get hasPayoutStatusSelect(): boolean {
+        return this.isPayout && this.showPayoutStatuses;
     }
 
     constructor(

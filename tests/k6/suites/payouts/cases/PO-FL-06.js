@@ -17,11 +17,11 @@ export default {
     ]);
     const counts = steps.decisionsAfterEach(counted, data.count.loads);
     context.observe('count_decisions_succeeded_failed_pending_pending_succeeded_failed', counts.join(','));
-    expectEqual(counts[3], counts[1], 'pending withdrawals are not counted');
+    expectEqual(counts[3], counts[1], 'pending payouts are not counted');
     expectFatalOnceReached(counts, 'countPayouts');
     const sums = steps.decisionsAfterEach(summed, data.sum.loads);
     context.observe('sum_decisions_pending30000_succeeded10000_failed10000', sums.join(','));
-    expectEqual(sums[0], data.sum.expected.afterPending, 'pending withdrawal is not summed');
-    expectEqual(sums[2], data.sum.expected.afterSucceededAndFailed, 'succeeded and failed withdrawals are summed');
+    expectEqual(sums[0], data.sum.expected.afterPending, 'pending payout is not summed');
+    expectEqual(sums[2], data.sum.expected.afterSucceededAndFailed, 'succeeded and failed payouts are summed');
   },
 };

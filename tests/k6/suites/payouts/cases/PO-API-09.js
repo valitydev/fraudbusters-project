@@ -19,7 +19,7 @@ export default {
     const steps = payoutSteps(context);
     const { ids, payouts, connection } = context;
     const partyId = ids.name('party');
-    const items = Array.from({ length: data.withdrawals }, (unused, index) => {
+    const items = Array.from({ length: data.payouts }, (unused, index) => {
       const fields = {
         walletId: ids.name(`wallet-${index % 2}`),
         email: `${ids.prefix}-${index % 2}@k6.test`,
@@ -31,40 +31,40 @@ export default {
         customerId: ids.name(`customer-${index % 2}`),
         status: index < data.succeeded ? 'succeeded' : 'failed',
       };
-      const withdrawal = steps.withdrawal({ partyId, ...fields, terminalId: fields.terminal });
-      return { withdrawal, fields: { ...fields, withdrawalId: withdrawal.id } };
+      const payout = steps.payout({ partyId, ...fields, terminalId: fields.terminal });
+      return { payout, fields: { ...fields, payoutId: payout.id } };
     });
-    steps.load(items.filter((item) => item.fields.status === 'succeeded').map((item) => item.withdrawal), 'succeeded');
-    steps.load(items.filter((item) => item.fields.status === 'failed').map((item) => item.withdrawal), 'failed',
+    steps.load(items.filter((item) => item.fields.status === 'succeeded').map((item) => item.payout), 'succeeded');
+    steps.load(items.filter((item) => item.fields.status === 'failed').map((item) => item.payout), 'failed',
       data.failedErrorCode);
-    const ownIds = items.map((item) => item.withdrawal.id);
-    const idsFound = (query) => [...new Set(steps.findWithdrawalsHistory({ partyId, ...query })
+    const ownIds = items.map((item) => item.payout.id);
+    const idsFound = (query) => [...new Set(steps.findPayoutsHistory({ partyId, ...query })
       .map((item) => item.id))].filter((id) => ownIds.includes(id)).sort();
-    waitFor(connection, `${data.withdrawals} withdrawals in history`, () => {
+    waitFor(connection, `${data.payouts} payouts in history`, () => {
       const found = idsFound({}).length;
-      return { done: found === data.withdrawals, observed: found };
+      return { done: found === data.payouts, observed: found };
     });
     const probe = items[5].fields;
     const future = new Date(Date.now() + 3600 * 1000);
     expectOutcomes(context, [
       ...data.filters.map((name) => filterOutcome(`filter_${name}`, idsFound({ [name]: probe[name] }),
-        items.filter((item) => item.fields[name] === probe[name]).map((item) => item.withdrawal.id).sort())),
+        items.filter((item) => item.fields[name] === probe[name]).map((item) => item.payout.id).sort())),
       filterOutcome('time_window', idsFound({
         from: historyTime(future), to: historyTime(new Date(future.getTime() + 3600 * 1000)),
       }), []),
     ]);
 
-    const changing = steps.withdrawal({ partyId, walletId: ids.name('wallet-0') });
+    const changing = steps.payout({ partyId, walletId: ids.name('wallet-0') });
     data.changing.forEach((status) => steps.loadAndAwait([changing], status));
-    expectEqual(steps.findWithdrawalsHistory({ partyId, withdrawalId: changing.id }).map((item) => item.status),
-      [data.changing[data.changing.length - 1]], 'withdrawal is returned once in its last state');
-    expectEqual(steps.findWithdrawalsHistory({ partyId, withdrawalId: changing.id, status: data.changing[0] }).length, 0,
+    expectEqual(steps.findPayoutsHistory({ partyId, payoutId: changing.id }).map((item) => item.status),
+      [data.changing[data.changing.length - 1]], 'payout is returned once in its last state');
+    expectEqual(steps.findPayoutsHistory({ partyId, payoutId: changing.id, status: data.changing[0] }).length, 0,
       'status filter applies to the last state');
 
-    const pages = expectPaginated((query) => expectSuccess(payouts.filterWithdrawalsHistory(
-      { ...historyWindow(), partyId, ...query }), 'withdrawal history page'), {
+    const pages = expectPaginated((query) => expectSuccess(payouts.filterPayoutsHistory(
+      { ...historyWindow(), partyId, ...query }), 'payout history page'), {
       size: data.pageSize, cursorAfter: byContinuation, expectedKeys: [...ownIds, changing.id], keyOf: (item) => item.id,
-      what: 'withdrawal history',
+      what: 'payout history',
     });
     context.observe('history_pages', pages.map((page) => page.items.length).join(','));
   },

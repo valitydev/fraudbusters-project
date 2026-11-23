@@ -10,7 +10,7 @@ import dev.vality.trusted.tokens.dao.TokenDao;
 import dev.vality.trusted.tokens.service.TemplateService;
 import dev.vality.trusted.tokens.validator.ConditionTemplateValidator;
 import dev.vality.trusted.tokens.validator.conditions.PaymentsConditionsValidator;
-import dev.vality.trusted.tokens.validator.conditions.WithdrawalConditionsValidator;
+import dev.vality.trusted.tokens.validator.conditions.PayoutConditionsValidator;
 import org.apache.thrift.TException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @ContextConfiguration(classes = {
         TrustedTokensHandler.class, TemplateService.class, RowConverter.class, ObjectMapperConfig.class,
-        ConditionTemplateValidator.class, PaymentsConditionsValidator.class, WithdrawalConditionsValidator.class,
+        ConditionTemplateValidator.class, PaymentsConditionsValidator.class, PayoutConditionsValidator.class,
         ConditionTrustedResolver.class
 })
 public class HandlerTest {
@@ -54,12 +54,12 @@ public class HandlerTest {
                 .thenReturn(createTemplateTrusted(PAYMENT));
         when(templateDao.get("TemplateTrustedWithSeveralCurrencyPayment"))
                 .thenReturn(createTemplateTrustedWithSeveralCurrency(PAYMENT));
-        when(templateDao.get("TemplateNotTrustedWithdrawal"))
-                .thenReturn(createTemplateNotTrusted(WITHDRAWAL));
-        when(templateDao.get("TemplateTrustedWithdrawal"))
-                .thenReturn(createTemplateTrusted(WITHDRAWAL));
-        when(templateDao.get("TemplateTrustedWithSeveralCurrencyWithdrawal"))
-                .thenReturn(createTemplateTrustedWithSeveralCurrency(WITHDRAWAL));
+        when(templateDao.get("TemplateNotTrustedPayout"))
+                .thenReturn(createTemplateNotTrusted(PAYOUT));
+        when(templateDao.get("TemplateTrustedPayout"))
+                .thenReturn(createTemplateTrusted(PAYOUT));
+        when(templateDao.get("TemplateTrustedWithSeveralCurrencyPayout"))
+                .thenReturn(createTemplateTrustedWithSeveralCurrency(PAYOUT));
     }
 
     @Test
@@ -73,18 +73,18 @@ public class HandlerTest {
         assertFalse(trustedTokensHandler.isTokenTrusted(
                 TOKEN, createTemplateNotTrustedWithSeveralCurrency(PAYMENT)));
         assertFalse(trustedTokensHandler.isTokenTrusted(
-                TOKEN, createTemplateNotTrusted(WITHDRAWAL)));
+                TOKEN, createTemplateNotTrusted(PAYOUT)));
         assertTrue(trustedTokensHandler.isTokenTrusted(
-                TOKEN, createTemplateTrusted(WITHDRAWAL)));
+                TOKEN, createTemplateTrusted(PAYOUT)));
         assertTrue(trustedTokensHandler.isTokenTrusted(
-                TOKEN, createTemplateTrustedWithSeveralCurrency(WITHDRAWAL)));
+                TOKEN, createTemplateTrustedWithSeveralCurrency(PAYOUT)));
         assertFalse(trustedTokensHandler.isTokenTrusted(
-                TOKEN, createTemplateNotTrustedWithSeveralCurrency(WITHDRAWAL)));
+                TOKEN, createTemplateNotTrustedWithSeveralCurrency(PAYOUT)));
         assertThrows(InvalidRequest.class,
                 () -> trustedTokensHandler.isTokenTrusted(TOKEN,
                         createTemplate(null, null)));
         assertTrue(trustedTokensHandler.isTokenTrusted(TOKEN,
-                createTemplateWithWithdrawalAndPayment()));
+                createTemplateWithPayoutAndPayment()));
     }
 
     @Test
@@ -96,11 +96,11 @@ public class HandlerTest {
         assertTrue(trustedTokensHandler.isTokenTrustedByConditionTemplateName(
                 TOKEN, "TemplateTrustedWithSeveralCurrencyPayment"));
         assertFalse(trustedTokensHandler.isTokenTrustedByConditionTemplateName(
-                TOKEN, "TemplateNotTrustedWithdrawal"));
+                TOKEN, "TemplateNotTrustedPayout"));
         assertTrue(trustedTokensHandler.isTokenTrustedByConditionTemplateName(
-                TOKEN, "TemplateTrustedWithdrawal"));
+                TOKEN, "TemplateTrustedPayout"));
         assertTrue(trustedTokensHandler.isTokenTrustedByConditionTemplateName(
-                TOKEN, "TemplateTrustedWithSeveralCurrencyWithdrawal"));
+                TOKEN, "TemplateTrustedWithSeveralCurrencyPayout"));
         assertThrows(ConditionTemplateNotFound.class,
                 () -> trustedTokensHandler.isTokenTrustedByConditionTemplateName(
                         TOKEN, "UnknownTemplate"));

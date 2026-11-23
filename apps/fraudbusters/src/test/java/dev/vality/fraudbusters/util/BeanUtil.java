@@ -370,10 +370,10 @@ public class BeanUtil {
     }
 
 
-    public static Withdrawal createChargeback(WithdrawalStatus status) {
+    public static Payout createChargeback(PayoutStatus status) {
         final Resource resource = new Resource();
         resource.setBankCard(createBankCard());
-        return new Withdrawal()
+        return new Payout()
                 .setStatus(status)
                 .setId("id")
                 .setCost(createCash())

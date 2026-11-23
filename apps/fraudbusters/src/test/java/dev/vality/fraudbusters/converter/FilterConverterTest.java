@@ -7,7 +7,7 @@ import dev.vality.damsel.fraudbusters.SortOrder;
 import dev.vality.fraudbusters.constant.FraudResultField;
 import dev.vality.fraudbusters.constant.FilterField;
 import dev.vality.fraudbusters.constant.PaymentField;
-import dev.vality.fraudbusters.constant.WithdrawalField;
+import dev.vality.fraudbusters.constant.PayoutField;
 import dev.vality.fraudbusters.factory.TestObjectsFactory;
 import dev.vality.fraudbusters.service.dto.FieldType;
 import dev.vality.fraudbusters.service.dto.FilterDto;
@@ -157,11 +157,11 @@ class FilterConverterTest {
     }
 
     @Test
-    void convertWithdrawalsKeepsOnlyWhatPayoutHistoryStores() {
+    void convertPayoutsKeepsOnlyWhatPayoutHistoryStores() {
         Filter filter = new Filter()
                 .setPartyId("party")
                 .setWalletId("wallet")
-                .setPaymentId("withdrawal")
+                .setPaymentId("payout")
                 .setStatus("failed")
                 .setCardToken("token")
                 .setUserId("user")
@@ -170,13 +170,13 @@ class FilterConverterTest {
                 .setTemplate("template")
                 .setRule("rule");
 
-        FilterDto dto = filterConverter.convertWithdrawals(filter, new Page().setSize(5),
+        FilterDto dto = filterConverter.convertPayouts(filter, new Page().setSize(5),
                 new Sort().setOrder(SortOrder.ASC));
 
         assertEquals(Set.of(
                         searchField(PaymentField.PARTY_ID, FieldType.STRING, "party"),
-                        searchField(WithdrawalField.WALLET_ID, FieldType.STRING, "wallet"),
-                        searchField(PaymentField.ID, FieldType.STRING, "withdrawal"),
+                        searchField(PayoutField.WALLET_ID, FieldType.STRING, "wallet"),
+                        searchField(PaymentField.ID, FieldType.STRING, "payout"),
                         searchField(PaymentField.STATUS, FieldType.ENUM, "failed"),
                         searchField(PaymentField.CARD_TOKEN, FieldType.STRING, "token"),
                         searchField(PaymentField.USER_ID, FieldType.STRING, "user")),
@@ -189,8 +189,8 @@ class FilterConverterTest {
     }
 
     @Test
-    void convertWithdrawalsIgnoresEmptyWallet() {
-        FilterDto dto = filterConverter.convertWithdrawals(new Filter().setWalletId(""), new Page(), new Sort());
+    void convertPayoutsIgnoresEmptyWallet() {
+        FilterDto dto = filterConverter.convertPayouts(new Filter().setWalletId(""), new Page(), new Sort());
 
         assertTrue(dto.getSearchFields().isEmpty());
     }

@@ -1,6 +1,6 @@
 package dev.vality.fraudbusters.repository.clickhouse.impl;
 
-import dev.vality.damsel.fraudbusters.WithdrawalStatus;
+import dev.vality.damsel.fraudbusters.PayoutStatus;
 import dev.vality.fraudbusters.fraud.model.FieldModel;
 import dev.vality.fraudbusters.repository.clickhouse.extractor.CountExtractor;
 import dev.vality.fraudbusters.repository.clickhouse.extractor.SumExtractor;
@@ -19,8 +19,8 @@ import java.util.List;
 public class PayoutHistoryRepository {
 
     private static final List<String> FINAL_STATUSES = List.of(
-            WithdrawalStatus.succeeded.name(),
-            WithdrawalStatus.failed.name()
+            PayoutStatus.succeeded.name(),
+            PayoutStatus.failed.name()
     );
 
     private final JdbcTemplate jdbcTemplate;
@@ -39,7 +39,7 @@ public class PayoutHistoryRepository {
             List<FieldModel> fieldModels) {
         String sql = buildSql(fieldName, "count() as cnt", "status = ?", fieldModels);
         List<Object> params =
-                AggregationUtil.generateParams(from, to, fieldModels, value, WithdrawalStatus.succeeded.name());
+                AggregationUtil.generateParams(from, to, fieldModels, value, PayoutStatus.succeeded.name());
         log.debug("PayoutHistoryRepository countOperationSuccessWithGroupBy sql: {}", sql);
         return jdbcTemplate.query(sql, params.toArray(), new CountExtractor());
     }
@@ -49,7 +49,7 @@ public class PayoutHistoryRepository {
             List<FieldModel> fieldModels) {
         String sql = buildSql(fieldName, "count() as cnt", "status = ?", fieldModels);
         List<Object> params =
-                AggregationUtil.generateParams(from, to, fieldModels, value, WithdrawalStatus.failed.name());
+                AggregationUtil.generateParams(from, to, fieldModels, value, PayoutStatus.failed.name());
         log.debug("PayoutHistoryRepository countOperationErrorWithGroupBy sql: {}", sql);
         return jdbcTemplate.query(sql, params.toArray(), new CountExtractor());
     }
@@ -59,7 +59,7 @@ public class PayoutHistoryRepository {
             List<FieldModel> fieldModels, String errorCode) {
         String sql = buildSql(fieldName, "count() as cnt", "status = ? and errorCode = ?", fieldModels);
         List<Object> params = AggregationUtil.generateParams(from, to, fieldModels, value,
-                WithdrawalStatus.failed.name(), errorCode);
+                PayoutStatus.failed.name(), errorCode);
         log.debug("PayoutHistoryRepository countOperationErrorWithGroupBy sql: {}", sql);
         return jdbcTemplate.query(sql, params.toArray(), new CountExtractor());
     }
@@ -78,7 +78,7 @@ public class PayoutHistoryRepository {
             List<FieldModel> fieldModels) {
         String sql = buildSql(fieldName, "sum(amount) as sum", "status = ?", fieldModels);
         List<Object> params =
-                AggregationUtil.generateParams(from, to, fieldModels, value, WithdrawalStatus.succeeded.name());
+                AggregationUtil.generateParams(from, to, fieldModels, value, PayoutStatus.succeeded.name());
         log.debug("PayoutHistoryRepository sumOperationSuccessWithGroupBy sql: {}", sql);
         return jdbcTemplate.query(sql, params.toArray(), new SumExtractor());
     }
@@ -88,7 +88,7 @@ public class PayoutHistoryRepository {
             List<FieldModel> fieldModels) {
         String sql = buildSql(fieldName, "sum(amount) as sum", "status = ?", fieldModels);
         List<Object> params =
-                AggregationUtil.generateParams(from, to, fieldModels, value, WithdrawalStatus.failed.name());
+                AggregationUtil.generateParams(from, to, fieldModels, value, PayoutStatus.failed.name());
         log.debug("PayoutHistoryRepository sumOperationErrorWithGroupBy sql: {}", sql);
         return jdbcTemplate.query(sql, params.toArray(), new SumExtractor());
     }
@@ -98,7 +98,7 @@ public class PayoutHistoryRepository {
             List<FieldModel> fieldModels, String errorCode) {
         String sql = buildSql(fieldName, "sum(amount) as sum", "status = ? and errorCode = ?", fieldModels);
         List<Object> params = AggregationUtil.generateParams(from, to, fieldModels, value,
-                WithdrawalStatus.failed.name(), errorCode);
+                PayoutStatus.failed.name(), errorCode);
         log.debug("PayoutHistoryRepository sumOperationErrorWithGroupBy sql: {}", sql);
         return jdbcTemplate.query(sql, params.toArray(), new SumExtractor());
     }

@@ -11,7 +11,7 @@ public abstract class CardTokenDataUtils {
     public static CardTokenData createCardTokenData() {
         CardTokenData cardTokenData = new CardTokenData();
         cardTokenData.setPayments(createCurrencyData(ConditionTemplateUtils.PAYMENT));
-        cardTokenData.setWithdrawals(createCurrencyData(ConditionTemplateUtils.WITHDRAWAL));
+        cardTokenData.setPayouts(createCurrencyData(ConditionTemplateUtils.PAYOUT));
         return cardTokenData;
     }
 

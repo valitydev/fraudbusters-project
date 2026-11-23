@@ -42,7 +42,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest(classes = {HistoricalDataHandler.class, CheckedPaymentToPaymentConverter.class,
         FilterConverter.class, HistoricalDataResponseConverter.class, EventToHistoricalTransactionCheckConverter.class,
         CheckedPaymentToFraudPaymentInfoConverter.class, ResultStatusConverter.class,
-        HistoricalWithdrawalCheckConverter.class})
+        HistoricalPayoutCheckConverter.class})
 class HistoricalDataHandlerTest {
 
     @Autowired
@@ -629,22 +629,22 @@ class HistoricalDataHandlerTest {
     }
 
     @Test
-    void getWithdrawalsSearchesPayoutHistoryByWallet() {
-        Withdrawal withdrawal = new Withdrawal().setId("withdrawal").setWalletId("wallet");
-        when(service.getWithdrawals(any(FilterDto.class))).thenReturn(HistoricalWithdrawalsDto.builder()
-                .withdrawals(List.of(withdrawal))
+    void getPayoutsSearchesPayoutHistoryByWallet() {
+        Payout payout = new Payout().setId("payout").setWalletId("wallet");
+        when(service.getPayouts(any(FilterDto.class))).thenReturn(HistoricalPayoutsDto.builder()
+                .payouts(List.of(payout))
                 .lastId("1")
                 .build());
 
-        HistoricalDataResponse response = handler.getWithdrawals(
+        HistoricalDataResponse response = handler.getPayouts(
                 new Filter().setWalletId("wallet").setShopId("shop"), new Page(), new Sort().setOrder(SortOrder.DESC));
 
         assertEquals("1", response.getContinuationId());
-        assertEquals(List.of(withdrawal), response.getData().getWithdrawals());
+        assertEquals(List.of(payout), response.getData().getPayouts());
         ArgumentCaptor<FilterDto> captor = ArgumentCaptor.forClass(FilterDto.class);
-        verify(service).getWithdrawals(captor.capture());
+        verify(service).getPayouts(captor.capture());
         assertEquals(Set.of(SearchFieldDto.builder()
-                        .field(dev.vality.fraudbusters.constant.WithdrawalField.WALLET_ID)
+                        .field(dev.vality.fraudbusters.constant.PayoutField.WALLET_ID)
                         .type(FieldType.STRING)
                         .value("wallet")
                         .build()),
@@ -652,9 +652,9 @@ class HistoricalDataHandlerTest {
     }
 
     @Test
-    void getWithdrawalChecksSearchesWithdrawalChecksByResultAndWallet() {
+    void getPayoutChecksSearchesPayoutChecksByResultAndWallet() {
         PayoutModel model = new PayoutModel();
-        model.setWithdrawalId("withdrawal");
+        model.setPayoutId("payout");
         model.setPartyId("party");
         model.setWalletId("wallet");
         model.setAmount(1000L);
@@ -668,12 +668,12 @@ class HistoricalDataHandlerTest {
         result.setCheckedTemplate("template");
         result.setResultModel(new ConcreteResultModel(
                 dev.vality.fraudo.constant.ResultStatus.DECLINE, "card_velocity", null));
-        when(service.getWithdrawalChecks(any(FilterDto.class))).thenReturn(HistoricalWithdrawalChecksDto.builder()
-                .withdrawalChecks(List.of(new PayoutResult(model, result)))
+        when(service.getPayoutChecks(any(FilterDto.class))).thenReturn(HistoricalPayoutChecksDto.builder()
+                .payoutChecks(List.of(new PayoutResult(model, result)))
                 .lastId("1")
                 .build());
 
-        HistoricalDataResponse response = handler.getWithdrawalChecks(
+        HistoricalDataResponse response = handler.getPayoutChecks(
                 new Filter()
                         .setWalletId("wallet")
                         .setStatus("decline")
@@ -683,35 +683,35 @@ class HistoricalDataHandlerTest {
                 new Sort().setOrder(SortOrder.DESC));
 
         assertEquals("1", response.getContinuationId());
-        HistoricalWithdrawalCheck check = response.getData().getWithdrawalChecks().get(0);
-        Withdrawal withdrawal = check.getWithdrawal();
-        assertEquals("withdrawal", withdrawal.getId());
-        assertEquals("2034-01-01T10:05:00Z", withdrawal.getEventTime());
-        assertEquals("party", withdrawal.getPartyId());
-        assertEquals("wallet", withdrawal.getWalletId());
-        assertEquals(1000L, withdrawal.getCost().getAmount());
+        HistoricalPayoutCheck check = response.getData().getPayoutChecks().get(0);
+        Payout payout = check.getPayout();
+        assertEquals("payout", payout.getId());
+        assertEquals("2034-01-01T10:05:00Z", payout.getEventTime());
+        assertEquals("party", payout.getPartyId());
+        assertEquals("wallet", payout.getWalletId());
+        assertEquals(1000L, payout.getCost().getAmount());
         assertTrue(check.getCheckResult().getConcreteCheckResult().getResultStatus().isSetDecline());
         assertEquals("card_velocity", check.getCheckResult().getConcreteCheckResult().getRuleChecked());
         assertEquals("template", check.getCheckResult().getCheckedTemplate());
-        assertEquals("token", withdrawal.getDestinationResource().getBankCard().getToken());
-        assertEquals("user", withdrawal.getClientInfo().getUserId());
-        assertEquals(WithdrawalStatus.pending, withdrawal.getStatus());
-        assertEquals("RUB", withdrawal.getAccount().getCurrency().getSymbolicCode());
+        assertEquals("token", payout.getDestinationResource().getBankCard().getToken());
+        assertEquals("user", payout.getClientInfo().getUserId());
+        assertEquals(PayoutStatus.pending, payout.getStatus());
+        assertEquals("RUB", payout.getAccount().getCurrency().getSymbolicCode());
         ArgumentCaptor<FilterDto> captor = ArgumentCaptor.forClass(FilterDto.class);
-        verify(service).getWithdrawalChecks(captor.capture());
+        verify(service).getPayoutChecks(captor.capture());
         assertEquals(Set.of(
                         SearchFieldDto.builder()
-                                .field(dev.vality.fraudbusters.constant.WithdrawalCheckField.WALLET_ID)
+                                .field(dev.vality.fraudbusters.constant.PayoutCheckField.WALLET_ID)
                                 .type(FieldType.STRING)
                                 .value("wallet")
                                 .build(),
                         SearchFieldDto.builder()
-                                .field(dev.vality.fraudbusters.constant.WithdrawalCheckField.RESULT_STATUS)
+                                .field(dev.vality.fraudbusters.constant.PayoutCheckField.RESULT_STATUS)
                                 .type(FieldType.ENUM)
                                 .value("DECLINE")
                                 .build(),
                         SearchFieldDto.builder()
-                                .field(dev.vality.fraudbusters.constant.WithdrawalCheckField.CHECKED_RULE)
+                                .field(dev.vality.fraudbusters.constant.PayoutCheckField.CHECKED_RULE)
                                 .type(FieldType.ENUM)
                                 .value("card_velocity")
                                 .build()),

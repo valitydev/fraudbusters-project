@@ -24,6 +24,6 @@ public class GroupPostfix {
 
     public static final String RESULT_AGGREGATOR = "result-aggregator";
 
-    public static final String WITHDRAWAL_CHECK_AGGREGATOR = "withdrawal-check-aggregator";
+    public static final String PAYOUT_CHECK_AGGREGATOR = "payout-check-aggregator";
 
 }

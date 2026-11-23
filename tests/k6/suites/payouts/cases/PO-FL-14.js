@@ -17,7 +17,7 @@ export default {
     ids.resolve(data.rows).forEach((row) => steps.addListRow(row.type, row.name, row.value, row.scope));
     const mismatches = data.scenarios.map((scenario) => {
       try {
-        steps.awaitDecision(scenario.name, () => steps.withdrawal({ ...base, ...scenario.withdrawal }), scenario.expected);
+        steps.awaitDecision(scenario.name, () => steps.payout({ ...base, ...scenario.payout }), scenario.expected);
         return undefined;
       } catch (error) {
         return `${scenario.name}: ${error.message}`;

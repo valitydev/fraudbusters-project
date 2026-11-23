@@ -4,7 +4,7 @@ import dev.vality.damsel.proxy_inspector.InspectorProxySrv;
 import dev.vality.damsel.wb_list.WbListServiceSrv;
 import dev.vality.fraudbusters.converter.CheckedResultToRiskScoreConverter;
 import dev.vality.fraudbusters.converter.ContextToFraudRequestConverter;
-import dev.vality.fraudbusters.converter.WithdrawalContextToModelConverter;
+import dev.vality.fraudbusters.converter.PayoutContextToModelConverter;
 import dev.vality.fraudbusters.domain.FraudResult;
 import dev.vality.fraudbusters.domain.PayoutResult;
 import dev.vality.fraudbusters.resource.payment.handler.FraudInspectorHandler;
@@ -31,7 +31,7 @@ public class PaymentResourceConfig {
             ContextToFraudRequestConverter requestConverter,
             TemplateVisitorImpl templateVisitor,
             WbListServiceSrv.Iface wbListServiceSrv,
-            WithdrawalContextToModelConverter withdrawalContextToModelConverter,
+            PayoutContextToModelConverter payoutContextToModelConverter,
             PayoutTemplateVisitorImpl payoutTemplateVisitor,
             KafkaTemplate<String, PayoutResult> kafkaPayoutResultTemplate) {
         return new FraudInspectorHandler(
@@ -41,7 +41,7 @@ public class PaymentResourceConfig {
                 templateVisitor,
                 kafkaFraudResultTemplate,
                 wbListServiceSrv,
-                withdrawalContextToModelConverter,
+                payoutContextToModelConverter,
                 payoutTemplateVisitor,
                 payoutResultTopic,
                 kafkaPayoutResultTemplate

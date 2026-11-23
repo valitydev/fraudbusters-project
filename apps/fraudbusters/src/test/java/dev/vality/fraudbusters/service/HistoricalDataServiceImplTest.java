@@ -2,7 +2,7 @@ package dev.vality.fraudbusters.service;
 
 import dev.vality.damsel.fraudbusters.Chargeback;
 import dev.vality.damsel.fraudbusters.Refund;
-import dev.vality.damsel.fraudbusters.Withdrawal;
+import dev.vality.damsel.fraudbusters.Payout;
 import dev.vality.fraudbusters.domain.CheckedPayment;
 import dev.vality.fraudbusters.domain.Event;
 import dev.vality.fraudbusters.domain.FraudPaymentRow;
@@ -43,9 +43,9 @@ class HistoricalDataServiceImplTest {
     @MockitoBean
     private Repository<FraudPaymentRow> fraudPaymentRepository;
     @MockitoBean
-    private Repository<Withdrawal> withdrawalRepository;
+    private Repository<Payout> payoutRepository;
     @MockitoBean
-    private Repository<PayoutResult> withdrawalCheckRepository;
+    private Repository<PayoutResult> payoutCheckRepository;
 
     @Test
     void getPaymentsWithoutPayments() {
@@ -273,59 +273,59 @@ class HistoricalDataServiceImplTest {
     }
 
     @Test
-    void getWithdrawalsWithoutWithdrawals() {
+    void getPayoutsWithoutPayouts() {
         FilterDto filterDto = new FilterDto();
-        when(withdrawalRepository.getByFilter(filterDto)).thenReturn(Collections.emptyList());
+        when(payoutRepository.getByFilter(filterDto)).thenReturn(Collections.emptyList());
 
-        HistoricalWithdrawalsDto actual = historicalDataService.getWithdrawals(filterDto);
+        HistoricalPayoutsDto actual = historicalDataService.getPayouts(filterDto);
 
         assertNull(actual.getLastId());
-        assertTrue(actual.getWithdrawals().isEmpty());
+        assertTrue(actual.getPayouts().isEmpty());
     }
 
     @Test
-    void getWithdrawalsContinuesAfterAFullPage() {
+    void getPayoutsContinuesAfterAFullPage() {
         FilterDto filterDto = new FilterDto();
         filterDto.setSize(2L);
         filterDto.setLastId("4");
-        List<Withdrawal> withdrawals = List.of(new Withdrawal().setId("a"), new Withdrawal().setId("b"));
-        when(withdrawalRepository.getByFilter(filterDto)).thenReturn(withdrawals);
+        List<Payout> payouts = List.of(new Payout().setId("a"), new Payout().setId("b"));
+        when(payoutRepository.getByFilter(filterDto)).thenReturn(payouts);
 
-        HistoricalWithdrawalsDto actual = historicalDataService.getWithdrawals(filterDto);
+        HistoricalPayoutsDto actual = historicalDataService.getPayouts(filterDto);
 
         assertEquals("6", actual.getLastId());
-        assertEquals(withdrawals, actual.getWithdrawals());
+        assertEquals(payouts, actual.getPayouts());
     }
 
     @Test
-    void getWithdrawalsStopsAfterAShortPage() {
+    void getPayoutsStopsAfterAShortPage() {
         FilterDto filterDto = new FilterDto();
         filterDto.setSize(2L);
-        when(withdrawalRepository.getByFilter(filterDto)).thenReturn(List.of(new Withdrawal().setId("a")));
+        when(payoutRepository.getByFilter(filterDto)).thenReturn(List.of(new Payout().setId("a")));
 
-        assertNull(historicalDataService.getWithdrawals(filterDto).getLastId());
+        assertNull(historicalDataService.getPayouts(filterDto).getLastId());
     }
 
     @Test
-    void getWithdrawalChecksContinuesAfterAFullPage() {
+    void getPayoutChecksContinuesAfterAFullPage() {
         FilterDto filterDto = new FilterDto();
         filterDto.setSize(2L);
         filterDto.setLastId("2");
         List<PayoutResult> results = List.of(new PayoutResult(), new PayoutResult());
-        when(withdrawalCheckRepository.getByFilter(filterDto)).thenReturn(results);
+        when(payoutCheckRepository.getByFilter(filterDto)).thenReturn(results);
 
-        HistoricalWithdrawalChecksDto dto = historicalDataService.getWithdrawalChecks(filterDto);
+        HistoricalPayoutChecksDto dto = historicalDataService.getPayoutChecks(filterDto);
 
-        assertEquals(results, dto.getWithdrawalChecks());
+        assertEquals(results, dto.getPayoutChecks());
         assertEquals("4", dto.getLastId());
     }
 
     @Test
-    void getWithdrawalChecksStopsAfterAShortPage() {
+    void getPayoutChecksStopsAfterAShortPage() {
         FilterDto filterDto = new FilterDto();
         filterDto.setSize(2L);
-        when(withdrawalCheckRepository.getByFilter(filterDto)).thenReturn(List.of(new PayoutResult()));
+        when(payoutCheckRepository.getByFilter(filterDto)).thenReturn(List.of(new PayoutResult()));
 
-        assertNull(historicalDataService.getWithdrawalChecks(filterDto).getLastId());
+        assertNull(historicalDataService.getPayoutChecks(filterDto).getLastId());
     }
 }

@@ -9,7 +9,7 @@ import java.util.List;
 public class ConditionTemplateUtils {
 
     public static final String PAYMENT = "payment";
-    public static final String WITHDRAWAL = "withdrawal";
+    public static final String PAYOUT = "payout";
 
     public static ConditionTemplate createTemplateNotTrusted(String type) {
         List<Condition> conditions = new ArrayList<>();
@@ -66,7 +66,7 @@ public class ConditionTemplateUtils {
         return createTemplate(conditions, type);
     }
 
-    public static ConditionTemplate createTemplateWithWithdrawalAndPayment() {
+    public static ConditionTemplate createTemplateWithPayoutAndPayment() {
         return new ConditionTemplate()
                 .setPaymentsConditions(new PaymentsConditions()
                         .setConditions(Collections.singletonList(new Condition()
@@ -74,7 +74,7 @@ public class ConditionTemplateUtils {
                                 .setYearsOffset(YearsOffset.current_year)
                                 .setCount(78)
                                 .setSum(78000))))
-                .setWithdrawalsConditions(new WithdrawalsConditions()
+                .setPayoutsConditions(new PayoutsConditions()
                         .setConditions(Collections.singletonList(new Condition()
                                 .setCurrencySymbolicCode("RUB")
                                 .setYearsOffset(YearsOffset.current_year)
@@ -90,10 +90,10 @@ public class ConditionTemplateUtils {
             conditionTemplate.setPaymentsConditions(paymentsConditions);
         }
 
-        if (WITHDRAWAL.equals(type)) {
-            WithdrawalsConditions withdrawalsConditions = new WithdrawalsConditions();
-            withdrawalsConditions.setConditions(conditions);
-            conditionTemplate.setWithdrawalsConditions(withdrawalsConditions);
+        if (PAYOUT.equals(type)) {
+            PayoutsConditions payoutsConditions = new PayoutsConditions();
+            payoutsConditions.setConditions(conditions);
+            conditionTemplate.setPayoutsConditions(payoutsConditions);
         }
         return conditionTemplate;
     }

@@ -2,8 +2,8 @@ package dev.vality.trusted.tokens.listener;
 
 import dev.vality.damsel.fraudbusters.Payment;
 import dev.vality.damsel.fraudbusters.PaymentStatus;
-import dev.vality.damsel.fraudbusters.Withdrawal;
-import dev.vality.damsel.fraudbusters.WithdrawalStatus;
+import dev.vality.damsel.fraudbusters.Payout;
+import dev.vality.damsel.fraudbusters.PayoutStatus;
 import dev.vality.testcontainers.annotations.kafka.config.KafkaProducer;
 import dev.vality.testcontainers.annotations.kafka.config.KafkaProducerConfig;
 import dev.vality.testcontainers.annotations.postgresql.PostgresqlTestcontainer;
@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static dev.vality.trusted.tokens.utils.TransactionUtils.createPayment;
-import static dev.vality.trusted.tokens.utils.TransactionUtils.createWithdrawal;
+import static dev.vality.trusted.tokens.utils.TransactionUtils.createPayout;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.*;
 @PostgresqlTestcontainer
 @SpringBootTest(properties = {
         "kafka.topics.payment.consume.enabled=true",
-        "kafka.topics.withdrawal.consume.enabled=true",
+        "kafka.topics.payout.consume.enabled=true",
         "kafka.state.cache.size=0"})
 @ContextConfiguration(classes = {KafkaProducerConfig.class})
 public class ListenerTest {
@@ -52,9 +52,9 @@ public class ListenerTest {
         try (AdminClient admin = AdminClient.create(Map.of("bootstrap.servers", KAFKA.getBootstrapServers()))) {
             admin.createTopics(List.of(
                     new NewTopic("payment_event", 1, (short) 1),
-                    new NewTopic("withdrawal", 1, (short) 1),
+                    new NewTopic("payout", 1, (short) 1),
                     new NewTopic("filtered_payment", 1, (short) 1),
-                    new NewTopic("filtered_withdrawal", 1, (short) 1)))
+                    new NewTopic("filtered_payout", 1, (short) 1)))
                     .all().get(30, TimeUnit.SECONDS);
         }
     }
@@ -62,8 +62,8 @@ public class ListenerTest {
 
     @Value("${kafka.topics.payment.id}")
     private String paymentTopicName;
-    @Value("${kafka.topics.withdrawal.id}")
-    private String withdrawalTopicName;
+    @Value("${kafka.topics.payout.id}")
+    private String payoutTopicName;
     @Autowired
     private KafkaProducer<TBase<?, ?>> testThriftKafkaProducer;
     @MockitoBean
@@ -109,36 +109,36 @@ public class ListenerTest {
     }
 
     @Test
-    void listenExistedCapturedWithdrawal() {
-        Withdrawal withdrawal = createWithdrawal().setStatus(WithdrawalStatus.succeeded);
-        String token = withdrawal.getDestinationResource().getBankCard().getToken();
+    void listenExistedCapturedPayout() {
+        Payout payout = createPayout().setStatus(PayoutStatus.succeeded);
+        String token = payout.getDestinationResource().getBankCard().getToken();
         CardTokenData cardTokenData = CardTokenDataUtils.createCardTokenData();
-        cardTokenData.setLastWithdrawalId(withdrawal.getId());
+        cardTokenData.setLastPayoutId(payout.getId());
         when(tokenDao.get(token)).thenReturn(cardTokenData);
 
-        testThriftKafkaProducer.send(withdrawalTopicName, withdrawal);
+        testThriftKafkaProducer.send(payoutTopicName, payout);
 
         verify(tokenDao, timeout(TIMEOUT).times(1)).get(token);
         verifyNoMoreInteractions(tokenDao);
     }
 
     @Test
-    void listenOldCapturedWithdrawal() {
-        Withdrawal withdrawal = createWithdrawal().setStatus(WithdrawalStatus.succeeded);
-        String token = withdrawal.getDestinationResource().getBankCard().getToken();
+    void listenOldCapturedPayout() {
+        Payout payout = createPayout().setStatus(PayoutStatus.succeeded);
+        String token = payout.getDestinationResource().getBankCard().getToken();
         CardTokenData cardTokenData = CardTokenDataUtils.createCardTokenData();
         when(tokenDao.get(token)).thenReturn(cardTokenData);
 
-        testThriftKafkaProducer.send(withdrawalTopicName, withdrawal);
+        testThriftKafkaProducer.send(payoutTopicName, payout);
 
         verify(tokenDao, timeout(TIMEOUT).times(2)).create(any());
 
     }
 
     @Test
-    void listenSucceededWithdrawal() {
-        testThriftKafkaProducer.send(withdrawalTopicName, createWithdrawal().setStatus(WithdrawalStatus.succeeded));
-        testThriftKafkaProducer.send(withdrawalTopicName, createWithdrawal().setStatus(WithdrawalStatus.pending));
+    void listenSucceededPayout() {
+        testThriftKafkaProducer.send(payoutTopicName, createPayout().setStatus(PayoutStatus.succeeded));
+        testThriftKafkaProducer.send(payoutTopicName, createPayout().setStatus(PayoutStatus.pending));
 
         verify(tokenDao, timeout(TIMEOUT).times(1)).create(any());
     }

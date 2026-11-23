@@ -14,18 +14,18 @@ import { ListResponse } from '../fb-management/swagger-codegen/model/listRespons
 import { ListType } from '../fb-management/swagger-codegen/model/listType';
 import { PayoutGroupReference } from '../fb-management/swagger-codegen/model/payoutGroupReference';
 import { PayoutGroupReferencesResponse } from '../fb-management/swagger-codegen/model/payoutGroupReferencesResponse';
+import { PayoutInspectResultsResponse } from '../fb-management/swagger-codegen/model/payoutInspectResultsResponse';
 import { PayoutListRecordsResponse } from '../fb-management/swagger-codegen/model/payoutListRecordsResponse';
 import { PayoutReference } from '../fb-management/swagger-codegen/model/payoutReference';
 import { PayoutReferencesResponse } from '../fb-management/swagger-codegen/model/payoutReferencesResponse';
 import { PayoutRowListRequest } from '../fb-management/swagger-codegen/model/payoutRowListRequest';
+import { PayoutsResponse } from '../fb-management/swagger-codegen/model/payoutsResponse';
 import { Template } from '../fb-management/swagger-codegen/model/template';
 import { TemplatesResponse } from '../fb-management/swagger-codegen/model/templatesResponse';
 import { ValidateTemplatesResponse } from '../fb-management/swagger-codegen/model/validateTemplatesResponse';
-import { WithdrawalInspectResultsResponse } from '../fb-management/swagger-codegen/model/withdrawalInspectResultsResponse';
-import { WithdrawalsResponse } from '../fb-management/swagger-codegen/model/withdrawalsResponse';
 
 /** Payout history search; each payout comes back once, in its latest state for the period. */
-export interface SearchWithdrawalsParams {
+export interface SearchPayoutsParams {
     from: string;
     to: string;
     sortOrder: string;
@@ -33,7 +33,7 @@ export interface SearchWithdrawalsParams {
     continuationId?: string;
     partyId?: string;
     walletId?: string;
-    withdrawalId?: string;
+    payoutId?: string;
     status?: string;
     cardToken?: string;
     fingerprint?: string;
@@ -44,7 +44,7 @@ export interface SearchWithdrawalsParams {
     providerCountry?: string;
 }
 
-export interface SearchWithdrawalInspectResultsParams {
+export interface SearchPayoutInspectResultsParams {
     from: string;
     to: string;
     sortOrder: string;
@@ -52,7 +52,7 @@ export interface SearchWithdrawalInspectResultsParams {
     continuationId?: string;
     partyId?: string;
     walletId?: string;
-    withdrawalId?: string;
+    payoutId?: string;
     status?: string;
     cardToken?: string;
     fingerprint?: string;
@@ -227,20 +227,15 @@ export class PayoutsService {
             .pipe(map((response) => response.id));
     }
 
-    filterWithdrawals(params: SearchWithdrawalsParams): Observable<WithdrawalsResponse> {
-        return this.http.get<WithdrawalsResponse>(`${this.endpoint}/withdrawals-historical-data/withdrawals`, {
+    filterPayouts(params: SearchPayoutsParams): Observable<PayoutsResponse> {
+        return this.http.get<PayoutsResponse>(`${this.endpoint}/payouts-historical-data/payouts`, {
             params: filterParameters(params),
         });
     }
 
-    filterWithdrawalInspectResults(
-        params: SearchWithdrawalInspectResultsParams
-    ): Observable<WithdrawalInspectResultsResponse> {
-        return this.http.get<WithdrawalInspectResultsResponse>(
-            `${this.endpoint}/withdrawals-historical-data/inspect-results`,
-            {
-                params: filterParameters(params),
-            }
-        );
+    filterPayoutInspectResults(params: SearchPayoutInspectResultsParams): Observable<PayoutInspectResultsResponse> {
+        return this.http.get<PayoutInspectResultsResponse>(`${this.endpoint}/payouts-historical-data/inspect-results`, {
+            params: filterParameters(params),
+        });
     }
 }

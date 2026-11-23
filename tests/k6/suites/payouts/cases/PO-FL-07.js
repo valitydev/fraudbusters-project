@@ -17,11 +17,11 @@ export default {
     ]);
     const counts = steps.decisionsAfterEach(counted, data.count.loads);
     context.observe('decisions_3_failed_then_3_succeeded', counts.join(','));
-    expectEqual(counts.slice(0, 3), data.count.expected.afterFailed, 'failed withdrawals are not counted');
+    expectEqual(counts.slice(0, 3), data.count.expected.afterFailed, 'failed payouts are not counted');
     expectFatalOnceReached(counts, 'countPayoutsSuccess');
     const sums = steps.decisionsAfterEach(summed, data.sum.loads);
     context.observe('sum_decisions_failed30000_succeeded10000_succeeded10000', sums.join(','));
-    expectEqual(sums[0], data.sum.expected.afterFailed, 'failed withdrawal is not summed');
-    expectEqual(sums[2], data.sum.expected.afterTwoSucceeded, 'succeeded withdrawals are summed');
+    expectEqual(sums[0], data.sum.expected.afterFailed, 'failed payout is not summed');
+    expectEqual(sums[2], data.sum.expected.afterTwoSucceeded, 'succeeded payouts are summed');
   },
 };

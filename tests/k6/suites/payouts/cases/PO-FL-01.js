@@ -10,13 +10,13 @@ export default {
     const steps = payoutSteps(context);
     const scope = steps.scope('a');
     steps.applyTemplate('template', data.template, scope);
-    const withdrawal = steps.withdrawal(scope);
-    steps.expectDecision(withdrawal, data.expected.decision, 'withdrawal below the limit');
-    const [stored] = steps.loadAndAwait([withdrawal]);
+    const payout = steps.payout(scope);
+    steps.expectDecision(payout, data.expected.decision, 'payout below the limit');
+    const [stored] = steps.loadAndAwait([payout]);
     expectEqual([stored.partyId, stored.walletId], [scope.partyId, scope.walletId], 'scope in history');
     expectEqual({ amount: stored.amount, currency: stored.currency, status: stored.status }, data.expected.history,
-      'withdrawal in history');
-    steps.expectDecision(steps.withdrawal({ ...scope, ...data.declined }), data.expected.declined,
-      'withdrawal above the limit');
+      'payout in history');
+    steps.expectDecision(steps.payout({ ...scope, ...data.declined }), data.expected.declined,
+      'payout above the limit');
   },
 };

@@ -38,7 +38,7 @@ class PayoutHistoryRepositoryTest {
     @BeforeEach
     void setUp() {
         jdbc = new JdbcTemplate(ClickHouseContainerExtension.createDataSource());
-        jdbc.execute("TRUNCATE TABLE fraud.withdrawal");
+        jdbc.execute("TRUNCATE TABLE fraud.payout");
         aggregates = new PayoutAggregators<>(new PayoutHistoryRepository(jdbc),
                 new TimeBoundaryServiceImpl(), BeanUtil.createPayoutFieldsInPayoutHistory());
     }
@@ -93,30 +93,30 @@ class PayoutHistoryRepositoryTest {
     }
 
     @Test
-    void legacyAndEnrichedWithdrawalsCanBeWrittenThroughTheExistingBatchPath() {
-        var withdrawal = new dev.vality.damsel.fraudbusters.Withdrawal()
+    void legacyAndEnrichedPayoutsCanBeWrittenThroughTheExistingBatchPath() {
+        var payout = new dev.vality.damsel.fraudbusters.Payout()
                 .setId("synthetic-batch")
                 .setEventTime("2026-01-01T12:00:00Z")
                 .setCost(new dev.vality.damsel.domain.Cash(100, new dev.vality.damsel.domain.CurrencyRef("RUB")))
-                .setStatus(dev.vality.damsel.fraudbusters.WithdrawalStatus.succeeded)
+                .setStatus(dev.vality.damsel.fraudbusters.PayoutStatus.succeeded)
                 .setAccount(new dev.vality.damsel.fraudbusters.Account()
                         .setId("synthetic-account")
                         .setCurrency(new dev.vality.damsel.domain.CurrencyRef("RUB")))
                 .setDestinationResource(dev.vality.damsel.fraudbusters.Resource.digital_wallet(
                         new dev.vality.damsel.fraudbusters.DigitalWallet()
                                 .setId("synthetic-destination")));
-        var writer = new dev.vality.fraudbusters.repository.clickhouse.impl.WithdrawalRepositoryImpl(jdbc,
+        var writer = new dev.vality.fraudbusters.repository.clickhouse.impl.PayoutRepositoryImpl(jdbc,
                 new org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate(jdbc),
-                new dev.vality.fraudbusters.repository.clickhouse.mapper.WithdrawalMapper());
-        writer.insertBatch(List.of(withdrawal));
-        assertNull(jdbc.queryForObject("SELECT userId FROM fraud.withdrawal", String.class));
-        withdrawal.setPartyId("party")
+                new dev.vality.fraudbusters.repository.clickhouse.mapper.PayoutMapper());
+        writer.insertBatch(List.of(payout));
+        assertNull(jdbc.queryForObject("SELECT userId FROM fraud.payout", String.class));
+        payout.setPartyId("party")
                 .setWalletId("wallet")
                 .setClientInfo(new dev.vality.damsel.fraudbusters.ClientInfo()
                         .setCustomerId("synthetic-customer")
                         .setUserId("synthetic-user")
                         .setEmail("synthetic@example.com"));
-        writer.insertBatch(List.of(withdrawal));
+        writer.insertBatch(List.of(payout));
         var model = createPayoutModel();
         model.setUserId("synthetic-user");
         model.setEmail("synthetic@example.com");
@@ -184,7 +184,7 @@ class PayoutHistoryRepositoryTest {
     private void insert(String id, long amount, String status, String party, String wallet,
                         String currency, int offset) {
         jdbc.update("""
-                INSERT INTO fraud.withdrawal(timestamp, eventTime, eventTimeHour, id, amount, currency,
+                INSERT INTO fraud.payout(timestamp, eventTime, eventTimeHour, id, amount, currency,
                                              status, cardToken, bin, partyId, walletId, errorCode)
                 VALUES (toDate(toDateTime(?, 'UTC')), ?, ?, ?, ?, ?, ?, 'synthetic-card', ?, ?, ?, 'synthetic-error')
                 """, (timestamp + offset) / 1000, (timestamp + offset) / 1000, (timestamp + offset) / 3600000 * 3600000,

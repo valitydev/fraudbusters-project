@@ -46,6 +46,6 @@ public class PayoutHistoryQuery {
                     and eventTimeHour <= ?
                     group by id
                 )
-            )""", EventSource.FRAUD_EVENTS_WITHDRAWAL.getTable());
+            )""", EventSource.FRAUD_EVENTS_PAYOUT.getTable());
 
 }

@@ -2,7 +2,7 @@ package dev.vality.fraudbusters.service;
 
 import dev.vality.damsel.fraudbusters.Chargeback;
 import dev.vality.damsel.fraudbusters.Refund;
-import dev.vality.damsel.fraudbusters.Withdrawal;
+import dev.vality.damsel.fraudbusters.Payout;
 import dev.vality.fraudbusters.domain.CheckedPayment;
 import dev.vality.fraudbusters.domain.Event;
 import dev.vality.fraudbusters.domain.FraudPaymentRow;
@@ -24,8 +24,8 @@ public class HistoricalDataServiceImpl implements HistoricalDataService {
     private final Repository<Chargeback> chargebackRepository;
     private final Repository<Event> fraudResultRepository;
     private final Repository<FraudPaymentRow> fraudPaymentRepository;
-    private final Repository<Withdrawal> withdrawalRepository;
-    private final Repository<PayoutResult> withdrawalCheckRepository;
+    private final Repository<Payout> payoutRepository;
+    private final Repository<PayoutResult> payoutCheckRepository;
 
     @Override
     public HistoricalPaymentsDto getPayments(FilterDto filter) {
@@ -78,21 +78,21 @@ public class HistoricalDataServiceImpl implements HistoricalDataService {
     }
 
     @Override
-    public HistoricalWithdrawalsDto getWithdrawals(FilterDto filter) {
-        List<Withdrawal> withdrawals = withdrawalRepository.getByFilter(filter);
-        String lastId = buildContinuationId(filter.getLastId(), filter.getSize(), withdrawals);
-        return HistoricalWithdrawalsDto.builder()
-                .withdrawals(withdrawals)
+    public HistoricalPayoutsDto getPayouts(FilterDto filter) {
+        List<Payout> payouts = payoutRepository.getByFilter(filter);
+        String lastId = buildContinuationId(filter.getLastId(), filter.getSize(), payouts);
+        return HistoricalPayoutsDto.builder()
+                .payouts(payouts)
                 .lastId(lastId)
                 .build();
     }
 
     @Override
-    public HistoricalWithdrawalChecksDto getWithdrawalChecks(FilterDto filter) {
-        List<PayoutResult> withdrawalChecks = withdrawalCheckRepository.getByFilter(filter);
-        String lastId = buildContinuationId(filter.getLastId(), filter.getSize(), withdrawalChecks);
-        return HistoricalWithdrawalChecksDto.builder()
-                .withdrawalChecks(withdrawalChecks)
+    public HistoricalPayoutChecksDto getPayoutChecks(FilterDto filter) {
+        List<PayoutResult> payoutChecks = payoutCheckRepository.getByFilter(filter);
+        String lastId = buildContinuationId(filter.getLastId(), filter.getSize(), payoutChecks);
+        return HistoricalPayoutChecksDto.builder()
+                .payoutChecks(payoutChecks)
                 .lastId(lastId)
                 .build();
     }

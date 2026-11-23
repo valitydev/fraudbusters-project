@@ -1,0 +1,89 @@
+package dev.vality.fraudbusters.repository.clickhouse.setter;
+
+import dev.vality.damsel.fraudbusters.Resource;
+import dev.vality.damsel.fraudbusters.ClientInfo;
+import dev.vality.damsel.fraudbusters.Payout;
+import dev.vality.fraudbusters.domain.TimeProperties;
+import dev.vality.fraudbusters.util.TimestampUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
+
+import static dev.vality.fraudbusters.constant.ClickhouseUtilsValue.UNKNOWN;
+
+@RequiredArgsConstructor
+public class PayoutBatchPreparedStatementSetter implements BatchPreparedStatementSetter {
+
+    public static final String FIELDS = """
+            timestamp, eventTimeHour, eventTime, id, amount, currency, bin, lastDigits, cardToken, paymentSystem,
+            terminal, providerId, bankCountry, accountId, accountCurrency, status, errorCode,
+            errorReason, issuerCountry, partyId, walletId, customerId, userId, ip, fingerprint, email, phone
+            """;
+
+    public static final String FIELDS_MARK = "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?";
+
+    private final List<Payout> batch;
+
+    @Override
+    public void setValues(PreparedStatement ps, int i) throws SQLException {
+        Payout payout = batch.get(i);
+        int l = 1;
+        TimeProperties timeProperties = TimestampUtil.generateTimePropertiesByString(payout.getEventTime());
+        ps.setObject(l++, timeProperties.getTimestamp());
+        ps.setLong(l++, timeProperties.getEventTimeHour());
+        ps.setLong(l++, timeProperties.getEventTime());
+
+        ps.setString(l++, payout.getId());
+
+        ps.setLong(l++, payout.getCost().getAmount());
+        ps.setString(l++, payout.getCost().getCurrency().getSymbolicCode());
+
+        final Resource destinationResource = payout.getDestinationResource();
+        ps.setString(l++, destinationResource.isSetBankCard() ? destinationResource.getBankCard().getBin() : UNKNOWN);
+        ps.setString(
+                l++,
+                destinationResource.isSetBankCard() ? destinationResource.getBankCard().getLastDigits() : UNKNOWN
+        );
+        ps.setString(l++, destinationResource.isSetBankCard() ? destinationResource.getBankCard().getToken() : UNKNOWN);
+        ps.setString(l++, destinationResource.isSetBankCard()
+                && destinationResource.getBankCard().isSetPaymentSystem()
+                ? destinationResource.getBankCard().getPaymentSystem().getId()
+                : UNKNOWN
+        );
+
+        ps.setString(l++, payout.isSetProviderInfo() ? payout.getProviderInfo().getTerminalId() : UNKNOWN);
+        ps.setString(l++, payout.isSetProviderInfo() ? payout.getProviderInfo().getProviderId() : UNKNOWN);
+        ps.setString(l++,
+                payout.isSetProviderInfo() && payout.getProviderInfo().isSetCountry()
+                        ? payout.getProviderInfo().getCountry()
+                        : UNKNOWN
+        );
+
+        ps.setString(l++, payout.getAccount().getId());
+        ps.setString(l++, payout.getAccount().getCurrency().getSymbolicCode());
+
+        ps.setString(l++, payout.getStatus().name());
+        ps.setObject(l++, payout.isSetError() ? payout.getError().getErrorCode() : null);
+        ps.setObject(l++, payout.isSetError() ? payout.getError().getErrorReason() : null);
+        ps.setString(l++, destinationResource.isSetBankCard()
+                && destinationResource.getBankCard().isSetIssuerCountry()
+                ? destinationResource.getBankCard().getIssuerCountry().name() : UNKNOWN);
+        ps.setString(l++, payout.getPartyId());
+        ps.setString(l++, payout.getWalletId());
+        ClientInfo client = payout.getClientInfo();
+        ps.setString(l++, client == null ? null : client.getCustomerId());
+        ps.setString(l++, client == null ? null : client.getUserId());
+        ps.setString(l++, client == null ? null : client.getIp());
+        ps.setString(l++, client == null ? null : client.getFingerprint());
+        ps.setString(l++, client == null ? null : client.getEmail());
+        ps.setString(l, client == null ? null : client.getPhone());
+    }
+
+    @Override
+    public int getBatchSize() {
+        return batch.size();
+    }
+}

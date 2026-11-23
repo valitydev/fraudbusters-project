@@ -16,7 +16,7 @@ export default {
     const partyB = ids.name('party-b');
     const wallet1 = ids.name('wallet-1');
     const wallet2 = ids.name('wallet-2');
-    const at = (partyId, walletId) => () => steps.withdrawal({ partyId, walletId, cardToken });
+    const at = (partyId, walletId) => () => steps.payout({ partyId, walletId, cardToken });
     const { black, white, grey } = data;
 
     const blackTemplate = steps.saveTemplate(ids.name('black'), black.template);
@@ -39,9 +39,9 @@ export default {
     const email = `${ids.prefix}-white@k6.test`;
     steps.bindNewTemplate('white', white.template, { partyId: whiteScope.partyId });
     steps.awaitReady('white template is applied', whiteScope, white.ready);
-    steps.expectDecision(steps.withdrawal({ ...whiteScope, email }), white.expected.notListed, 'not in white list');
+    steps.expectDecision(steps.payout({ ...whiteScope, email }), white.expected.notListed, 'not in white list');
     steps.addListRow('white', 'EMAIL', email, { partyId: whiteScope.partyId });
-    steps.awaitDecision('email in white list', () => steps.withdrawal({ ...whiteScope, email }), white.expected.listed);
+    steps.awaitDecision('email in white list', () => steps.payout({ ...whiteScope, email }), white.expected.listed);
 
     const greyCard = { partyId: ids.name('party-grey'), walletId: wallet1, cardToken: ids.name('grey-card') };
     const { count, fromMs, toMs } = grey.countInfo;
@@ -49,10 +49,10 @@ export default {
     steps.awaitReady('grey template is applied', greyCard, grey.ready);
     steps.addListRow('grey', 'CARD_TOKEN', greyCard.cardToken, { partyId: greyCard.partyId },
       countInfoFor(count, fromMs, toMs));
-    const first = steps.awaitDecision('card in grey list', () => steps.withdrawal(greyCard), grey.expected.listed);
+    const first = steps.awaitDecision('card in grey list', () => steps.payout(greyCard), grey.expected.listed);
     steps.loadAndAwait([first]);
     const after = waitFor(connection, 'grey list limit is exhausted', () => {
-      const decision = steps.inspect(steps.withdrawal(greyCard));
+      const decision = steps.inspect(steps.payout(greyCard));
       return { done: decision !== grey.expected.listed, value: decision, observed: decision };
     });
     context.observe('grey_decision_after_limit', after);

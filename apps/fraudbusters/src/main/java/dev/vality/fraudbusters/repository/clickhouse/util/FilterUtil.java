@@ -4,8 +4,8 @@ package dev.vality.fraudbusters.repository.clickhouse.util;
 import dev.vality.fraudbusters.constant.FraudResultField;
 import dev.vality.fraudbusters.constant.PaymentField;
 import dev.vality.fraudbusters.constant.QueryParamName;
-import dev.vality.fraudbusters.constant.WithdrawalCheckField;
-import dev.vality.fraudbusters.constant.WithdrawalField;
+import dev.vality.fraudbusters.constant.PayoutCheckField;
+import dev.vality.fraudbusters.constant.PayoutField;
 import dev.vality.fraudbusters.repository.clickhouse.query.FraudResultQuery;
 import dev.vality.fraudbusters.service.dto.FieldType;
 import dev.vality.fraudbusters.service.dto.FilterDto;
@@ -85,8 +85,8 @@ public class FilterUtil {
      */
     private static boolean isOperationField(SearchFieldDto searchField) {
         return searchField.getField() instanceof PaymentField
-                || searchField.getField() instanceof WithdrawalField
-                || searchField.getField() instanceof WithdrawalCheckField;
+                || searchField.getField() instanceof PayoutField
+                || searchField.getField() instanceof PayoutCheckField;
     }
 
     private static void addPaymentFraudResultSearchFields(StringBuilder filters, Set<SearchFieldDto> searchFields) {
