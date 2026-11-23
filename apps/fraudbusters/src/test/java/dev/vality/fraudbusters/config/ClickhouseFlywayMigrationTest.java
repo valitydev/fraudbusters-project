@@ -28,20 +28,25 @@ class ClickhouseFlywayMigrationTest {
 
     @Test
     void cleanDatabaseIsCreatedByAllMigrations() {
-        assertEquals(3, migrate().migrationsExecuted);
-        assertEquals(List.of("1 SQL", "2 SQL", "3 SQL"), findAppliedVersions());
+        assertEquals(4, migrate().migrationsExecuted);
+        assertEquals(List.of("1 SQL", "2 SQL", "3 SQL", "4 SQL"), findAppliedVersions());
         assertEquals(List.of(
                         "chargeback ReplicatedReplacingMergeTree",
                         "events_unique ReplicatedMergeTree",
                         "fraud_payment ReplicatedMergeTree",
                         "payment ReplicatedReplacingMergeTree",
                         "refund ReplicatedReplacingMergeTree",
-                        "withdrawal ReplicatedReplacingMergeTree"),
+                        "withdrawal ReplicatedReplacingMergeTree",
+                        "withdrawal_check ReplicatedMergeTree"),
                 jdbc.queryForList("""
                         SELECT concat(name, ' ', engine) FROM system.tables
                         WHERE database = 'fraud' AND name != 'clickhouse_flyway_schema_history'
                         ORDER BY name
                         """, String.class));
+        assertEquals(List.of("events_unique"), jdbc.queryForList("""
+                SELECT name FROM system.tables
+                WHERE database = 'fraud' AND match(engine_full, '[[:space:]]TTL[[:space:]]')
+                """, String.class));
         assertEquals(0, migrate().migrationsExecuted);
     }
 
@@ -68,9 +73,9 @@ class ClickhouseFlywayMigrationTest {
                 VALUES ('2026-01-01', 1767225600000, 1767225600000, 'existing', 'succeeded')
                 """);
 
-        assertEquals(2, migrate().migrationsExecuted);
+        assertEquals(3, migrate().migrationsExecuted);
 
-        assertEquals(List.of("1 BASELINE", "2 SQL", "3 SQL"), findAppliedVersions());
+        assertEquals(List.of("1 BASELINE", "2 SQL", "3 SQL", "4 SQL"), findAppliedVersions());
         assertEquals(cleanSchema, describeFraudSchema());
         assertEquals(1, jdbc.queryForObject("""
                 SELECT count() FROM fraud.withdrawal WHERE id = 'existing' AND partyId IS NULL
@@ -87,9 +92,9 @@ class ClickhouseFlywayMigrationTest {
         CLIENT_IDENTITY_TABLES.forEach(table -> jdbc.execute(
                 "ALTER TABLE fraud." + table + " DROP COLUMN customerId, DROP COLUMN userId"));
 
-        assertEquals(2, migrate().migrationsExecuted);
+        assertEquals(3, migrate().migrationsExecuted);
 
-        assertEquals(List.of("1 BASELINE", "2 SQL", "3 SQL"), findAppliedVersions());
+        assertEquals(List.of("1 BASELINE", "2 SQL", "3 SQL", "4 SQL"), findAppliedVersions());
         assertEquals(cleanSchema, describeFraudSchema());
     }
 

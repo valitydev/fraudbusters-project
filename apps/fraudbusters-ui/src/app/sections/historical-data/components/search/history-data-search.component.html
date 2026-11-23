@@ -41,10 +41,10 @@
         </mat-form-field>
     </div>
     <div fxLayoutGap="10px grid" fxFlexFill fxLayout.lt-sm="column" class="row-margin">
-        <mat-form-field *ngIf="!isPayout" appearance="outline">
+        <mat-form-field *ngIf="!hasWithdrawalStatusSelect" appearance="outline">
             <input matInput placeholder="status" formControlName="status" type="string" autocomplete="false" />
         </mat-form-field>
-        <mat-form-field *ngIf="isPayout" appearance="outline">
+        <mat-form-field *ngIf="hasWithdrawalStatusSelect" appearance="outline">
             <mat-select placeholder="status" formControlName="status">
                 <mat-option value="">any status</mat-option>
                 <mat-option *ngFor="let status of payoutStatuses" [value]="status">{{ status }}</mat-option>

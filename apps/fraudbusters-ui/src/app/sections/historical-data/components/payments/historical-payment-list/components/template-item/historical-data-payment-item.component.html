@@ -13,6 +13,7 @@
             <div class="fb-body-2" fxFlex="0 0 120px">{{ payment.amount }}</div>
             <div class="fb-body-2" fxFlex="0 0 120px">{{ payment.currency }}</div>
             <div class="fb-body-2" fxFlex>{{ payment.clientInfo.email }}</div>
+            <div class="fb-body-2" fxFlex>{{ payment.clientInfo?.userId }}</div>
             <div class="fb-body-2" fxFlex="0 0 160px">{{ payment.eventTime | date : 'yyyy-MM-dd HH:mm:ss' }}</div>
         </div>
     </mat-expansion-panel-header>

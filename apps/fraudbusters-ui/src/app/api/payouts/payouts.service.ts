@@ -21,6 +21,7 @@ import { PayoutRowListRequest } from '../fb-management/swagger-codegen/model/pay
 import { Template } from '../fb-management/swagger-codegen/model/template';
 import { TemplatesResponse } from '../fb-management/swagger-codegen/model/templatesResponse';
 import { ValidateTemplatesResponse } from '../fb-management/swagger-codegen/model/validateTemplatesResponse';
+import { WithdrawalInspectResultsResponse } from '../fb-management/swagger-codegen/model/withdrawalInspectResultsResponse';
 import { WithdrawalsResponse } from '../fb-management/swagger-codegen/model/withdrawalsResponse';
 
 /** Payout history search; each payout comes back once, in its latest state for the period. */
@@ -41,6 +42,25 @@ export interface SearchWithdrawalsParams {
     email?: string;
     terminal?: string;
     providerCountry?: string;
+}
+
+export interface SearchWithdrawalInspectResultsParams {
+    from: string;
+    to: string;
+    sortOrder: string;
+    size?: number;
+    continuationId?: string;
+    partyId?: string;
+    walletId?: string;
+    withdrawalId?: string;
+    status?: string;
+    cardToken?: string;
+    fingerprint?: string;
+    customerId?: string;
+    userId?: string;
+    email?: string;
+    template?: string;
+    rule?: string;
 }
 
 /** Payout configuration in fraudbusters-management; payout templates, groups and lists are kept apart from payments. */
@@ -208,8 +228,19 @@ export class PayoutsService {
     }
 
     filterWithdrawals(params: SearchWithdrawalsParams): Observable<WithdrawalsResponse> {
-        return this.http.get<WithdrawalsResponse>(`${this.endpoint}/payouts-historical-data/withdrawals`, {
+        return this.http.get<WithdrawalsResponse>(`${this.endpoint}/withdrawals-historical-data/withdrawals`, {
             params: filterParameters(params),
         });
+    }
+
+    filterWithdrawalInspectResults(
+        params: SearchWithdrawalInspectResultsParams
+    ): Observable<WithdrawalInspectResultsResponse> {
+        return this.http.get<WithdrawalInspectResultsResponse>(
+            `${this.endpoint}/withdrawals-historical-data/inspect-results`,
+            {
+                params: filterParameters(params),
+            }
+        );
     }
 }

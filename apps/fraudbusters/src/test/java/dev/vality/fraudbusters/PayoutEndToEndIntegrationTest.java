@@ -20,9 +20,18 @@ import dev.vality.damsel.withdrawals.domain.Destination;
 import dev.vality.fraudbusters.config.MockExternalServices;
 import dev.vality.fraudbusters.config.TestClickhouseConfig;
 import dev.vality.fraudbusters.config.properties.KafkaTopics;
+import dev.vality.fraudbusters.constant.PaymentField;
+import dev.vality.fraudbusters.constant.SortOrder;
+import dev.vality.fraudbusters.domain.PayoutResult;
 import dev.vality.fraudbusters.extension.ClickHouseContainerExtension;
+import dev.vality.fraudbusters.repository.clickhouse.impl.WithdrawalCheckRepository;
 import dev.vality.fraudbusters.repository.clickhouse.impl.WithdrawalRepositoryImpl;
+import dev.vality.fraudbusters.service.dto.FieldType;
+import dev.vality.fraudbusters.service.dto.FilterDto;
+import dev.vality.fraudbusters.service.dto.SearchFieldDto;
+import dev.vality.fraudbusters.service.dto.SortDto;
 import dev.vality.fraudbusters.util.BeanUtil;
+import dev.vality.fraudo.constant.ResultStatus;
 import dev.vality.testcontainers.annotations.KafkaSpringBootTest;
 import dev.vality.testcontainers.annotations.kafka.KafkaTestcontainer;
 import dev.vality.testcontainers.annotations.kafka.config.KafkaProducer;
@@ -39,7 +48,12 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.net.URI;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -48,6 +62,7 @@ import static dev.vality.fraudbusters.util.BeanUtil.crateCommandTemplateReferenc
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
@@ -63,7 +78,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
                 "kafka.topic.payout-template",
                 "kafka.topic.payout-reference",
                 "kafka.topic.payout-group-list",
-                "kafka.topic.payout-group-reference"
+                "kafka.topic.payout-group-reference",
+                "kafka.topic.payout-result"
         })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = {FraudBustersApplication.class, TestClickhouseConfig.class},
@@ -92,6 +108,8 @@ class PayoutEndToEndIntegrationTest {
     private KafkaTopics kafkaTopics;
     @Autowired
     private WithdrawalRepositoryImpl withdrawalRepository;
+    @Autowired
+    private WithdrawalCheckRepository withdrawalCheckRepository;
 
     @LocalServerPort
     private int serverPort;
@@ -143,6 +161,41 @@ class PayoutEndToEndIntegrationTest {
         InvalidRequest invalid = assertThrows(InvalidRequest.class,
                 () -> client.inspectWithdrawal(withdrawal(PARTY, "", CARD, 100)));
         assertFalse(invalid.getErrors().isEmpty());
+
+        awaitWithdrawalCheck(ResultStatus.DECLINE, "card_velocity", SHARED_TEMPLATE_ID);
+        awaitWithdrawalCheck(ResultStatus.HIGH_RISK, "big", WALLET_TEMPLATE_ID);
+    }
+
+    private void awaitWithdrawalCheck(ResultStatus status, String rule, String template) throws Exception {
+        long deadline = System.currentTimeMillis() + AWAIT_MILLIS;
+        boolean stored = isWithdrawalCheckStored(status, rule, template);
+        while (!stored && System.currentTimeMillis() < deadline) {
+            Thread.sleep(250);
+            stored = isWithdrawalCheckStored(status, rule, template);
+        }
+        assertTrue(stored, "withdrawal check " + status + " " + rule + " is not stored");
+    }
+
+    private boolean isWithdrawalCheckStored(ResultStatus status, String rule, String template) {
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.SECONDS);
+        FilterDto filter = new FilterDto();
+        filter.setTimeFrom(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.minusDays(1)));
+        filter.setTimeTo(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.plusDays(1)));
+        filter.setSize(100L);
+        SortDto sort = new SortDto();
+        sort.setOrder(SortOrder.DESC);
+        filter.setSort(sort);
+        filter.setSearchFields(Set.of(SearchFieldDto.builder()
+                .field(PaymentField.PARTY_ID)
+                .type(FieldType.STRING)
+                .value(PARTY)
+                .build()));
+        List<PayoutResult> results = withdrawalCheckRepository.getByFilter(filter);
+        return results.stream()
+                .map(PayoutResult::getResultModel)
+                .anyMatch(result -> result.getResultModel().getResultStatus() == status
+                        && rule.equals(result.getResultModel().getRuleChecked())
+                        && template.equals(result.getCheckedTemplate()));
     }
 
     private void publishPayoutTemplate(String id, String template) throws Exception {

@@ -46,7 +46,7 @@
 ### PO-FL-01. Выплата без риска: проверка, история
 - **Предусловия:** шаблон выплаты `rule: amount() >= 100000 -> decline; rule: amount() < 100000 -> accept;`.
 - **Шаги:** проверить выплату на 5000; загрузить её со статусом `succeeded`; найти в
-  `GET /payouts-historical-data/withdrawals` по `withdrawalId`; проверить выплату на 150000.
+  `GET /withdrawals-historical-data/withdrawals` по `withdrawalId`; проверить выплату на 150000.
 - **Ожидание:** `low`; запись найдена с party, wallet, суммой и статусом `succeeded`; вторая проверка — `fatal`.
 
 ### PO-FL-02. Нет привязки и неполный контекст
@@ -177,7 +177,7 @@
 - **Предусловия:** 12 выплат кейса с разными party, wallet, статусами, email, card_token, fingerprint, terminal,
   maskedPan, providerCountry, customerId, userId.
 - **Шаги:**
-  1. `GET /payouts-historical-data/withdrawals` с каждым фильтром.
+  1. `GET /withdrawals-historical-data/withdrawals` с каждым фильтром.
   2. Загрузить выплату со статусом `pending`, затем ту же со `succeeded`; искать по `withdrawalId`,
      по `withdrawalStatus=pending` и `succeeded`.
   3. Узкое окно `from`/`to`; `sortBy`/`sortOrder`; постранично по `continuationId` с `size=5`.

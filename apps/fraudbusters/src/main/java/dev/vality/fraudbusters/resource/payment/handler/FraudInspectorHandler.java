@@ -41,12 +41,18 @@ public class FraudInspectorHandler implements InspectorProxySrv.Iface {
         try {
             context.validate();
             PayoutModel model = withdrawalContextToModelConverter.convert(context);
+            log.info("Check withdrawal withdrawalId: {} partyId: {} walletId: {}",
+                    model.getWithdrawalId(), model.getPartyId(), model.getWalletId());
             CheckedResultModel result = payoutTemplateVisitor.visit(model);
             kafkaPayoutResultTemplate.send(payoutResultTopic, model.getWithdrawalId(), new PayoutResult(model, result));
+            log.info("Checked withdrawal withdrawalId: {} result: {}", model.getWithdrawalId(), result);
             return checkedResultToRiskScoreConverter.convert(result);
         } catch (IllegalArgumentException e) {
+            log.warn("Invalid withdrawal context withdrawalId: {} error: {}",
+                    context.getWithdrawalId(), e.getMessage());
             throw new InvalidRequest().setErrors(List.of(e.getMessage()));
         } catch (Exception e) {
+            log.error("Error when inspectWithdrawal() withdrawalId: {} e: ", context.getWithdrawalId(), e);
             throw new TException("Unable to inspect withdrawal", e);
         }
     }

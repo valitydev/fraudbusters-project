@@ -5,17 +5,23 @@ import dev.vality.damsel.domain.Cash;
 import dev.vality.damsel.domain.CountryCode;
 import dev.vality.damsel.domain.CurrencyRef;
 import dev.vality.damsel.domain.PaymentSystemRef;
+import dev.vality.damsel.fraudbusters.Accept;
 import dev.vality.damsel.fraudbusters.Account;
+import dev.vality.damsel.fraudbusters.CheckResult;
 import dev.vality.damsel.fraudbusters.ClientInfo;
+import dev.vality.damsel.fraudbusters.ConcreteCheckResult;
+import dev.vality.damsel.fraudbusters.Decline;
 import dev.vality.damsel.fraudbusters.Error;
 import dev.vality.damsel.fraudbusters.Filter;
 import dev.vality.damsel.fraudbusters.GenericPaymentTool;
 import dev.vality.damsel.fraudbusters.HistoricalData;
 import dev.vality.damsel.fraudbusters.HistoricalDataResponse;
 import dev.vality.damsel.fraudbusters.HistoricalDataServiceSrv;
+import dev.vality.damsel.fraudbusters.HistoricalWithdrawalCheck;
 import dev.vality.damsel.fraudbusters.Page;
 import dev.vality.damsel.fraudbusters.ProviderInfo;
 import dev.vality.damsel.fraudbusters.Resource;
+import dev.vality.damsel.fraudbusters.ResultStatus;
 import dev.vality.damsel.fraudbusters.Sort;
 import dev.vality.damsel.fraudbusters.SortOrder;
 import dev.vality.damsel.fraudbusters.Withdrawal;
@@ -53,7 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         ManagementWebSecurityAutoConfiguration.class, SecurityAutoConfiguration.class,
         ServletWebSecurityAutoConfiguration.class,
         OAuth2ResourceServerAutoConfiguration.class})
-class PayoutsHistoricalDataResourceTest {
+class WithdrawalsHistoricalDataResourceTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -62,12 +68,12 @@ class PayoutsHistoricalDataResourceTest {
     private HistoricalDataServiceSrv.Iface iface;
 
     @Test
-    void searchesPayoutHistoryAndMapsEachDestination() throws Exception {
+    void searchesWithdrawalHistoryAndMapsEachDestination() throws Exception {
         when(iface.getWithdrawals(any(), any(), any())).thenReturn(new HistoricalDataResponse()
                 .setContinuationId("2")
                 .setData(HistoricalData.withdrawals(List.of(cardWithdrawal(), otherWithdrawal()))));
 
-        mockMvc.perform(get("/payouts-historical-data/withdrawals")
+        mockMvc.perform(get("/withdrawals-historical-data/withdrawals")
                         .queryParam("from", "2034-01-01 00:00:00")
                         .queryParam("to", "2034-01-02 00:00:00")
                         .queryParam("size", "2")
@@ -107,7 +113,7 @@ class PayoutsHistoricalDataResourceTest {
         when(iface.getWithdrawals(any(), any(), any())).thenReturn(new HistoricalDataResponse()
                 .setData(HistoricalData.withdrawals(List.of())));
 
-        mockMvc.perform(get("/payouts-historical-data/withdrawals")
+        mockMvc.perform(get("/withdrawals-historical-data/withdrawals")
                         .queryParam("from", "2034-01-01 00:00:00")
                         .queryParam("to", "2034-01-02 00:00:00")
                         .queryParam("sortOrder", "ASC"))
@@ -121,13 +127,90 @@ class PayoutsHistoricalDataResourceTest {
 
     @Test
     void rejectsAnUnknownStatus() throws Exception {
-        mockMvc.perform(get("/payouts-historical-data/withdrawals")
+        mockMvc.perform(get("/withdrawals-historical-data/withdrawals")
                         .queryParam("from", "2034-01-01 00:00:00")
                         .queryParam("to", "2034-01-02 00:00:00")
                         .queryParam("status", "captured"))
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(iface);
+    }
+
+    @Test
+    void searchesWithdrawalInspectResultsByResultAndRule() throws Exception {
+        when(iface.getWithdrawalChecks(any(), any(), any())).thenReturn(new HistoricalDataResponse()
+                .setContinuationId("2")
+                .setData(HistoricalData.withdrawal_checks(List.of(
+                        withdrawalCheck(base("w1", WithdrawalStatus.pending)
+                                        .setDestinationResource(Resource.bank_card(new BankCard()
+                                                .setToken("token")
+                                                .setBin("411111")
+                                                .setLastDigits("1111")
+                                                .setPaymentSystem(new PaymentSystemRef("VISA"))
+                                                .setIssuerCountry(CountryCode.RUS)))
+                                        .setClientInfo(new ClientInfo()
+                                                .setUserId("user")
+                                                .setEmail("user@example.com")),
+                                ResultStatus.decline(new Decline()), "card_velocity"),
+                        withdrawalCheck(base("w2", WithdrawalStatus.pending)
+                                        .setDestinationResource(Resource.generic(new GenericPaymentTool("-"))),
+                                ResultStatus.accept(new Accept()), null)))));
+
+        mockMvc.perform(get("/withdrawals-historical-data/inspect-results")
+                        .queryParam("from", "2034-01-01 00:00:00")
+                        .queryParam("to", "2034-01-02 00:00:00")
+                        .queryParam("size", "2")
+                        .queryParam("walletId", "wallet")
+                        .queryParam("status", "decline")
+                        .queryParam("rule", "card_velocity")
+                        .queryParam("template", "template")
+                        .queryParam("userId", "user"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("""
+                        {"continuationId":"2","result":[
+                          {"withdrawalId":"w1","eventTime":"2034-01-01T10:05:00","partyId":"party",
+                           "walletId":"wallet","amount":1000,"currency":"RUB","destinationType":"bank_card",
+                           "cardToken":"token","bin":"411111","lastDigits":"1111","paymentSystem":"VISA",
+                           "issuerCountry":"RUS","clientInfo":{"userId":"user","email":"user@example.com"},
+                           "resultStatus":"decline","checkedTemplate":"template","ruleChecked":"card_velocity"},
+                          {"withdrawalId":"w2","destinationType":"unknown","resultStatus":"accept"}
+                        ]}"""));
+
+        ArgumentCaptor<Filter> filter = ArgumentCaptor.forClass(Filter.class);
+        ArgumentCaptor<Page> page = ArgumentCaptor.forClass(Page.class);
+        ArgumentCaptor<Sort> sort = ArgumentCaptor.forClass(Sort.class);
+        verify(iface).getWithdrawalChecks(filter.capture(), page.capture(), sort.capture());
+        assertEquals("wallet", filter.getValue().getWalletId());
+        assertEquals("decline", filter.getValue().getStatus());
+        assertEquals("card_velocity", filter.getValue().getRule());
+        assertEquals("template", filter.getValue().getTemplate());
+        assertEquals("user", filter.getValue().getUserId());
+        assertFalse(filter.getValue().isSetShopId());
+        assertEquals(2, page.getValue().getSize());
+        assertEquals(SortOrder.DESC, sort.getValue().getOrder());
+    }
+
+    @Test
+    void returnsNoWithdrawalInspectResultsWhenNothingIsFound() throws Exception {
+        when(iface.getWithdrawalChecks(any(), any(), any())).thenReturn(new HistoricalDataResponse()
+                .setData(HistoricalData.withdrawal_checks(List.of())));
+
+        mockMvc.perform(get("/withdrawals-historical-data/inspect-results")
+                        .queryParam("from", "2034-01-01 00:00:00")
+                        .queryParam("to", "2034-01-02 00:00:00"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"result\":[]}"));
+    }
+
+    private static HistoricalWithdrawalCheck withdrawalCheck(Withdrawal withdrawal, ResultStatus resultStatus,
+                                                             String rule) {
+        return new HistoricalWithdrawalCheck()
+                .setWithdrawal(withdrawal)
+                .setCheckResult(new CheckResult()
+                        .setCheckedTemplate("template")
+                        .setConcreteCheckResult(new ConcreteCheckResult()
+                                .setResultStatus(resultStatus)
+                                .setRuleChecked(rule)));
     }
 
     private static Withdrawal cardWithdrawal() {

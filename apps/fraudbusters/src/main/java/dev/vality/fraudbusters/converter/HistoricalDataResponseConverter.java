@@ -4,6 +4,7 @@ import dev.vality.damsel.fraudbusters.*;
 import dev.vality.fraudbusters.service.dto.HistoricalChargebacksDto;
 import dev.vality.fraudbusters.service.dto.HistoricalFraudResultsDto;
 import dev.vality.fraudbusters.service.dto.HistoricalPaymentsDto;
+import dev.vality.fraudbusters.service.dto.HistoricalWithdrawalChecksDto;
 import dev.vality.fraudbusters.service.dto.HistoricalRefundsDto;
 import dev.vality.fraudbusters.service.dto.HistoricalWithdrawalsDto;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class HistoricalDataResponseConverter {
     private final CheckedPaymentToPaymentConverter paymentConverter;
     private final EventToHistoricalTransactionCheckConverter transactionCheckConverter;
     private final CheckedPaymentToFraudPaymentInfoConverter fraudPaymentInfoConverter;
+    private final HistoricalWithdrawalCheckConverter withdrawalCheckConverter;
 
     public HistoricalDataResponse convertPayment(HistoricalPaymentsDto historicalPaymentsDto) {
         List<Payment> payments = historicalPaymentsDto.getPayments().stream()
@@ -74,6 +76,17 @@ public class HistoricalDataResponseConverter {
         historicalData.setWithdrawals(historicalWithdrawalsDto.getWithdrawals());
         return new HistoricalDataResponse()
                 .setContinuationId(historicalWithdrawalsDto.getLastId())
+                .setData(historicalData);
+    }
+
+    public HistoricalDataResponse convertWithdrawalChecks(HistoricalWithdrawalChecksDto historicalWithdrawalChecksDto) {
+        List<HistoricalWithdrawalCheck> withdrawalChecks = historicalWithdrawalChecksDto.getWithdrawalChecks().stream()
+                .map(withdrawalCheckConverter::convert)
+                .collect(Collectors.toList());
+        HistoricalData historicalData = new HistoricalData();
+        historicalData.setWithdrawalChecks(withdrawalChecks);
+        return new HistoricalDataResponse()
+                .setContinuationId(historicalWithdrawalChecksDto.getLastId())
                 .setData(historicalData);
     }
 }
