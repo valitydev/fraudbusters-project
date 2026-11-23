@@ -7,4 +7,4 @@ properties:
   result:
     type: array
     items:
-      $ref: '../schemas/Withdrawal.yaml'
+      $ref: '../schemas/Payout.yaml'

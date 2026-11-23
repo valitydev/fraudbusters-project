@@ -27,7 +27,7 @@ properties:
     $ref: './Provider.yaml'
   status:
     description: Статус выплаты
-    $ref: './WithdrawalStatus.yaml'
+    $ref: './PayoutStatus.yaml'
   error:
     $ref: './Error.yaml'
   partyId:

@@ -32,14 +32,14 @@ struct ConditionTemplateRequest {
 
 struct ConditionTemplate {
     1: optional PaymentsConditions payments_conditions
-    2: optional WithdrawalsConditions withdrawals_conditions
+    2: optional PayoutsConditions payouts_conditions
 }
 
 struct PaymentsConditions {
     1: required list<Condition> conditions
 }
 
-struct WithdrawalsConditions {
+struct PayoutsConditions {
     1: required list<Condition> conditions
 }
 

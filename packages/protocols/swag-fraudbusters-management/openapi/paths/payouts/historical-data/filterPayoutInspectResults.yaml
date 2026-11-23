@@ -1,7 +1,7 @@
 get:
-  summary: Поиск по истории выплат
-  description: Каждая выплата возвращается один раз, в последнем состоянии за период; фильтры применяются к нему.
-  operationId: filterWithdrawals
+  summary: Поиск по истории результатов проверки выплат антифродом
+  description: Каждая проверка выплаты возвращается отдельной записью с результатом, сработавшим шаблоном и правилом.
+  operationId: filterPayoutInspectResults
   tags:
     - historical-data
   parameters:
@@ -13,23 +13,23 @@ get:
     - $ref: "../../../components/parameters/to.yaml"
     - $ref: "../../../components/parameters/partyId.yaml"
     - $ref: "../../../components/parameters/walletId.yaml"
-    - $ref: "../../../components/parameters/withdrawalId.yaml"
-    - $ref: "../../../components/parameters/withdrawalStatus.yaml"
+    - $ref: "../../../components/parameters/payoutId.yaml"
+    - $ref: "../../../components/parameters/status.yaml"
     - $ref: "../../../components/parameters/email.yaml"
-    - $ref: "../../../components/parameters/providerCountry.yaml"
     - $ref: "../../../components/parameters/cardToken.yaml"
     - $ref: "../../../components/parameters/fingerprint.yaml"
-    - $ref: "../../../components/parameters/terminal.yaml"
     - $ref: "../../../components/parameters/maskedPan.yaml"
+    - $ref: "../../../components/parameters/template.yaml"
+    - $ref: "../../../components/parameters/rule.yaml"
     - $ref: "../../../components/parameters/customerId.yaml"
     - $ref: "../../../components/parameters/userId.yaml"
   responses:
     '201':
-      description: Withdrawals
+      description: Payout inspect results
       content:
         application/json:
           schema:
-            $ref: '../../../components/responses/WithdrawalsResponse.yaml'
+            $ref: '../../../components/responses/PayoutInspectResultsResponse.yaml'
     '401':
       description: Unauthorized
     '403':

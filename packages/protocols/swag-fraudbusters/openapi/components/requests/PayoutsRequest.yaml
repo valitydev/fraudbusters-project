@@ -1,0 +1,6 @@
+type: object
+properties:
+  payouts:
+    type: array
+    items:
+      $ref: '../schemas/Payout.yaml'

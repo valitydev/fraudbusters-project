@@ -36,8 +36,8 @@ paths:
     $ref: ./paths/payments.yaml
   /refunds:
     $ref: ./paths/refunds.yaml
-  /withdrawals:
-    $ref: ./paths/withdrawals.yaml
+  /payouts:
+    $ref: ./paths/payouts.yaml
 servers:
   - url: 'https://api.vality.dev/org/v1'
 components:

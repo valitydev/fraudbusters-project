@@ -251,12 +251,12 @@ struct Chargeback {
     12:  optional PayerType payer_type
 }
 
-struct Withdrawal {
+struct Payout {
     1:  required ID id
     2:  required base.Timestamp event_time
     3:  required Resource destination_resource
     4:  required domain.Cash cost
-    5:  required WithdrawalStatus status
+    5:  required PayoutStatus status
     6:  required Account account
     7:  optional Error error
     8:  optional ProviderInfo provider_info
@@ -303,7 +303,7 @@ struct Account {
     2: required domain.CurrencyRef currency
 }
 
-enum WithdrawalStatus {
+enum PayoutStatus {
     pending
     succeeded
     failed
@@ -427,8 +427,8 @@ struct HistoricalDataSetCheckResult {
     1: required set<HistoricalTransactionCheck> historical_transaction_check
 }
 
-struct HistoricalWithdrawalCheck {
-    1: required Withdrawal withdrawal
+struct HistoricalPayoutCheck {
+    1: required Payout payout
     2: required CheckResult check_result
 }
 
@@ -438,8 +438,8 @@ union HistoricalData {
    3: list<Chargeback> chargebacks
    4: list<HistoricalTransactionCheck> fraud_results
    5: list<FraudPaymentInfo> fraud_payments
-   6: list<Withdrawal> withdrawals
-   7: list<HistoricalWithdrawalCheck> withdrawal_checks
+   6: list<Payout> payouts
+   7: list<HistoricalPayoutCheck> payout_checks
 }
 
 /**
@@ -512,7 +512,7 @@ service PaymentService {
     void insertPayments(1: list<Payment> payments)
     throws (1: InsertionException ex1)
 
-    void insertWithdrawals(1: list<Withdrawal> payments)
+    void insertPayouts(1: list<Payout> payments)
     throws (1: InsertionException ex1)
 
     void insertRefunds(1: list<Refund> refunds)
@@ -556,9 +556,9 @@ service HistoricalDataService {
     /**
     * Получение исторических данных по выплатам: последнее состояние каждой выплаты за период
     **/
-    HistoricalDataResponse getWithdrawals(1: Filter filter, 2: Page page, 3: Sort sort)
+    HistoricalDataResponse getPayouts(1: Filter filter, 2: Page page, 3: Sort sort)
 
-    HistoricalDataResponse getWithdrawalChecks(1: Filter filter, 2: Page page, 3: Sort sort)
+    HistoricalDataResponse getPayoutChecks(1: Filter filter, 2: Page page, 3: Sort sort)
 
     /**
     * Применение нового правила к историческим данным

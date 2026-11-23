@@ -1,4 +1,4 @@
-name: withdrawalId
+name: payoutId
 in: query
 schema:
   type: string

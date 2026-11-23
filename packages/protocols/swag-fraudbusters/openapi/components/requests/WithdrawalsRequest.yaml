@@ -1,6 +1,0 @@
-type: object
-properties:
-  withdrawals:
-    type: array
-    items:
-      $ref: '../schemas/Withdrawal.yaml'
