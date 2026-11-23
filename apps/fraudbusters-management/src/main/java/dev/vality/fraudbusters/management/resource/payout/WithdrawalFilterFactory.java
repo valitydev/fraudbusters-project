@@ -9,9 +9,6 @@ import dev.vality.damsel.fraudbusters.SortOrder;
 
 final class WithdrawalFilterFactory {
 
-    private WithdrawalFilterFactory() {
-    }
-
     static Filter forWithdrawals(String from, String to, String partyId, String walletId, String withdrawalId,
                                  String status, String email, String cardToken, String fingerprint, String maskedPan,
                                  String customerId, String userId, String providerCountry, String terminal) {
