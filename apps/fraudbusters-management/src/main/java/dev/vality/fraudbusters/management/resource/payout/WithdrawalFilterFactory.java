@@ -4,6 +4,8 @@ import dev.vality.damsel.base.BoundType;
 import dev.vality.damsel.base.TimestampInterval;
 import dev.vality.damsel.base.TimestampIntervalBound;
 import dev.vality.damsel.fraudbusters.Filter;
+import dev.vality.damsel.fraudbusters.Sort;
+import dev.vality.damsel.fraudbusters.SortOrder;
 
 final class WithdrawalFilterFactory {
 
@@ -26,6 +28,12 @@ final class WithdrawalFilterFactory {
                 cardToken, fingerprint, maskedPan, customerId, userId)
                 .setTemplate(template)
                 .setRule(rule);
+    }
+
+    static Sort buildSort(String sortBy, String sortOrder) {
+        return new Sort()
+                .setField(sortBy)
+                .setOrder(sortOrder != null ? SortOrder.valueOf(sortOrder) : SortOrder.DESC);
     }
 
     private static Filter buildCommonFilter(String from, String to, String partyId, String walletId,

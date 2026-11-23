@@ -4,8 +4,6 @@ import dev.vality.damsel.fraudbusters.Filter;
 import dev.vality.damsel.fraudbusters.HistoricalWithdrawalCheck;
 import dev.vality.damsel.fraudbusters.HistoricalDataServiceSrv;
 import dev.vality.damsel.fraudbusters.Page;
-import dev.vality.damsel.fraudbusters.Sort;
-import dev.vality.damsel.fraudbusters.SortOrder;
 import dev.vality.damsel.fraudbusters.WithdrawalStatus;
 import dev.vality.fraudbusters.management.converter.payout.WithdrawalCheckToApiWithdrawalInspectResultConverter;
 import dev.vality.fraudbusters.management.converter.payout.WithdrawalToApiWithdrawalConverter;
@@ -61,9 +59,7 @@ public class WithdrawalsHistoricalDataResource implements WithdrawalsHistoricalD
         var withdrawals = historicalDataServiceSrv.getWithdrawals(
                 filter,
                 page,
-                new Sort()
-                        .setField(sortBy)
-                        .setOrder(sortOrder != null ? SortOrder.valueOf(sortOrder) : SortOrder.DESC));
+                WithdrawalFilterFactory.buildSort(sortBy, sortOrder));
         List<dev.vality.damsel.fraudbusters.Withdrawal> result = withdrawals.getData().isSetWithdrawals()
                 ? withdrawals.getData().getWithdrawals()
                 : List.of();
@@ -100,9 +96,7 @@ public class WithdrawalsHistoricalDataResource implements WithdrawalsHistoricalD
         var withdrawalChecks = historicalDataServiceSrv.getWithdrawalChecks(
                 filter,
                 page,
-                new Sort()
-                        .setField(sortBy)
-                        .setOrder(sortOrder != null ? SortOrder.valueOf(sortOrder) : SortOrder.DESC));
+                WithdrawalFilterFactory.buildSort(sortBy, sortOrder));
         List<HistoricalWithdrawalCheck> result = withdrawalChecks.getData().isSetWithdrawalChecks()
                 ? withdrawalChecks.getData().getWithdrawalChecks()
                 : List.of();
