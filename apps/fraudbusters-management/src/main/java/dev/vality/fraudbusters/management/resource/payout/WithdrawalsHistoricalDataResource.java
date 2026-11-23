@@ -55,26 +55,8 @@ public class WithdrawalsHistoricalDataResource implements WithdrawalsHistoricalD
                 .noneMatch(known -> known.name().equals(status))) {
             throw new IllegalArgumentException("Unknown withdrawal status: " + status);
         }
-        Filter filter = new Filter()
-                .setInterval(new TimestampInterval()
-                        .setLowerBound(new TimestampIntervalBound()
-                                .setBoundTime(from)
-                                .setBoundType(BoundType.inclusive))
-                        .setUpperBound(new TimestampIntervalBound()
-                                .setBoundTime(to)
-                                .setBoundType(BoundType.inclusive)))
-                .setPartyId(partyId)
-                .setWalletId(walletId)
-                .setPaymentId(withdrawalId)
-                .setStatus(status)
-                .setEmail(email)
-                .setProviderCountry(providerCountry)
-                .setCardToken(cardToken)
-                .setFingerprint(fingerprint)
-                .setTerminal(terminal)
-                .setMaskedPan(maskedPan)
-                .setCustomerId(customerId)
-                .setUserId(userId);
+        Filter filter = buildWithdrawalsFilter(from, to, partyId, walletId, withdrawalId, status, email,
+                providerCountry, cardToken, fingerprint, terminal, maskedPan, customerId, userId);
         Page page = new Page().setContinuationId(continuationId);
         if (size != null) {
             page.setSize(size);
@@ -132,6 +114,32 @@ public class WithdrawalsHistoricalDataResource implements WithdrawalsHistoricalD
         return ResponseEntity.ok(new WithdrawalInspectResultsResponse()
                 .result(result.stream().map(withdrawalInspectResultConverter::convert).toList())
                 .continuationId(withdrawalChecks.getContinuationId()));
+    }
+
+    private static Filter buildWithdrawalsFilter(String from, String to, String partyId, String walletId,
+                                                 String withdrawalId, String status, String email,
+                                                 String providerCountry, String cardToken, String fingerprint,
+                                                 String terminal, String maskedPan, String customerId, String userId) {
+        return new Filter()
+                .setInterval(new TimestampInterval()
+                        .setLowerBound(new TimestampIntervalBound()
+                                .setBoundTime(from)
+                                .setBoundType(BoundType.inclusive))
+                        .setUpperBound(new TimestampIntervalBound()
+                                .setBoundTime(to)
+                                .setBoundType(BoundType.inclusive)))
+                .setPartyId(partyId)
+                .setWalletId(walletId)
+                .setPaymentId(withdrawalId)
+                .setStatus(status)
+                .setEmail(email)
+                .setProviderCountry(providerCountry)
+                .setCardToken(cardToken)
+                .setFingerprint(fingerprint)
+                .setTerminal(terminal)
+                .setMaskedPan(maskedPan)
+                .setCustomerId(customerId)
+                .setUserId(userId);
     }
 
     private static Filter buildWithdrawalInspectResultsFilter(String from, String to, String partyId,

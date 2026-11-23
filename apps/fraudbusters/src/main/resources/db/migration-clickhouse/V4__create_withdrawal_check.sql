@@ -23,5 +23,4 @@ CREATE TABLE IF NOT EXISTS fraud.withdrawal_check ON CLUSTER '{cluster}' (
     checkedTemplate String
 ) ENGINE = ReplicatedMergeTree('/clickhouse/{cluster}/tables/{shard}/fraud/withdrawal_check', '{replica}')
 PARTITION BY toYYYYMM(timestamp)
-ORDER BY (eventTimeHour, partyId, walletId, resultStatus, id)
-TTL timestamp + toIntervalMonth(3);
+ORDER BY (eventTimeHour, partyId, walletId, resultStatus, id);

@@ -43,6 +43,10 @@ class ClickhouseFlywayMigrationTest {
                         WHERE database = 'fraud' AND name != 'clickhouse_flyway_schema_history'
                         ORDER BY name
                         """, String.class));
+        assertEquals(List.of("events_unique"), jdbc.queryForList("""
+                SELECT name FROM system.tables
+                WHERE database = 'fraud' AND match(engine_full, '[[:space:]]TTL[[:space:]]')
+                """, String.class));
         assertEquals(0, migrate().migrationsExecuted);
     }
 
