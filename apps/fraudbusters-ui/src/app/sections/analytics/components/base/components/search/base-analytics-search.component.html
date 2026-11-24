@@ -14,12 +14,12 @@
         <div class="fb-filter-fields period-dates">
             <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
                 <mat-label>From (UTC)</mat-label>
-                <input matInput type="date" formControlName="from" [readonly]="!customPeriod" [max]="today" />
+                <input matInput type="date" formControlName="from" [max]="today" />
             </mat-form-field>
             <span aria-hidden="true">–</span>
             <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
                 <mat-label>To (UTC)</mat-label>
-                <input matInput type="date" formControlName="to" [readonly]="!customPeriod" [max]="today" />
+                <input matInput type="date" formControlName="to" [max]="today" />
             </mat-form-field>
         </div>
     </div>

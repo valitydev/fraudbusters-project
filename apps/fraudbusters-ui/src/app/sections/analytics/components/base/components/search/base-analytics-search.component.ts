@@ -27,8 +27,8 @@ export class BaseAnalyticsSearchComponent implements OnInit {
         shopId: '',
         type: '',
         time: DEFAULT_ANALYTICS_PERIOD as string,
-        from: '',
-        to: '',
+        from: { value: '', disabled: true },
+        to: { value: '', disabled: true },
     });
     readonly today = this.dates.dateInputValue(new Date());
     private readonly destroyRef = inject(DestroyRef);
@@ -42,13 +42,9 @@ export class BaseAnalyticsSearchComponent implements OnInit {
         private datePipe: DatePipe
     ) {}
 
-    get customPeriod(): boolean {
-        return this.form.controls.time.value === 'custom';
-    }
-
     get invalidRange(): boolean {
         const { time, from, to } = this.form.getRawValue();
-        return this.customPeriod && !this.dates.resolveRange(time, from, to);
+        return time === 'custom' && !this.dates.resolveRange(time, from, to);
     }
 
     ngOnInit(): void {
@@ -94,6 +90,7 @@ export class BaseAnalyticsSearchComponent implements OnInit {
                       }
                     : { time }
             );
+            this.updateDateControls();
         }
     }
 
@@ -112,6 +109,18 @@ export class BaseAnalyticsSearchComponent implements OnInit {
             from: this.dates.dateInputValue(range.from),
             to: this.dates.dateInputValue(range.to),
         });
+        this.updateDateControls();
+    }
+
+    private updateDateControls(): void {
+        const { time, from, to } = this.form.controls;
+        if (time.value === 'custom' && from.disabled) {
+            from.enable({ emitEvent: false });
+            to.enable({ emitEvent: false });
+        } else if (time.value !== 'custom' && from.enabled) {
+            from.disable({ emitEvent: false });
+            to.disable({ emitEvent: false });
+        }
     }
 
     private loadFilters(query: ParamMap, currencies: string[]): void {
@@ -125,6 +134,7 @@ export class BaseAnalyticsSearchComponent implements OnInit {
         const from = time === 'custom' ? fromDate : this.dates.dateInputValue(range.from);
         const to = time === 'custom' ? toDate : this.dates.dateInputValue(range.to);
         this.form.setValue({ partyId, shopId, type, time, from, to }, { emitEvent: false });
+        this.updateDateControls();
         if (range) {
             this.analytics.search({
                 fromTime: this.datePipe.transform(range.from, DateFormat._yyyyMMDdHHMmSs, 'UTC'),
