@@ -1,6 +1,8 @@
 <div fxLayout="column" [fxLayoutGap]="layoutGapM">
-    <div fxLayout fxLayoutAlign="space-between center">
-        <fb-groups-search (valueChanges)="search($event)"></fb-groups-search>
+    <div class="fb-page-toolbar">
+        <fb-groups-search (valueChanges)="search($event)">
+            <h1 class="fb-page-title">Groups</h1>
+        </fb-groups-search>
         <button mat-button color="primary" (click)="createGroup()">CREATE GROUP</button>
     </div>
     <div *ngIf="groups$ | async as groups">

@@ -8,7 +8,6 @@ import { removeEmptyProperties } from '../../../../../../shared/utils/remove-emp
 @Component({
     selector: 'fb-candidates-search',
     templateUrl: 'candidates-search.component.html',
-    styleUrls: ['search.component.scss'],
 })
 export class CandidatesSearchComponent {
     @Output() valueChanges: EventEmitter<string> = new EventEmitter();

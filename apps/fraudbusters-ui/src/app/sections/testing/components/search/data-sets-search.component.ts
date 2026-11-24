@@ -9,7 +9,6 @@ import { removeEmptyProperties } from '../../../../shared/utils/remove-empty-pro
 @Component({
     selector: 'fb-data-sets-search',
     templateUrl: 'data-sets-search.component.html',
-    styleUrls: ['search.component.scss'],
 })
 export class DataSetsSearchComponent {
     @Output() valueChanges: EventEmitter<string> = new EventEmitter();

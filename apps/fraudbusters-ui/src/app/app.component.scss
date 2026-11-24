@@ -23,7 +23,7 @@
     }
 
     .mdc-text-field--no-label:not(.mdc-text-field--textarea) .mat-mdc-form-field-input-control.mdc-text-field__input,
-    .mat-mdc-text-field-wrapper .mat-mdc-form-field-input-control {
+    .mat-mdc-text-field-wrapper:not(.fb-filter-fields *) .mat-mdc-form-field-input-control {
         height: 100%;
     }
 
@@ -31,7 +31,7 @@
         background: none;
     }
 
-    .mat-mdc-text-field-wrapper.mdc-text-field {
+    .mat-mdc-text-field-wrapper.mdc-text-field:not(.fb-filter-fields *) {
         .mat-mdc-form-field-has-icon-suffix {
             padding-right: 10px;
         }
@@ -220,12 +220,12 @@
         }
     }
 
-    .mat-mdc-form-field-infix {
+    .mat-mdc-form-field-infix:not(.fb-filter-fields *) {
         height: 15px;
         padding: 0;
     }
 
-    .mat-mdc-text-field-wrapper.mdc-text-field {
+    .mat-mdc-text-field-wrapper.mdc-text-field:not(.fb-filter-fields *) {
         height: 100%;
         border: 1px solid #e6ecf5;
         font-size: 13px;

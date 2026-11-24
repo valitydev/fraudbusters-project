@@ -1,5 +1,8 @@
-<form fxLayout fxLayoutGap="16px" [formGroup]="form">
-    <mat-form-field appearance="outline">
-        <input matInput placeholder="Search" formControlName="searchQuery" type="string" autocomplete="false" />
-    </mat-form-field>
+<form class="fb-search-heading" [formGroup]="form">
+    <ng-content></ng-content>
+    <fb-compact-search
+        formControlName="searchQuery"
+        label="Search templates"
+        placeholder="Search by ID"
+    ></fb-compact-search>
 </form>

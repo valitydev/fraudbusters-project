@@ -1,27 +1,59 @@
-<form [formGroup]="form">
-    <div fxLayout fxLayoutAlign="space-between center" *ngIf="this.currencies$ | async">
-        <div [fxLayoutGap]="layoutGapM">
-            <mat-form-field appearance="outline">
-                <input matInput placeholder="merchant" formControlName="partyId" autocomplete="false" />
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-                <input matInput placeholder="shop" formControlName="shopId" autocomplete="false" />
-            </mat-form-field>
-            <mat-form-field class="select" appearance="outline" *ngIf="currencies$ | async as currencies">
-                <mat-select formControlName="type">
-                    <mat-option *ngFor="let name of currencies" [value]="name">{{ name }}</mat-option>
-                </mat-select>
-            </mat-form-field>
-        </div>
-        <div fxLayout fxLayoutAlign="space-between end">
-            <div *ngIf="inProgress | async" fxLayout fxLayoutAlign="center" style="height: 30px; width: 40px">
-                <mat-progress-spinner color="primary" mode="indeterminate" diameter="20"></mat-progress-spinner>
-            </div>
-            <mat-form-field class="select" appearance="outline" *ngIf="units">
-                <mat-select formControlName="time">
-                    <mat-option *ngFor="let name of units" value="{{ name }}">{{ name }}</mat-option>
-                </mat-select>
-            </mat-form-field>
-        </div>
+<form *ngIf="currencies$ | async as currencies" class="fb-filter-stack" [formGroup]="form">
+    <div class="fb-filter-presets" role="group" aria-label="Period">
+        <button
+            *ngFor="let unit of units"
+            mat-stroked-button
+            type="button"
+            [attr.aria-pressed]="form.value.time === unit"
+            (click)="setPeriod(unit)"
+        >
+            {{ unit }}
+        </button>
+        <mat-progress-spinner
+            *ngIf="inProgress | async"
+            color="primary"
+            mode="indeterminate"
+            diameter="20"
+            aria-label="Loading analytics"
+        ></mat-progress-spinner>
+    </div>
+    <div class="fb-filter-fields fb-filter-fields-fill">
+        <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+            <mat-label>Merchant</mat-label>
+            <input #merchant matInput placeholder="Merchant ID" formControlName="partyId" autocomplete="off" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+            <mat-label>Shop</mat-label>
+            <input #shop matInput placeholder="Shop ID" formControlName="shopId" autocomplete="off" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+            <mat-label>Currency</mat-label>
+            <mat-select formControlName="type">
+                <mat-option *ngFor="let currency of currencies" [value]="currency">{{ currency }}</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+    <div *ngIf="hasActiveFilters(currencies[0])" class="fb-filter-summary" role="group" aria-label="Active filters">
+        <button
+            *ngIf="form.value.partyId"
+            type="button"
+            class="fb-filter-chip"
+            aria-label="Clear merchant filter"
+            (click)="merchant.focus(); form.get('partyId').setValue('')"
+        >
+            <span>Merchant: {{ form.value.partyId }}</span
+            ><span aria-hidden="true">×</span>
+        </button>
+        <button
+            *ngIf="form.value.shopId"
+            type="button"
+            class="fb-filter-chip"
+            aria-label="Clear shop filter"
+            (click)="shop.focus(); form.get('shopId').setValue('')"
+        >
+            <span>Shop: {{ form.value.shopId }}</span
+            ><span aria-hidden="true">×</span>
+        </button>
+        <button mat-button type="button" (click)="merchant.focus(); resetFilters(currencies[0])">Reset filters</button>
     </div>
 </form>

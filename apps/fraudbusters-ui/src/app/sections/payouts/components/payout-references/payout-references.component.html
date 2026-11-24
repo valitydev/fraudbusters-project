@@ -1,9 +1,8 @@
 <div fxLayout="column" [fxLayoutGap]="layoutGapM">
-    <div fxLayout fxLayoutAlign="space-between center">
-        <form fxLayout fxLayoutGap="16px" [formGroup]="searchForm">
-            <mat-form-field appearance="outline">
-                <input matInput placeholder="Search" formControlName="searchQuery" type="string" autocomplete="false" />
-            </mat-form-field>
+    <div class="fb-page-toolbar">
+        <form class="fb-search-heading" [formGroup]="searchForm">
+            <h1 class="fb-page-title">References</h1>
+            <fb-compact-search formControlName="searchQuery" label="Search references"></fb-compact-search>
         </form>
         <button mat-button color="primary" (click)="createReference()">CREATE REFERENCE</button>
     </div>

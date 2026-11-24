@@ -13,7 +13,6 @@ export interface PayoutSectionLink {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PayoutSectionComponent {
-    title$ = this.route.data.pipe(map((data) => data.title as string));
     links$ = this.route.data.pipe(map((data) => data.links as PayoutSectionLink[]));
 
     constructor(private route: ActivatedRoute) {}

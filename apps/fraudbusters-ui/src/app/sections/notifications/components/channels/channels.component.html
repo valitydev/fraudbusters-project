@@ -1,6 +1,8 @@
 <div fxLayout="column" [fxLayoutGap]="layoutGapM">
-    <div fxLayout fxLayoutAlign="space-between center">
-        <fb-periodical-search (valueChanges)="search($event)"></fb-periodical-search>
+    <div class="fb-page-toolbar">
+        <fb-periodical-search (valueChanges)="search($event)">
+            <h1 class="fb-page-title">Channels</h1>
+        </fb-periodical-search>
         <button mat-button color="primary" (click)="addChannel()">ADD CHANNEL</button>
     </div>
     <div *ngIf="channels$ | async as channels">

@@ -46,10 +46,12 @@ import { PayoutTemplatesComponent } from './components/payout-templates/payout-t
 import { PayoutSectionComponent } from './payout-section.component';
 import { PayoutsRoutingModule } from './payouts-routing.module';
 import { PayoutsFeedbackService } from './services/payouts-feedback.service';
+import { CompactSearchComponent } from '../../shared/components/compact-search/compact-search.component';
 
 /** Payout configuration laid out as the payment sections of the same name. */
 @NgModule({
     imports: [
+        CompactSearchComponent,
         PayoutsRoutingModule,
         CommonModule,
         FlexLayoutModule,

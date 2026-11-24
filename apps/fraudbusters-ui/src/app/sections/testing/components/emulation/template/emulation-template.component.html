@@ -1,11 +1,13 @@
 <div fxLayout="column" [fxLayoutGap]="layoutGapM">
-    <div fxLayout fxLayoutAlign="space-between center">
-        <div fxLayoutGap="10px grid">
-            <mat-form-field class="search fb-full-width" appearance="outline">
-                <input matInput placeholder="Party ID" label="partyId" [(ngModel)]="filter.partyId" name="partyId" />
+    <div class="fb-filter-toolbar">
+        <div class="fb-filter-fields">
+            <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+                <mat-label>Party ID</mat-label>
+                <input matInput [(ngModel)]="filter.partyId" name="partyId" />
             </mat-form-field>
-            <mat-form-field class="search fb-full-width" appearance="outline">
-                <input matInput placeholder="Shop ID" label="shopId" [(ngModel)]="filter.shopId" name="shopId" />
+            <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+                <mat-label>Shop ID</mat-label>
+                <input matInput [(ngModel)]="filter.shopId" name="shopId" />
             </mat-form-field>
         </div>
         <button mat-button color="primary" (click)="emulate()">Emulate</button>

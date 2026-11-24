@@ -1,0 +1,37 @@
+<div class="search" role="search" [attr.aria-label]="label" (keydown.escape)="dismiss($event)">
+    <button
+        #trigger
+        class="search-trigger"
+        type="button"
+        [disabled]="disabled"
+        [attr.aria-label]="label"
+        [attr.aria-expanded]="open"
+        [attr.aria-controls]="fieldId"
+        (click)="toggle()"
+    >
+        <mat-icon aria-hidden="true">search</mat-icon>
+    </button>
+    <div class="search-field" [id]="fieldId" [hidden]="!open">
+        <input
+            #input
+            type="search"
+            autocomplete="off"
+            [attr.aria-label]="label"
+            [placeholder]="placeholder || label"
+            [value]="value"
+            [disabled]="disabled"
+            (input)="setQuery(input.value)"
+            (blur)="onTouched()"
+        />
+        <button
+            type="button"
+            class="clear"
+            aria-label="Clear search"
+            [disabled]="disabled"
+            [hidden]="!value"
+            (click)="clear()"
+        >
+            <mat-icon aria-hidden="true">close</mat-icon>
+        </button>
+    </div>
+</div>

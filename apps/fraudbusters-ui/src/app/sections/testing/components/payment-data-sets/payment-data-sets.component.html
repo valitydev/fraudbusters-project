@@ -1,5 +1,5 @@
 <div fxLayout="column" [fxLayoutGap]="layoutGapM">
-    <div fxLayout fxLayoutAlign="space-between center">
+    <div class="fb-filter-toolbar">
         <fb-data-sets-search (valueChanges)="search($event)"></fb-data-sets-search>
         <button mat-button color="primary" (click)="createDataSet()">CREATE DATA SET</button>
     </div>

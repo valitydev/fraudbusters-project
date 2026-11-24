@@ -1,6 +1,8 @@
 <div fxLayout="column" [fxLayoutGap]="layoutGapM">
-    <div fxLayout fxLayoutAlign="space-between center">
-        <fb-template-references-search (valueChanges)="search($event)"></fb-template-references-search>
+    <div class="fb-page-toolbar">
+        <fb-template-references-search (valueChanges)="search($event)">
+            <h1 class="fb-page-title">References</h1>
+        </fb-template-references-search>
         <button mat-button color="primary" (click)="createReference()">CREATE REFERENCE</button>
     </div>
     <div *ngIf="references$ | async as references; else Empty" fxLayout="column" [fxLayoutGap]="layoutGapM">

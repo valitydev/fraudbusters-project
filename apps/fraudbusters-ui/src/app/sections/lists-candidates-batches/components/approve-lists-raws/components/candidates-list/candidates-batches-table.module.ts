@@ -19,6 +19,7 @@ import { ActionsComponent } from './components/actions/actions.component';
 import { CandidatesBatchesTableHeaderComponent } from './components/candidates-batches-table-header/candidates-batches-table-header.component';
 import { CandidatesBatchesTableItemComponent } from './components/candidates-batches-table-item/candidates-batches-table-item.component';
 import { CandidatesBatchesTableSearchComponent } from './components/candidates-batches-table-search/candidates-batches-table-search.component';
+import { CompactSearchComponent } from '../../../../../../shared/components/compact-search/compact-search.component';
 import { EmptySearchResultModule } from '../../../../../../shared/components/empty-search-result';
 import { ListHeaderModule } from '../../../../../../shared/components/list-header';
 import { ShowMorePanelModule } from '../../../../../../shared/components/show-more-panel';
@@ -27,6 +28,7 @@ import { SharedPipesModule } from '../../../../../../shared/pipes';
 
 @NgModule({
     imports: [
+        CompactSearchComponent,
         CommonModule,
         FlexModule,
         MatExpansionModule,

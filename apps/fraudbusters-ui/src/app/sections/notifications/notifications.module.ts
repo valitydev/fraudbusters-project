@@ -28,9 +28,11 @@ import { PeriodicalNotificationsListModule } from './components/periodical/perio
 import { PeriodicalSearchComponent } from './components/periodical-search/periodical-search.component';
 import { NotificationsRoutingModule } from './notifications-routing.module';
 import { NotificationsComponent } from './notifications.component';
+import { CompactSearchComponent } from '../../shared/components/compact-search/compact-search.component';
 
 @NgModule({
     imports: [
+        CompactSearchComponent,
         NotificationsRoutingModule,
         MatTabsModule,
         CommonModule,

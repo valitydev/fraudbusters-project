@@ -1,8 +1,9 @@
 <mat-toolbar class="toolbar">
-    <a href="/index.html">
-        <img src="../../../../assets/img/logo.svg" alt="logo" />
+    <a routerLink="/" aria-label="Fraudbusters home">
+        <img src="../../../../assets/img/logo.svg" alt="Fraudbusters" />
     </a>
 </mat-toolbar>
 <div class="nav-list">
     <fb-menu-list-item *ngFor="let item of navItems" [item]="item"></fb-menu-list-item>
 </div>
+<ng-content select="[menu-footer]"></ng-content>

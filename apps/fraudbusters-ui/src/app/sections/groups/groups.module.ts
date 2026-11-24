@@ -34,6 +34,7 @@ import { GroupsReferenceService } from './services/groups-reference/groups-refer
 import { DataSetService } from '../../api/payments/data-set';
 import { PaymentGroupsService } from '../../api/payments/groups';
 import { PaymentGroupsReferencesService } from '../../api/payments/groups-references';
+import { CompactSearchComponent } from '../../shared/components/compact-search/compact-search.component';
 import { EmptySearchResultModule } from '../../shared/components/empty-search-result';
 import { ShowMorePanelModule } from '../../shared/components/show-more-panel';
 import { ShowMoreContinuationPanelModule } from '../../shared/components/show-more-panel-continuation';
@@ -53,6 +54,7 @@ import { ErrorHandlerService } from '../../shared/services/utils/error-handler.s
         GroupsSearchComponent,
     ],
     imports: [
+        CompactSearchComponent,
         FlexModule,
         MatButtonModule,
         MatCardModule,

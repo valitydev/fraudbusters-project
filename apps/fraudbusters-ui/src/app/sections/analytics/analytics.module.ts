@@ -33,7 +33,6 @@ import { RiskSeriesMapperService } from '../../api/payments/analytics/riskSeries
 import { BarChartModule } from '../../shared/components/charts';
 import { ConfirmActionDialogModule } from '../../shared/components/confirm-action-dialog';
 import { EmptySearchResultModule } from '../../shared/components/empty-search-result';
-import { FbInfoCardModule } from '../../shared/components/fb-info-card';
 import { ShowMorePanelModule } from '../../shared/components/show-more-panel';
 import { SharedPipesModule } from '../../shared/pipes';
 import { ArraySortPipe } from '../../shared/pipes/sort-by-field.pipe';
@@ -72,7 +71,6 @@ import { BaseAnalyticsService } from './components/base/services/base-analytics.
         NgxMatNativeDateModule,
         NgxMatDatetimePickerModule,
         MatSelectModule,
-        FbInfoCardModule,
         BarChartModule,
         FraudSummaryListModule,
     ],

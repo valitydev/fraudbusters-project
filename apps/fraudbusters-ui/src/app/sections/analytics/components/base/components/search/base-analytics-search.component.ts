@@ -1,17 +1,15 @@
-import { Component, EventEmitter, Inject, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { debounceTime, map, take } from 'rxjs/operators';
 
 import { removeEmptyProperties } from '../../../../../../shared/utils/remove-empty-properties';
-import { LAYOUT_GAP_M } from '../../../../../../tokens';
 import { BaseAnalyticsService } from '../../services/base-analytics.service';
 
 @Component({
     selector: 'fb-base-analytics-search',
     templateUrl: 'base-analytics-search.component.html',
-    styleUrls: ['search.component.scss'],
 })
 export class BaseAnalyticsSearchComponent implements OnInit {
     @Output() valueChanges: EventEmitter<string> = new EventEmitter();
@@ -20,7 +18,7 @@ export class BaseAnalyticsSearchComponent implements OnInit {
 
     @Input() inProgress: Observable<boolean>;
 
-    units = ['1 day', '1 week', 'last month', 'last year'];
+    readonly units = ['1 day', '1 week', 'last month', 'last year'];
 
     form: FormGroup = this.fb.group({
         partyId: '',
@@ -33,8 +31,7 @@ export class BaseAnalyticsSearchComponent implements OnInit {
         private route: ActivatedRoute,
         private router: Router,
         private fb: FormBuilder,
-        private baseAnalyticsService: BaseAnalyticsService,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
+        private baseAnalyticsService: BaseAnalyticsService
     ) {
         this.form.valueChanges.pipe(debounceTime(600), map(removeEmptyProperties)).subscribe((v) => {
             this.router.navigate([location.pathname], { queryParams: v });
@@ -65,5 +62,20 @@ export class BaseAnalyticsSearchComponent implements OnInit {
                     : this.units[0],
             });
         });
+    }
+
+    setPeriod(unit: string): void {
+        if (this.form.value.time !== unit) {
+            this.form.patchValue({ time: unit });
+        }
+    }
+
+    hasActiveFilters(defaultCurrency: string): boolean {
+        const { partyId, shopId, type, time } = this.form.value;
+        return Boolean(partyId || shopId || type !== defaultCurrency || time !== this.units[0]);
+    }
+
+    resetFilters(defaultCurrency: string): void {
+        this.form.reset({ partyId: '', shopId: '', type: defaultCurrency, time: this.units[0] });
     }
 }

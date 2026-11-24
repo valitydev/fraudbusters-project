@@ -1,0 +1,40 @@
+.fb-template-table {
+    border: 1px solid #e2e1eb;
+    border-radius: 8px;
+    background: #fff;
+    overflow-x: auto;
+
+    > fb-list-header,
+    > fb-template-header,
+    > .fb-template-row {
+        display: block;
+        min-width: 520px;
+    }
+
+    .mat-mdc-card.list-header {
+        min-height: 38px;
+        border: 0;
+        border-radius: 0;
+        background: #f3f1f8;
+    }
+
+    .mat-expansion-panel {
+        border: 0;
+        border-top: 1px solid #e2e1eb;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .mat-expansion-panel-header {
+        min-height: 44px;
+        padding: 9px 24px !important;
+    }
+
+    .mat-expansion-panel-header.mat-expanded {
+        background-color: #f6f2ff !important;
+    }
+
+    > fb-show-more-panel {
+        padding: 8px;
+    }
+}

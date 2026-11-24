@@ -2,7 +2,7 @@
     <div class="fb-body-2">{{ summary.status }}</div>
     <div class="fb-body-2 wrap">{{ summary.template }}</div>
     <div class="fb-body-2 wrap">{{ summary.checkedRule }}</div>
-    <div class="fb-body-2">{{ summary.summary.sum }}</div>
-    <div class="fb-body-2">{{ summary.summary.count }}</div>
-    <div class="fb-body-2">{{ numberFormat(summary.summary.ratio) | number : '.1-4' }}</div>
+    <div class="fb-body-2">{{ (summary.summary.sum | number : '1.0-2') ?? '—' }}</div>
+    <div class="fb-body-2">{{ (summary.summary.count | number) ?? '—' }}</div>
+    <div class="fb-body-2">{{ (formatRatio(summary.summary.ratio) | percent : '1.0-2') ?? '—' }}</div>
 </mat-card>

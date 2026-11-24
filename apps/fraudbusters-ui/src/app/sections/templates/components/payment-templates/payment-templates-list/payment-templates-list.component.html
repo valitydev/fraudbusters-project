@@ -1,6 +1,6 @@
-<div fxLayout="column" [fxLayoutGap]="layoutGapM">
+<div class="fb-template-table">
     <fb-template-header></fb-template-header>
-    <div *ngFor="let template of templates" fxLayout="column" [fxLayoutGap]="layoutGapM">
+    <div *ngFor="let template of templates" class="fb-template-row">
         <fb-template-item
             [template]="template"
             (editItem)="editItem.emit($event)"

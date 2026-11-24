@@ -15,7 +15,7 @@ export class FraudSummaryItemComponent {
 
     constructor(@Inject(LAYOUT_GAP_S) public layoutGapS: string, @Inject(LAYOUT_GAP_M) public layoutGapM: string) {}
 
-    numberFormat(num) {
-        return num === 'Infinity' ? 100 : num;
+    formatRatio(value: number): number | null {
+        return Number.isFinite(value) ? value : null;
     }
 }

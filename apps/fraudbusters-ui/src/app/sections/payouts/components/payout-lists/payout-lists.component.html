@@ -1,13 +1,22 @@
+<h1 class="fb-page-title">Lists</h1>
 <div fxLayout="column" [fxLayoutGap]="layoutGapM">
-    <div fxLayout fxLayoutAlign="space-between center">
-        <form fxLayout fxLayoutGap="16px" [formGroup]="searchForm">
-            <mat-form-field class="multi-select" appearance="outline" *ngIf="listNames$ | async as listNames">
+    <div class="fb-filter-toolbar">
+        <form class="fb-filter-fields" [formGroup]="searchForm">
+            <mat-form-field
+                class="multi-select"
+                appearance="outline"
+                floatLabel="always"
+                subscriptSizing="dynamic"
+                *ngIf="listNames$ | async as listNames"
+            >
+                <mat-label>List names</mat-label>
                 <mat-select formControlName="types" multiple>
                     <mat-option *ngFor="let name of listNames" [value]="name">{{ name }}</mat-option>
                 </mat-select>
             </mat-form-field>
-            <mat-form-field appearance="outline">
-                <input matInput placeholder="Search" formControlName="searchQuery" type="string" autocomplete="false" />
+            <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+                <mat-label>Search records</mat-label>
+                <input matInput formControlName="searchQuery" autocomplete="off" />
             </mat-form-field>
         </form>
         <button mat-button color="primary" (click)="createRow()">CREATE RECORD</button>

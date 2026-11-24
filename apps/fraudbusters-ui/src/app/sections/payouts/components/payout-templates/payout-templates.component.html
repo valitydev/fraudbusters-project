@@ -1,20 +1,23 @@
 <div fxLayout="column" [fxLayoutGap]="layoutGapM">
-    <div fxLayout fxLayoutAlign="space-between center">
-        <form fxLayout fxLayoutGap="16px" [formGroup]="searchForm">
-            <mat-form-field appearance="outline">
-                <input matInput placeholder="Search" formControlName="searchQuery" type="string" autocomplete="false" />
-            </mat-form-field>
+    <div class="fb-page-toolbar">
+        <form class="fb-search-heading" [formGroup]="searchForm">
+            <h1 class="fb-page-title">Templates</h1>
+            <fb-compact-search
+                formControlName="searchQuery"
+                label="Search templates"
+                placeholder="Search by ID"
+            ></fb-compact-search>
         </form>
-        <button mat-button color="primary" (click)="createTemplate()">CREATE TEMPLATE</button>
+        <button mat-flat-button color="primary" (click)="createTemplate()">Create template</button>
     </div>
     <div *ngIf="templates$ | async as templates">
-        <div *ngIf="templates.length; else Empty" fxLayout="column" [fxLayoutGap]="layoutGapM">
+        <div *ngIf="templates.length; else Empty" class="fb-template-table" fxLayout="column">
             <fb-list-header [reserveToggleSpace]="true">
                 <div class="fb-body-2" fxFlex>ID</div>
                 <div class="fb-body-2" fxFlex="0 0 160px">Last update</div>
                 <div class="fb-body-2" fxFlex>Modified by</div>
             </fb-list-header>
-            <div *ngFor="let template of templates" fxLayout="column" [fxLayoutGap]="layoutGapM">
+            <div *ngFor="let template of templates" class="fb-template-row">
                 <mat-expansion-panel>
                     <mat-expansion-panel-header>
                         <div fxLayout fxFlexFill fxLayoutAlign="start center" [fxLayoutGap]="layoutGapM">

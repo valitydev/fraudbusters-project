@@ -1,8 +1,77 @@
-.container-fluid {
-    padding: 24px;
-    min-height: calc(100vh - 134px);
+mat-sidenav-container {
+    min-height: 100dvh;
 }
 
-button.mat-mdc-menu-trigger.mdc-icon-button.mat-mdc-icon-button.mat-unthemed.mat-mdc-button-base {
-    margin-left: auto;
+mat-sidenav {
+    width: 200px;
+}
+
+.workspace {
+    box-sizing: border-box;
+    min-height: 100dvh;
+    padding: 20px 24px 24px;
+    min-width: 0;
+}
+
+.profile-footer {
+    padding: 8px;
+    border-top: 1px solid #e2e1eb;
+}
+
+.profile-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: #34313b;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+
+    &:hover,
+    &[aria-expanded='true'] {
+        background: #f6f2ff;
+    }
+}
+
+.profile-avatar {
+    display: grid;
+    place-items: center;
+    flex: 0 0 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #eee9fc;
+    color: #6943b9;
+    font-weight: 600;
+}
+
+.profile-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile-trigger mat-icon {
+    color: #666174;
+}
+
+.mobile-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #fff;
+    border-bottom: 1px solid #e2e1eb;
+    font-weight: 600;
+}
+
+@media (max-width: 700px) {
+    .workspace {
+        padding: 14px;
+    }
 }

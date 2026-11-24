@@ -10,7 +10,6 @@ import { removeEmptyProperties } from '../../../../shared/utils/remove-empty-pro
 @Component({
     selector: 'fb-history-data-search',
     templateUrl: 'history-data-search.component.html',
-    styleUrls: ['search.component.scss'],
 })
 export class HistoryDataSearchComponent {
     @Input() showRuleFilters = false;

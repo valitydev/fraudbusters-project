@@ -4,10 +4,10 @@ import { ActivatedRoute } from '@angular/router';
 import { combineLatest } from 'rxjs';
 
 import { AuditService } from './audit.service';
+import { Filter } from './model/filter';
 import { SortOrder } from '../../shared/constants/sort-order';
 import { SearchFieldService } from '../../shared/services/utils/search-field.service';
-import { LAYOUT_GAP_M, LAYOUT_GAP_S } from '../../tokens';
-import { Filter } from './model/filter';
+import { LAYOUT_GAP_M } from '../../tokens';
 
 @Component({
     templateUrl: './audit.component.html',
@@ -30,8 +30,7 @@ export class AuditComponent {
         private auditService: AuditService,
         private searchFieldService: SearchFieldService,
         private route: ActivatedRoute,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string,
-        @Inject(LAYOUT_GAP_S) public layoutGapS: string
+        @Inject(LAYOUT_GAP_M) public layoutGapM: string
     ) {
         combineLatest([this.commandsTypes$, this.objectsTypes$, this.route.queryParams]).subscribe((params) => {
             this.filter = {

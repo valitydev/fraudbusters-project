@@ -37,9 +37,11 @@ import { TemplatesSearchComponent } from './components/templates-search/template
 import { FetchDefaultReferencesService } from './services/fetch-default-references.service';
 import { TemplatesRoutingModule } from './templates-routing.module';
 import { TemplatesComponent } from './templates.component';
+import { CompactSearchComponent } from '../../shared/components/compact-search/compact-search.component';
 
 @NgModule({
     imports: [
+        CompactSearchComponent,
         TemplatesRoutingModule,
         MatTabsModule,
         CommonModule,

@@ -34,7 +34,6 @@ const listTab = (path: string, listType: ListType) => ({
                 canActivate: [AuthGuard],
                 data: {
                     roles: [Roles.FraudOfficer],
-                    title: 'Payout templates',
                     links: [
                         { path: 'templates', name: 'Templates' },
                         { path: 'references', name: 'References' },
@@ -52,7 +51,6 @@ const listTab = (path: string, listType: ListType) => ({
                 canActivate: [AuthGuard],
                 data: {
                     roles: [Roles.FraudOfficer],
-                    title: 'Payout groups',
                     links: [
                         { path: 'list', name: 'Groups' },
                         { path: 'references', name: 'References' },
@@ -70,7 +68,6 @@ const listTab = (path: string, listType: ListType) => ({
                 canActivate: [AuthGuard],
                 data: {
                     roles: LIST_ROLES,
-                    title: 'Payout lists',
                     links: [
                         { path: 'black', name: 'Black' },
                         { path: 'white', name: 'White' },

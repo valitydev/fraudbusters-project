@@ -1,7 +1,6 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Inject, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
 import { Template } from '../../../../../api/fb-management/swagger-codegen/model/template';
-import { LAYOUT_GAP_M } from '../../../../../tokens';
 
 @Component({
     selector: 'fb-payment-templates-list',
@@ -20,6 +19,4 @@ export class PaymentTemplatesListComponent {
 
     @Output()
     copyItem = new EventEmitter<string>();
-
-    constructor(@Inject(LAYOUT_GAP_M) public layoutGapM: string) {}
 }

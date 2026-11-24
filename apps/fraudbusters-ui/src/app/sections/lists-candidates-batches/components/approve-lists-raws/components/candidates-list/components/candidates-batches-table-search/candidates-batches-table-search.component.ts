@@ -9,7 +9,6 @@ import { removeEmptyProperties } from '../../../../../../../../shared/utils/remo
 @Component({
     selector: 'fb-candidates-batches-table-search',
     templateUrl: 'candidates-batches-table-search.component.html',
-    styleUrls: ['candidates-batches-table-search.component.scss'],
 })
 export class CandidatesBatchesTableSearchComponent {
     @Output() valueChanges: EventEmitter<string> = new EventEmitter();

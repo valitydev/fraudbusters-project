@@ -29,6 +29,7 @@ import {
 import { CandidatesComponent } from './candidates.component';
 import { CandidatesListModule } from './components/candidates-list';
 import { CandidatesSearchComponent } from './components/candidates-search/candidates-search.component';
+import { CompactSearchComponent } from '../../../../shared/components/compact-search/compact-search.component';
 import { EmptySearchResultModule } from '../../../../shared/components/empty-search-result';
 import { ShowMorePanelModule } from '../../../../shared/components/show-more-panel';
 import { ShowMoreContinuationPanelModule } from '../../../../shared/components/show-more-panel-continuation';
@@ -39,6 +40,7 @@ import { SearchFieldService } from '../../../../shared/services/utils/search-fie
 @NgModule({
     declarations: [CandidatesComponent, CandidatesSearchComponent],
     imports: [
+        CompactSearchComponent,
         FlexModule,
         MatButtonModule,
         MatCardModule,
