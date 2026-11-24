@@ -3,7 +3,9 @@
         <fb-templates-search (valueChanges)="search($event)">
             <h1 class="fb-page-title">Templates</h1>
         </fb-templates-search>
-        <button mat-flat-button color="primary" (click)="createTemplate()">Create template</button>
+        <button mat-stroked-button type="button" class="fb-create-template" (click)="createTemplate()">
+            Create template
+        </button>
     </div>
     <div *ngIf="templates$ | async as templates">
         <fb-payment-templates-list

@@ -8,7 +8,9 @@
                 placeholder="Search by ID"
             ></fb-compact-search>
         </form>
-        <button mat-flat-button color="primary" (click)="createTemplate()">Create template</button>
+        <button mat-stroked-button type="button" class="fb-create-template" (click)="createTemplate()">
+            Create template
+        </button>
     </div>
     <div *ngIf="templates$ | async as templates">
         <div *ngIf="templates.length; else Empty" class="fb-template-table" fxLayout="column">
