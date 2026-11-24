@@ -25,21 +25,34 @@
                             <div class="fb-body-2" fxFlex="0 0 160px">
                                 {{ template.lastUpdateDate | date : 'yyyy-MM-dd HH:mm:ss' }}
                             </div>
-                            <div class="fb-body-2" fxFlex>{{ template.modifiedByUser }}</div>
+                            <div class="fb-body-2" fxFlex>{{ template.modifiedByUser || '—' }}</div>
                         </div>
                     </mat-expansion-panel-header>
-                    <div class="panel-content" fxLayout="column" [fxLayoutGap]="layoutGapM">
-                        <mat-divider></mat-divider>
-                        <div class="fb-body-1 fb-template" fxLayout="column" [fxLayoutGap]="layoutGapS">
-                            <ng-container *ngFor="let rule of template.template | templateToRules">
-                                <code>{{ rule }}</code>
-                            </ng-container>
+                    <div class="fb-template-detail">
+                        <div class="fb-template-rules">
+                            <div class="fb-template-rules-label">Rules</div>
+                            <div class="fb-template-rules-code">
+                                <code *ngFor="let rule of template.template | templateToRules">{{ rule }}</code>
+                            </div>
                         </div>
-                        <mat-divider></mat-divider>
-                        <div fxLayout fxLayoutAlign="end" [fxLayoutGap]="layoutGapM">
-                            <button mat-button color="warn" (click)="removeTemplate(template.id)">Remove</button>
-                            <button mat-button color="accent" (click)="copyTemplate(template.id)">Copy</button>
-                            <button mat-button color="primary" (click)="editTemplate(template.id)">Edit</button>
+                        <div class="fb-template-actions" role="group" aria-label="Template actions">
+                            <button
+                                mat-button
+                                type="button"
+                                class="fb-template-remove"
+                                (click)="removeTemplate(template.id)"
+                            >
+                                Remove
+                            </button>
+                            <button mat-button type="button" (click)="copyTemplate(template.id)">Copy</button>
+                            <button
+                                mat-stroked-button
+                                type="button"
+                                class="fb-template-edit"
+                                (click)="editTemplate(template.id)"
+                            >
+                                Edit
+                            </button>
                         </div>
                     </div>
                 </mat-expansion-panel>

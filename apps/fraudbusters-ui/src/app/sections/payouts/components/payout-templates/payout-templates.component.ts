@@ -6,7 +6,7 @@ import { debounceTime, map, switchMap } from 'rxjs/operators';
 
 import { Template } from '../../../../api/fb-management/swagger-codegen/model/template';
 import { PayoutsService } from '../../../../api/payouts';
-import { LAYOUT_GAP_M, LAYOUT_GAP_S } from '../../../../tokens';
+import { LAYOUT_GAP_M } from '../../../../tokens';
 import { PAYOUT_PAGE_SIZE, PayoutPageFetcher } from '../../services/payout-page-fetcher';
 import { PayoutsFeedbackService } from '../../services/payouts-feedback.service';
 
@@ -28,8 +28,7 @@ export class PayoutTemplatesComponent {
         private feedback: PayoutsFeedbackService,
         private router: Router,
         private fb: FormBuilder,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string,
-        @Inject(LAYOUT_GAP_S) public layoutGapS: string
+        @Inject(LAYOUT_GAP_M) public layoutGapM: string
     ) {
         this.searchForm.controls.searchQuery.valueChanges
             .pipe(

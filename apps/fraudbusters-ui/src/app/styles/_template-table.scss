@@ -3,6 +3,7 @@
     border-radius: 8px;
     background: #fff;
     overflow-x: auto;
+    container-type: inline-size;
 
     > fb-list-header,
     > fb-template-header,
@@ -32,6 +33,76 @@
 
     .mat-expansion-panel-header.mat-expanded {
         background-color: #f6f2ff !important;
+    }
+
+    .mat-expansion-panel-body {
+        padding: 0;
+    }
+
+    .fb-template-detail {
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        gap: 10px 16px;
+        max-inline-size: 100cqw;
+        padding: 10px 24px 12px;
+    }
+
+    .fb-template-rules {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .fb-template-rules-label {
+        margin-bottom: 4px;
+        color: #625f74;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .fb-template-rules-code {
+        display: grid;
+        gap: 4px;
+        padding: 7px 10px;
+        border-radius: 5px;
+        background: #f6f7fb;
+        color: #34313b;
+        overflow-wrap: anywhere;
+
+        code {
+            white-space: pre-wrap;
+        }
+    }
+
+    .fb-template-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px;
+
+        button {
+            min-width: 0;
+            height: 32px;
+            padding-inline: 8px;
+            letter-spacing: normal;
+        }
+
+        .fb-template-remove {
+            color: #a4263a;
+        }
+
+        .fb-template-edit {
+            border-color: #dcd4ec;
+            color: #6741b7;
+        }
+    }
+
+    @container (max-width: 580px) {
+        .fb-template-detail {
+            flex-direction: column;
+            align-items: stretch;
+            padding-inline: 12px;
+        }
     }
 
     > fb-show-more-panel {

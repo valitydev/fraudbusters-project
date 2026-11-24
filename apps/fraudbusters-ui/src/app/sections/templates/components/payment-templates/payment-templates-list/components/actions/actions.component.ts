@@ -1,6 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Inject, Input, Output } from '@angular/core';
-
-import { LAYOUT_GAP_M } from '../../../../../../../tokens';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
     selector: 'fb-actions',
@@ -19,6 +17,4 @@ export class ActionsComponent {
 
     @Output()
     copyItem = new EventEmitter<string>();
-
-    constructor(@Inject(LAYOUT_GAP_M) public layoutGapM: string) {}
 }
