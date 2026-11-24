@@ -1,0 +1,50 @@
+:host {
+    --analytics-filter-height: 36px;
+}
+
+.fb-filter-presets button {
+    height: var(--analytics-filter-height);
+}
+
+.fb-filter-fields {
+    --mat-form-field-container-height: var(--analytics-filter-height);
+    --mat-form-field-container-vertical-padding: calc((var(--analytics-filter-height) - 24px) / 2);
+}
+
+@media (pointer: coarse) {
+    :host {
+        --analytics-filter-height: 44px;
+    }
+}
+
+.period-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+}
+
+.period-dates {
+    flex-wrap: nowrap;
+    gap: 7px;
+
+    > mat-form-field {
+        width: 148px;
+    }
+}
+
+.date-error {
+    margin: 0;
+    color: #a4263a;
+}
+
+@media (max-width: 480px) {
+    .period-dates {
+        width: 100%;
+
+        > mat-form-field {
+            flex: 1;
+            min-width: 0;
+        }
+    }
+}

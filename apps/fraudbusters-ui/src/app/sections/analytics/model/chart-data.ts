@@ -11,4 +11,5 @@ export interface Series {
 export interface ChartData {
     currency: string;
     series: Series[];
+    categorical?: boolean;
 }

@@ -7,3 +7,9 @@
 .wrap {
     word-wrap: anywhere;
 }
+
+:host .fraud-summary-grid {
+    padding: 10px 24px;
+    border-width: 0 0 1px;
+    border-radius: 0;
+}

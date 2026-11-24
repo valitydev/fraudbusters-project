@@ -1,22 +1,31 @@
-<form *ngIf="currencies$ | async as currencies" class="fb-filter-stack" [formGroup]="form">
-    <div class="fb-filter-presets" role="group" aria-label="Period">
-        <button
-            *ngFor="let unit of units"
-            mat-stroked-button
-            type="button"
-            [attr.aria-pressed]="form.value.time === unit"
-            (click)="setPeriod(unit)"
-        >
-            {{ unit }}
-        </button>
-        <mat-progress-spinner
-            *ngIf="inProgress | async"
-            color="primary"
-            mode="indeterminate"
-            diameter="20"
-            aria-label="Loading analytics"
-        ></mat-progress-spinner>
+<form *ngIf="currencies$ | async as currencies; else currencyUnavailable" class="fb-filter-stack" [formGroup]="form">
+    <div class="period-row">
+        <div class="fb-filter-presets" role="group" aria-label="Period">
+            <button
+                *ngFor="let period of periods"
+                mat-stroked-button
+                type="button"
+                [attr.aria-pressed]="form.value.time === period.key"
+                (click)="setPeriod(period.key)"
+            >
+                {{ period.label }}
+            </button>
+        </div>
+        <div class="fb-filter-fields period-dates">
+            <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+                <mat-label>From (UTC)</mat-label>
+                <input matInput type="date" formControlName="from" [readonly]="!customPeriod" [max]="today" />
+            </mat-form-field>
+            <span aria-hidden="true">–</span>
+            <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+                <mat-label>To (UTC)</mat-label>
+                <input matInput type="date" formControlName="to" [readonly]="!customPeriod" [max]="today" />
+            </mat-form-field>
+        </div>
     </div>
+    <p *ngIf="invalidRange" class="date-error" role="alert">
+        Enter a valid UTC date range. Earlier results use the last valid selection.
+    </p>
     <div class="fb-filter-fields fb-filter-fields-fill">
         <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
             <mat-label>Merchant</mat-label>
@@ -33,7 +42,15 @@
             </mat-select>
         </mat-form-field>
     </div>
-    <div *ngIf="hasActiveFilters(currencies[0])" class="fb-filter-summary" role="group" aria-label="Active filters">
+    <p *ngIf="!currencies.length" class="date-error" role="status">
+        No currencies are available for payment analytics.
+    </p>
+    <div
+        *ngIf="currencies.length && hasActiveFilters(currencies[0])"
+        class="fb-filter-summary"
+        role="group"
+        aria-label="Active filters"
+    >
         <button
             *ngIf="form.value.partyId"
             type="button"
@@ -57,3 +74,6 @@
         <button mat-button type="button" (click)="merchant.focus(); resetFilters(currencies[0])">Reset filters</button>
     </div>
 </form>
+<ng-template #currencyUnavailable>
+    <p role="status">Loading payment filters…</p>
+</ng-template>

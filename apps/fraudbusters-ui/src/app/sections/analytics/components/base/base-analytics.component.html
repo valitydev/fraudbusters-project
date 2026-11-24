@@ -1,51 +1,77 @@
 <div class="analytics">
-    <fb-base-analytics-search [inProgress]="inProgress$" (valueChanges)="search($event)"></fb-base-analytics-search>
+    <fb-base-analytics-search></fb-base-analytics-search>
 
-    <dl class="metrics">
-        <div>
-            <dt>Attempted payments</dt>
-            <dd>{{ (attemptedPayments$ | async | number) ?? '—' }}</dd>
-        </div>
-        <div>
-            <dt>Blocked payments</dt>
-            <dd>{{ (blockedPayments$ | async | number) ?? '—' }}</dd>
-        </div>
-        <div>
-            <dt>Blocked share</dt>
-            <dd>{{ (ratioOfBlocked$ | async | percent : '1.0-2') ?? '—' }}</dd>
-        </div>
-        <div>
-            <dt>Blocked amount</dt>
-            <dd>
-                {{ (blockedSum$ | async | number : '1.0-2') ?? '—' }} <small>{{ currency }}</small>
-            </dd>
-        </div>
-    </dl>
+    <ng-container *ngIf="state$ | async as state">
+        <p *ngIf="state.loading" class="analytics-message" role="status">Loading analytics…</p>
+        <section *ngIf="state.error" class="analytics-message" role="alert">
+            Analytics could not be loaded.
+            <button mat-stroked-button type="button" (click)="retry()">Retry</button>
+        </section>
+        <ng-container *ngIf="state.data as data">
+            <dl class="metrics" aria-label="Payment analytics summary">
+                <div>
+                    <dt>Attempted payments</dt>
+                    <dd>{{ (data.attempted | number) ?? '—' }}</dd>
+                </div>
+                <div>
+                    <dt>Blocked payments</dt>
+                    <dd>{{ (data.blocked | number) ?? '—' }}</dd>
+                </div>
+                <div>
+                    <dt>Blocked share</dt>
+                    <dd>{{ (data.ratio | percent : '1.0-2') ?? '—' }}</dd>
+                    <div class="metric-note">Of attempted payments</div>
+                </div>
+                <div>
+                    <dt>Blocked amount</dt>
+                    <dd>
+                        {{ (data.blockedAmount | number : '1.0-2') ?? '—' }} <small>{{ data.currency }}</small>
+                    </dd>
+                </div>
+            </dl>
 
-    <mat-card class="risk-card">
-        <mat-card-content>
-            <h2>Fraud result ratio</h2>
-            <p>Share of payment attempts by risk score</p>
-            <ng-container *ngIf="chartData$ | async as chartData">
-                <fb-bar-chart
-                    *ngIf="chartData.series.length; else noData"
-                    [series]="chartData.series"
-                    [colors]="colors"
-                    [height]="245"
-                ></fb-bar-chart>
-            </ng-container>
-            <ng-template #noData><p class="empty">No data matches these filters</p></ng-template>
-        </mat-card-content>
-    </mat-card>
+            <div class="analytics-charts">
+                <mat-card class="analytics-card">
+                    <h2>Risk distribution</h2>
+                    <p class="card-caption">Share of checks by risk score, %</p>
+                    <fb-bar-chart
+                        *ngIf="data.chart.series.length; else noChart"
+                        [series]="data.chart.series"
+                        [categorical]="data.chart.categorical"
+                        [colors]="colors"
+                        [height]="275"
+                    ></fb-bar-chart>
+                    <ng-template #noChart><p class="empty">No risk results for this selection.</p></ng-template>
+                </mat-card>
 
-    <section *ngIf="fraudSummary$ | async as summaries">
-        <ng-container *ngIf="summaries.length">
-            <h2>Rule breakdown</h2>
-            <div class="table-scroll">
-                <fb-fraud-summary-templates-list
-                    [summaryRows]="summaries | sort : 'summary.count'"
-                ></fb-fraud-summary-templates-list>
+                <mat-card class="analytics-card">
+                    <h2>Top declined rules</h2>
+                    <p class="card-caption">Top 5 by number of decline results</p>
+                    <ul *ngIf="data.topDeclines.length; else noDeclines" class="rule-ranking">
+                        <li *ngFor="let row of data.topDeclines">
+                            <div class="rule-name">
+                                <strong>{{ row.checkedRule }}</strong>
+                                <small *ngIf="row.template">{{ row.template }}</small>
+                            </div>
+                            <span class="rule-count">{{ row.summary.count | number }}</span>
+                            <div class="rule-track" aria-hidden="true">
+                                <span
+                                    [style.width.%]="(row.summary.count / data.topDeclines[0].summary.count) * 100"
+                                ></span>
+                            </div>
+                        </li>
+                    </ul>
+                    <ng-template #noDeclines><p class="empty">No declined rules for this selection.</p></ng-template>
+                </mat-card>
             </div>
+
+            <mat-card class="analytics-card">
+                <h2>Rule breakdown</h2>
+                <div *ngIf="data.summaries.length; else noRules" class="table-scroll">
+                    <fb-fraud-summary-templates-list [summaryRows]="data.summaries"></fb-fraud-summary-templates-list>
+                </div>
+                <ng-template #noRules><p class="empty">No rule results for this selection.</p></ng-template>
+            </mat-card>
         </ng-container>
-    </section>
+    </ng-container>
 </div>

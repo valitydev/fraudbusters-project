@@ -1,81 +1,139 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { debounceTime, map, take } from 'rxjs/operators';
+import { DatePipe } from '@angular/common';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder } from '@angular/forms';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { of } from 'rxjs';
+import { catchError, debounceTime, map, switchMap, take } from 'rxjs/operators';
 
-import { removeEmptyProperties } from '../../../../../../shared/utils/remove-empty-properties';
+import { DateFormat } from '../../../../../../shared/constants/date-format';
+import {
+    ANALYTICS_PERIODS,
+    BaseAnalyticsUtilService,
+    DEFAULT_ANALYTICS_PERIOD,
+} from '../../services/base-analytics-util.service';
 import { BaseAnalyticsService } from '../../services/base-analytics.service';
 
 @Component({
     selector: 'fb-base-analytics-search',
     templateUrl: 'base-analytics-search.component.html',
+    styleUrls: ['./base-analytics-search.component.scss'],
 })
 export class BaseAnalyticsSearchComponent implements OnInit {
-    @Output() valueChanges: EventEmitter<string> = new EventEmitter();
-
-    currencies$ = this.baseAnalyticsService.currencies$;
-
-    @Input() inProgress: Observable<boolean>;
-
-    readonly units = ['1 day', '1 week', 'last month', 'last year'];
-
-    form: FormGroup = this.fb.group({
+    readonly periods = ANALYTICS_PERIODS;
+    readonly currencies$ = this.analytics.currencies$.pipe(catchError(() => of([])));
+    readonly form = this.fb.nonNullable.group({
         partyId: '',
         shopId: '',
         type: '',
-        time: this.units[0],
+        time: DEFAULT_ANALYTICS_PERIOD as string,
+        from: '',
+        to: '',
     });
+    readonly today = this.dates.dateInputValue(new Date());
+    private readonly destroyRef = inject(DestroyRef);
 
     constructor(
         private route: ActivatedRoute,
         private router: Router,
         private fb: FormBuilder,
-        private baseAnalyticsService: BaseAnalyticsService
-    ) {
-        this.form.valueChanges.pipe(debounceTime(600), map(removeEmptyProperties)).subscribe((v) => {
-            this.router.navigate([location.pathname], { queryParams: v });
-            const params = Object.create(v);
-            params.partyId = v.partyId;
-            params.shopId = v.shopId;
-            params.type = v.type;
-            params.time = v.time;
-            this.valueChanges.emit(v);
-        });
-        this.route.queryParams.pipe(take(1)).subscribe((v) => this.form.patchValue(v));
+        private analytics: BaseAnalyticsService,
+        private dates: BaseAnalyticsUtilService,
+        private datePipe: DatePipe
+    ) {}
+
+    get customPeriod(): boolean {
+        return this.form.controls.time.value === 'custom';
+    }
+
+    get invalidRange(): boolean {
+        const { time, from, to } = this.form.getRawValue();
+        return this.customPeriod && !this.dates.resolveRange(time, from, to);
     }
 
     ngOnInit(): void {
-        this.currencies$.pipe(take(1)).subscribe((value) => {
-            this.form.setValue({
-                partyId: this.route.snapshot.queryParamMap.get('partyId')
-                    ? this.route.snapshot.queryParamMap.get('partyId')
-                    : '',
-                shopId: this.route.snapshot.queryParamMap.get('shopId')
-                    ? this.route.snapshot.queryParamMap.get('shopId')
-                    : '',
-                type: this.route.snapshot.queryParamMap.get('type')
-                    ? this.route.snapshot.queryParamMap.get('type')
-                    : value[0],
-                time: this.route.snapshot.queryParamMap.get('time')
-                    ? this.route.snapshot.queryParamMap.get('time')
-                    : this.units[0],
+        this.currencies$
+            .pipe(
+                take(1),
+                switchMap((currencies) => this.route.queryParamMap.pipe(map((query) => ({ currencies, query })))),
+                takeUntilDestroyed(this.destroyRef)
+            )
+            .subscribe(({ currencies, query }) => {
+                if (currencies?.length) {
+                    this.loadFilters(query, currencies);
+                }
+            });
+        this.form.valueChanges.pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+            const { partyId, shopId, type, time, from, to } = this.form.getRawValue();
+            if (!type || this.invalidRange) {
+                return;
+            }
+            void this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: {
+                    partyId: partyId.trim() || null,
+                    shopId: shopId.trim() || null,
+                    type,
+                    time,
+                    from: time === 'custom' ? from : null,
+                    to: time === 'custom' ? to : null,
+                },
             });
         });
     }
 
-    setPeriod(unit: string): void {
-        if (this.form.value.time !== unit) {
-            this.form.patchValue({ time: unit });
+    setPeriod(time: string): void {
+        if (time !== this.form.controls.time.value) {
+            const range = time === 'custom' ? null : this.dates.resolveRange(time);
+            this.form.patchValue(
+                range
+                    ? {
+                          time,
+                          from: this.dates.dateInputValue(range.from),
+                          to: this.dates.dateInputValue(range.to),
+                      }
+                    : { time }
+            );
         }
     }
 
     hasActiveFilters(defaultCurrency: string): boolean {
-        const { partyId, shopId, type, time } = this.form.value;
-        return Boolean(partyId || shopId || type !== defaultCurrency || time !== this.units[0]);
+        const { partyId, shopId, type, time } = this.form.getRawValue();
+        return !!(partyId || shopId || type !== defaultCurrency || time !== DEFAULT_ANALYTICS_PERIOD);
     }
 
     resetFilters(defaultCurrency: string): void {
-        this.form.reset({ partyId: '', shopId: '', type: defaultCurrency, time: this.units[0] });
+        const range = this.dates.resolveRange(DEFAULT_ANALYTICS_PERIOD);
+        this.form.patchValue({
+            partyId: '',
+            shopId: '',
+            type: defaultCurrency,
+            time: DEFAULT_ANALYTICS_PERIOD,
+            from: this.dates.dateInputValue(range.from),
+            to: this.dates.dateInputValue(range.to),
+        });
+    }
+
+    private loadFilters(query: ParamMap, currencies: string[]): void {
+        const type = currencies.includes(query.get('type')) ? query.get('type') : currencies[0];
+        const time = query.get('time') || DEFAULT_ANALYTICS_PERIOD;
+        const partyId = query.get('partyId') || '';
+        const shopId = query.get('shopId') || '';
+        const fromDate = query.get('from') || '';
+        const toDate = query.get('to') || '';
+        const range = this.dates.resolveRange(time, fromDate, toDate);
+        const from = time === 'custom' ? fromDate : this.dates.dateInputValue(range.from);
+        const to = time === 'custom' ? toDate : this.dates.dateInputValue(range.to);
+        this.form.setValue({ partyId, shopId, type, time, from, to }, { emitEvent: false });
+        if (range) {
+            this.analytics.search({
+                fromTime: this.datePipe.transform(range.from, DateFormat._yyyyMMDdHHMmSs, 'UTC'),
+                toTime: this.datePipe.transform(range.to, DateFormat._yyyyMMDdHHMmSs, 'UTC'),
+                currency: type,
+                merchantId: partyId || undefined,
+                shopId: shopId || undefined,
+                splitUnit: range.splitUnit,
+            });
+        }
     }
 }
