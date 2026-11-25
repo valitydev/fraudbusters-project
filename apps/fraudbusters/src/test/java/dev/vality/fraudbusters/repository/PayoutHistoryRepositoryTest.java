@@ -187,7 +187,7 @@ class PayoutHistoryRepositoryTest {
                 INSERT INTO fraud.withdrawal(timestamp, eventTime, eventTimeHour, id, amount, currency,
                                              status, cardToken, bin, partyId, walletId, errorCode)
                 VALUES (toDate(toDateTime(?, 'UTC')), ?, ?, ?, ?, ?, ?, 'synthetic-card', ?, ?, ?, 'synthetic-error')
-                """, (timestamp + offset) / 1000, (timestamp + offset) / 1000, timestamp / 3600000 * 3600000, id,
-                amount, currency, status, "bin-" + id, party, wallet);
+                """, (timestamp + offset) / 1000, (timestamp + offset) / 1000, (timestamp + offset) / 3600000 * 3600000,
+                id, amount, currency, status, "bin-" + id, party, wallet);
     }
 }

@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.time.ZoneOffset.UTC;
+import static java.time.temporal.ChronoUnit.HOURS;
 
 public class AggregationUtil {
 
@@ -61,6 +62,8 @@ public class AggregationUtil {
                 dateTo,
                 instantFrom.getEpochSecond(),
                 instantTo.getEpochSecond(),
+                hourOf(instantFrom),
+                hourOf(instantTo),
                 value,
                 status,
                 errorCode
@@ -83,7 +86,8 @@ public class AggregationUtil {
         Instant instantTo = Instant.ofEpochMilli(to);
         LocalDate dateTo = instantTo.atZone(UTC).toLocalDate();
         ArrayList<Object> objects = new ArrayList<>();
-        Stream.of(dateFrom, dateTo, instantFrom.getEpochSecond(), instantTo.getEpochSecond(), value)
+        Stream.of(dateFrom, dateTo, instantFrom.getEpochSecond(), instantTo.getEpochSecond(),
+                        hourOf(instantFrom), hourOf(instantTo), value)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(() -> objects));
         if (!statuses.isEmpty()) {
@@ -116,6 +120,14 @@ public class AggregationUtil {
 
     public static List<Object> generateStatusParams(Long from, Long to, Object value, String status) {
         return generateParams(from, to, null, value, status);
+    }
+
+    /**
+     * Bound for {@code eventTimeHour}, the hour of {@code eventTime} in milliseconds and the first column of the
+     * sorting key: it lets ClickHouse skip the granules outside the window.
+     */
+    private static long hourOf(Instant instant) {
+        return instant.truncatedTo(HOURS).toEpochMilli();
     }
 
     @NotNull
