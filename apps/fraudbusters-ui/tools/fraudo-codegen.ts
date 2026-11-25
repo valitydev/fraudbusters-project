@@ -8,6 +8,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+// Prettier 2 ships without typings; only the synchronous API is used here.
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const prettier: {
+    format(source: string, options: object): string;
+    resolveConfig: { sync(file: string): object | null };
+} = require('prettier');
+
 const GRAMMAR_DIR = path.resolve(__dirname, '../../../packages/libs/fraudo/src/main/antlr4/imports');
 const FIELDS_DIR = path.resolve(__dirname, '../../fraudbusters/src/main/java/dev/vality/fraudbusters/fraud/constant');
 const OUTPUT = path.resolve(__dirname, '../src/app/shared/pipes/fraudo-grammar.generated.ts');
@@ -73,7 +80,8 @@ const output = [
     list('FRAUDO_PAYOUT_FIELDS', enumValues('PayoutCheckedField.java')),
 ].join('\n');
 
-fs.writeFileSync(OUTPUT, output);
+// Format with the project's Prettier config, so CI can regenerate the file and still pass `ui:check`.
+fs.writeFileSync(OUTPUT, prettier.format(output, { ...prettier.resolveConfig.sync(OUTPUT), filepath: OUTPUT }));
 console.log(
     `Fraudo vocabulary: ${new Set(functions).size} functions written to ${path.relative(process.cwd(), OUTPUT)}`
 );
