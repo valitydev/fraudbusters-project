@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DateTime Range Picker — Fraud Monitoring UI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+          },
+          colors: {
+            canvas: '#F8F9FB',
+            surface: '#FFFFFF',
+            borderSubtle: '#E2E8F0',
+            borderStrong: '#CBD5E1',
+            ink: '#1E293B',
+            muted: '#64748B',
+            brand: {
+              DEFAULT: '#6338F5',
+              hover: '#5128D9',
+              soft: '#F3EFFF',
+              border: '#DDD6FE',
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      background-color: #F8F9FB;
+      color: #1E293B;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Compact synchronized mini time columns (max 4 visible rows) */
+    .time-drum {
+      max-height: 124px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: #CBD5E1 transparent;
+    }
+
+    .time-drum::-webkit-scrollbar {
+      width: 4px;
+    }
+    .time-drum::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .time-drum::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+
+    /* Hide native number spinners */
+    input[type='number']::-webkit-inner-spin-button,
+    input[type='number']::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type='number'] {
+      -moz-appearance: textfield;
+    }
+  </style>
+</head>
+<body class="min-h-screen py-6 px-4 sm:px-8">
+
+  <div class="max-w-[1260px] mx-auto space-y-5">
+
+    <!-- Top Page Header + Quick Test Helper Bar -->
+    <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <h1 class="text-[22px] font-semibold tracking-tight text-ink leading-tight">Historical data</h1>
+          <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-brand-soft text-brand border border-brand-border">
+            Refactored DateTime Picker
+          </span>
+        </div>
+        <p class="text-xs text-muted mt-0.5">Unified purple accent palette, full-width non-truncating triggers, range band highlighting, and compact time controls.</p>
+      </div>
+
+      <!-- Quick Test Actions Bar -->
+      <div class="flex flex-wrap items-center gap-2 bg-surface border border-borderSubtle rounded-xl px-3 py-2 shadow-2xs self-start lg:self-auto">
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-muted mr-1">Test actions:</span>
+        <button
+          type="button"
+          onclick="openPopover('from')"
+          class="px-2.5 py-1 rounded-lg bg-brand-soft hover:bg-[#E7DDFB] text-brand border border-brand-border text-xs font-semibold transition"
+        >
+          Open FROM picker
+        </button>
+        <button
+          type="button"
+          onclick="openPopover('to')"
+          class="px-2.5 py-1 rounded-lg bg-surface hover:bg-canvas text-ink border border-borderSubtle text-xs font-medium transition"
+        >
+          Open TO picker
+        </button>
+        <button
+          type="button"
+          onclick="applyQuickPreset('1d', true)"
+          class="px-2.5 py-1 rounded-lg bg-surface hover:bg-canvas text-ink border border-borderSubtle text-xs font-medium transition"
+        >
+          Test 24h range
+        </button>
+      </div>
+    </header>
+
+    <!-- Realistic Historical Data Filter Bar Card -->
+    <section class="relative bg-surface border border-borderSubtle rounded-xl p-5 shadow-2xs space-y-4">
+
+      <!-- Row 1: Quick Range Presets + Paired FROM / TO Triggers + Duration Summary -->
+      <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-4">
+        <div class="flex flex-wrap items-end gap-3.5">
+
+          <!-- Quick Range Presets -->
+          <div>
+            <span class="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">Time range</span>
+            <div class="inline-flex flex-wrap items-center gap-1.5" role="group" aria-label="Time range presets">
+              <button
+                type="button"
+                data-preset="1h"
+                onclick="applyQuickPreset('1h')"
+                class="preset-btn px-3 py-2 rounded-lg text-xs font-medium border border-borderSubtle bg-surface text-ink hover:bg-canvas transition"
+              >
+                1 hour
+              </button>
+              <button
+                type="button"
+                data-preset="2h"
+                onclick="applyQuickPreset('2h')"
+                class="preset-btn px-3 py-2 rounded-lg text-xs font-medium border border-borderSubtle bg-surface text-ink hover:bg-canvas transition"
+              >
+                2 hours
+              </button>
+              <button
+                type="button"
+                data-preset="1d"
+                onclick="applyQuickPreset('1d')"
+                class="preset-btn px-3 py-2 rounded-lg text-xs font-medium border border-borderSubtle bg-surface text-ink hover:bg-canvas transition"
+              >
+                1 day
+              </button>
+              <button
+                type="button"
+                data-preset="1w"
+                onclick="applyQuickPreset('1w')"
+                class="preset-btn px-3 py-2 rounded-lg text-xs font-semibold border border-brand-border bg-brand-soft text-brand transition"
+              >
+                1 week
+              </button>
+              <span
+                id="customPresetBadge"
+                class="hidden items-center gap-1 px-2.5 py-2 rounded-lg text-xs font-semibold border border-brand-border bg-brand-soft text-brand"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-brand"></span>
+                Custom
+              </span>
+            </div>
+          </div>
+
+          <!-- Paired Input Triggers: FROM and TO (Wide enough so seconds never clip) -->
+          <div id="triggersAnchor" class="relative flex flex-wrap sm:flex-nowrap items-end gap-3">
+
+            <!-- FROM Trigger -->
+            <div>
+              <label for="fromTriggerBtn" class="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
+                From
+              </label>
+              <button
+                id="fromTriggerBtn"
+                type="button"
+                onclick="togglePopover('from')"
+                class="w-full sm:w-[228px] flex items-center justify-between gap-2.5 px-3.5 py-2 rounded-lg bg-surface border text-left transition focus:outline-none"
+              >
+                <span id="fromTriggerText" class="font-mono text-xs font-medium text-ink tabular-nums whitespace-nowrap">
+                  18/11/2026, 17:11:16
+                </span>
+                <svg class="w-4 h-4 text-muted shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2.5" />
+                  <path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Connector Arrow -->
+            <div class="hidden sm:flex items-center justify-center pb-2.5 text-muted">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </div>
+
+            <!-- TO Trigger -->
+            <div>
+              <label for="toTriggerBtn" class="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
+                To
+              </label>
+              <button
+                id="toTriggerBtn"
+                type="button"
+                onclick="togglePopover('to')"
+                class="w-full sm:w-[228px] flex items-center justify-between gap-2.5 px-3.5 py-2 rounded-lg bg-surface border text-left transition focus:outline-none"
+              >
+                <span id="toTriggerText" class="font-mono text-xs font-medium text-ink tabular-nums whitespace-nowrap">
+                  25/11/2026, 17:11:16
+                </span>
+                <svg class="w-4 h-4 text-muted shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2.5" />
+                  <path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- =================================================================
+                 INTERACTIVE CUSTOM DATETIME RANGE POPOVER (Open by default on FROM)
+                 ================================================================= -->
+            <div
+              id="dateTimePopover"
+              role="dialog"
+              aria-label="Select date and time range"
+              class="z-40 mt-2 w-[94vw] max-w-[630px] bg-surface border border-borderSubtle rounded-[10px] shadow-xl overflow-hidden"
+            >
+              <!-- Popover Header: Active Boundary Indicator & Instant FROM/TO Switcher -->
+              <div class="px-4 py-3 bg-[#FAFBFD] border-b border-borderSubtle flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-brand"></span>
+                  <span id="editingBoundaryLabel" class="text-xs font-semibold text-ink">
+                    Editing FROM boundary
+                  </span>
+                </div>
+
+                <!-- Quick Toggle Pill between FROM and TO -->
+                <div class="inline-flex items-center p-0.5 rounded-lg bg-canvas border border-borderSubtle">
+                  <button
+                    id="switchToFromPill"
+                    type="button"
+                    onclick="switchPopoverBoundary('from')"
+                    class="px-2.5 py-1 rounded-md text-[11px] font-semibold transition"
+                  >
+                    FROM
+                  </button>
+                  <button
+                    id="switchToToPill"
+                    type="button"
+                    onclick="switchPopoverBoundary('to')"
+                    class="px-2.5 py-1 rounded-md text-[11px] font-medium transition"
+                  >
+                    TO
+                  </button>
+                </div>
+              </div>
+
+              <!-- Subtle Feedback Banner (e.g., when TO is clamped/shifted automatically) -->
+              <div id="popoverFeedbackBanner" class="hidden px-4 py-2 bg-brand-soft border-b border-brand-border text-[11.5px] font-medium text-brand flex items-center justify-between gap-2">
+                <span id="popoverFeedbackText"></span>
+                <button type="button" onclick="hidePopoverFeedback()" class="text-brand/70 hover:text-brand font-semibold">OK</button>
+              </div>
+
+              <!-- Popover Main Body: Left Calendar Grid + Right Compact Time Picker -->
+              <div class="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-borderSubtle">
+
+                <!-- LEFT SIDE (7 cols): Calendar Grid with Range Band -->
+                <div class="md:col-span-7 p-4">
+                  <!-- Month / Year Header with Horizontal Arrows & Quick Selectors -->
+                  <div class="flex items-center justify-between gap-2 mb-3">
+                    <button
+                      type="button"
+                      onclick="navigateMonth(-1)"
+                      class="w-8 h-8 rounded-lg border border-borderSubtle bg-surface hover:bg-canvas hover:border-borderStrong flex items-center justify-center text-ink transition"
+                      title="Previous month"
+                      aria-label="Previous month"
+                    >
+                      <span class="text-sm font-semibold leading-none">&lsaquo;</span>
+                    </button>
+
+                    <div class="flex items-center gap-1.5">
+                      <select
+                        id="calendarMonthSelect"
+                        onchange="handleMonthYearSelect()"
+                        aria-label="Select month"
+                        class="text-xs font-semibold text-ink bg-canvas hover:bg-surface border border-borderSubtle focus:border-brand rounded-lg px-2.5 py-1.5 outline-none cursor-pointer transition"
+                      >
+                        <option value="0">January</option>
+                        <option value="1">February</option>
+                        <option value="2">March</option>
+                        <option value="3">April</option>
+                        <option value="4">May</option>
+                        <option value="5">June</option>
+                        <option value="6">July</option>
+                        <option value="7">August</option>
+                        <option value="8">September</option>
+                        <option value="9">October</option>
+                        <option value="10">November</option>
+                        <option value="11">December</option>
+                      </select>
+
+                      <select
+                        id="calendarYearSelect"
+                        onchange="handleMonthYearSelect()"
+                        aria-label="Select year"
+                        class="font-mono text-xs font-semibold text-ink bg-canvas hover:bg-surface border border-borderSubtle focus:border-brand rounded-lg px-2.5 py-1.5 outline-none cursor-pointer tabular-nums transition"
+                      >
+                        <option value="2025">2025</option>
+                        <option value="2026" selected>2026</option>
+                        <option value="2027">2027</option>
+                      </select>
+                    </div>
+
+                    <button
+                      type="button"
+                      onclick="navigateMonth(1)"
+                      class="w-8 h-8 rounded-lg border border-borderSubtle bg-surface hover:bg-canvas hover:border-borderStrong flex items-center justify-center text-ink transition"
+                      title="Next month"
+                      aria-label="Next month"
+                    >
+                      <span class="text-sm font-semibold leading-none">&rsaquo;</span>
+                    </button>
+                  </div>
+
+                  <!-- Weekday Headers (Mon–Sun in JetBrains Mono) -->
+                  <div class="grid grid-cols-7 mb-1.5 text-center">
+                    <span class="font-mono text-[11px] font-semibold text-muted py-1">Mon</span>
+                    <span class="font-mono text-[11px] font-semibold text-muted py-1">Tue</span>
+                    <span class="font-mono text-[11px] font-semibold text-muted py-1">Wed</span>
+                    <span class="font-mono text-[11px] font-semibold text-muted py-1">Thu</span>
+                    <span class="font-mono text-[11px] font-semibold text-muted py-1">Fri</span>
+                    <span class="font-mono text-[11px] font-semibold text-muted py-1">Sat</span>
+                    <span class="font-mono text-[11px] font-semibold text-muted py-1">Sun</span>
+                  </div>
+
+                  <!-- Calendar Days Grid -->
+                  <div id="calendarDaysGrid" class="grid grid-cols-7 gap-y-1 text-center">
+                    <!-- Rendered dynamically -->
+                  </div>
+
+                  <!-- Legend -->
+                  <div class="mt-3 pt-2.5 border-t border-borderSubtle/70 flex items-center justify-between text-[11px] text-muted">
+                    <div class="flex items-center gap-3">
+                      <span class="inline-flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-sm bg-brand"></span>
+                        Start / End
+                      </span>
+                      <span class="inline-flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-sm bg-brand-soft border border-brand-border"></span>
+                        In range
+                      </span>
+                    </div>
+                    <span class="inline-flex items-center gap-1.5">
+                      <span class="w-2.5 h-2.5 rounded-full ring-1 ring-brand"></span>
+                      Today (25 Nov)
+                    </span>
+                  </div>
+                </div>
+
+                <!-- RIGHT SIDE (5 cols): Compact Time Picker -->
+                <div class="md:col-span-5 p-4 flex flex-col justify-between bg-[#FAFBFD]/40">
+                  <div>
+                    <div class="flex items-center justify-between mb-2.5">
+                      <span class="text-xs font-semibold text-ink">Time (UTC)</span>
+                      <span id="activeDatePill" class="font-mono text-[11px] font-semibold px-2 py-0.5 rounded bg-brand-soft text-brand tabular-nums">
+                        18/11/2026
+                      </span>
+                    </div>
+
+                    <!-- Segmented Numeric Inputs (HH : MM : SS) -->
+                    <div class="grid grid-cols-3 gap-2 mb-3">
+                      <!-- Hours -->
+                      <div>
+                        <label for="hourInput" class="block text-[10px] font-semibold uppercase tracking-wider text-muted text-center mb-1">Hours</label>
+                        <div class="flex items-center rounded-lg bg-surface border border-borderSubtle focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/15 overflow-hidden">
+                          <button type="button" onclick="stepTimePart('hours', -1)" class="px-1.5 py-1.5 text-muted hover:text-ink hover:bg-canvas text-xs font-semibold transition" aria-label="Decrease hours">&minus;</button>
+                          <input
+                            id="hourInput"
+                            type="number"
+                            min="0"
+                            max="23"
+                            value="17"
+                            onchange="handleManualTimeInput('hours', this.value)"
+                            class="w-full text-center font-mono text-xs font-semibold text-ink tabular-nums py-1.5 outline-none bg-transparent"
+                          />
+                          <button type="button" onclick="stepTimePart('hours', 1)" class="px-1.5 py-1.5 text-muted hover:text-ink hover:bg-canvas text-xs font-semibold transition" aria-label="Increase hours">+</button>
+                        </div>
+                      </div>
+
+                      <!-- Minutes -->
+                      <div>
+                        <label for="minuteInput" class="block text-[10px] font-semibold uppercase tracking-wider text-muted text-center mb-1">Minutes</label>
+                        <div class="flex items-center rounded-lg bg-surface border border-borderSubtle focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/15 overflow-hidden">
+                          <button type="button" onclick="stepTimePart('minutes', -1)" class="px-1.5 py-1.5 text-muted hover:text-ink hover:bg-canvas text-xs font-semibold transition" aria-label="Decrease minutes">&minus;</button>
+                          <input
+                            id="minuteInput"
+                            type="number"
+                            min="0"
+                            max="59"
+                            value="11"
+                            onchange="handleManualTimeInput('minutes', this.value)"
+                            class="w-full text-center font-mono text-xs font-semibold text-ink tabular-nums py-1.5 outline-none bg-transparent"
+                          />
+                          <button type="button" onclick="stepTimePart('minutes', 1)" class="px-1.5 py-1.5 text-muted hover:text-ink hover:bg-canvas text-xs font-semibold transition" aria-label="Increase minutes">+</button>
+                        </div>
+                      </div>
+
+                      <!-- Seconds -->
+                      <div>
+                        <label for="secondInput" class="block text-[10px] font-semibold uppercase tracking-wider text-muted text-center mb-1">Seconds</label>
+                        <div class="flex items-center rounded-lg bg-surface border border-borderSubtle focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/15 overflow-hidden">
+                          <button type="button" onclick="stepTimePart('seconds', -1)" class="px-1.5 py-1.5 text-muted hover:text-ink hover:bg-canvas text-xs font-semibold transition" aria-label="Decrease seconds">&minus;</button>
+                          <input
+                            id="secondInput"
+                            type="number"
+                            min="0"
+                            max="59"
+                            value="16"
+                            onchange="handleManualTimeInput('seconds', this.value)"
+                            class="w-full text-center font-mono text-xs font-semibold text-ink tabular-nums py-1.5 outline-none bg-transparent"
+                          />
+                          <button type="button" onclick="stepTimePart('seconds', 1)" class="px-1.5 py-1.5 text-muted hover:text-ink hover:bg-canvas text-xs font-semibold transition" aria-label="Increase seconds">+</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Synchronized Compact Scrollable Mini-Columns (max 4 visible rows) -->
+                    <div class="grid grid-cols-3 gap-2 p-1.5 rounded-lg bg-surface border border-borderSubtle mb-3">
+                      <div id="hoursDrum" class="time-drum space-y-0.5 pr-0.5"></div>
+                      <div id="minutesDrum" class="time-drum space-y-0.5 pr-0.5"></div>
+                      <div id="secondsDrum" class="time-drum space-y-0.5 pr-0.5"></div>
+                    </div>
+                  </div>
+
+                  <!-- Quick Time Preset Chips -->
+                  <div>
+                    <span class="block text-[10.5px] font-semibold uppercase tracking-wider text-muted mb-1.5">Quick time presets</span>
+                    <div class="grid grid-cols-2 gap-1.5">
+                      <button
+                        type="button"
+                        onclick="applyTimeOfDay(0, 0, 0)"
+                        class="px-2 py-1.5 rounded-lg bg-surface border border-borderSubtle hover:border-brand-border hover:bg-brand-soft/60 text-left transition group"
+                      >
+                        <span class="block font-mono text-[11px] font-semibold text-ink group-hover:text-brand tabular-nums">00:00:00</span>
+                        <span class="block text-[10px] text-muted">Start of day</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onclick="applyTimeOfDay(12, 0, 0)"
+                        class="px-2 py-1.5 rounded-lg bg-surface border border-borderSubtle hover:border-brand-border hover:bg-brand-soft/60 text-left transition group"
+                      >
+                        <span class="block font-mono text-[11px] font-semibold text-ink group-hover:text-brand tabular-nums">12:00:00</span>
+                        <span class="block text-[10px] text-muted">Midday</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onclick="applyTimeOfDay(23, 59, 59)"
+                        class="px-2 py-1.5 rounded-lg bg-surface border border-borderSubtle hover:border-brand-border hover:bg-brand-soft/60 text-left transition group"
+                      >
+                        <span class="block font-mono text-[11px] font-semibold text-ink group-hover:text-brand tabular-nums">23:59:59</span>
+                        <span class="block text-[10px] text-muted">End of day</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onclick="applyTimeOfDay(17, 13, 0)"
+                        class="px-2 py-1.5 rounded-lg bg-surface border border-borderSubtle hover:border-brand-border hover:bg-brand-soft/60 text-left transition group"
+                      >
+                        <span class="block font-mono text-[11px] font-semibold text-brand tabular-nums">Now</span>
+                        <span class="block text-[10px] text-muted font-mono tabular-nums">17:13:00</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Popover Footer -->
+              <div class="px-4 py-3 bg-[#FAFBFD] border-t border-borderSubtle flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onclick="resetDraftToOneWeek()"
+                    class="text-xs font-medium text-muted hover:text-ink transition"
+                  >
+                    Reset to 1 week
+                  </button>
+                  <span id="draftDurationBadge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-soft text-brand border border-brand-border font-mono text-[11px] font-semibold tabular-nums">
+                    7d 00h 00m selected
+                  </span>
+                </div>
+
+                <div class="flex items-center gap-2 ml-auto">
+                  <button
+                    type="button"
+                    onclick="cancelPopoverChanges()"
+                    class="px-3.5 py-1.5 rounded-lg bg-surface border border-borderStrong hover:bg-canvas text-ink text-xs font-semibold transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onclick="applyPopoverChanges()"
+                    class="px-4 py-1.5 rounded-lg bg-brand hover:bg-brand-hover text-white text-xs font-semibold shadow-2xs transition"
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- END POPOVER -->
+
+          </div>
+        </div>
+
+        <!-- Live Applied Duration Summary Badge -->
+        <div class="flex items-center gap-2 self-start xl:self-end">
+          <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-canvas border border-borderSubtle text-xs">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span class="text-muted">Window:</span>
+            <span id="appliedDurationBadge" class="font-mono font-semibold text-ink tabular-nums">7d 00h 00m selected</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Row 2: Subtle Preview of Historical Data Search Row (Shows clean overlay behavior) -->
+      <div class="pt-3 border-t border-borderSubtle/80">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <div>
+            <label class="block text-[11px] font-semibold text-muted mb-1">ID</label>
+            <input
+              type="text"
+              placeholder="e.g. 132.132"
+              class="w-full font-mono text-xs px-3 py-2 rounded-lg bg-canvas border border-borderSubtle text-ink placeholder:text-[#94A3B8] outline-none focus:border-brand transition"
+            />
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-muted mb-1">Email</label>
+            <input
+              type="text"
+              placeholder="e.g. test@mail.ru444x"
+              class="w-full font-mono text-xs px-3 py-2 rounded-lg bg-canvas border border-borderSubtle text-ink placeholder:text-[#94A3B8] outline-none focus:border-brand transition"
+            />
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-muted mb-1">Party ID</label>
+            <input
+              type="text"
+              placeholder="e.g. party-wb-id"
+              class="w-full font-mono text-xs px-3 py-2 rounded-lg bg-canvas border border-borderSubtle text-ink placeholder:text-[#94A3B8] outline-none focus:border-brand transition"
+            />
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-muted mb-1">Shop ID</label>
+            <input
+              type="text"
+              placeholder="e.g. shop-wb-id"
+              class="w-full font-mono text-xs px-3 py-2 rounded-lg bg-canvas border border-borderSubtle text-ink placeholder:text-[#94A3B8] outline-none focus:border-brand transition"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Subtle Preview of Historical Data Table Beneath Filter Bar -->
+    <section class="bg-surface border border-borderSubtle rounded-xl shadow-2xs overflow-hidden">
+      <div class="px-5 py-3 border-b border-borderSubtle bg-[#FAFBFD] flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2">
+          <span class="font-semibold text-ink">Inspect results</span>
+          <span class="text-muted">&bull;</span>
+          <span id="tableWindowPreviewLabel" class="font-mono text-[11px] text-muted tabular-nums">
+            Filtered: 18/11/2026 17:11:16 &rarr; 25/11/2026 17:11:16
+          </span>
+        </div>
+        <span class="text-muted tabular-nums">Showing 3 sample rows</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-borderSubtle bg-[#FAFBFD] text-[11px] font-semibold uppercase tracking-wider text-muted">
+              <th class="py-2.5 pl-5 pr-3">ID</th>
+              <th class="py-2.5 px-3">Result status</th>
+              <th class="py-2.5 px-3">Party ID</th>
+              <th class="py-2.5 px-3">Shop ID</th>
+              <th class="py-2.5 px-3">Email</th>
+              <th class="py-2.5 px-3">Template</th>
+              <th class="py-2.5 pl-3 pr-5">Event time</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-borderSubtle text-xs">
+            <tr class="hover:bg-[#FAFBFD] transition">
+              <td class="py-3 pl-5 pr-3 font-mono font-semibold text-ink tabular-nums">132.132</td>
+              <td class="py-3 px-3">
+                <span class="inline-flex items-center gap-1.5 font-mono text-[11px] font-semibold px-2.5 py-0.5 rounded-md border bg-rose-50 text-rose-700 border-rose-200">
+                  <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>decline
+                </span>
+              </td>
+              <td class="py-3 px-3 font-mono text-ink">party-wb-id</td>
+              <td class="py-3 px-3 font-mono text-ink">shop-wb-id</td>
+              <td class="py-3 px-3 font-mono text-ink">test@mail.ru444x</td>
+              <td class="py-3 px-3 font-mono text-brand font-medium">black-list-template-id</td>
+              <td class="py-3 pl-3 pr-5 font-mono text-ink tabular-nums">2026-11-24 13:16:28</td>
+            </tr>
+            <tr class="hover:bg-[#FAFBFD] transition">
+              <td class="py-3 pl-5 pr-3 font-mono font-semibold text-ink tabular-nums">997.997</td>
+              <td class="py-3 px-3">
+                <span class="inline-flex items-center gap-1.5 font-mono text-[11px] font-semibold px-2.5 py-0.5 rounded-md border bg-emerald-50 text-emerald-700 border-emerald-200">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>accept
+                </span>
+              </td>
+              <td class="py-3 px-3 font-mono text-ink">party-wb-id</td>
+              <td class="py-3 px-3 font-mono text-ink">shop-wb-id</td>
+              <td class="py-3 px-3 font-mono text-ink">test@mail.ru444x</td>
+              <td class="py-3 px-3 font-mono text-brand font-medium">grey-list-template-id</td>
+              <td class="py-3 pl-3 pr-5 font-mono text-ink tabular-nums">2026-11-24 13:16:08</td>
+            </tr>
+            <tr class="hover:bg-[#FAFBFD] transition">
+              <td class="py-3 pl-5 pr-3 font-mono font-semibold text-ink tabular-nums">640.640</td>
+              <td class="py-3 px-3">
+                <span class="inline-flex items-center gap-1.5 font-mono text-[11px] font-semibold px-2.5 py-0.5 rounded-md border bg-sky-50 text-sky-700 border-sky-200">
+                  <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>three_ds
+                </span>
+              </td>
+              <td class="py-3 px-3 font-mono text-ink">party-wb-id</td>
+              <td class="py-3 px-3 font-mono text-ink">shop-wb-id</td>
+              <td class="py-3 px-3 font-mono text-ink">test@mail.ru444</td>
+              <td class="py-3 px-3 font-mono text-muted">&mdash;</td>
+              <td class="py-3 pl-3 pr-5 font-mono text-ink tabular-nums">2026-11-24 13:15:47</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    // =========================================================================
+    // STATE & DATE HELPERS (UTC-based so dates never shift by local timezone)
+    // =========================================================================
+    const TODAY_UTC = new Date(Date.UTC(2026, 10, 25, 17, 13, 0)); // Nov 25, 2026
+
+    let committedFrom = new Date(Date.UTC(2026, 10, 18, 17, 11, 16));
+    let committedTo = new Date(Date.UTC(2026, 10, 25, 17, 11, 16));
+    let activePreset = '1w';
+
+    // Draft state edited inside popover before clicking Apply
+    let draftFrom = new Date(committedFrom.getTime());
+    let draftTo = new Date(committedTo.getTime());
+    let activeBoundary = 'from'; // 'from' | 'to'
+    let isPopoverOpen = true;
+    let viewYear = 2026;
+    let viewMonth = 10; // 0-indexed (10 = November)
+
+    function pad2(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    function formatDateTimeDisplay(date) {
+      const dd = pad2(date.getUTCDate());
+      const mm = pad2(date.getUTCMonth() + 1);
+      const yyyy = date.getUTCFullYear();
+      const hh = pad2(date.getUTCHours());
+      const min = pad2(date.getUTCMinutes());
+      const ss = pad2(date.getUTCSeconds());
+      return `${dd}/${mm}/${yyyy}, ${hh}:${min}:${ss}`;
+    }
+
+    function formatDateOnly(date) {
+      return `${pad2(date.getUTCDate())}/${pad2(date.getUTCMonth() + 1)}/${date.getUTCFullYear()}`;
+    }
+
+    function startOfDayUTC(date) {
+      return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+    }
+
+    function formatDurationSummary(fromDate, toDate) {
+      const diffMs = Math.max(0, toDate.getTime() - fromDate.getTime());
+      const totalMinutes = Math.floor(diffMs / 60000);
+      const days = Math.floor(totalMinutes / (60 * 24));
+      const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+      const minutes = totalMinutes % 60;
+      return `${days}d ${pad2(hours)}h ${pad2(minutes)}m selected`;
+    }
+
+    // =========================================================================
+    // POPOVER OPEN / CLOSE / POSITIONING
+    // =========================================================================
+    function positionPopoverSmartly() {
+      const popover = document.getElementById('dateTimePopover');
+      const anchor = document.getElementById('triggersAnchor');
+      if (!popover || !anchor) return;
+
+      popover.style.position = 'absolute';
+      popover.style.top = '100%';
+      popover.style.left = '0px';
+      popover.style.right = 'auto';
+
+      const rect = popover.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+
+      if (rect.right > viewportWidth - 16) {
+        const overflow = rect.right - (viewportWidth - 16);
+        popover.style.left = `${Math.max(-anchor.getBoundingClientRect().left + 12, -overflow)}px`;
+      }
+    }
+
+    function openPopover(boundary = 'from') {
+      draftFrom = new Date(committedFrom.getTime());
+      draftTo = new Date(committedTo.getTime());
+      activeBoundary = boundary;
+      isPopoverOpen = true;
+
+      const targetDate = boundary === 'from' ? draftFrom : draftTo;
+      viewYear = targetDate.getUTCFullYear();
+      viewMonth = targetDate.getUTCMonth();
+
+      hidePopoverFeedback();
+      document.getElementById('dateTimePopover').classList.remove('hidden');
+      renderAll();
+      positionPopoverSmartly();
+    }
+
+    function closePopover() {
+      isPopoverOpen = false;
+      document.getElementById('dateTimePopover').classList.add('hidden');
+      updateTriggerStyles();
+    }
+
+    function togglePopover(boundary) {
+      if (isPopoverOpen && activeBoundary === boundary) {
+        closePopover();
+      } else if (isPopoverOpen) {
+        switchPopoverBoundary(boundary);
+      } else {
+        openPopover(boundary);
+      }
+    }
+
+    function switchPopoverBoundary(boundary) {
+      activeBoundary = boundary;
+      const targetDate = boundary === 'from' ? draftFrom : draftTo;
+      viewYear = targetDate.getUTCFullYear();
+      viewMonth = targetDate.getUTCMonth();
+      renderPopoverUI();
+    }
+
+    function showPopoverFeedback(msg) {
+      const banner = document.getElementById('popoverFeedbackBanner');
+      document.getElementById('popoverFeedbackText').textContent = msg;
+      banner.classList.remove('hidden');
+    }
+
+    function hidePopoverFeedback() {
+      document.getElementById('popoverFeedbackBanner').classList.add('hidden');
+    }
+
+    // =========================================================================
+    // CALENDAR NAVIGATION & DAY SELECTION WITH RANGE VALIDATION
+    // =========================================================================
+    function navigateMonth(delta) {
+      viewMonth += delta;
+      if (viewMonth < 0) {
+        viewMonth = 11;
+        viewYear -= 1;
+      } else if (viewMonth > 11) {
+        viewMonth = 0;
+        viewYear += 1;
+      }
+      renderCalendarGrid();
+    }
+
+    function handleMonthYearSelect() {
+      viewMonth = Number(document.getElementById('calendarMonthSelect').value);
+      viewYear = Number(document.getElementById('calendarYearSelect').value);
+      renderCalendarGrid();
+    }
+
+    function selectCalendarDay(year, month, day) {
+      const currentIntervalMs = Math.max(3600000, draftTo.getTime() - draftFrom.getTime());
+
+      if (activeBoundary === 'from') {
+        const nextFrom = new Date(
+          Date.UTC(
+            year,
+            month,
+            day,
+            draftFrom.getUTCHours(),
+            draftFrom.getUTCMinutes(),
+            draftFrom.getUTCSeconds()
+          )
+        );
+        draftFrom = nextFrom;
+
+        // Validation: if FROM is moved past TO, automatically shift TO forward by the same interval
+        if (draftFrom.getTime() > draftTo.getTime()) {
+          draftTo = new Date(draftFrom.getTime() + currentIntervalMs);
+          showPopoverFeedback('TO boundary shifted forward automatically to preserve a valid range.');
+        } else {
+          hidePopoverFeedback();
+        }
+      } else {
+        const nextTo = new Date(
+          Date.UTC(
+            year,
+            month,
+            day,
+            draftTo.getUTCHours(),
+            draftTo.getUTCMinutes(),
+            draftTo.getUTCSeconds()
+          )
+        );
+
+        // Validation: prevent setting TO earlier than FROM
+        if (nextTo.getTime() < draftFrom.getTime()) {
+          draftTo = new Date(draftFrom.getTime());
+          showPopoverFeedback('TO cannot be earlier than FROM — clamped to start boundary.');
+        } else {
+          draftTo = nextTo;
+          hidePopoverFeedback();
+        }
+      }
+
+      viewYear = year;
+      viewMonth = month;
+      renderPopoverUI();
+    }
+
+    // =========================================================================
+    // TIME PICKER CONTROLS (Segmented Inputs, Steppers, Mini-Drums, Presets)
+    // =========================================================================
+    function getActiveDraftDate() {
+      return activeBoundary === 'from' ? draftFrom : draftTo;
+    }
+
+    function setActiveDraftTime(hours, minutes, seconds) {
+      const h = Math.max(0, Math.min(23, Number(hours) || 0));
+      const m = Math.max(0, Math.min(59, Number(minutes) || 0));
+      const s = Math.max(0, Math.min(59, Number(seconds) || 0));
+
+      const target = getActiveDraftDate();
+      target.setUTCHours(h, m, s, 0);
+
+      // Keep TO >= FROM if same day time adjustment crosses boundary
+      if (draftTo.getTime() < draftFrom.getTime()) {
+        if (activeBoundary === 'from') {
+          draftTo = new Date(draftFrom.getTime());
+          showPopoverFeedback('TO time matched to FROM so end time is never earlier than start.');
+        } else {
+          draftTo = new Date(draftFrom.getTime());
+          showPopoverFeedback('TO time clamped to FROM boundary.');
+        }
+      }
+
+      renderPopoverUI();
+    }
+
+    function stepTimePart(part, delta) {
+      const target = getActiveDraftDate();
+      let h = target.getUTCHours();
+      let m = target.getUTCMinutes();
+      let s = target.getUTCSeconds();
+
+      if (part === 'hours') h = (h + delta + 24) % 24;
+      if (part === 'minutes') m = (m + delta + 60) % 60;
+      if (part === 'seconds') s = (s + delta + 60) % 60;
+
+      setActiveDraftTime(h, m, s);
+    }
+
+    function handleManualTimeInput(part, rawVal) {
+      const target = getActiveDraftDate();
+      let h = target.getUTCHours();
+      let m = target.getUTCMinutes();
+      let s = target.getUTCSeconds();
+
+      const val = parseInt(rawVal, 10);
+      if (part === 'hours') h = isNaN(val) ? 0 : val;
+      if (part === 'minutes') m = isNaN(val) ? 0 : val;
+      if (part === 'seconds') s = isNaN(val) ? 0 : val;
+
+      setActiveDraftTime(h, m, s);
+    }
+
+    function applyTimeOfDay(h, m, s) {
+      setActiveDraftTime(h, m, s);
+    }
+
+    // =========================================================================
+    // QUICK PRESETS, APPLY, CANCEL & RESET
+    // =========================================================================
+    function applyQuickPreset(preset, openAfter = false) {
+      activePreset = preset;
+      const anchorEnd = new Date(Date.UTC(2026, 10, 25, 17, 11, 16));
+      const offsets = {
+        '1h': 1 * 3600 * 1000,
+        '2h': 2 * 3600 * 1000,
+        '1d': 24 * 3600 * 1000,
+        '1w': 7 * 24 * 3600 * 1000,
+      };
+
+      committedTo = new Date(anchorEnd.getTime());
+      committedFrom = new Date(anchorEnd.getTime() - (offsets[preset] || offsets['1w']));
+      draftFrom = new Date(committedFrom.getTime());
+      draftTo = new Date(committedTo.getTime());
+
+      if (openAfter) {
+        openPopover('from');
+      } else {
+        renderAll();
+      }
+
+      const labels = { '1h': '1 hour', '2h': '2 hours', '1d': '1 day', '1w': '1 week' };
+      showToast(`Applied "${labels[preset]}" range (${formatDurationSummary(committedFrom, committedTo)})`, 'info');
+    }
+
+    function resetDraftToOneWeek() {
+      const anchorEnd = new Date(Date.UTC(2026, 10, 25, 17, 11, 16));
+      draftTo = new Date(anchorEnd.getTime());
+      draftFrom = new Date(anchorEnd.getTime() - 7 * 24 * 3600 * 1000);
+      viewYear = (activeBoundary === 'from' ? draftFrom : draftTo).getUTCFullYear();
+      viewMonth = (activeBoundary === 'from' ? draftFrom : draftTo).getUTCMonth();
+      hidePopoverFeedback();
+      renderPopoverUI();
+      showToast('Draft reset to default 1 week window', 'info');
+    }
+
+    function cancelPopoverChanges() {
+      draftFrom = new Date(committedFrom.getTime());
+      draftTo = new Date(committedTo.getTime());
+      closePopover();
+      showToast('Reverted uncommitted range changes', 'info');
+    }
+
+    function applyPopoverChanges() {
+      committedFrom = new Date(draftFrom.getTime());
+      committedTo = new Date(draftTo.getTime());
+
+      // Detect if committed duration matches a standard preset
+      const diffMs = committedTo.getTime() - committedFrom.getTime();
+      if (diffMs === 3600000) activePreset = '1h';
+      else if (diffMs === 7200000) activePreset = '2h';
+      else if (diffMs === 86400000) activePreset = '1d';
+      else if (diffMs === 604800000) activePreset = '1w';
+      else activePreset = 'custom';
+
+      closePopover();
+      renderAll();
+      showToast(`Applied range: ${formatDurationSummary(committedFrom, committedTo)}`, 'success');
+    }
+
+    // =========================================================================
+    // RENDERING FUNCTIONS
+    // =========================================================================
+    function renderAll() {
+      renderPresetBar();
+      renderTriggers();
+      if (isPopoverOpen) {
+        renderPopoverUI();
+      }
+    }
+
+    function renderPresetBar() {
+      document.querySelectorAll('.preset-btn').forEach((btn) => {
+        const isMatch = btn.dataset.preset === activePreset;
+        btn.className = isMatch
+          ? 'preset-btn px-3 py-2 rounded-lg text-xs font-semibold border border-brand-border bg-brand-soft text-brand transition'
+          : 'preset-btn px-3 py-2 rounded-lg text-xs font-medium border border-borderSubtle bg-surface text-ink hover:bg-canvas transition';
+      });
+
+      const customBadge = document.getElementById('customPresetBadge');
+      if (activePreset === 'custom') {
+        customBadge.classList.remove('hidden');
+        customBadge.classList.add('inline-flex');
+      } else {
+        customBadge.classList.add('hidden');
+        customBadge.classList.remove('inline-flex');
+      }
+
+      const summary = formatDurationSummary(committedFrom, committedTo);
+      document.getElementById('appliedDurationBadge').textContent = summary;
+      document.getElementById('tableWindowPreviewLabel').textContent =
+        `Filtered: ${formatDateTimeDisplay(committedFrom).replace(',', '')} \u2192 ${formatDateTimeDisplay(committedTo).replace(',', '')}`;
+    }
+
+    function renderTriggers() {
+      document.getElementById('fromTriggerText').textContent = formatDateTimeDisplay(
+        isPopoverOpen ? draftFrom : committedFrom
+      );
+      document.getElementById('toTriggerText').textContent = formatDateTimeDisplay(
+        isPopoverOpen ? draftTo : committedTo
+      );
+      updateTriggerStyles();
+    }
+
+    function updateTriggerStyles() {
+      const fromBtn = document.getElementById('fromTriggerBtn');
+      const toBtn = document.getElementById('toTriggerBtn');
+
+      const fromActive = isPopoverOpen && activeBoundary === 'from';
+      const toActive = isPopoverOpen && activeBoundary === 'to';
+
+      fromBtn.className = fromActive
+        ? 'w-full sm:w-[228px] flex items-center justify-between gap-2.5 px-3.5 py-2 rounded-lg bg-surface border border-brand ring-2 ring-brand/15 text-left transition focus:outline-none'
+        : 'w-full sm:w-[228px] flex items-center justify-between gap-2.5 px-3.5 py-2 rounded-lg bg-surface border border-borderSubtle hover:border-borderStrong text-left transition focus:outline-none';
+
+      toBtn.className = toActive
+        ? 'w-full sm:w-[228px] flex items-center justify-between gap-2.5 px-3.5 py-2 rounded-lg bg-surface border border-brand ring-2 ring-brand/15 text-left transition focus:outline-none'
+        : 'w-full sm:w-[228px] flex items-center justify-between gap-2.5 px-3.5 py-2 rounded-lg bg-surface border border-borderSubtle hover:border-borderStrong text-left transition focus:outline-none';
+    }
+
+    function renderPopoverUI() {
+      renderTriggers();
+
+      // Header boundary label & toggle pills
+      document.getElementById('editingBoundaryLabel').textContent =
+        activeBoundary === 'from' ? 'Editing FROM boundary' : 'Editing TO boundary';
+
+      const fromPill = document.getElementById('switchToFromPill');
+      const toPill = document.getElementById('switchToToPill');
+
+      fromPill.className =
+        activeBoundary === 'from'
+          ? 'px-2.5 py-1 rounded-md text-[11px] font-semibold bg-brand text-white shadow-2xs transition'
+          : 'px-2.5 py-1 rounded-md text-[11px] font-medium text-muted hover:text-ink transition';
+
+      toPill.className =
+        activeBoundary === 'to'
+          ? 'px-2.5 py-1 rounded-md text-[11px] font-semibold bg-brand text-white shadow-2xs transition'
+          : 'px-2.5 py-1 rounded-md text-[11px] font-medium text-muted hover:text-ink transition';
+
+      // Draft duration summary in footer
+      document.getElementById('draftDurationBadge').textContent = formatDurationSummary(draftFrom, draftTo);
+
+      renderCalendarGrid();
+      renderTimePickerControls();
+    }
+
+    function renderCalendarGrid() {
+      document.getElementById('calendarMonthSelect').value = String(viewMonth);
+      document.getElementById('calendarYearSelect').value = String(viewYear);
+
+      const grid = document.getElementById('calendarDaysGrid');
+      const firstOfMonth = new Date(Date.UTC(viewYear, viewMonth, 1));
+      // Convert Sunday=0..Saturday=6 into Monday=0..Sunday=6
+      const startWeekday = (firstOfMonth.getUTCDay() + 6) % 7;
+      const daysInMonth = new Date(Date.UTC(viewYear, viewMonth + 1, 0)).getUTCDate();
+      const prevMonthDays = new Date(Date.UTC(viewYear, viewMonth, 0)).getUTCDate();
+
+      const fromDayStart = startOfDayUTC(draftFrom);
+      const toDayStart = startOfDayUTC(draftTo);
+      const todayDayStart = startOfDayUTC(TODAY_UTC);
+
+      const cells = [];
+
+      // Leading adjacent month days
+      for (let i = startWeekday - 1; i >= 0; i--) {
+        const d = prevMonthDays - i;
+        const m = viewMonth === 0 ? 11 : viewMonth - 1;
+        const y = viewMonth === 0 ? viewYear - 1 : viewYear;
+        cells.push({ year: y, month: m, day: d, inCurrentMonth: false });
+      }
+
+      // Current month days
+      for (let d = 1; d <= daysInMonth; d++) {
+        cells.push({ year: viewYear, month: viewMonth, day: d, inCurrentMonth: true });
+      }
+
+      // Trailing adjacent month days to complete 42 cells (6 rows)
+      let nextDay = 1;
+      while (cells.length < 42) {
+        const m = viewMonth === 11 ? 0 : viewMonth + 1;
+        const y = viewMonth === 11 ? viewYear + 1 : viewYear;
+        cells.push({ year: y, month: m, day: nextDay++, inCurrentMonth: false });
+      }
+
+      grid.innerHTML = cells
+        .map((cell) => {
+          const cellDayMs = Date.UTC(cell.year, cell.month, cell.day);
+          const isStart = cellDayMs === fromDayStart;
+          const isEnd = cellDayMs === toDayStart;
+          const isEndpoint = isStart || isEnd;
+          const isInRange = cellDayMs > fromDayStart && cellDayMs < toDayStart;
+          const isToday = cellDayMs === todayDayStart;
+
+          // Wrapper band styling for seamless range highlight
+          let wrapperBg = '';
+          if (isStart && !isEnd) wrapperBg = 'bg-gradient-to-r from-transparent via-brand-soft to-brand-soft rounded-l-lg';
+          else if (isEnd && !isStart) wrapperBg = 'bg-gradient-to-l from-transparent via-brand-soft to-brand-soft rounded-r-lg';
+          else if (isInRange) wrapperBg = 'bg-brand-soft';
+
+          // Inner button styling
+          let btnClasses =
+            'w-8 h-8 mx-auto rounded-lg font-mono text-xs tabular-nums flex items-center justify-center transition ';
+
+          if (isEndpoint) {
+            btnClasses += 'bg-brand text-white font-semibold shadow-2xs ';
+          } else if (isInRange) {
+            btnClasses += 'text-brand font-semibold hover:bg-brand/10 ';
+          } else if (cell.inCurrentMonth) {
+            btnClasses += 'text-ink font-medium hover:bg-canvas ';
+          } else {
+            btnClasses += 'text-[#94A3B8] hover:bg-canvas ';
+          }
+
+          if (isToday && !isEndpoint) {
+            btnClasses += 'ring-1 ring-brand font-semibold ';
+          }
+
+          return `
+            <div class="py-0.5 ${wrapperBg}">
+              <button
+                type="button"
+                onclick="selectCalendarDay(${cell.year}, ${cell.month}, ${cell.day})"
+                class="${btnClasses}"
+                aria-label="${pad2(cell.day)}/${pad2(cell.month + 1)}/${cell.year}"
+              >
+                ${cell.day}
+              </button>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    function renderTimePickerControls() {
+      const target = getActiveDraftDate();
+      const curH = target.getUTCHours();
+      const curM = target.getUTCMinutes();
+      const curS = target.getUTCSeconds();
+
+      document.getElementById('activeDatePill').textContent = formatDateOnly(target);
+      document.getElementById('hourInput').value = pad2(curH);
+      document.getElementById('minuteInput').value = pad2(curM);
+      document.getElementById('secondInput').value = pad2(curS);
+
+      renderMiniDrum('hoursDrum', 24, curH, (val) => setActiveDraftTime(val, curM, curS));
+      renderMiniDrum('minutesDrum', 60, curM, (val) => setActiveDraftTime(curH, val, curS));
+      renderMiniDrum('secondsDrum', 60, curS, (val) => setActiveDraftTime(curH, curM, val));
+    }
+
+    function renderMiniDrum(containerId, count, activeValue, onSelectFn) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+
+      for (let i = 0; i < count; i++) {
+        const isSelected = i === activeValue;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = pad2(i);
+        btn.className = isSelected
+          ? 'w-full py-1 rounded-md font-mono text-xs font-semibold tabular-nums bg-brand text-white transition'
+          : 'w-full py-1 rounded-md font-mono text-xs font-medium tabular-nums text-ink hover:bg-brand-soft hover:text-brand transition';
+        btn.onclick = () => onSelectFn(i);
+        container.appendChild(btn);
+
+        if (isSelected) {
+          requestAnimationFrame(() => {
+            container.scrollTop = Math.max(0, btn.offsetTop - container.offsetTop - 42);
+          });
+        }
+      }
+    }
+
+    // =========================================================================
+    // CLICK OUTSIDE & TOAST HELPERS
+    // =========================================================================
+    document.addEventListener('click', (e) => {
+      if (!isPopoverOpen) return;
+      const anchor = document.getElementById('triggersAnchor');
+      if (anchor && !anchor.contains(e.target)) {
+        closePopover();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (isPopoverOpen) positionPopoverSmartly();
+    });
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+
+      const styles = {
+        success: 'bg-ink text-white border-slate-700',
+        info: 'bg-surface text-ink border-borderStrong',
+      };
+
+      const dotColors = {
+        success: 'bg-emerald-400',
+        info: 'bg-brand',
+      };
+
+      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 rounded-xl border shadow-lg text-xs font-medium transition-all duration-200 transform translate-y-2 opacity-0 ${styles[type] || styles.info}`;
+      toast.innerHTML = `
+        <span class="w-2 h-2 rounded-full shrink-0 ${dotColors[type] || dotColors.info}"></span>
+        <span>${message}</span>
+      `;
+
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-2', 'opacity-0');
+        setTimeout(() => toast.remove(), 200);
+      }, 2500);
+    }
+
+    // Initialize on load (open by default on FROM)
+    window.addEventListener('DOMContentLoaded', () => {
+      openPopover('from');
+    });
+  </script>
+</body>
+</html>

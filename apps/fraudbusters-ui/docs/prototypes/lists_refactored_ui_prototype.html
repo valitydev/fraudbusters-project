@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lists — Fraud Monitoring</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+          },
+          colors: {
+            canvas: '#F6F7FB',
+            surface: '#FFFFFF',
+            borderSubtle: '#E5E7EB',
+            borderStrong: '#D1D5DB',
+            ink: '#1E2438',
+            muted: '#6E768E',
+            brand: {
+              DEFAULT: '#5E35B1',
+              hover: '#512DA8',
+              soft: '#F2EEFC',
+              border: '#D7C9F8',
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      background-color: #F6F7FB;
+      color: #1E2438;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D8DCE8;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #B8C0D4;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row">
+
+  <!-- Mobile Top Navigation Bar -->
+  <header class="lg:hidden bg-surface border-b border-borderSubtle px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+    <div class="flex items-center gap-3">
+      <button id="mobileMenuBtn" type="button" class="p-2 rounded-lg text-ink hover:bg-canvas transition" aria-label="Toggle navigation">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg bg-brand flex items-center justify-center text-white font-bold text-base shadow-sm">F</div>
+        <span class="font-semibold text-sm text-ink">FraudGuard</span>
+      </div>
+    </div>
+    <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-brand-soft text-brand border border-brand-border">
+      Lists
+    </span>
+  </header>
+
+  <!-- Mobile Sidebar Backdrop -->
+  <div id="sidebarBackdrop" class="fixed inset-0 bg-slate-900/30 z-30 hidden lg:hidden"></div>
+
+  <!-- Left Navigation Sidebar -->
+  <aside id="sidebar" class="fixed lg:sticky top-0 left-0 z-40 h-screen w-[224px] shrink-0 bg-surface border-r border-borderSubtle flex flex-col justify-between transition-transform duration-200 -translate-x-full lg:translate-x-0">
+    <div>
+      <!-- Brand Logo -->
+      <div class="h-14 px-5 flex items-center justify-center lg:justify-start">
+        <a href="#lists" onclick="switchListCategory('Black'); return false;" class="flex items-center gap-2.5 focus:outline-none">
+          <svg class="w-7 h-7 text-brand" viewBox="0 0 28 28" fill="none">
+            <rect x="4" y="3" width="6" height="22" rx="2.5" fill="currentColor" />
+            <rect x="4" y="3" width="18" height="5.5" rx="2.5" fill="currentColor" />
+            <rect x="4" y="11.5" width="13" height="5" rx="2.5" fill="#7E57C2" />
+            <circle cx="20.5" cy="14" r="2.5" fill="#9575CD" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Navigation List -->
+      <nav class="px-3 py-2 space-y-1 text-[13px] font-medium">
+        <div>
+          <button id="paymentsToggle" type="button" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-ink hover:bg-canvas transition">
+            <span class="flex items-center gap-2.5">
+              <svg class="w-4 h-4 text-muted" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <rect x="3" y="5" width="18" height="14" rx="2.5" />
+                <path d="M3 10h18" />
+              </svg>
+              Payments
+            </span>
+            <svg id="paymentsChevron" class="w-3.5 h-3.5 text-muted transition-transform duration-150" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+            </svg>
+          </button>
+
+          <div id="paymentsSubmenu" class="mt-1 space-y-0.5 pl-2">
+            <a href="#analytics" onclick="showToast('Navigation: Analytics', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+              </svg>
+              Analytics
+            </a>
+
+            <a href="#templates" onclick="showToast('Navigation: Templates', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <rect x="4" y="3" width="16" height="18" rx="2" />
+                <path stroke-linecap="round" d="M8 8h8M8 12h8M8 16h5" />
+              </svg>
+              Templates
+            </a>
+
+            <a href="#groups" onclick="showToast('Navigation: Groups', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <circle cx="9" cy="8" r="3" />
+                <circle cx="16" cy="10" r="2.5" />
+                <path stroke-linecap="round" d="M4 19c0-2.8 2.2-5 5-5s5 2.2 5 5M14 19c0-2 1.5-3.6 3.5-3.6 1.2 0 2.2.5 2.8 1.4" />
+              </svg>
+              Groups
+            </a>
+
+            <!-- Active Item: Lists -->
+            <a href="#lists" onclick="return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-brand-soft text-brand font-semibold transition">
+              <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+                <path stroke-linecap="round" d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" />
+              </svg>
+              Lists
+            </a>
+
+            <a href="#testing" onclick="showToast('Navigation: Testing', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M9 3h6l1 3h3v4l-2 2v5a3 3 0 01-3 3h-4a3 3 0 01-3-3v-5l-2-2V6h3l1-3z" />
+              </svg>
+              Testing
+            </a>
+
+            <a href="#historical" onclick="showToast('Navigation: Historical data', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Historical data
+            </a>
+          </div>
+        </div>
+
+        <div class="pt-1 space-y-0.5">
+          <button type="button" onclick="showToast('Navigation: Payouts', 'info')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+            <span class="flex items-center gap-2.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <rect x="3" y="6" width="18" height="12" rx="2" />
+                <circle cx="16" cy="12" r="1.5" />
+              </svg>
+              Payouts
+            </span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          <a href="#notifications" onclick="showToast('Navigation: Notifications', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            Notifications
+          </a>
+
+          <a href="#audit" onclick="showToast('Navigation: Audit', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Audit
+          </a>
+        </div>
+      </nav>
+    </div>
+
+    <!-- User Profile Footer -->
+    <div class="p-3 border-t border-borderSubtle">
+      <div class="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-canvas cursor-pointer transition">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-full bg-brand-soft text-brand font-semibold text-xs flex items-center justify-center shrink-0">
+            D
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs font-semibold text-ink truncate">dsfsdfadsf</p>
+            <p class="text-[11px] text-muted truncate">Officer, Monitoring</p>
+          </div>
+        </div>
+        <svg class="w-3.5 h-3.5 text-muted shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+        </svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 min-w-0 px-4 sm:px-8 py-6 max-w-[1440px] mx-auto w-full space-y-5">
+
+    <!-- 1. Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <h1 class="text-[22px] font-semibold tracking-tight text-ink leading-tight">Lists</h1>
+        <p class="text-xs text-muted mt-0.5">Manage blocklists, allowlists, grey watchlists, and auto-detected candidate entities</p>
+      </div>
+
+      <!-- Primary & Secondary CTAs -->
+      <div class="flex items-center gap-2.5 self-start sm:self-auto">
+        <button
+          type="button"
+          onclick="openCleanCsvModal()"
+          class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg bg-surface border border-borderStrong hover:bg-canvas text-ink text-xs font-semibold shadow-2xs transition"
+        >
+          <svg class="w-3.5 h-3.5 text-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          Clean by CSV
+        </button>
+
+        <button
+          type="button"
+          onclick="openCreateModal()"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-brand hover:bg-brand-hover text-white text-xs font-semibold shadow-2xs transition"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Create record
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. Category Tabs (Black, White, Grey, Candidates) -->
+    <div class="border-b border-borderSubtle flex items-center gap-6 overflow-x-auto">
+      <!-- Tab: Black -->
+      <button
+        type="button"
+        data-category="Black"
+        onclick="switchListCategory('Black')"
+        class="category-tab relative pb-3 text-[13px] font-semibold text-brand flex items-center gap-2 whitespace-nowrap transition"
+      >
+        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+        <span>Black</span>
+        <span id="count-Black" class="tab-badge px-2 py-0.5 text-[11px] font-semibold rounded-full bg-brand-soft text-brand tabular-nums">4</span>
+        <span class="tab-underline absolute bottom-0 left-0 right-0 h-[2px] bg-brand rounded-t"></span>
+      </button>
+
+      <!-- Tab: White -->
+      <button
+        type="button"
+        data-category="White"
+        onclick="switchListCategory('White')"
+        class="category-tab relative pb-3 text-[13px] font-medium text-muted hover:text-ink flex items-center gap-2 whitespace-nowrap transition"
+      >
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span>White</span>
+        <span id="count-White" class="tab-badge px-2 py-0.5 text-[11px] font-medium rounded-full bg-surface border border-borderSubtle text-muted tabular-nums">3</span>
+        <span class="tab-underline hidden absolute bottom-0 left-0 right-0 h-[2px] bg-brand rounded-t"></span>
+      </button>
+
+      <!-- Tab: Grey -->
+      <button
+        type="button"
+        data-category="Grey"
+        onclick="switchListCategory('Grey')"
+        class="category-tab relative pb-3 text-[13px] font-medium text-muted hover:text-ink flex items-center gap-2 whitespace-nowrap transition"
+      >
+        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+        <span>Grey</span>
+        <span id="count-Grey" class="tab-badge px-2 py-0.5 text-[11px] font-medium rounded-full bg-surface border border-borderSubtle text-muted tabular-nums">2</span>
+        <span class="tab-underline hidden absolute bottom-0 left-0 right-0 h-[2px] bg-brand rounded-t"></span>
+      </button>
+
+      <!-- Tab: Candidates -->
+      <button
+        type="button"
+        data-category="Candidates"
+        onclick="switchListCategory('Candidates')"
+        class="category-tab relative pb-3 text-[13px] font-medium text-muted hover:text-ink flex items-center gap-2 whitespace-nowrap transition"
+      >
+        <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+        <span>Candidates</span>
+        <span id="count-Candidates" class="tab-badge px-2 py-0.5 text-[11px] font-medium rounded-full bg-surface border border-borderSubtle text-muted tabular-nums">3</span>
+        <span class="tab-underline hidden absolute bottom-0 left-0 right-0 h-[2px] bg-brand rounded-t"></span>
+      </button>
+    </div>
+
+    <!-- 3. Unified White Table Card -->
+    <section class="bg-surface border border-borderSubtle rounded-xl shadow-2xs overflow-visible">
+
+      <!-- Integrated Table Toolbar -->
+      <div class="px-5 py-3.5 border-b border-borderSubtle flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+        <!-- Left Filters: List Names Select + Search Input -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 flex-1">
+          <!-- List Names Filter -->
+          <div class="flex items-center gap-2 shrink-0">
+            <label for="listNameFilter" class="text-xs font-medium text-muted whitespace-nowrap">List names:</label>
+            <select
+              id="listNameFilter"
+              onchange="renderRecordsTable()"
+              class="font-mono text-xs font-medium text-ink bg-canvas border border-borderSubtle hover:border-borderStrong rounded-lg px-3 py-2 outline-none focus:border-brand focus:ring-2 focus:ring-brand/15 transition cursor-pointer"
+            >
+              <option value="ALL">All lists</option>
+              <option value="CARD_TOKEN">CARD_TOKEN</option>
+              <option value="EMAIL">EMAIL</option>
+              <option value="IP">IP</option>
+              <option value="BIN">BIN</option>
+              <option value="DEVICE_ID">DEVICE_ID</option>
+            </select>
+          </div>
+
+          <!-- Search Input -->
+          <div class="relative w-full sm:w-80 lg:w-96">
+            <svg class="w-4 h-4 text-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="7" />
+              <path stroke-linecap="round" d="M20 20l-3.5-3.5" />
+            </svg>
+            <input
+              id="recordSearchInput"
+              type="text"
+              placeholder="Search records by value, party or shop..."
+              autocomplete="off"
+              class="w-full pl-9 pr-11 py-2 text-xs rounded-lg bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 text-ink placeholder:text-[#9AA2B8] outline-none transition"
+            />
+            <button
+              id="clearSearchBtn"
+              type="button"
+              onclick="clearRecordSearch()"
+              class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink p-0.5 rounded"
+              title="Clear search"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <kbd id="searchShortcutHint" class="hidden sm:inline-block absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-mono text-muted bg-surface border border-borderSubtle rounded pointer-events-none">/</kbd>
+          </div>
+        </div>
+
+        <!-- Right Controls: Counter + Sort -->
+        <div class="flex items-center justify-between lg:justify-end gap-3 shrink-0">
+          <span id="recordsCounterLabel" class="text-xs text-muted tabular-nums">Showing 4 of 4 records</span>
+
+          <div class="flex items-center gap-2">
+            <label for="sortRecordsSelect" class="text-xs text-muted whitespace-nowrap">Sort by:</label>
+            <select
+              id="sortRecordsSelect"
+              onchange="renderRecordsTable()"
+              class="text-xs font-medium text-ink bg-canvas border border-borderSubtle hover:border-borderStrong rounded-lg px-2.5 py-1.5 outline-none focus:border-brand transition cursor-pointer"
+            >
+              <option value="inserted_desc">Inserted at (newest)</option>
+              <option value="inserted_asc">Inserted at (oldest)</option>
+              <option value="value_asc">Value (A–Z)</option>
+              <option value="value_desc">Value (Z–A)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Candidates Context Banner (Shown only on Candidates tab) -->
+      <div id="candidatesHintBanner" class="hidden px-5 py-2.5 bg-indigo-50/70 border-b border-indigo-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
+        <div class="flex items-center gap-2 text-indigo-900">
+          <span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></span>
+          <span>Candidate records are flagged automatically by velocity or chargeback rules. Review and promote confirmed entities to <strong>Black</strong>, <strong>White</strong>, or <strong>Grey</strong> lists.</span>
+        </div>
+      </div>
+
+      <!-- Records Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-borderSubtle bg-[#FAFBFD] text-[11px] font-semibold uppercase tracking-wider text-muted">
+              <th class="py-3 pl-5 pr-3 w-[16%]">List name</th>
+              <th class="py-3 px-3 w-[17%]">Party ID</th>
+              <th class="py-3 px-3 w-[17%]">Shop ID</th>
+              <th class="py-3 px-3 w-[26%]">Value</th>
+              <th class="py-3 px-3 w-[16%]">Inserted at</th>
+              <th class="py-3 pl-3 pr-5 text-right w-[8%]">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="recordsTableBody" class="divide-y divide-borderSubtle text-xs">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyRecordsState" class="hidden py-12 px-5 text-center">
+        <div class="w-10 h-10 rounded-xl bg-canvas border border-borderSubtle flex items-center justify-center mx-auto mb-3 text-muted">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" />
+          </svg>
+        </div>
+        <p id="emptyStateTitle" class="text-sm font-semibold text-ink">No records found</p>
+        <p id="emptyStateDesc" class="text-xs text-muted mt-1 max-w-md mx-auto">No entries match your current filter criteria in this list.</p>
+        <div class="mt-4 flex items-center justify-center gap-2">
+          <button
+            id="emptyResetFilterBtn"
+            type="button"
+            onclick="resetAllFilters()"
+            class="px-3.5 py-1.5 rounded-lg bg-surface border border-borderStrong text-xs font-medium text-ink hover:bg-canvas transition"
+          >
+            Reset filters
+          </button>
+          <button
+            type="button"
+            onclick="openCreateModal()"
+            class="px-3.5 py-1.5 rounded-lg bg-brand text-white text-xs font-semibold hover:bg-brand-hover transition"
+          >
+            + Create record
+          </button>
+        </div>
+      </div>
+
+      <!-- Compact Table Footer -->
+      <div id="tableCardFooter" class="px-5 py-3 bg-[#FAFBFD] border-t border-borderSubtle flex items-center justify-between text-xs text-muted">
+        <span id="footerSummaryLabel" class="tabular-nums">Active list: Black • 4 records</span>
+        <span class="hidden sm:inline text-[11px]">Hover any value to copy • Use <kbd class="px-1.5 py-0.5 font-mono text-[10px] bg-surface border border-borderSubtle rounded text-ink">/</kbd> to search</span>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =========================================================================
+       MODAL 1: CREATE / EDIT RECORD MODAL
+       ========================================================================= -->
+  <div id="recordModalBackdrop" class="fixed inset-0 bg-slate-900/40 backdrop-blur-[1px] z-50 hidden items-center justify-center p-4" onclick="closeRecordModal()">
+    <div class="bg-surface border border-borderSubtle rounded-2xl shadow-xl w-full max-w-lg overflow-hidden" onclick="event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-borderSubtle flex items-center justify-between">
+        <div>
+          <h2 id="recordModalTitle" class="text-base font-semibold text-ink">Create record</h2>
+          <p id="recordModalSubtitle" class="text-xs text-muted mt-0.5">Add single or multiple entity values to a monitoring list</p>
+        </div>
+        <button type="button" onclick="closeRecordModal()" class="p-1.5 rounded-lg text-muted hover:text-ink hover:bg-canvas transition" aria-label="Close modal">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-4">
+        <!-- List Category Pills -->
+        <div>
+          <label class="block text-xs font-semibold text-ink mb-1.5">Target list category <span class="text-red-500">*</span></label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="modalCategoryPills">
+            <button type="button" data-cat="Black" onclick="selectModalCategory('Black')" class="modal-cat-pill flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-semibold transition">
+              <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+              Black
+            </button>
+            <button type="button" data-cat="White" onclick="selectModalCategory('White')" class="modal-cat-pill flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-medium transition">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              White
+            </button>
+            <button type="button" data-cat="Grey" onclick="selectModalCategory('Grey')" class="modal-cat-pill flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-medium transition">
+              <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+              Grey
+            </button>
+            <button type="button" data-cat="Candidates" onclick="selectModalCategory('Candidates')" class="modal-cat-pill flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-medium transition">
+              <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+              Candidates
+            </button>
+          </div>
+        </div>
+
+        <!-- List Name Select -->
+        <div>
+          <label for="modalListNameSelect" class="block text-xs font-semibold text-ink mb-1.5">List name <span class="text-red-500">*</span></label>
+          <select
+            id="modalListNameSelect"
+            onchange="updateModalValuePlaceholder()"
+            class="w-full font-mono text-xs font-medium text-ink bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 rounded-lg px-3.5 py-2.5 outline-none transition"
+          >
+            <option value="CARD_TOKEN">CARD_TOKEN</option>
+            <option value="EMAIL">EMAIL</option>
+            <option value="IP">IP</option>
+            <option value="BIN">BIN</option>
+            <option value="DEVICE_ID">DEVICE_ID</option>
+          </select>
+        </div>
+
+        <!-- Party ID & Shop ID -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label for="modalPartyIdInput" class="block text-xs font-semibold text-ink mb-1.5">Party ID <span class="text-red-500">*</span></label>
+            <input
+              id="modalPartyIdInput"
+              type="text"
+              placeholder="e.g. party-wb-id"
+              autocomplete="off"
+              spellcheck="false"
+              class="w-full font-mono text-xs px-3.5 py-2.5 rounded-lg bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 text-ink placeholder:text-[#9AA2B8] outline-none transition"
+            />
+          </div>
+
+          <div>
+            <label for="modalShopIdInput" class="block text-xs font-semibold text-ink mb-1.5">Shop ID <span class="text-muted font-normal">(optional)</span></label>
+            <input
+              id="modalShopIdInput"
+              type="text"
+              placeholder="e.g. shop-wb-id"
+              autocomplete="off"
+              spellcheck="false"
+              class="w-full font-mono text-xs px-3.5 py-2.5 rounded-lg bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 text-ink placeholder:text-[#9AA2B8] outline-none transition"
+            />
+          </div>
+        </div>
+
+        <!-- Value Input (Supports Batch via comma or newline) -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="modalValueTextarea" class="text-xs font-semibold text-ink">Value <span class="text-red-500">*</span></label>
+            <span id="modalBatchCountPill" class="text-[11px] font-medium text-muted tabular-nums">0 values</span>
+          </div>
+          <textarea
+            id="modalValueTextarea"
+            rows="3"
+            placeholder="wb_test_token_133&#10;Enter multiple values separated by comma or new line..."
+            oninput="updateModalBatchCounter()"
+            class="w-full font-mono text-xs p-3 rounded-lg bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 text-ink placeholder:text-[#9AA2B8] outline-none transition resize-none"
+          ></textarea>
+          <p id="modalHelperHint" class="text-[11px] text-muted mt-1">
+            Tip: Paste multiple values separated by commas or line breaks to batch-create records at once.
+          </p>
+        </div>
+
+        <div id="modalFormError" class="hidden px-3.5 py-2.5 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 font-medium"></div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-3.5 bg-[#FAFBFD] border-t border-borderSubtle flex items-center justify-end gap-2.5">
+        <button
+          type="button"
+          onclick="closeRecordModal()"
+          class="px-4 py-2 rounded-lg bg-surface border border-borderStrong hover:bg-canvas text-ink text-xs font-semibold transition"
+        >
+          Cancel
+        </button>
+        <button
+          id="modalSubmitBtn"
+          type="button"
+          onclick="submitRecordModal()"
+          class="px-5 py-2 rounded-lg bg-brand hover:bg-brand-hover text-white text-xs font-semibold shadow-2xs transition tabular-nums"
+        >
+          Create record
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 2: CLEAN BY CSV MODAL
+       ========================================================================= -->
+  <div id="cleanCsvModalBackdrop" class="fixed inset-0 bg-slate-900/40 backdrop-blur-[1px] z-50 hidden items-center justify-center p-4" onclick="closeCleanCsvModal()">
+    <div class="bg-surface border border-borderSubtle rounded-2xl shadow-xl w-full max-w-xl overflow-hidden" onclick="event.stopPropagation()">
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-borderSubtle flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-base font-semibold text-ink">Clean records by CSV</h2>
+            <p class="text-xs text-muted mt-0.5">Bulk-remove matching values from a target monitoring list</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCleanCsvModal()" class="p-1.5 rounded-lg text-muted hover:text-ink hover:bg-canvas transition" aria-label="Close modal">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6 space-y-4">
+        <!-- Target List & List Name Selectors -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label for="cleanTargetCategorySelect" class="block text-xs font-semibold text-ink mb-1.5">Target list category</label>
+            <select
+              id="cleanTargetCategorySelect"
+              onchange="evaluateCsvCleanupMatches()"
+              class="w-full text-xs font-semibold text-ink bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand rounded-lg px-3.5 py-2.5 outline-none transition"
+            >
+              <option value="Black">Black</option>
+              <option value="White">White</option>
+              <option value="Grey">Grey</option>
+              <option value="Candidates">Candidates</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="cleanListNameSelect" class="block text-xs font-semibold text-ink mb-1.5">List name scope</label>
+            <select
+              id="cleanListNameSelect"
+              onchange="evaluateCsvCleanupMatches()"
+              class="w-full font-mono text-xs font-medium text-ink bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand rounded-lg px-3.5 py-2.5 outline-none transition"
+            >
+              <option value="ALL">All list names</option>
+              <option value="CARD_TOKEN">CARD_TOKEN</option>
+              <option value="EMAIL">EMAIL</option>
+              <option value="IP">IP</option>
+              <option value="BIN">BIN</option>
+              <option value="DEVICE_ID">DEVICE_ID</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- File Upload + Sample Loader -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-xs font-semibold text-ink">CSV file or values list</label>
+            <button
+              type="button"
+              onclick="loadSampleCleanupCsv()"
+              class="text-[11.5px] font-medium text-brand hover:underline"
+            >
+              Load sample CSV from current list
+            </button>
+          </div>
+
+          <label class="flex items-center justify-between px-3.5 py-2.5 mb-2.5 rounded-lg bg-canvas border border-dashed border-borderStrong hover:border-brand cursor-pointer transition">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <svg class="w-4 h-4 text-brand shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <span id="cleanCsvFileLabel" class="text-xs text-ink font-medium truncate">Choose a .csv file to upload...</span>
+            </div>
+            <span class="text-[11px] font-semibold text-brand shrink-0 ml-2">Browse</span>
+            <input id="cleanCsvFileInput" type="file" accept=".csv,text/csv" class="hidden" onchange="handleCleanCsvFile(event)" />
+          </label>
+
+          <textarea
+            id="cleanCsvTextarea"
+            rows="4"
+            placeholder="value&#10;wb_test_token_133&#10;fraud_user@example.com"
+            oninput="evaluateCsvCleanupMatches()"
+            class="w-full font-mono text-xs p-3 rounded-lg bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 text-ink placeholder:text-[#9AA2B8] outline-none transition resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Live Match Preview Box -->
+        <div class="rounded-xl bg-[#FAFBFD] border border-borderSubtle p-3.5">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted">Matched records preview</span>
+            <span id="cleanMatchCountBadge" class="text-[11px] font-semibold text-muted tabular-nums">0 matches found</span>
+          </div>
+          <div id="cleanMatchPreviewList" class="space-y-1.5 max-h-32 overflow-y-auto text-xs">
+            <p class="text-xs text-muted py-4 text-center">Upload a CSV file or paste values above to preview records that will be deleted.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 py-3.5 bg-[#FAFBFD] border-t border-borderSubtle flex items-center justify-between gap-3">
+        <span class="text-[11.5px] text-muted">Deleted records cannot be restored automatically</span>
+        <div class="flex items-center gap-2.5">
+          <button
+            type="button"
+            onclick="closeCleanCsvModal()"
+            class="px-4 py-2 rounded-lg bg-surface border border-borderStrong hover:bg-canvas text-ink text-xs font-semibold transition"
+          >
+            Cancel
+          </button>
+          <button
+            id="confirmCleanCsvBtn"
+            type="button"
+            disabled
+            onclick="executeCsvCleanup()"
+            class="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 disabled:bg-borderSubtle disabled:text-[#94A3B8] disabled:cursor-not-allowed text-white text-xs font-semibold shadow-2xs transition tabular-nums"
+          >
+            Delete matched (0)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 3: DELETE CONFIRMATION DIALOG
+       ========================================================================= -->
+  <div id="deleteConfirmBackdrop" class="fixed inset-0 bg-slate-900/40 backdrop-blur-[1px] z-50 hidden items-center justify-center p-4" onclick="closeDeleteConfirm()">
+    <div class="bg-surface border border-borderSubtle rounded-2xl shadow-xl w-full max-w-md overflow-hidden" onclick="event.stopPropagation()">
+      <div class="p-6">
+        <div class="flex items-start gap-3.5">
+          <div class="w-9 h-9 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <h3 class="text-sm font-semibold text-ink">Delete record from <span id="deleteTargetListName">Black</span> list?</h3>
+            <p class="text-xs text-muted mt-1">This entity value will immediately stop matching rules bound to this list.</p>
+            <div class="mt-3 px-3 py-2 rounded-lg bg-canvas border border-borderSubtle font-mono text-xs text-ink truncate" id="deleteRecordPreview">
+              wb_test_token_133
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-3.5 bg-[#FAFBFD] border-t border-borderSubtle flex items-center justify-end gap-2.5">
+        <button
+          type="button"
+          onclick="closeDeleteConfirm()"
+          class="px-4 py-2 rounded-lg bg-surface border border-borderStrong hover:bg-canvas text-ink text-xs font-semibold transition"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onclick="confirmDeleteRecord()"
+          class="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-2xs transition"
+        >
+          Delete record
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    // =========================================================================
+    // INITIAL MOCK DATASET
+    // =========================================================================
+    let recordsData = [
+      // Black list
+      {
+        id: 1,
+        category: 'Black',
+        listName: 'CARD_TOKEN',
+        partyId: 'party-wb-id',
+        shopId: 'shop-wb-id',
+        value: 'wb_test_token_133',
+        insertedAt: '2026-11-24 13:16:18',
+      },
+      {
+        id: 2,
+        category: 'Black',
+        listName: 'EMAIL',
+        partyId: 'party-columbus-id',
+        shopId: 'shop-columbus-id',
+        value: 'chargeback.ring99@mail.example',
+        insertedAt: '2026-11-24 12:41:05',
+      },
+      {
+        id: 3,
+        category: 'Black',
+        listName: 'IP',
+        partyId: 'party-aggr-id',
+        shopId: '',
+        value: '185.220.101.44',
+        insertedAt: '2026-11-23 19:08:52',
+      },
+      {
+        id: 4,
+        category: 'Black',
+        listName: 'BIN',
+        partyId: 'party-wb-id',
+        shopId: 'shop-wb-mobile',
+        value: '427655',
+        insertedAt: '2026-11-22 09:30:11',
+      },
+
+      // White list
+      {
+        id: 5,
+        category: 'White',
+        listName: 'CARD_TOKEN',
+        partyId: 'party-vip-corp',
+        shopId: 'shop-vip-main',
+        value: 'vip_tok_9948210a',
+        insertedAt: '2026-11-24 11:20:40',
+      },
+      {
+        id: 6,
+        category: 'White',
+        listName: 'EMAIL',
+        partyId: 'party-vip-corp',
+        shopId: '',
+        value: 'treasury@enterprise-partner.io',
+        insertedAt: '2026-11-23 16:15:09',
+      },
+      {
+        id: 7,
+        category: 'White',
+        listName: 'IP',
+        partyId: 'party-columbus-id',
+        shopId: 'shop-columbus-id',
+        value: '91.108.56.12',
+        insertedAt: '2026-11-21 14:02:33',
+      },
+
+      // Grey list
+      {
+        id: 8,
+        category: 'Grey',
+        listName: 'DEVICE_ID',
+        partyId: 'party-nordic-pay',
+        shopId: 'shop-nordic-web',
+        value: 'dev_fp_883910bc4e',
+        insertedAt: '2026-11-24 10:05:19',
+      },
+      {
+        id: 9,
+        category: 'Grey',
+        listName: 'CARD_TOKEN',
+        partyId: 'party-wb-id',
+        shopId: 'shop-wb-id',
+        value: 'wb_watch_token_408',
+        insertedAt: '2026-11-23 08:44:27',
+      },
+
+      // Candidates
+      {
+        id: 10,
+        category: 'Candidates',
+        listName: 'CARD_TOKEN',
+        partyId: 'party-columbus-id',
+        shopId: 'shop-columbus-id',
+        value: 'cand_tok_772190ff',
+        insertedAt: '2026-11-24 13:12:04',
+      },
+      {
+        id: 11,
+        category: 'Candidates',
+        listName: 'EMAIL',
+        partyId: 'party-aggr-id',
+        shopId: 'shop-aggr-id',
+        value: 'velocity.alert.22@tempbox.org',
+        insertedAt: '2026-11-24 12:55:49',
+      },
+      {
+        id: 12,
+        category: 'Candidates',
+        listName: 'DEVICE_ID',
+        partyId: 'party-wb-id',
+        shopId: '',
+        value: 'dev_fp_00192837ab',
+        insertedAt: '2026-11-24 11:48:31',
+      },
+    ];
+
+    let activeCategory = 'Black';
+    let openMenuRecordId = null;
+    let openPromoteSubmenuId = null;
+    let editingRecordId = null;
+    let pendingDeleteId = null;
+    let matchedIdsForCsvClean = [];
+
+    // DOM Elements
+    const listNameFilter = document.getElementById('listNameFilter');
+    const recordSearchInput = document.getElementById('recordSearchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const searchShortcutHint = document.getElementById('searchShortcutHint');
+    const sortRecordsSelect = document.getElementById('sortRecordsSelect');
+    const recordsTableBody = document.getElementById('recordsTableBody');
+    const emptyRecordsState = document.getElementById('emptyRecordsState');
+    const recordsCounterLabel = document.getElementById('recordsCounterLabel');
+    const footerSummaryLabel = document.getElementById('footerSummaryLabel');
+
+    // =========================================================================
+    // CATEGORY TABS & TABLE RENDERING
+    // =========================================================================
+    function updateCategoryTabCounts() {
+      const categories = ['Black', 'White', 'Grey', 'Candidates'];
+      categories.forEach((cat) => {
+        const count = recordsData.filter((r) => r.category === cat).length;
+        const badge = document.getElementById(`count-${cat}`);
+        if (badge) badge.textContent = count;
+      });
+    }
+
+    function switchListCategory(category) {
+      activeCategory = category;
+      openMenuRecordId = null;
+      openPromoteSubmenuId = null;
+
+      document.querySelectorAll('.category-tab').forEach((btn) => {
+        const isActive = btn.dataset.category === category;
+        const badge = btn.querySelector('.tab-badge');
+        const underline = btn.querySelector('.tab-underline');
+
+        btn.classList.toggle('text-brand', isActive);
+        btn.classList.toggle('font-semibold', isActive);
+        btn.classList.toggle('text-muted', !isActive);
+        btn.classList.toggle('font-medium', !isActive);
+
+        if (badge) {
+          badge.className = isActive
+            ? 'tab-badge px-2 py-0.5 text-[11px] font-semibold rounded-full bg-brand-soft text-brand tabular-nums'
+            : 'tab-badge px-2 py-0.5 text-[11px] font-medium rounded-full bg-surface border border-borderSubtle text-muted tabular-nums';
+        }
+        if (underline) {
+          underline.classList.toggle('hidden', !isActive);
+        }
+      });
+
+      document.getElementById('candidatesHintBanner').classList.toggle('hidden', category !== 'Candidates');
+      renderRecordsTable();
+    }
+
+    function getListNameBadgeStyle(listName) {
+      const styles = {
+        CARD_TOKEN: 'bg-brand-soft text-brand border-brand-border/70',
+        EMAIL: 'bg-blue-50 text-blue-700 border-blue-200/80',
+        IP: 'bg-amber-50 text-amber-700 border-amber-200/80',
+        BIN: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
+        DEVICE_ID: 'bg-slate-100 text-slate-700 border-slate-200',
+      };
+      return styles[listName] || 'bg-canvas text-ink border-borderSubtle';
+    }
+
+    function renderRecordsTable() {
+      updateCategoryTabCounts();
+
+      const selectedListName = listNameFilter.value;
+      const query = recordSearchInput.value.trim().toLowerCase();
+      const sortBy = sortRecordsSelect.value;
+
+      const categoryRecords = recordsData.filter((r) => r.category === activeCategory);
+
+      let filtered = categoryRecords.filter((r) => {
+        if (selectedListName !== 'ALL' && r.listName !== selectedListName) return false;
+        if (!query) return true;
+        return (
+          r.value.toLowerCase().includes(query) ||
+          r.partyId.toLowerCase().includes(query) ||
+          (r.shopId && r.shopId.toLowerCase().includes(query)) ||
+          r.listName.toLowerCase().includes(query)
+        );
+      });
+
+      filtered.sort((a, b) => {
+        if (sortBy === 'value_asc') return a.value.localeCompare(b.value);
+        if (sortBy === 'value_desc') return b.value.localeCompare(a.value);
+        if (sortBy === 'inserted_asc') return a.insertedAt.localeCompare(b.insertedAt);
+        return b.insertedAt.localeCompare(a.insertedAt);
+      });
+
+      recordsCounterLabel.textContent = `Showing ${filtered.length} of ${categoryRecords.length} records`;
+      footerSummaryLabel.textContent = `Active list: ${activeCategory} • ${categoryRecords.length} total ${categoryRecords.length === 1 ? 'record' : 'records'}`;
+
+      if (filtered.length === 0) {
+        recordsTableBody.innerHTML = '';
+        emptyRecordsState.classList.remove('hidden');
+
+        const hasActiveFilter = selectedListName !== 'ALL' || query.length > 0;
+        document.getElementById('emptyStateTitle').textContent = hasActiveFilter
+          ? 'No matching records found'
+          : `No records in ${activeCategory} list yet`;
+        document.getElementById('emptyStateDesc').textContent = hasActiveFilter
+          ? 'Try clearing your search query or switching the List names filter.'
+          : `Add new entities to the ${activeCategory} list using the Create record button above.`;
+        document.getElementById('emptyResetFilterBtn').classList.toggle('hidden', !hasActiveFilter);
+        return;
+      }
+
+      emptyRecordsState.classList.add('hidden');
+
+      recordsTableBody.innerHTML = filtered
+        .map((rec) => {
+          const isMenuOpen = openMenuRecordId === rec.id;
+          const isPromoteOpen = openPromoteSubmenuId === rec.id;
+          const isCandidate = activeCategory === 'Candidates';
+
+          return `
+            <tr class="group hover:bg-[#FAFBFD] transition">
+              <!-- LIST NAME -->
+              <td class="py-3.5 pl-5 pr-3 align-middle whitespace-nowrap">
+                <span class="inline-flex items-center font-mono text-[11px] font-semibold px-2.5 py-1 rounded-md border ${getListNameBadgeStyle(rec.listName)}">
+                  ${escapeHtml(rec.listName)}
+                </span>
+              </td>
+
+              <!-- PARTY ID -->
+              <td class="py-3.5 px-3 align-middle font-mono text-xs text-ink whitespace-nowrap">
+                ${escapeHtml(rec.partyId)}
+              </td>
+
+              <!-- SHOP ID -->
+              <td class="py-3.5 px-3 align-middle font-mono text-xs whitespace-nowrap ${rec.shopId ? 'text-ink' : 'text-muted italic'}">
+                ${rec.shopId ? escapeHtml(rec.shopId) : '—'}
+              </td>
+
+              <!-- VALUE with Hover Copy -->
+              <td class="py-3.5 px-3 align-middle">
+                <div class="inline-flex items-center gap-2 max-w-full">
+                  <code class="font-mono text-xs font-medium text-ink bg-canvas border border-borderSubtle rounded-md px-2.5 py-1 truncate max-w-[300px]">
+                    ${escapeHtml(rec.value)}
+                  </code>
+                  <button
+                    type="button"
+                    onclick="copyValue(${rec.id})"
+                    class="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-md text-muted hover:text-brand hover:bg-brand-soft transition shrink-0"
+                    title="Copy value"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <rect x="9" y="9" width="13" height="13" rx="2" />
+                      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+
+              <!-- INSERTED AT -->
+              <td class="py-3.5 px-3 align-middle text-xs text-ink tabular-nums whitespace-nowrap">
+                ${escapeHtml(rec.insertedAt)}
+              </td>
+
+              <!-- ACTIONS -->
+              <td class="py-3.5 pl-3 pr-5 align-middle text-right whitespace-nowrap">
+                <div class="inline-flex items-center justify-end gap-1.5 relative" onclick="event.stopPropagation()">
+                  ${
+                    isCandidate
+                      ? `<div class="relative">
+                          <button
+                            type="button"
+                            onclick="togglePromoteDropdown(${rec.id})"
+                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-brand-soft hover:bg-[#E7DDFB] text-brand border border-brand-border/80 text-xs font-semibold transition"
+                          >
+                            Promote to list
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
+
+                          ${
+                            isPromoteOpen
+                              ? `<div class="absolute right-0 mt-1 w-40 bg-surface border border-borderSubtle rounded-xl shadow-lg py-1 z-30 text-left text-xs">
+                                  <div class="px-3 py-1 text-[10.5px] font-semibold uppercase tracking-wider text-muted">Move to list</div>
+                                  <button type="button" onclick="promoteCandidate(${rec.id}, 'Black')" class="w-full px-3.5 py-2 hover:bg-canvas text-ink flex items-center gap-2 font-medium">
+                                    <span class="w-2 h-2 rounded-full bg-rose-500"></span> Black list
+                                  </button>
+                                  <button type="button" onclick="promoteCandidate(${rec.id}, 'White')" class="w-full px-3.5 py-2 hover:bg-canvas text-ink flex items-center gap-2 font-medium">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> White list
+                                  </button>
+                                  <button type="button" onclick="promoteCandidate(${rec.id}, 'Grey')" class="w-full px-3.5 py-2 hover:bg-canvas text-ink flex items-center gap-2 font-medium">
+                                    <span class="w-2 h-2 rounded-full bg-amber-500"></span> Grey list
+                                  </button>
+                                </div>`
+                              : ''
+                          }
+                        </div>`
+                      : ''
+                  }
+
+                  <!-- Overflow Menu ⋮ -->
+                  <div class="relative">
+                    <button
+                      type="button"
+                      onclick="toggleRecordMenu(${rec.id})"
+                      class="p-1.5 rounded-lg text-muted hover:text-ink hover:bg-canvas border border-transparent hover:border-borderSubtle transition"
+                      title="Actions"
+                      aria-label="Row actions"
+                    >
+                      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 6a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 5.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 5.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" />
+                      </svg>
+                    </button>
+
+                    ${
+                      isMenuOpen
+                        ? `<div class="absolute right-0 mt-1 w-44 bg-surface border border-borderSubtle rounded-xl shadow-lg py-1 z-30 text-left text-xs">
+                            <button type="button" onclick="copyValue(${rec.id}); closeMenus();" class="w-full px-3.5 py-2 hover:bg-canvas text-ink flex items-center gap-2">
+                              Copy value
+                            </button>
+                            <button type="button" onclick="openEditRecordModal(${rec.id})" class="w-full px-3.5 py-2 hover:bg-canvas text-ink flex items-center gap-2">
+                              Edit record
+                            </button>
+                            ${
+                              isCandidate
+                                ? `<div class="my-1 border-t border-borderSubtle"></div>
+                                   <button type="button" onclick="promoteCandidate(${rec.id}, 'Black')" class="w-full px-3.5 py-2 hover:bg-canvas text-brand font-medium flex items-center gap-2">
+                                     Promote to Black
+                                   </button>
+                                   <button type="button" onclick="promoteCandidate(${rec.id}, 'White')" class="w-full px-3.5 py-2 hover:bg-canvas text-emerald-700 font-medium flex items-center gap-2">
+                                     Promote to White
+                                   </button>
+                                   <button type="button" onclick="promoteCandidate(${rec.id}, 'Grey')" class="w-full px-3.5 py-2 hover:bg-canvas text-amber-700 font-medium flex items-center gap-2">
+                                     Promote to Grey
+                                   </button>`
+                                : ''
+                            }
+                            <div class="my-1 border-t border-borderSubtle"></div>
+                            <button type="button" onclick="openDeleteConfirm(${rec.id})" class="w-full px-3.5 py-2 hover:bg-rose-50 text-rose-600 flex items-center gap-2">
+                              Delete
+                            </button>
+                          </div>`
+                        : ''
+                    }
+                  </div>
+                </div>
+              </td>
+            </tr>
+          `;
+        })
+        .join('');
+    }
+
+    function toggleRecordMenu(id) {
+      openPromoteSubmenuId = null;
+      openMenuRecordId = openMenuRecordId === id ? null : id;
+      renderRecordsTable();
+    }
+
+    function togglePromoteDropdown(id) {
+      openMenuRecordId = null;
+      openPromoteSubmenuId = openPromoteSubmenuId === id ? null : id;
+      renderRecordsTable();
+    }
+
+    function closeMenus() {
+      openMenuRecordId = null;
+      openPromoteSubmenuId = null;
+      renderRecordsTable();
+    }
+
+    document.addEventListener('click', () => {
+      if (openMenuRecordId !== null || openPromoteSubmenuId !== null) {
+        closeMenus();
+      }
+    });
+
+    function promoteCandidate(id, targetCategory) {
+      const rec = recordsData.find((r) => r.id === id);
+      closeMenus();
+      if (!rec) return;
+
+      rec.category = targetCategory;
+      rec.insertedAt = getCurrentUtcTimestamp();
+      renderRecordsTable();
+      showToast(`Promoted "${rec.value}" to ${targetCategory} list`, 'success');
+    }
+
+    function copyValue(id) {
+      const rec = recordsData.find((r) => r.id === id);
+      if (!rec) return;
+      copyTextToClipboard(rec.value);
+      showToast(`Copied "${rec.value}" to clipboard`, 'info');
+    }
+
+    // Search & Filter Controls
+    recordSearchInput.addEventListener('input', () => {
+      const hasQuery = recordSearchInput.value.length > 0;
+      clearSearchBtn.classList.toggle('hidden', !hasQuery);
+      searchShortcutHint.classList.toggle('hidden', hasQuery);
+      renderRecordsTable();
+    });
+
+    function clearRecordSearch() {
+      recordSearchInput.value = '';
+      clearSearchBtn.classList.add('hidden');
+      searchShortcutHint.classList.remove('hidden');
+      renderRecordsTable();
+    }
+
+    function resetAllFilters() {
+      listNameFilter.value = 'ALL';
+      clearRecordSearch();
+    }
+
+    // Keyboard shortcut '/' to focus search
+    document.addEventListener('keydown', (e) => {
+      if (
+        e.key === '/' &&
+        document.activeElement !== recordSearchInput &&
+        !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)
+      ) {
+        e.preventDefault();
+        recordSearchInput.focus();
+      } else if (e.key === 'Escape') {
+        closeRecordModal();
+        closeCleanCsvModal();
+        closeDeleteConfirm();
+      }
+    });
+
+    // =========================================================================
+    // MODAL 1: CREATE / EDIT RECORD
+    // =========================================================================
+    let modalSelectedCategory = 'Black';
+
+    function selectModalCategory(cat) {
+      modalSelectedCategory = cat;
+      document.querySelectorAll('.modal-cat-pill').forEach((btn) => {
+        const active = btn.dataset.cat === cat;
+        const dot = btn.querySelector('span');
+        btn.className = active
+          ? 'modal-cat-pill flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-semibold transition bg-brand-soft border-brand-border text-brand'
+          : 'modal-cat-pill flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-medium transition bg-surface border-borderSubtle text-ink hover:bg-canvas';
+        if (dot) btn.prepend(dot);
+      });
+    }
+
+    function updateModalValuePlaceholder() {
+      const type = document.getElementById('modalListNameSelect').value;
+      const placeholders = {
+        CARD_TOKEN: 'wb_test_token_133\nEnter multiple tokens separated by comma or new line...',
+        EMAIL: 'user@example.com\nEnter multiple emails separated by comma or new line...',
+        IP: '185.220.101.44\nEnter multiple IPv4/IPv6 addresses...',
+        BIN: '427655\nEnter 6-8 digit BIN prefixes...',
+        DEVICE_ID: 'dev_fp_883910bc4e\nEnter device fingerprint hashes...',
+      };
+      document.getElementById('modalValueTextarea').placeholder = placeholders[type] || '';
+    }
+
+    function parseBatchValues(rawText) {
+      return rawText
+        .split(/[\r\n,]+/)
+        .map((v) => v.trim())
+        .filter(Boolean);
+    }
+
+    function updateModalBatchCounter() {
+      const vals = parseBatchValues(document.getElementById('modalValueTextarea').value);
+      const pill = document.getElementById('modalBatchCountPill');
+      const submitBtn = document.getElementById('modalSubmitBtn');
+
+      pill.textContent = `${vals.length} ${vals.length === 1 ? 'value' : 'values'}`;
+      pill.className =
+        vals.length > 0
+          ? 'text-[11px] font-semibold text-brand tabular-nums'
+          : 'text-[11px] font-medium text-muted tabular-nums';
+
+      if (editingRecordId !== null) {
+        submitBtn.textContent = 'Save changes';
+      } else {
+        submitBtn.textContent = vals.length > 1 ? `Create ${vals.length} records` : 'Create record';
+      }
+    }
+
+    function openCreateModal() {
+      editingRecordId = null;
+      document.getElementById('recordModalTitle').textContent = 'Create record';
+      document.getElementById('recordModalSubtitle').textContent = 'Add single or multiple entity values to a monitoring list';
+      document.getElementById('modalHelperHint').classList.remove('hidden');
+      document.getElementById('modalFormError').classList.add('hidden');
+
+      selectModalCategory(activeCategory);
+      document.getElementById('modalListNameSelect').value =
+        listNameFilter.value !== 'ALL' ? listNameFilter.value : 'CARD_TOKEN';
+      document.getElementById('modalPartyIdInput').value = '';
+      document.getElementById('modalShopIdInput').value = '';
+      document.getElementById('modalValueTextarea').value = '';
+
+      updateModalValuePlaceholder();
+      updateModalBatchCounter();
+
+      const backdrop = document.getElementById('recordModalBackdrop');
+      backdrop.classList.remove('hidden');
+      backdrop.classList.add('flex');
+      document.getElementById('modalPartyIdInput').focus();
+    }
+
+    function openEditRecordModal(id) {
+      const rec = recordsData.find((r) => r.id === id);
+      closeMenus();
+      if (!rec) return;
+
+      editingRecordId = rec.id;
+      document.getElementById('recordModalTitle').textContent = 'Edit record';
+      document.getElementById('recordModalSubtitle').textContent = 'Update entity value, scope, or target monitoring list';
+      document.getElementById('modalHelperHint').classList.add('hidden');
+      document.getElementById('modalFormError').classList.add('hidden');
+
+      selectModalCategory(rec.category);
+      document.getElementById('modalListNameSelect').value = rec.listName;
+      document.getElementById('modalPartyIdInput').value = rec.partyId;
+      document.getElementById('modalShopIdInput').value = rec.shopId || '';
+      document.getElementById('modalValueTextarea').value = rec.value;
+
+      updateModalBatchCounter();
+
+      const backdrop = document.getElementById('recordModalBackdrop');
+      backdrop.classList.remove('hidden');
+      backdrop.classList.add('flex');
+      document.getElementById('modalValueTextarea').focus();
+    }
+
+    function closeRecordModal() {
+      const backdrop = document.getElementById('recordModalBackdrop');
+      backdrop.classList.add('hidden');
+      backdrop.classList.remove('flex');
+    }
+
+    function submitRecordModal() {
+      const listName = document.getElementById('modalListNameSelect').value;
+      const partyId = document.getElementById('modalPartyIdInput').value.trim();
+      const shopId = document.getElementById('modalShopIdInput').value.trim();
+      const rawValues = document.getElementById('modalValueTextarea').value;
+      const errorBox = document.getElementById('modalFormError');
+
+      if (!partyId) {
+        errorBox.textContent = 'Party ID is required.';
+        errorBox.classList.remove('hidden');
+        document.getElementById('modalPartyIdInput').focus();
+        return;
+      }
+
+      const values = parseBatchValues(rawValues);
+      if (values.length === 0) {
+        errorBox.textContent = 'Please enter at least one value.';
+        errorBox.classList.remove('hidden');
+        document.getElementById('modalValueTextarea').focus();
+        return;
+      }
+
+      const ts = getCurrentUtcTimestamp();
+
+      if (editingRecordId !== null) {
+        const rec = recordsData.find((r) => r.id === editingRecordId);
+        if (rec) {
+          rec.category = modalSelectedCategory;
+          rec.listName = listName;
+          rec.partyId = partyId;
+          rec.shopId = shopId;
+          rec.value = values[0];
+          rec.insertedAt = ts;
+        }
+        closeRecordModal();
+        switchListCategory(modalSelectedCategory);
+        showToast('Record updated', 'success');
+        return;
+      }
+
+      // Batch or single creation
+      let maxId = recordsData.reduce((m, r) => Math.max(m, r.id), 0);
+      values.forEach((val) => {
+        recordsData.unshift({
+          id: ++maxId,
+          category: modalSelectedCategory,
+          listName,
+          partyId,
+          shopId,
+          value: val,
+          insertedAt: ts,
+        });
+      });
+
+      closeRecordModal();
+      switchListCategory(modalSelectedCategory);
+      showToast(
+        values.length === 1
+          ? `Added "${values[0]}" to ${modalSelectedCategory} list`
+          : `Added ${values.length} records to ${modalSelectedCategory} list`,
+        'success'
+      );
+    }
+
+    // =========================================================================
+    // MODAL 2: CLEAN BY CSV
+    // =========================================================================
+    function openCleanCsvModal() {
+      document.getElementById('cleanTargetCategorySelect').value = activeCategory;
+      document.getElementById('cleanListNameSelect').value = listNameFilter.value;
+      document.getElementById('cleanCsvFileInput').value = '';
+      document.getElementById('cleanCsvFileLabel').textContent = 'Choose a .csv file to upload...';
+      document.getElementById('cleanCsvTextarea').value = '';
+      evaluateCsvCleanupMatches();
+
+      const backdrop = document.getElementById('cleanCsvModalBackdrop');
+      backdrop.classList.remove('hidden');
+      backdrop.classList.add('flex');
+    }
+
+    function closeCleanCsvModal() {
+      const backdrop = document.getElementById('cleanCsvModalBackdrop');
+      backdrop.classList.add('hidden');
+      backdrop.classList.remove('flex');
+    }
+
+    function loadSampleCleanupCsv() {
+      const targetCat = document.getElementById('cleanTargetCategorySelect').value;
+      const scopeList = document.getElementById('cleanListNameSelect').value;
+
+      const candidates = recordsData.filter(
+        (r) => r.category === targetCat && (scopeList === 'ALL' || r.listName === scopeList)
+      );
+
+      const sampleValues =
+        candidates.length > 0
+          ? candidates.slice(0, 2).map((r) => r.value)
+          : ['wb_test_token_133', 'non_existent_token_999'];
+
+      document.getElementById('cleanCsvFileLabel').textContent = `cleanup-${targetCat.toLowerCase()}.csv`;
+      document.getElementById('cleanCsvTextarea').value = ['value', ...sampleValues, 'unmatched_dummy_entry'].join('\n');
+      evaluateCsvCleanupMatches();
+    }
+
+    function handleCleanCsvFile(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      document.getElementById('cleanCsvFileLabel').textContent = file.name;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('cleanCsvTextarea').value = String(e.target.result || '');
+        evaluateCsvCleanupMatches();
+      };
+      reader.readAsText(file);
+    }
+
+    function evaluateCsvCleanupMatches() {
+      const targetCat = document.getElementById('cleanTargetCategorySelect').value;
+      const scopeList = document.getElementById('cleanListNameSelect').value;
+      const raw = document.getElementById('cleanCsvTextarea').value.trim();
+
+      const previewList = document.getElementById('cleanMatchPreviewList');
+      const countBadge = document.getElementById('cleanMatchCountBadge');
+      const confirmBtn = document.getElementById('confirmCleanCsvBtn');
+
+      matchedIdsForCsvClean = [];
+
+      if (!raw) {
+        countBadge.textContent = '0 matches found';
+        countBadge.className = 'text-[11px] font-semibold text-muted tabular-nums';
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Delete matched (0)';
+        previewList.innerHTML =
+          '<p class="text-xs text-muted py-4 text-center">Upload a CSV file or paste values above to preview records that will be deleted.</p>';
+        return;
+      }
+
+      const tokens = new Set();
+      raw.split(/\r?\n/).forEach((line, idx) => {
+        line.split(/[,;]/).forEach((cell) => {
+          const cleaned = cell.trim().replace(/^["']|["']$/g, '');
+          if (!cleaned) return;
+          if (idx === 0 && ['value', 'values', 'token', 'card_token'].includes(cleaned.toLowerCase())) return;
+          tokens.add(cleaned);
+        });
+      });
+
+      const matches = recordsData.filter(
+        (r) =>
+          r.category === targetCat &&
+          (scopeList === 'ALL' || r.listName === scopeList) &&
+          tokens.has(r.value)
+      );
+
+      matchedIdsForCsvClean = matches.map((m) => m.id);
+
+      countBadge.textContent = `${matches.length} ${matches.length === 1 ? 'match' : 'matches'} found`;
+      countBadge.className =
+        matches.length > 0
+          ? 'text-[11px] font-semibold text-rose-600 tabular-nums'
+          : 'text-[11px] font-semibold text-muted tabular-nums';
+
+      confirmBtn.disabled = matches.length === 0;
+      confirmBtn.textContent = `Delete matched (${matches.length})`;
+
+      if (matches.length === 0) {
+        previewList.innerHTML = `<p class="text-xs text-muted py-4 text-center">No matching records found in <strong>${escapeHtml(targetCat)}</strong> for the provided ${tokens.size} CSV ${tokens.size === 1 ? 'value' : 'values'}.</p>`;
+        return;
+      }
+
+      previewList.innerHTML = matches
+        .map(
+          (m) => `
+          <div class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg bg-surface border border-rose-200/80">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="font-mono text-[10.5px] font-semibold px-1.5 py-0.5 rounded bg-canvas text-ink border border-borderSubtle">${escapeHtml(m.listName)}</span>
+              <code class="font-mono text-xs text-ink truncate">${escapeHtml(m.value)}</code>
+            </div>
+            <span class="font-mono text-[11px] text-muted shrink-0">${escapeHtml(m.partyId)}</span>
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    function executeCsvCleanup() {
+      if (matchedIdsForCsvClean.length === 0) return;
+
+      const targetCat = document.getElementById('cleanTargetCategorySelect').value;
+      const toRemove = new Set(matchedIdsForCsvClean);
+      const removedCount = toRemove.size;
+
+      recordsData = recordsData.filter((r) => !toRemove.has(r.id));
+
+      closeCleanCsvModal();
+      switchListCategory(targetCat);
+      showToast(`Removed ${removedCount} ${removedCount === 1 ? 'record' : 'records'} from ${targetCat} list`, 'success');
+    }
+
+    // =========================================================================
+    // MODAL 3: DELETE CONFIRMATION
+    // =========================================================================
+    function openDeleteConfirm(id) {
+      const rec = recordsData.find((r) => r.id === id);
+      closeMenus();
+      if (!rec) return;
+
+      pendingDeleteId = rec.id;
+      document.getElementById('deleteTargetListName').textContent = rec.category;
+      document.getElementById('deleteRecordPreview').textContent = `${rec.listName}: ${rec.value}`;
+
+      const backdrop = document.getElementById('deleteConfirmBackdrop');
+      backdrop.classList.remove('hidden');
+      backdrop.classList.add('flex');
+    }
+
+    function closeDeleteConfirm() {
+      pendingDeleteId = null;
+      const backdrop = document.getElementById('deleteConfirmBackdrop');
+      backdrop.classList.add('hidden');
+      backdrop.classList.remove('flex');
+    }
+
+    function confirmDeleteRecord() {
+      if (pendingDeleteId === null) return;
+      const rec = recordsData.find((r) => r.id === pendingDeleteId);
+      recordsData = recordsData.filter((r) => r.id !== pendingDeleteId);
+      closeDeleteConfirm();
+      renderRecordsTable();
+      if (rec) {
+        showToast(`Deleted "${rec.value}" from ${rec.category} list`, 'info');
+      }
+    }
+
+    // =========================================================================
+    // HELPERS & SIDEBAR
+    // =========================================================================
+    function getCurrentUtcTimestamp() {
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${now.getUTCFullYear()}-${pad(now.getUTCMonth() + 1)}-${pad(now.getUTCDate())} ${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}:${pad(now.getUTCSeconds())}`;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function copyTextToClipboard(text) {
+      const tempInput = document.createElement('textarea');
+      tempInput.value = text;
+      tempInput.style.position = 'fixed';
+      tempInput.style.opacity = '0';
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      try {
+        document.execCommand('copy');
+      } catch (err) {
+        // Fallback ignored
+      }
+      document.body.removeChild(tempInput);
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+
+      const styles = {
+        success: 'bg-ink text-white border-slate-700',
+        error: 'bg-rose-600 text-white border-rose-700',
+        info: 'bg-surface text-ink border-borderStrong',
+      };
+
+      const dotColors = {
+        success: 'bg-emerald-400',
+        error: 'bg-white',
+        info: 'bg-brand',
+      };
+
+      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 rounded-xl border shadow-lg text-xs font-medium transition-all duration-200 transform translate-y-2 opacity-0 ${styles[type] || styles.info}`;
+      toast.innerHTML = `
+        <span class="w-2 h-2 rounded-full shrink-0 ${dotColors[type] || dotColors.info}"></span>
+        <span>${escapeHtml(message)}</span>
+      `;
+
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-2', 'opacity-0');
+        setTimeout(() => toast.remove(), 200);
+      }, 2800);
+    }
+
+    // Sidebar collapse & mobile drawer
+    document.getElementById('paymentsToggle').addEventListener('click', () => {
+      document.getElementById('paymentsSubmenu').classList.toggle('hidden');
+      document.getElementById('paymentsChevron').classList.toggle('rotate-180');
+    });
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+    function toggleMobileSidebar(open) {
+      sidebar.classList.toggle('-translate-x-full', !open);
+      sidebarBackdrop.classList.toggle('hidden', !open);
+    }
+
+    mobileMenuBtn.addEventListener('click', () => toggleMobileSidebar(true));
+    sidebarBackdrop.addEventListener('click', () => toggleMobileSidebar(false));
+
+    // Initial render
+    switchListCategory('Black');
+  </script>
+</body>
+</html>

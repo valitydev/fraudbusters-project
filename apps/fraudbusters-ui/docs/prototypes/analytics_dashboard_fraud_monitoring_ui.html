@@ -1,0 +1,2131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analytics — Fraud Monitoring</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+          },
+          colors: {
+            canvas: '#F8F9FB',
+            surface: '#FFFFFF',
+            borderSubtle: '#E2E8F0',
+            borderStrong: '#CBD5E1',
+            ink: '#1E293B',
+            muted: '#64748B',
+            brand: {
+              DEFAULT: '#6338F5',
+              hover: '#5128D9',
+              soft: '#F3EFFE',
+              border: '#DDD6FE',
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      background-color: #F8F9FB;
+      color: #1E293B;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row">
+
+  <!-- Mobile Top Header -->
+  <header class="lg:hidden bg-surface border-b border-borderSubtle px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+    <div class="flex items-center gap-3">
+      <button id="mobileMenuBtn" type="button" class="p-2 rounded-lg text-ink hover:bg-canvas transition" aria-label="Toggle navigation">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg bg-brand flex items-center justify-center text-white font-bold text-sm shadow-2xs">F</div>
+        <span class="font-semibold text-sm text-ink">FraudGuard</span>
+      </div>
+    </div>
+    <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-brand-soft text-brand border border-brand-border">
+      Analytics
+    </span>
+  </header>
+
+  <!-- Mobile Sidebar Backdrop -->
+  <div id="sidebarBackdrop" class="fixed inset-0 bg-slate-900/30 z-30 hidden lg:hidden"></div>
+
+  <!-- Left Navigation Sidebar -->
+  <aside id="sidebar" class="fixed lg:sticky top-0 left-0 z-40 h-screen w-[224px] shrink-0 bg-surface border-r border-borderSubtle flex flex-col justify-between transition-transform duration-200 -translate-x-full lg:translate-x-0">
+    <div>
+      <!-- Brand Logo -->
+      <div class="h-14 px-5 flex items-center justify-center lg:justify-start">
+        <a href="#analytics" onclick="return false;" class="flex items-center gap-2.5 focus:outline-none">
+          <svg class="w-7 h-7 text-brand" viewBox="0 0 28 28" fill="none">
+            <rect x="4" y="3" width="6" height="22" rx="2.5" fill="currentColor" />
+            <rect x="4" y="3" width="18" height="5.5" rx="2.5" fill="currentColor" />
+            <rect x="4" y="11.5" width="13" height="5" rx="2.5" fill="#815CF8" />
+            <circle cx="20.5" cy="14" r="2.5" fill="#A58BFA" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Navigation List -->
+      <nav class="px-3 py-2 space-y-1 text-[13px] font-medium">
+        <!-- Payments Section (Expanded) -->
+        <div>
+          <button id="paymentsToggle" type="button" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-ink hover:bg-canvas transition">
+            <span class="flex items-center gap-2.5">
+              <svg class="w-4 h-4 text-muted" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <rect x="3" y="5" width="18" height="14" rx="2.5" />
+                <path d="M3 10h18" />
+              </svg>
+              Payments
+            </span>
+            <svg id="paymentsChevron" class="w-3.5 h-3.5 text-muted transition-transform duration-150" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+            </svg>
+          </button>
+
+          <div id="paymentsSubmenu" class="mt-1 space-y-0.5 pl-2">
+            <!-- Active Item: Analytics -->
+            <a href="#analytics" onclick="return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-brand-soft text-brand font-semibold transition">
+              <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+              </svg>
+              Analytics
+            </a>
+
+            <a href="#templates" onclick="showToast('Navigation: Templates', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <rect x="4" y="3" width="16" height="18" rx="2" />
+                <path stroke-linecap="round" d="M8 8h8M8 12h8M8 16h5" />
+              </svg>
+              Templates
+            </a>
+
+            <a href="#groups" onclick="showToast('Navigation: Groups', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <circle cx="9" cy="8" r="3" />
+                <circle cx="16" cy="10" r="2.5" />
+                <path stroke-linecap="round" d="M4 19c0-2.8 2.2-5 5-5s5 2.2 5 5M14 19c0-2 1.5-3.6 3.5-3.6 1.2 0 2.2.5 2.8 1.4" />
+              </svg>
+              Groups
+            </a>
+
+            <a href="#lists" onclick="showToast('Navigation: Lists', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" />
+              </svg>
+              Lists
+            </a>
+
+            <a href="#testing" onclick="showToast('Navigation: Testing', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M9 3h6l1 3h3v4l-2 2v5a3 3 0 01-3 3h-4a3 3 0 01-3-3v-5l-2-2V6h3l1-3z" />
+              </svg>
+              Testing
+            </a>
+
+            <a href="#historical" onclick="showToast('Navigation: Historical data', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Historical data
+            </a>
+          </div>
+        </div>
+
+        <!-- Payouts Collapsible Group -->
+        <div class="pt-1 space-y-0.5">
+          <button id="payoutsToggle" type="button" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+            <span class="flex items-center gap-2.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <rect x="3" y="6" width="18" height="12" rx="2" />
+                <circle cx="16" cy="12" r="1.5" />
+              </svg>
+              Payouts
+            </span>
+            <svg id="payoutsChevron" class="w-3.5 h-3.5 transition-transform duration-150" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          <div id="payoutsSubmenu" class="hidden space-y-0.5 pl-2">
+            <a href="#payout-templates" onclick="showToast('Navigation: Payouts → Templates', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-muted hover:text-ink hover:bg-canvas transition text-xs">
+              Templates
+            </a>
+            <a href="#payout-groups" onclick="showToast('Navigation: Payouts → Groups', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-muted hover:text-ink hover:bg-canvas transition text-xs">
+              Groups
+            </a>
+            <a href="#payout-lists" onclick="showToast('Navigation: Payouts → Lists', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-muted hover:text-ink hover:bg-canvas transition text-xs">
+              Lists
+            </a>
+            <a href="#payout-history" onclick="showToast('Navigation: Payouts → Historical data', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-muted hover:text-ink hover:bg-canvas transition text-xs">
+              Historical data
+            </a>
+          </div>
+
+          <a href="#notifications" onclick="showToast('Navigation: Notifications', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            Notifications
+          </a>
+
+          <a href="#audit" onclick="showToast('Navigation: Audit', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Audit
+          </a>
+        </div>
+      </nav>
+    </div>
+
+    <!-- User Profile Footer -->
+    <div class="p-3 border-t border-borderSubtle">
+      <div class="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-canvas cursor-pointer transition">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-full bg-brand-soft text-brand font-semibold text-xs flex items-center justify-center shrink-0">
+            D
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs font-semibold text-ink truncate">dsfsdfadsf</p>
+            <p class="text-[11px] text-muted truncate">Officer, Monitoring</p>
+          </div>
+        </div>
+        <svg class="w-3.5 h-3.5 text-muted shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+        </svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 min-w-0 px-4 sm:px-8 py-6 max-w-[1440px] mx-auto w-full space-y-5">
+
+    <!-- 1. Page Header -->
+    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <h1 class="text-[24px] font-bold tracking-tight text-ink leading-tight">Analytics</h1>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface border border-borderSubtle font-mono text-[11px] font-medium text-muted tabular-nums shadow-2xs">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          UTC+00:00
+        </span>
+      </div>
+
+      <!-- Scenario Switcher & Export Action -->
+      <div class="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+        <button
+          id="sparseToggleBtn"
+          type="button"
+          onclick="toggleSparseScenario()"
+          aria-pressed="false"
+          class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface border border-borderSubtle hover:border-borderStrong text-xs font-medium text-ink shadow-2xs transition"
+          title="Switch between full Yesterday dataset (14 checks) and sparse screenshot dataset (4 checks)"
+        >
+          <span id="sparseToggleDot" class="w-2 h-2 rounded-full bg-slate-300 transition-colors"></span>
+          <span>Sparse day (4)</span>
+        </button>
+
+        <button
+          type="button"
+          onclick="exportAnalyticsReport()"
+          class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-surface border border-borderStrong hover:bg-canvas text-ink text-xs font-semibold shadow-2xs transition"
+        >
+          <svg class="w-3.5 h-3.5 text-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Export report
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. Filter Bar Card -->
+    <section class="relative bg-surface border border-borderSubtle rounded-xl p-5 shadow-2xs space-y-4">
+
+      <!-- Row 1: Period Preset Pills + Paired FROM (UTC) -> TO (UTC) Date Inputs -->
+      <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-4">
+        <div class="flex flex-wrap items-end gap-3">
+          <!-- Period Preset Pills -->
+          <div>
+            <span class="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">Period</span>
+            <div class="inline-flex flex-wrap items-center gap-1.5" role="group" aria-label="Analytics period presets">
+              <button type="button" data-preset="today" onclick="selectPeriodPreset('today')" class="period-pill px-3 py-2 rounded-lg text-xs font-medium border border-borderSubtle bg-surface text-ink hover:bg-canvas transition">Today</button>
+              <button type="button" data-preset="yesterday" onclick="selectPeriodPreset('yesterday')" class="period-pill px-3 py-2 rounded-lg text-xs font-semibold border border-brand-border bg-brand-soft text-brand transition">Yesterday</button>
+              <button type="button" data-preset="7d" onclick="selectPeriodPreset('7d')" class="period-pill px-3 py-2 rounded-lg text-xs font-medium border border-borderSubtle bg-surface text-ink hover:bg-canvas transition">7 days</button>
+              <button type="button" data-preset="30d" onclick="selectPeriodPreset('30d')" class="period-pill px-3 py-2 rounded-lg text-xs font-medium border border-borderSubtle bg-surface text-ink hover:bg-canvas transition">30 days</button>
+              <button type="button" data-preset="month" onclick="selectPeriodPreset('month')" class="period-pill px-3 py-2 rounded-lg text-xs font-medium border border-borderSubtle bg-surface text-ink hover:bg-canvas transition">This month</button>
+              <button type="button" data-preset="year" onclick="selectPeriodPreset('year')" class="period-pill px-3 py-2 rounded-lg text-xs font-medium border border-borderSubtle bg-surface text-ink hover:bg-canvas transition">This year</button>
+              <button type="button" data-preset="custom" onclick="openDatePopover('from')" class="period-pill px-3 py-2 rounded-lg text-xs font-medium border border-borderSubtle bg-surface text-ink hover:bg-canvas transition">Custom range</button>
+            </div>
+          </div>
+
+          <!-- Paired Date Range Inputs: FROM (UTC) -> TO (UTC) -->
+          <div id="dateRangeAnchor" class="relative flex flex-wrap sm:flex-nowrap items-end gap-2.5">
+            <!-- FROM (UTC) -->
+            <div>
+              <label for="fromDateTrigger" class="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
+                From (UTC)
+              </label>
+              <button
+                id="fromDateTrigger"
+                type="button"
+                onclick="toggleDatePopover('from')"
+                class="w-[154px] flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-surface border border-borderSubtle hover:border-borderStrong text-left transition focus:outline-none"
+              >
+                <span id="fromDateDisplay" class="font-mono text-xs font-medium text-ink tabular-nums">24/11/2026</span>
+                <svg class="w-4 h-4 text-muted shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2.5" />
+                  <path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Arrow Connector -->
+            <div class="hidden sm:flex items-center justify-center pb-2.5 text-muted">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </div>
+
+            <!-- TO (UTC) -->
+            <div>
+              <label for="toDateTrigger" class="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
+                To (UTC)
+              </label>
+              <button
+                id="toDateTrigger"
+                type="button"
+                onclick="toggleDatePopover('to')"
+                class="w-[154px] flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-surface border border-borderSubtle hover:border-borderStrong text-left transition focus:outline-none"
+              >
+                <span id="toDateDisplay" class="font-mono text-xs font-medium text-ink tabular-nums">24/11/2026</span>
+                <svg class="w-4 h-4 text-muted shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2.5" />
+                  <path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Custom Purple-Accented Date Range Popover -->
+            <div
+              id="dateRangePopover"
+              role="dialog"
+              aria-label="Select UTC date range"
+              class="hidden absolute top-full left-0 z-40 mt-2 w-[320px] sm:w-[344px] bg-surface border border-borderSubtle rounded-xl shadow-xl overflow-hidden"
+            >
+              <!-- Popover Header -->
+              <div class="px-4 py-2.5 bg-[#FAFBFD] border-b border-borderSubtle flex items-center justify-between">
+                <span id="popoverBoundaryTitle" class="text-xs font-semibold text-ink">Select FROM date (UTC)</span>
+                <div class="inline-flex items-center p-0.5 rounded-lg bg-canvas border border-borderSubtle">
+                  <button id="popSwitchFrom" type="button" onclick="switchPopoverBoundary('from')" class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-brand text-white transition">FROM</button>
+                  <button id="popSwitchTo" type="button" onclick="switchPopoverBoundary('to')" class="px-2 py-0.5 rounded-md text-[11px] font-medium text-muted hover:text-ink transition">TO</button>
+                </div>
+              </div>
+
+              <!-- Month Navigation -->
+              <div class="p-3.5">
+                <div class="flex items-center justify-between mb-2.5">
+                  <button type="button" onclick="shiftCalendarMonth(-1)" class="w-7 h-7 rounded-lg border border-borderSubtle bg-surface hover:bg-canvas flex items-center justify-center text-ink text-sm font-semibold transition" aria-label="Previous month">&lsaquo;</button>
+                  <span id="calendarMonthLabel" class="text-xs font-semibold text-ink">November 2026</span>
+                  <button type="button" onclick="shiftCalendarMonth(1)" class="w-7 h-7 rounded-lg border border-borderSubtle bg-surface hover:bg-canvas flex items-center justify-center text-ink text-sm font-semibold transition" aria-label="Next month">&rsaquo;</button>
+                </div>
+
+                <div class="grid grid-cols-7 text-center mb-1">
+                  <span class="font-mono text-[10.5px] font-semibold text-muted py-1">Mon</span>
+                  <span class="font-mono text-[10.5px] font-semibold text-muted py-1">Tue</span>
+                  <span class="font-mono text-[10.5px] font-semibold text-muted py-1">Wed</span>
+                  <span class="font-mono text-[10.5px] font-semibold text-muted py-1">Thu</span>
+                  <span class="font-mono text-[10.5px] font-semibold text-muted py-1">Fri</span>
+                  <span class="font-mono text-[10.5px] font-semibold text-muted py-1">Sat</span>
+                  <span class="font-mono text-[10.5px] font-semibold text-muted py-1">Sun</span>
+                </div>
+
+                <div id="calendarGrid" class="grid grid-cols-7 gap-y-1 text-center"></div>
+              </div>
+
+              <!-- Popover Footer -->
+              <div class="px-4 py-2.5 bg-[#FAFBFD] border-t border-borderSubtle flex items-center justify-between gap-2">
+                <span id="popoverRangeSummary" class="font-mono text-[11px] font-semibold text-brand tabular-nums">1 day</span>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="closeDatePopover()" class="px-3 py-1.5 rounded-lg bg-surface border border-borderStrong hover:bg-canvas text-ink text-xs font-semibold transition">Cancel</button>
+                  <button type="button" onclick="applyCustomDatePopover()" class="px-3.5 py-1.5 rounded-lg bg-brand hover:bg-brand-hover text-white text-xs font-semibold transition">Apply</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Window Context Badge -->
+        <div class="hidden xl:flex items-center gap-2 text-xs text-muted pb-1.5">
+          <span class="w-2 h-2 rounded-full bg-brand"></span>
+          <span>Granularity:</span>
+          <span id="granularityBadge" class="font-mono font-semibold text-ink">Hourly (UTC)</span>
+        </div>
+      </div>
+
+      <!-- Row 2: Merchant, Shop, Currency & Reset filters -->
+      <div class="pt-3 border-t border-borderSubtle/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5 items-end">
+        <!-- Merchant ID Input with Autocomplete -->
+        <div class="lg:col-span-4 relative">
+          <label for="merchantInput" class="block text-[11px] font-semibold text-muted mb-1">Merchant</label>
+          <div class="relative">
+            <input
+              id="merchantInput"
+              type="text"
+              placeholder="Merchant ID (e.g. party-wb-id)"
+              autocomplete="off"
+              onfocus="openAutocomplete('merchant')"
+              oninput="handleFilterInputChange()"
+              class="w-full font-mono text-xs pl-3 pr-8 py-2 rounded-lg bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 text-ink placeholder:text-[#94A3B8] outline-none transition"
+            />
+            <button
+              id="clearMerchantBtn"
+              type="button"
+              onclick="clearSingleFilter('merchant')"
+              class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink p-0.5"
+              aria-label="Clear merchant"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <!-- Autocomplete Dropdown -->
+          <div id="merchantSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 z-30 bg-surface border border-borderSubtle rounded-xl shadow-lg py-1 text-xs">
+            <button type="button" onmousedown="pickSuggestion('merchant', 'party-wb-id')" class="w-full px-3 py-2 text-left hover:bg-brand-soft flex items-center justify-between transition">
+              <span class="font-mono font-semibold text-ink">party-wb-id</span>
+              <span class="text-[11px] text-muted">Wildberries Core</span>
+            </button>
+            <button type="button" onmousedown="pickSuggestion('merchant', 'party-columbus-id')" class="w-full px-3 py-2 text-left hover:bg-brand-soft flex items-center justify-between transition">
+              <span class="font-mono font-semibold text-ink">party-columbus-id</span>
+              <span class="text-[11px] text-muted">Columbus Retail</span>
+            </button>
+            <button type="button" onmousedown="pickSuggestion('merchant', 'party-aggr-id')" class="w-full px-3 py-2 text-left hover:bg-brand-soft flex items-center justify-between transition">
+              <span class="font-mono font-semibold text-ink">party-aggr-id</span>
+              <span class="text-[11px] text-muted">Aggregator Hub</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Shop ID Input with Autocomplete -->
+        <div class="lg:col-span-4 relative">
+          <label for="shopInput" class="block text-[11px] font-semibold text-muted mb-1">Shop</label>
+          <div class="relative">
+            <input
+              id="shopInput"
+              type="text"
+              placeholder="Shop ID (e.g. shop-wb-id)"
+              autocomplete="off"
+              onfocus="openAutocomplete('shop')"
+              oninput="handleFilterInputChange()"
+              class="w-full font-mono text-xs pl-3 pr-8 py-2 rounded-lg bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 text-ink placeholder:text-[#94A3B8] outline-none transition"
+            />
+            <button
+              id="clearShopBtn"
+              type="button"
+              onclick="clearSingleFilter('shop')"
+              class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink p-0.5"
+              aria-label="Clear shop"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <!-- Autocomplete Dropdown -->
+          <div id="shopSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 z-30 bg-surface border border-borderSubtle rounded-xl shadow-lg py-1 text-xs">
+            <button type="button" onmousedown="pickSuggestion('shop', 'shop-wb-id')" class="w-full px-3 py-2 text-left hover:bg-brand-soft flex items-center justify-between transition">
+              <span class="font-mono font-semibold text-ink">shop-wb-id</span>
+              <span class="text-[11px] text-muted">party-wb-id</span>
+            </button>
+            <button type="button" onmousedown="pickSuggestion('shop', 'shop-columbus-id')" class="w-full px-3 py-2 text-left hover:bg-brand-soft flex items-center justify-between transition">
+              <span class="font-mono font-semibold text-ink">shop-columbus-id</span>
+              <span class="text-[11px] text-muted">party-columbus-id</span>
+            </button>
+            <button type="button" onmousedown="pickSuggestion('shop', 'shop-aggr-id')" class="w-full px-3 py-2 text-left hover:bg-brand-soft flex items-center justify-between transition">
+              <span class="font-mono font-semibold text-ink">shop-aggr-id</span>
+              <span class="text-[11px] text-muted">party-aggr-id</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Currency Select -->
+        <div class="lg:col-span-2">
+          <label for="currencySelect" class="block text-[11px] font-semibold text-muted mb-1">Currency</label>
+          <select
+            id="currencySelect"
+            onchange="handleFilterInputChange()"
+            class="w-full font-mono text-xs font-semibold px-3 py-2 rounded-lg bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 text-ink outline-none transition cursor-pointer"
+          >
+            <option value="RUB" selected>RUB</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+          </select>
+        </div>
+
+        <!-- Reset Filters Button -->
+        <div class="lg:col-span-2 flex justify-start lg:justify-end">
+          <button
+            id="resetFiltersBtn"
+            type="button"
+            disabled
+            onclick="resetAllAnalyticsFilters()"
+            class="w-full lg:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg border text-xs font-semibold transition disabled:bg-canvas disabled:text-[#94A3B8] disabled:border-borderSubtle disabled:cursor-not-allowed bg-surface border-borderStrong text-ink hover:bg-canvas"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Reset filters
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 4-Column KPI Summary Row -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <!-- KPI 1: Attempted payments -->
+      <div class="bg-surface border border-borderSubtle rounded-xl p-5 shadow-2xs flex flex-col justify-between min-h-[118px]">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-semibold text-muted">Attempted payments</span>
+          <span id="kpiAttemptedDelta" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 tabular-nums">
+            +16.7%
+          </span>
+        </div>
+        <div class="mt-3">
+          <div id="kpiAttemptedValue" class="font-mono text-[28px] font-bold text-ink tracking-tight tabular-nums leading-none">
+            14
+          </div>
+          <p id="kpiAttemptedSub" class="text-[11.5px] text-muted mt-2">Total rule engine evaluations</p>
+        </div>
+      </div>
+
+      <!-- KPI 2: Blocked payments -->
+      <div class="bg-surface border border-borderSubtle rounded-xl p-5 shadow-2xs flex flex-col justify-between min-h-[118px]">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-semibold text-muted">Blocked payments</span>
+          <span id="kpiBlockedDelta" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-rose-50 text-rose-700 border border-rose-200 tabular-nums">
+            3 declines
+          </span>
+        </div>
+        <div class="mt-3">
+          <div id="kpiBlockedValue" class="font-mono text-[28px] font-bold text-ink tracking-tight tabular-nums leading-none">
+            3
+          </div>
+          <p id="kpiBlockedSub" class="text-[11.5px] text-muted mt-2">Rejected by active fraud rules</p>
+        </div>
+      </div>
+
+      <!-- KPI 3: Blocked share -->
+      <div class="bg-surface border border-borderSubtle rounded-xl p-5 shadow-2xs flex flex-col justify-between min-h-[118px]">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-semibold text-muted">Blocked share</span>
+          <span id="kpiShareBadge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-brand-soft text-brand border border-brand-border tabular-nums">
+            3 / 14
+          </span>
+        </div>
+        <div class="mt-3">
+          <div id="kpiShareValue" class="font-mono text-[28px] font-bold text-ink tracking-tight tabular-nums leading-none">
+            21.4%
+          </div>
+          <p class="text-[11.5px] text-muted mt-2">Of attempted payments</p>
+        </div>
+      </div>
+
+      <!-- KPI 4: Blocked amount -->
+      <div class="bg-surface border border-borderSubtle rounded-xl p-5 shadow-2xs flex flex-col justify-between min-h-[118px]">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-semibold text-muted">Blocked amount</span>
+          <span id="kpiAmountCurrencyTag" class="px-2 py-0.5 rounded-md font-mono text-[11px] font-semibold bg-canvas border border-borderSubtle text-muted">
+            RUB
+          </span>
+        </div>
+        <div class="mt-3">
+          <div class="flex items-baseline gap-1.5">
+            <span id="kpiAmountValue" class="font-mono text-[28px] font-bold text-ink tracking-tight tabular-nums leading-none">
+              300
+            </span>
+            <span id="kpiAmountCurrencyUnit" class="font-mono text-xs font-semibold text-muted">
+              RUB
+            </span>
+          </div>
+          <p id="kpiAmountSub" class="text-[11.5px] text-muted mt-2">Prevented fraud exposure</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 2-Column Analytics Visualization Row (~62% / 38% split) -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+
+      <!-- Left Card (~62% -> 7 of 12 cols): Risk distribution -->
+      <div class="lg:col-span-7 bg-surface border border-borderSubtle rounded-xl p-5 shadow-2xs flex flex-col justify-between">
+        <!-- Card Header + Interactive Risk Score Legend Pills -->
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+          <div>
+            <h2 class="text-sm font-semibold text-ink">Risk distribution</h2>
+            <p class="text-xs text-muted mt-0.5">Share of checks by risk score, %</p>
+          </div>
+
+          <!-- Interactive Legend Toggles -->
+          <div class="flex flex-wrap items-center gap-1.5" role="group" aria-label="Risk score series toggles">
+            <button
+              type="button"
+              data-series="trusted"
+              onclick="toggleRiskSeries('trusted')"
+              class="risk-legend-btn inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border border-brand-border bg-brand-soft text-ink transition"
+            >
+              <span class="w-2.5 h-2.5 rounded-xs bg-[#6338F5]"></span>
+              trusted
+            </button>
+
+            <button
+              type="button"
+              data-series="low"
+              onclick="toggleRiskSeries('low')"
+              class="risk-legend-btn inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border border-emerald-200 bg-emerald-50/70 text-ink transition"
+            >
+              <span class="w-2.5 h-2.5 rounded-xs bg-[#10B981]"></span>
+              low
+            </button>
+
+            <button
+              type="button"
+              data-series="high"
+              onclick="toggleRiskSeries('high')"
+              class="risk-legend-btn inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border border-slate-200 bg-slate-100 text-ink transition"
+            >
+              <span class="w-2.5 h-2.5 rounded-xs bg-[#94A3B8]"></span>
+              high
+            </button>
+
+            <button
+              type="button"
+              data-series="fatal"
+              onclick="toggleRiskSeries('fatal')"
+              class="risk-legend-btn inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border border-rose-200 bg-rose-50/70 text-ink transition"
+            >
+              <span class="w-2.5 h-2.5 rounded-xs bg-[#EF4444]"></span>
+              fatal
+            </button>
+          </div>
+        </div>
+
+        <!-- Crisp Stacked Bar Chart Container with Hover Tooltip -->
+        <div class="relative flex-1 min-h-[245px] pt-2 select-none" id="riskChartWrapper">
+          <!-- Floating Hover Tooltip -->
+          <div
+            id="riskChartTooltip"
+            class="hidden pointer-events-none absolute z-20 w-[210px] bg-ink text-white rounded-xl p-3 shadow-xl border border-slate-700 text-xs transition-opacity duration-100"
+          >
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- Y-Axis Gridlines + Bars Area -->
+          <div class="flex h-[215px]">
+            <!-- Y-Axis Labels -->
+            <div class="w-10 shrink-0 flex flex-col justify-between text-right pr-2.5 pb-6 font-mono text-[10.5px] text-muted tabular-nums">
+              <span>100%</span>
+              <span>75%</span>
+              <span>50%</span>
+              <span>25%</span>
+              <span>0%</span>
+            </div>
+
+            <!-- Plot Canvas -->
+            <div class="flex-1 relative flex flex-col">
+              <!-- Horizontal Gridlines -->
+              <div class="flex-1 relative border-b border-borderSubtle">
+                <div class="absolute inset-x-0 top-0 border-t border-dashed border-borderSubtle/80"></div>
+                <div class="absolute inset-x-0 top-1/4 border-t border-dashed border-borderSubtle/80"></div>
+                <div class="absolute inset-x-0 top-2/4 border-t border-dashed border-borderSubtle/80"></div>
+                <div class="absolute inset-x-0 top-3/4 border-t border-dashed border-borderSubtle/80"></div>
+
+                <!-- Stacked Bars Row -->
+                <div id="riskChartBarsRow" class="relative z-10 h-full flex items-end justify-between gap-1 sm:gap-2 px-1 sm:px-3">
+                  <!-- Bars injected dynamically -->
+                </div>
+              </div>
+
+              <!-- X-Axis Labels Row -->
+              <div id="riskChartXAxisRow" class="h-6 flex items-center justify-between gap-1 sm:gap-2 px-1 sm:px-3 pt-1.5">
+                <!-- Labels injected dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Card (~38% -> 5 of 12 cols): Top declined rules -->
+      <div class="lg:col-span-5 bg-surface border border-borderSubtle rounded-xl p-5 shadow-2xs flex flex-col justify-between">
+        <div>
+          <div class="flex items-start justify-between gap-2 mb-4">
+            <div>
+              <h2 class="text-sm font-semibold text-ink">Top declined rules</h2>
+              <p class="text-xs text-muted mt-0.5">Top 5 by number of decline results</p>
+            </div>
+
+            <button
+              id="clearRuleHighlightBtn"
+              type="button"
+              onclick="selectTopDeclinedRule(null)"
+              class="hidden text-xs font-semibold text-brand hover:underline"
+            >
+              Clear filter
+            </button>
+          </div>
+
+          <!-- Ranked Rules List -->
+          <div id="topDeclinedRulesList" class="space-y-3">
+            <!-- Dynamically rendered -->
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-borderSubtle/80 flex items-center justify-between text-[11px] text-muted">
+          <span>Click any rule to filter breakdown below</span>
+          <span id="topRulesTotalLabel" class="font-mono font-semibold text-ink tabular-nums">3 declines</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Bottom Card: Rule breakdown Table -->
+    <section class="bg-surface border border-borderSubtle rounded-xl shadow-2xs overflow-hidden">
+      <!-- Table Header & Status Filter Pills -->
+      <div class="px-5 py-4 border-b border-borderSubtle flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <h2 class="text-sm font-semibold text-ink">Rule breakdown</h2>
+          <span id="breakdownRowCountBadge" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-canvas border border-borderSubtle text-muted tabular-nums">
+            4 rows
+          </span>
+
+          <!-- Active Rule Filter Chip (Shown when clicked in Top declined rules) -->
+          <span id="activeRuleChip" class="hidden inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-brand-soft text-brand border border-brand-border">
+            <span>Filtered by:</span>
+            <code id="activeRuleChipLabel" class="font-mono font-semibold"></code>
+            <button type="button" onclick="selectTopDeclinedRule(null)" class="hover:text-brand-hover font-bold ml-0.5" aria-label="Remove rule filter">&times;</button>
+          </span>
+        </div>
+
+        <!-- Status Filter Pills & Search -->
+        <div class="flex flex-wrap items-center gap-2.5">
+          <div class="inline-flex items-center p-0.5 rounded-lg bg-canvas border border-borderSubtle" role="group" aria-label="Filter breakdown by status">
+            <button type="button" data-status="all" onclick="setBreakdownStatusFilter('all')" class="status-filter-pill px-2.5 py-1 rounded-md text-xs font-semibold bg-surface text-ink shadow-2xs transition">All</button>
+            <button type="button" data-status="decline" onclick="setBreakdownStatusFilter('decline')" class="status-filter-pill px-2.5 py-1 rounded-md text-xs font-medium text-muted hover:text-ink transition">decline</button>
+            <button type="button" data-status="three_ds" onclick="setBreakdownStatusFilter('three_ds')" class="status-filter-pill px-2.5 py-1 rounded-md text-xs font-medium text-muted hover:text-ink transition">three_ds</button>
+            <button type="button" data-status="accept" onclick="setBreakdownStatusFilter('accept')" class="status-filter-pill px-2.5 py-1 rounded-md text-xs font-medium text-muted hover:text-ink transition">accept</button>
+          </div>
+
+          <div class="relative">
+            <input
+              id="breakdownSearchInput"
+              type="text"
+              placeholder="Search template or rule..."
+              oninput="renderAnalyticsDashboard()"
+              class="w-48 sm:w-56 font-mono text-xs pl-8 pr-3 py-1.5 rounded-lg bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand outline-none transition"
+            />
+            <svg class="w-3.5 h-3.5 text-muted absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="7" />
+              <path stroke-linecap="round" d="M20 20l-3.5-3.5" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-borderSubtle bg-[#FAFBFD] text-[11px] font-semibold uppercase tracking-wider text-muted">
+              <th class="py-3 pl-5 pr-3 w-[14%]">Status</th>
+              <th class="py-3 px-3 w-[28%]">Template</th>
+              <th class="py-3 px-3 w-[22%]">Checked rule</th>
+              <th class="py-3 px-3 text-right w-[14%]">Sum</th>
+              <th class="py-3 px-3 text-right w-[10%]">Count</th>
+              <th class="py-3 pl-3 pr-5 text-right w-[12%]">Ratio</th>
+            </tr>
+          </thead>
+          <tbody id="ruleBreakdownTableBody" class="divide-y divide-borderSubtle text-xs">
+            <!-- Dynamically rendered -->
+          </tbody>
+          <tfoot id="ruleBreakdownTableFoot" class="bg-[#FAFBFD] border-t border-borderSubtle text-xs font-semibold">
+            <!-- Dynamically rendered totals summing strictly to 100% -->
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    // =========================================================================
+    // DATASETS & MATHEMATICALLY CONSISTENT ANALYTICS ENGINE
+    // =========================================================================
+    const CURRENCY_RATES = {
+      RUB: 1,
+      USD: 0.011,
+      EUR: 0.01,
+    };
+
+    // Each preset has consistent breakdown rows + hourly/daily risk buckets
+    const ANALYTICS_DATASETS = {
+      yesterday: {
+        label: 'Yesterday',
+        from: '24/11/2026',
+        to: '24/11/2026',
+        granularity: 'Hourly (UTC)',
+        deltaAttempted: '+16.7%',
+        rows: [
+          {
+            id: 'r-three-ds',
+            status: 'three_ds',
+            template: 'RULE_NOT_CHECKED',
+            isUnchecked: true,
+            ruleIndex: null,
+            ruleName: null,
+            baseSumRub: 123.1,
+            count: 7,
+            merchant: 'party-wb-id',
+            shop: 'shop-wb-id',
+          },
+          {
+            id: 'r-aggr-0',
+            status: 'decline',
+            template: 'test-templ-aggr-id',
+            isUnchecked: false,
+            ruleIndex: 0,
+            ruleName: null,
+            baseSumRub: 210,
+            count: 2,
+            merchant: 'party-aggr-id',
+            shop: 'shop-aggr-id',
+          },
+          {
+            id: 'r-black-0',
+            status: 'decline',
+            template: 'black-list-template-id',
+            isUnchecked: false,
+            ruleIndex: 0,
+            ruleName: null,
+            baseSumRub: 90,
+            count: 1,
+            merchant: 'party-wb-id',
+            shop: 'shop-wb-id',
+          },
+          {
+            id: 'r-white-0',
+            status: 'accept',
+            template: 'white-list-template-id',
+            isUnchecked: false,
+            ruleIndex: 0,
+            ruleName: 'trusted_vip_pass',
+            baseSumRub: 540,
+            count: 4,
+            merchant: 'party-columbus-id',
+            shop: 'shop-columbus-id',
+          },
+        ],
+        buckets: [
+          { label: '00:00', trusted: 1, low: 0, high: 0, fatal: 0 },
+          { label: '03:00', trusted: 0, low: 1, high: 0, fatal: 0 },
+          { label: '06:00', trusted: 1, low: 1, high: 0, fatal: 0 },
+          { label: '09:00', trusted: 1, low: 1, high: 1, fatal: 0 },
+          { label: '12:00', trusted: 1, low: 1, high: 2, fatal: 2 },
+          { label: '15:00', trusted: 0, low: 1, high: 0, fatal: 1 },
+          { label: '18:00', trusted: 0, low: 0, high: 0, fatal: 0 },
+          { label: '21:00', trusted: 0, low: 0, high: 0, fatal: 0 },
+        ],
+      },
+
+      // Sparse screenshot dataset (4 attempted payments, 0 blocked, 7 three_ds / sparse check view)
+      yesterdaySparse: {
+        label: 'Yesterday (Sparse)',
+        from: '24/11/2026',
+        to: '24/11/2026',
+        granularity: 'Hourly (UTC)',
+        deltaAttempted: '0.0%',
+        rows: [
+          {
+            id: 'r-sparse-3ds',
+            status: 'three_ds',
+            template: 'RULE_NOT_CHECKED',
+            isUnchecked: true,
+            ruleIndex: null,
+            ruleName: null,
+            baseSumRub: 123.1,
+            count: 3,
+            merchant: 'party-wb-id',
+            shop: 'shop-wb-id',
+          },
+          {
+            id: 'r-sparse-accept',
+            status: 'accept',
+            template: 'white-list-template-id',
+            isUnchecked: false,
+            ruleIndex: 0,
+            ruleName: null,
+            baseSumRub: 450,
+            count: 1,
+            merchant: 'party-wb-id',
+            shop: 'shop-wb-id',
+          },
+        ],
+        buckets: [
+          { label: '00:00', trusted: 0, low: 0, high: 0, fatal: 0 },
+          { label: '03:00', trusted: 0, low: 0, high: 0, fatal: 0 },
+          { label: '06:00', trusted: 0, low: 0, high: 0, fatal: 0 },
+          { label: '09:00', trusted: 0, low: 0, high: 0, fatal: 0 },
+          { label: '12:00', trusted: 0, low: 1, high: 2, fatal: 1 },
+          { label: '15:00', trusted: 0, low: 0, high: 0, fatal: 0 },
+          { label: '18:00', trusted: 0, low: 0, high: 0, fatal: 0 },
+          { label: '21:00', trusted: 0, low: 0, high: 0, fatal: 0 },
+        ],
+      },
+
+      today: {
+        label: 'Today',
+        from: '25/11/2026',
+        to: '25/11/2026',
+        granularity: 'Hourly (UTC)',
+        deltaAttempted: '+8.4%',
+        rows: [
+          {
+            id: 't-accept',
+            status: 'accept',
+            template: 'white-list-template-id',
+            isUnchecked: false,
+            ruleIndex: 0,
+            ruleName: 'trusted_vip_pass',
+            baseSumRub: 4200,
+            count: 11,
+            merchant: 'party-wb-id',
+            shop: 'shop-wb-id',
+          },
+          {
+            id: 't-3ds',
+            status: 'three_ds',
+            template: 'RULE_NOT_CHECKED',
+            isUnchecked: true,
+            ruleIndex: null,
+            ruleName: null,
+            baseSumRub: 1850,
+            count: 6,
+            merchant: 'party-columbus-id',
+            shop: 'shop-columbus-id',
+          },
+          {
+            id: 't-decline-1',
+            status: 'decline',
+            template: 'test-templ-id',
+            isUnchecked: false,
+            ruleIndex: 1,
+            ruleName: 'amount_test',
+            baseSumRub: 1590,
+            count: 2,
+            merchant: 'party-wb-id',
+            shop: 'shop-wb-id',
+          },
+          {
+            id: 't-decline-2',
+            status: 'decline',
+            template: 'black-list-template-id',
+            isUnchecked: false,
+            ruleIndex: 0,
+            ruleName: null,
+            baseSumRub: 640,
+            count: 1,
+            merchant: 'party-aggr-id',
+            shop: 'shop-aggr-id',
+          },
+        ],
+        buckets: [
+          { label: '00:00', trusted: 2, low: 1, high: 0, fatal: 0 },
+          { label: '03:00', trusted: 1, low: 1, high: 0, fatal: 0 },
+          { label: '06:00', trusted: 2, low: 2, high: 1, fatal: 0 },
+          { label: '09:00', trusted: 3, low: 1, high: 1, fatal: 1 },
+          { label: '12:00', trusted: 2, low: 1, high: 1, fatal: 1 },
+          { label: '15:00', trusted: 1, low: 0, high: 0, fatal: 1 },
+          { label: '18:00', trusted: 0, low: 0, high: 0, fatal: 0 },
+          { label: '21:00', trusted: 0, low: 0, high: 0, fatal: 0 },
+        ],
+      },
+
+      '7d': {
+        label: '7 days',
+        from: '18/11/2026',
+        to: '24/11/2026',
+        granularity: 'Daily (UTC)',
+        deltaAttempted: '+12.4%',
+        rows: [
+          {
+            id: '7d-accept',
+            status: 'accept',
+            template: 'white-list-template-id',
+            isUnchecked: false,
+            ruleIndex: 0,
+            ruleName: 'trusted_vip_pass',
+            baseSumRub: 48600,
+            count: 68,
+            merchant: 'party-wb-id',
+            shop: 'shop-wb-id',
+          },
+          {
+            id: '7d-3ds',
+            status: 'three_ds',
+            template: 'RULE_NOT_CHECKED',
+            isUnchecked: true,
+            ruleIndex: null,
+            ruleName: null,
+            baseSumRub: 29400,
+            count: 34,
+            merchant: 'party-columbus-id',
+            shop: 'shop-columbus-id',
+          },
+          {
+            id: '7d-dec-aggr',
+            status: 'decline',
+            template: 'test-templ-aggr-id',
+            isUnchecked: false,
+            ruleIndex: 0,
+            ruleName: null,
+            baseSumRub: 14200,
+            count: 9,
+            merchant: 'party-aggr-id',
+            shop: 'shop-aggr-id',
+          },
+          {
+            id: '7d-dec-amt',
+            status: 'decline',
+            template: 'test-templ-id',
+            isUnchecked: false,
+            ruleIndex: 1,
+            ruleName: 'amount_test',
+            baseSumRub: 9800,
+            count: 5,
+            merchant: 'party-wb-id',
+            shop: 'shop-wb-id',
+          },
+          {
+            id: '7d-dec-bl',
+            status: 'decline',
+            template: 'black-list-template-id',
+            isUnchecked: false,
+            ruleIndex: 0,
+            ruleName: null,
+            baseSumRub: 4350,
+            count: 4,
+            merchant: 'party-wb-id',
+            shop: 'shop-wb-id',
+          },
+        ],
+        buckets: [
+          { label: '18 Nov', trusted: 8, low: 5, high: 2, fatal: 2 },
+          { label: '19 Nov', trusted: 10, low: 4, high: 3, fatal: 1 },
+          { label: '20 Nov', trusted: 9, low: 6, high: 2, fatal: 3 },
+          { label: '21 Nov', trusted: 11, low: 5, high: 2, fatal: 2 },
+          { label: '22 Nov', trusted: 7, low: 4, high: 3, fatal: 2 },
+          { label: '23 Nov', trusted: 12, low: 6, high: 2, fatal: 3 },
+          { label: '24 Nov', trusted: 11, low: 4, high: 3, fatal: 2 },
+        ],
+      },
+
+      '30d': {
+        label: '30 days',
+        from: '26/10/2026',
+        to: '24/11/2026',
+        granularity: '5-day buckets (UTC)',
+        deltaAttempted: '+19.1%',
+        rows: [
+          {
+            id: '30d-accept',
+            status: 'accept',
+            template: 'white-list-template-id',
+            isUnchecked: false,
+            ruleIndex: 0,
+            ruleName: 'trusted_vip_pass',
+            baseSumRub: 214500,
+            count: 312,
+            merchant: 'party-wb-id',
+            shop: 'shop-wb-id',
+          },
+          {
+            id: '30d-3ds',
+            status: 'three_ds',
+            template: 'RULE_NOT_CHECKED',
+            isUnchecked: true,
+            ruleIndex: null,
+            ruleName: null,
+            baseSumRub: 118900,
+            count: 146,
+            merchant: 'party-columbus-id',
+            shop: 'shop-columbus-id',
+          },
+          {
+            id: '30d-dec-1',
+            status: 'decline',
+            template: 'test-templ-aggr-id',
+            isUnchecked: false,
+            ruleIndex: 0,
+            ruleName: null,
+            baseSumRub: 54100,
+            count: 31,
+            merchant: 'party-aggr-id',
+            shop: 'shop-aggr-id',
+          },
+          {
+            id: '30d-dec-2',
+            status: 'decline',
+            template: 'test-templ-id',
+            isUnchecked: false,
+            ruleIndex: 1,
+            ruleName: 'amount_test',
+            baseSumRub: 38900,
+            count: 19,
+            merchant: 'party-wb-id',
+            shop: 'shop-wb-id',
+          },
+          {
+            id: '30d-dec-3',
+            status: 'decline',
+            template: 'black-list-template-id',
+            isUnchecked: false,
+            ruleIndex: 0,
+            ruleName: null,
+            baseSumRub: 21400,
+            count: 14,
+            merchant: 'party-wb-id',
+            shop: 'shop-wb-id',
+          },
+        ],
+        buckets: [
+          { label: '26 Oct', trusted: 48, low: 22, high: 12, fatal: 9 },
+          { label: '31 Oct', trusted: 52, low: 25, high: 14, fatal: 11 },
+          { label: '05 Nov', trusted: 50, low: 21, high: 11, fatal: 10 },
+          { label: '10 Nov', trusted: 56, low: 28, high: 15, fatal: 12 },
+          { label: '15 Nov', trusted: 51, low: 24, high: 13, fatal: 11 },
+          { label: '20 Nov', trusted: 55, low: 26, high: 14, fatal: 11 },
+        ],
+      },
+
+      month: {
+        label: 'This month',
+        from: '01/11/2026',
+        to: '25/11/2026',
+        granularity: '5-day buckets (UTC)',
+        deltaAttempted: '+14.8%',
+        rows: [
+          {
+            id: 'm-accept',
+            status: 'accept',
+            template: 'white-list-template-id',
+            isUnchecked: false,
+            ruleIndex: 0,
+            ruleName: 'trusted_vip_pass',
+            baseSumRub: 176400,
+            count: 254,
+            merchant: 'party-wb-id',
+            shop: 'shop-wb-id',
+          },
+          {
+            id: 'm-3ds',
+            status: 'three_ds',
+            template: 'RULE_NOT_CHECKED',
+            isUnchecked: true,
+            ruleIndex: null,
+            ruleName: null,
+            baseSumRub: 96200,
+            count: 118,
+            merchant: 'party-columbus-id',
+            shop: 'shop-columbus-id',
+          },
+          {
+            id: 'm-dec-1',
+            status: 'decline',
+            template: 'test-templ-aggr-id',
+            isUnchecked: false,
+            ruleIndex: 0,
+            ruleName: null,
+            baseSumRub: 41200,
+            count: 24,
+            merchant: 'party-aggr-id',
+            shop: 'shop-aggr-id',
+          },
+          {
+            id: 'm-dec-2',
+            status: 'decline',
+            template: 'test-templ-id',
+            isUnchecked: false,
+            ruleIndex: 1,
+            ruleName: 'amount_test',
+            baseSumRub: 29800,
+            count: 15,
+            merchant: 'party-wb-id',
+            shop: 'shop-wb-id',
+          },
+        ],
+        buckets: [
+          { label: '01 Nov', trusted: 44, low: 21, high: 10, fatal: 7 },
+          { label: '06 Nov', trusted: 51, low: 24, high: 12, fatal: 8 },
+          { label: '11 Nov', trusted: 49, low: 22, high: 11, fatal: 8 },
+          { label: '16 Nov', trusted: 54, low: 26, high: 13, fatal: 8 },
+          { label: '21 Nov', trusted: 56, low: 25, high: 12, fatal: 8 },
+        ],
+      },
+
+      year: {
+        label: 'This year',
+        from: '01/01/2026',
+        to: '25/11/2026',
+        granularity: 'Quarterly (UTC)',
+        deltaAttempted: '+28.3%',
+        rows: [
+          {
+            id: 'y-accept',
+            status: 'accept',
+            template: 'white-list-template-id',
+            isUnchecked: false,
+            ruleIndex: 0,
+            ruleName: 'trusted_vip_pass',
+            baseSumRub: 1840000,
+            count: 2410,
+            merchant: 'party-wb-id',
+            shop: 'shop-wb-id',
+          },
+          {
+            id: 'y-3ds',
+            status: 'three_ds',
+            template: 'RULE_NOT_CHECKED',
+            isUnchecked: true,
+            ruleIndex: null,
+            ruleName: null,
+            baseSumRub: 920000,
+            count: 1120,
+            merchant: 'party-columbus-id',
+            shop: 'shop-columbus-id',
+          },
+          {
+            id: 'y-dec-1',
+            status: 'decline',
+            template: 'test-templ-aggr-id',
+            isUnchecked: false,
+            ruleIndex: 0,
+            ruleName: null,
+            baseSumRub: 310000,
+            count: 198,
+            merchant: 'party-aggr-id',
+            shop: 'shop-aggr-id',
+          },
+          {
+            id: 'y-dec-2',
+            status: 'decline',
+            template: 'test-templ-id',
+            isUnchecked: false,
+            ruleIndex: 1,
+            ruleName: 'amount_test',
+            baseSumRub: 215000,
+            count: 132,
+            merchant: 'party-wb-id',
+            shop: 'shop-wb-id',
+          },
+          {
+            id: 'y-dec-3',
+            status: 'decline',
+            template: 'black-list-template-id',
+            isUnchecked: false,
+            ruleIndex: 0,
+            ruleName: null,
+            baseSumRub: 145000,
+            count: 95,
+            merchant: 'party-wb-id',
+            shop: 'shop-wb-id',
+          },
+        ],
+        buckets: [
+          { label: 'Q1 2026', trusted: 540, low: 250, high: 120, fatal: 95 },
+          { label: 'Q2 2026', trusted: 610, low: 280, high: 140, fatal: 105 },
+          { label: 'Q3 2026', trusted: 630, low: 295, high: 145, fatal: 112 },
+          { label: 'Q4 2026', trusted: 630, low: 295, high: 145, fatal: 113 },
+        ],
+      },
+    };
+
+    // =========================================================================
+    // APPLICATION STATE
+    // =========================================================================
+    let activePreset = 'yesterday';
+    let isSparseMode = false;
+    let customFromDate = new Date(Date.UTC(2026, 10, 24));
+    let customToDate = new Date(Date.UTC(2026, 10, 24));
+    let popoverOpen = false;
+    let popoverBoundary = 'from';
+    let calendarMonth = 10; // Nov 2026
+    let calendarYear = 2026;
+    let draftFrom = new Date(customFromDate.getTime());
+    let draftTo = new Date(customToDate.getTime());
+
+    let visibleRiskSeries = {
+      trusted: true,
+      low: true,
+      high: true,
+      fatal: true,
+    };
+
+    let selectedRuleFilter = null; // e.g. 'test-templ-aggr-id::0'
+    let breakdownStatusFilter = 'all'; // 'all' | 'decline' | 'three_ds' | 'accept'
+
+    // =========================================================================
+    // FILTER & PRESET HANDLERS
+    // =========================================================================
+    function getActiveDataset() {
+      if (activePreset === 'yesterday' && isSparseMode) {
+        return ANALYTICS_DATASETS.yesterdaySparse;
+      }
+      if (activePreset === 'custom') {
+        return ANALYTICS_DATASETS['7d'];
+      }
+      return ANALYTICS_DATASETS[activePreset] || ANALYTICS_DATASETS.yesterday;
+    }
+
+    function selectPeriodPreset(preset) {
+      activePreset = preset;
+      selectedRuleFilter = null;
+      closeDatePopover();
+
+      const ds = getActiveDataset();
+      document.getElementById('fromDateDisplay').textContent = ds.from;
+      document.getElementById('toDateDisplay').textContent = ds.to;
+      document.getElementById('granularityBadge').textContent = ds.granularity;
+
+      // Sync date objects
+      const [fd, fm, fy] = ds.from.split('/').map(Number);
+      const [td, tm, ty] = ds.to.split('/').map(Number);
+      customFromDate = new Date(Date.UTC(fy, fm - 1, fd));
+      customToDate = new Date(Date.UTC(ty, tm - 1, td));
+
+      updatePresetPillsUI();
+      updateResetButtonState();
+      renderAnalyticsDashboard();
+    }
+
+    function toggleSparseScenario() {
+      isSparseMode = !isSparseMode;
+      const btn = document.getElementById('sparseToggleBtn');
+      const dot = document.getElementById('sparseToggleDot');
+      btn.setAttribute('aria-pressed', String(isSparseMode));
+
+      if (isSparseMode) {
+        activePreset = 'yesterday';
+        btn.className = 'inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brand-soft border border-brand-border text-xs font-semibold text-brand shadow-2xs transition';
+        dot.className = 'w-2 h-2 rounded-full bg-brand transition-colors';
+        showToast('Switched to Sparse day (4 attempted, 0 blocked)', 'info');
+      } else {
+        btn.className = 'inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface border border-borderSubtle hover:border-borderStrong text-xs font-medium text-ink shadow-2xs transition';
+        dot.className = 'w-2 h-2 rounded-full bg-slate-300 transition-colors';
+        showToast('Switched to Standard Yesterday dataset (14 attempted, 3 blocked)', 'info');
+      }
+
+      selectPeriodPreset(activePreset);
+    }
+
+    function updatePresetPillsUI() {
+      document.querySelectorAll('.period-pill').forEach((btn) => {
+        const isActive = btn.dataset.preset === activePreset;
+        btn.className = isActive
+          ? 'period-pill px-3 py-2 rounded-lg text-xs font-semibold border border-brand-border bg-brand-soft text-brand transition'
+          : 'period-pill px-3 py-2 rounded-lg text-xs font-medium border border-borderSubtle bg-surface text-ink hover:bg-canvas transition';
+      });
+    }
+
+    function handleFilterInputChange() {
+      const mVal = document.getElementById('merchantInput').value.trim();
+      const sVal = document.getElementById('shopInput').value.trim();
+
+      document.getElementById('clearMerchantBtn').classList.toggle('hidden', !mVal);
+      document.getElementById('clearShopBtn').classList.toggle('hidden', !sVal);
+
+      updateResetButtonState();
+      renderAnalyticsDashboard();
+    }
+
+    function openAutocomplete(field) {
+      document.getElementById('merchantSuggestions').classList.toggle('hidden', field !== 'merchant');
+      document.getElementById('shopSuggestions').classList.toggle('hidden', field !== 'shop');
+    }
+
+    function pickSuggestion(field, value) {
+      if (field === 'merchant') {
+        document.getElementById('merchantInput').value = value;
+        document.getElementById('merchantSuggestions').classList.add('hidden');
+      } else {
+        document.getElementById('shopInput').value = value;
+        document.getElementById('shopSuggestions').classList.add('hidden');
+      }
+      handleFilterInputChange();
+    }
+
+    function clearSingleFilter(field) {
+      if (field === 'merchant') {
+        document.getElementById('merchantInput').value = '';
+      } else {
+        document.getElementById('shopInput').value = '';
+      }
+      handleFilterInputChange();
+    }
+
+    function updateResetButtonState() {
+      const mVal = document.getElementById('merchantInput').value.trim();
+      const sVal = document.getElementById('shopInput').value.trim();
+      const curVal = document.getElementById('currencySelect').value;
+
+      const isModified =
+        activePreset !== 'yesterday' ||
+        isSparseMode ||
+        mVal !== '' ||
+        sVal !== '' ||
+        curVal !== 'RUB' ||
+        selectedRuleFilter !== null ||
+        breakdownStatusFilter !== 'all';
+
+      document.getElementById('resetFiltersBtn').disabled = !isModified;
+    }
+
+    function resetAllAnalyticsFilters() {
+      isSparseMode = false;
+      const sparseBtn = document.getElementById('sparseToggleBtn');
+      sparseBtn.className = 'inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface border border-borderSubtle hover:border-borderStrong text-xs font-medium text-ink shadow-2xs transition';
+      document.getElementById('sparseToggleDot').className = 'w-2 h-2 rounded-full bg-slate-300 transition-colors';
+
+      document.getElementById('merchantInput').value = '';
+      document.getElementById('shopInput').value = '';
+      document.getElementById('currencySelect').value = 'RUB';
+      document.getElementById('breakdownSearchInput').value = '';
+      document.getElementById('clearMerchantBtn').classList.add('hidden');
+      document.getElementById('clearShopBtn').classList.add('hidden');
+
+      selectedRuleFilter = null;
+      breakdownStatusFilter = 'all';
+      updateStatusPillsUI();
+      selectPeriodPreset('yesterday');
+      showToast('Filters reset to default (Yesterday, RUB)', 'info');
+    }
+
+    // =========================================================================
+    // CUSTOM PURPLE-ACCENTED DATE RANGE POPOVER
+    // =========================================================================
+    function formatDateUTC(d) {
+      const dd = String(d.getUTCDate()).padStart(2, '0');
+      const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+      return `${dd}/${mm}/${d.getUTCFullYear()}`;
+    }
+
+    function toggleDatePopover(boundary) {
+      if (popoverOpen && popoverBoundary === boundary) {
+        closeDatePopover();
+      } else {
+        openDatePopover(boundary);
+      }
+    }
+
+    function openDatePopover(boundary) {
+      popoverOpen = true;
+      popoverBoundary = boundary;
+      draftFrom = new Date(customFromDate.getTime());
+      draftTo = new Date(customToDate.getTime());
+
+      const target = boundary === 'from' ? draftFrom : draftTo;
+      calendarYear = target.getUTCFullYear();
+      calendarMonth = target.getUTCMonth();
+
+      document.getElementById('dateRangePopover').classList.remove('hidden');
+      renderDatePopover();
+    }
+
+    function closeDatePopover() {
+      popoverOpen = false;
+      document.getElementById('dateRangePopover').classList.add('hidden');
+      updateDateTriggerBorders();
+    }
+
+    function switchPopoverBoundary(boundary) {
+      popoverBoundary = boundary;
+      const target = boundary === 'from' ? draftFrom : draftTo;
+      calendarYear = target.getUTCFullYear();
+      calendarMonth = target.getUTCMonth();
+      renderDatePopover();
+    }
+
+    function shiftCalendarMonth(delta) {
+      calendarMonth += delta;
+      if (calendarMonth < 0) {
+        calendarMonth = 11;
+        calendarYear -= 1;
+      } else if (calendarMonth > 11) {
+        calendarMonth = 0;
+        calendarYear += 1;
+      }
+      renderDatePopover();
+    }
+
+    function selectCalendarDay(y, m, d) {
+      const picked = new Date(Date.UTC(y, m, d));
+      if (popoverBoundary === 'from') {
+        draftFrom = picked;
+        if (draftFrom.getTime() > draftTo.getTime()) {
+          draftTo = new Date(draftFrom.getTime());
+        }
+        popoverBoundary = 'to';
+      } else {
+        if (picked.getTime() < draftFrom.getTime()) {
+          draftFrom = picked;
+        } else {
+          draftTo = picked;
+        }
+      }
+      renderDatePopover();
+    }
+
+    function applyCustomDatePopover() {
+      customFromDate = new Date(draftFrom.getTime());
+      customToDate = new Date(draftTo.getTime());
+      activePreset = 'custom';
+
+      document.getElementById('fromDateDisplay').textContent = formatDateUTC(customFromDate);
+      document.getElementById('toDateDisplay').textContent = formatDateUTC(customToDate);
+      document.getElementById('granularityBadge').textContent = 'Custom UTC window';
+
+      closeDatePopover();
+      updatePresetPillsUI();
+      updateResetButtonState();
+      renderAnalyticsDashboard();
+      showToast(`Custom range applied: ${formatDateUTC(customFromDate)} → ${formatDateUTC(customToDate)}`, 'success');
+    }
+
+    function updateDateTriggerBorders() {
+      const fromBtn = document.getElementById('fromDateTrigger');
+      const toBtn = document.getElementById('toDateTrigger');
+
+      fromBtn.className =
+        popoverOpen && popoverBoundary === 'from'
+          ? 'w-[154px] flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-surface border border-brand ring-2 ring-brand/15 text-left transition focus:outline-none'
+          : 'w-[154px] flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-surface border border-borderSubtle hover:border-borderStrong text-left transition focus:outline-none';
+
+      toBtn.className =
+        popoverOpen && popoverBoundary === 'to'
+          ? 'w-[154px] flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-surface border border-brand ring-2 ring-brand/15 text-left transition focus:outline-none'
+          : 'w-[154px] flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-surface border border-borderSubtle hover:border-borderStrong text-left transition focus:outline-none';
+    }
+
+    function renderDatePopover() {
+      updateDateTriggerBorders();
+
+      document.getElementById('popoverBoundaryTitle').textContent =
+        popoverBoundary === 'from' ? 'Select FROM date (UTC)' : 'Select TO date (UTC)';
+
+      document.getElementById('popSwitchFrom').className =
+        popoverBoundary === 'from'
+          ? 'px-2 py-0.5 rounded-md text-[11px] font-semibold bg-brand text-white transition'
+          : 'px-2 py-0.5 rounded-md text-[11px] font-medium text-muted hover:text-ink transition';
+
+      document.getElementById('popSwitchTo').className =
+        popoverBoundary === 'to'
+          ? 'px-2 py-0.5 rounded-md text-[11px] font-semibold bg-brand text-white transition'
+          : 'px-2 py-0.5 rounded-md text-[11px] font-medium text-muted hover:text-ink transition';
+
+      const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December',
+      ];
+      document.getElementById('calendarMonthLabel').textContent = `${monthNames[calendarMonth]} ${calendarYear}`;
+
+      const daysDiff = Math.round((draftTo.getTime() - draftFrom.getTime()) / 86400000) + 1;
+      document.getElementById('popoverRangeSummary').textContent = `${daysDiff} ${daysDiff === 1 ? 'day' : 'days'}`;
+
+      const firstDay = new Date(Date.UTC(calendarYear, calendarMonth, 1));
+      const startWeekday = (firstDay.getUTCDay() + 6) % 7;
+      const daysInMonth = new Date(Date.UTC(calendarYear, calendarMonth + 1, 0)).getUTCDate();
+
+      const fromMs = draftFrom.getTime();
+      const toMs = draftTo.getTime();
+
+      let html = '';
+      for (let i = 0; i < startWeekday; i++) {
+        html += '<div></div>';
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const cellMs = Date.UTC(calendarYear, calendarMonth, d);
+        const isEndpoint = cellMs === fromMs || cellMs === toMs;
+        const inRange = cellMs > fromMs && cellMs < toMs;
+
+        let cls = 'w-8 h-8 mx-auto rounded-lg font-mono text-xs tabular-nums flex items-center justify-center transition ';
+        if (isEndpoint) {
+          cls += 'bg-brand text-white font-semibold shadow-2xs';
+        } else if (inRange) {
+          cls += 'bg-brand-soft text-brand font-semibold';
+        } else {
+          cls += 'text-ink hover:bg-canvas font-medium';
+        }
+
+        html += `<div><button type="button" onclick="selectCalendarDay(${calendarYear}, ${calendarMonth}, ${d})" class="${cls}">${d}</button></div>`;
+      }
+
+      document.getElementById('calendarGrid').innerHTML = html;
+    }
+
+    // =========================================================================
+    // RISK SERIES TOGGLE & TOP DECLINED RULE SELECTION
+    // =========================================================================
+    function toggleRiskSeries(seriesKey) {
+      const activeCount = Object.values(visibleRiskSeries).filter(Boolean).length;
+      if (visibleRiskSeries[seriesKey] && activeCount === 1) {
+        showToast('At least one risk score series must remain visible', 'info');
+        return;
+      }
+
+      visibleRiskSeries[seriesKey] = !visibleRiskSeries[seriesKey];
+
+      document.querySelectorAll('.risk-legend-btn').forEach((btn) => {
+        const key = btn.dataset.series;
+        const active = visibleRiskSeries[key];
+        btn.classList.toggle('opacity-40', !active);
+      });
+
+      renderRiskDistributionChart();
+    }
+
+    function selectTopDeclinedRule(ruleKey) {
+      if (selectedRuleFilter === ruleKey) {
+        selectedRuleFilter = null;
+      } else {
+        selectedRuleFilter = ruleKey;
+      }
+      updateResetButtonState();
+      renderAnalyticsDashboard();
+    }
+
+    function setBreakdownStatusFilter(status) {
+      breakdownStatusFilter = status;
+      updateStatusPillsUI();
+      updateResetButtonState();
+      renderAnalyticsDashboard();
+    }
+
+    function updateStatusPillsUI() {
+      document.querySelectorAll('.status-filter-pill').forEach((btn) => {
+        const active = btn.dataset.status === breakdownStatusFilter;
+        btn.className = active
+          ? 'status-filter-pill px-2.5 py-1 rounded-md text-xs font-semibold bg-surface text-ink shadow-2xs transition'
+          : 'status-filter-pill px-2.5 py-1 rounded-md text-xs font-medium text-muted hover:text-ink transition';
+      });
+    }
+
+    // =========================================================================
+    // CORE RENDERING ENGINE (KPIs + Chart + Top Rules + Breakdown Table)
+    // =========================================================================
+    function getScopedBreakdownRows() {
+      const ds = getActiveDataset();
+      const qMerchant = document.getElementById('merchantInput').value.trim().toLowerCase();
+      const qShop = document.getElementById('shopInput').value.trim().toLowerCase();
+
+      return ds.rows.filter((r) => {
+        if (qMerchant && !r.merchant.toLowerCase().includes(qMerchant)) return false;
+        if (qShop && !r.shop.toLowerCase().includes(qShop)) return false;
+        return true;
+      });
+    }
+
+    function formatCurrencyValue(rubAmount, currency) {
+      const rate = CURRENCY_RATES[currency] || 1;
+      const converted = rubAmount * rate;
+      if (currency === 'RUB') {
+        return Number.isInteger(converted)
+          ? converted.toLocaleString('en-US')
+          : converted.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+      }
+      return converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function renderAnalyticsDashboard() {
+      const ds = getActiveDataset();
+      const currency = document.getElementById('currencySelect').value;
+      const scopedRows = getScopedBreakdownRows();
+
+      // 1. Compute KPIs strictly from scopedRows so every panel agrees 100%
+      const attemptedCount = scopedRows.reduce((acc, r) => acc + r.count, 0);
+      const declineRows = scopedRows.filter((r) => r.status === 'decline');
+      const blockedCount = declineRows.reduce((acc, r) => acc + r.count, 0);
+      const blockedSharePct = attemptedCount > 0 ? ((blockedCount / attemptedCount) * 100).toFixed(1) : '0.0';
+      const blockedSumRub = declineRows.reduce((acc, r) => acc + r.baseSumRub, 0);
+
+      document.getElementById('kpiAttemptedValue').textContent = attemptedCount.toLocaleString('en-US');
+      document.getElementById('kpiAttemptedDelta').textContent = ds.deltaAttempted;
+
+      document.getElementById('kpiBlockedValue').textContent = blockedCount.toLocaleString('en-US');
+      document.getElementById('kpiBlockedDelta').textContent = `${blockedCount} ${blockedCount === 1 ? 'decline' : 'declines'}`;
+
+      document.getElementById('kpiShareValue').textContent = `${blockedSharePct}%`;
+      document.getElementById('kpiShareBadge').textContent = `${blockedCount} / ${attemptedCount}`;
+
+      document.getElementById('kpiAmountValue').textContent = formatCurrencyValue(blockedSumRub, currency);
+      document.getElementById('kpiAmountCurrencyTag').textContent = currency;
+      document.getElementById('kpiAmountCurrencyUnit').textContent = currency;
+
+      // 2. Render Risk Distribution Stacked Bar Chart
+      renderRiskDistributionChart();
+
+      // 3. Render Top Declined Rules Card
+      renderTopDeclinedRules(declineRows);
+
+      // 4. Render Bottom Rule Breakdown Table
+      renderRuleBreakdownTable(scopedRows, attemptedCount, currency);
+    }
+
+    function renderRiskDistributionChart() {
+      const ds = getActiveDataset();
+      const barsRow = document.getElementById('riskChartBarsRow');
+      const xAxisRow = document.getElementById('riskChartXAxisRow');
+
+      const seriesConfig = [
+        { key: 'trusted', label: 'trusted', color: '#6338F5' },
+        { key: 'low', label: 'low', color: '#10B981' },
+        { key: 'high', label: 'high', color: '#94A3B8' },
+        { key: 'fatal', label: 'fatal', color: '#EF4444' },
+      ];
+
+      barsRow.innerHTML = ds.buckets
+        .map((bucket, idx) => {
+          const activeTotals = seriesConfig.reduce(
+            (sum, s) => sum + (visibleRiskSeries[s.key] ? bucket[s.key] : 0),
+            0
+          );
+
+          if (activeTotals === 0) {
+            return `
+              <div
+                class="flex-1 h-full flex flex-col justify-end items-center group cursor-pointer"
+                onmouseenter="showRiskTooltip(event, ${idx})"
+                onmousemove="moveRiskTooltip(event)"
+                onmouseleave="hideRiskTooltip()"
+              >
+                <div class="w-4 sm:w-5 h-[2px] bg-slate-200 rounded-full group-hover:bg-slate-400 transition"></div>
+              </div>
+            `;
+          }
+
+          // Build stacked segments from bottom to top: trusted -> low -> high -> fatal
+          const segmentsHtml = seriesConfig
+            .filter((s) => visibleRiskSeries[s.key] && bucket[s.key] > 0)
+            .map((s) => {
+              const pct = (bucket[s.key] / activeTotals) * 100;
+              return `<div style="height: ${pct.toFixed(2)}%; background-color: ${s.color};" class="w-full transition-all duration-200"></div>`;
+            })
+            .join('');
+
+          return `
+            <div
+              class="flex-1 h-full flex flex-col justify-end items-center group cursor-pointer"
+              onmouseenter="showRiskTooltip(event, ${idx})"
+              onmousemove="moveRiskTooltip(event)"
+              onmouseleave="hideRiskTooltip()"
+            >
+              <div class="w-4 sm:w-5 h-full flex flex-col-reverse rounded-t-[4px] overflow-hidden ring-0 group-hover:ring-2 group-hover:ring-brand/40 transition">
+                ${segmentsHtml}
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+
+      xAxisRow.innerHTML = ds.buckets
+        .map(
+          (bucket) => `
+          <div class="flex-1 text-center font-mono text-[10.5px] text-muted tabular-nums truncate">
+            ${escapeHtml(bucket.label)}
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    function showRiskTooltip(event, bucketIdx) {
+      const ds = getActiveDataset();
+      const bucket = ds.buckets[bucketIdx];
+      if (!bucket) return;
+
+      const tooltip = document.getElementById('riskChartTooltip');
+      const seriesMeta = [
+        { key: 'fatal', label: 'fatal', color: '#EF4444' },
+        { key: 'high', label: 'high', color: '#94A3B8' },
+        { key: 'low', label: 'low', color: '#10B981' },
+        { key: 'trusted', label: 'trusted', color: '#6338F5' },
+      ];
+
+      const total = seriesMeta.reduce((sum, s) => sum + (visibleRiskSeries[s.key] ? bucket[s.key] : 0), 0);
+
+      const rowsHtml = seriesMeta
+        .filter((s) => visibleRiskSeries[s.key])
+        .map((s) => {
+          const val = bucket[s.key];
+          const pct = total > 0 ? ((val / total) * 100).toFixed(0) : '0';
+          return `
+            <div class="flex items-center justify-between gap-3">
+              <span class="inline-flex items-center gap-1.5 text-slate-200">
+                <span class="w-2 h-2 rounded-xs" style="background-color: ${s.color};"></span>
+                ${s.label}
+              </span>
+              <span class="font-mono font-semibold tabular-nums text-white">${pct}% <span class="text-slate-400 font-normal">(${val})</span></span>
+            </div>
+          `;
+        })
+        .join('');
+
+      tooltip.innerHTML = `
+        <div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-700">
+          <span class="font-mono font-semibold text-white">${escapeHtml(bucket.label)} UTC</span>
+          <span class="font-mono text-[11px] text-slate-300 tabular-nums">${total} checks</span>
+        </div>
+        <div class="space-y-1">
+          ${rowsHtml}
+        </div>
+      `;
+
+      tooltip.classList.remove('hidden');
+      moveRiskTooltip(event);
+    }
+
+    function moveRiskTooltip(event) {
+      const wrapper = document.getElementById('riskChartWrapper');
+      const tooltip = document.getElementById('riskChartTooltip');
+      const rect = wrapper.getBoundingClientRect();
+
+      let left = event.clientX - rect.left + 14;
+      let top = event.clientY - rect.top - 20;
+
+      if (left + 215 > rect.width) {
+        left = event.clientX - rect.left - 224;
+      }
+      if (top < 0) top = 8;
+
+      tooltip.style.left = `${Math.max(4, left)}px`;
+      tooltip.style.top = `${top}px`;
+    }
+
+    function hideRiskTooltip() {
+      document.getElementById('riskChartTooltip').classList.add('hidden');
+    }
+
+    function renderTopDeclinedRules(declineRows) {
+      const container = document.getElementById('topDeclinedRulesList');
+      const clearBtn = document.getElementById('clearRuleHighlightBtn');
+      const totalLabel = document.getElementById('topRulesTotalLabel');
+
+      clearBtn.classList.toggle('hidden', selectedRuleFilter === null);
+
+      const sorted = [...declineRows].sort((a, b) => b.count - a.count).slice(0, 5);
+      const totalDeclines = sorted.reduce((acc, r) => acc + r.count, 0);
+      totalLabel.textContent = `${totalDeclines} ${totalDeclines === 1 ? 'decline' : 'declines'}`;
+
+      if (sorted.length === 0) {
+        container.innerHTML = `
+          <div class="py-10 px-4 text-center rounded-xl bg-canvas border border-borderSubtle">
+            <p class="text-xs font-semibold text-ink">No declined rules in this slice</p>
+            <p class="text-[11.5px] text-muted mt-1">All evaluated checks resulted in accept or 3DS challenge.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const maxCount = Math.max(...sorted.map((r) => r.count), 1);
+
+      container.innerHTML = sorted
+        .map((rule) => {
+          const ruleKey = `${rule.template}::${rule.ruleIndex}`;
+          const isSelected = selectedRuleFilter === ruleKey;
+          const pctWidth = Math.round((rule.count / maxCount) * 100);
+
+          const titleBadge = rule.ruleName
+            ? `<span class="font-mono text-xs font-semibold text-ink">${escapeHtml(rule.ruleName)}</span>`
+            : `<span class="font-mono text-xs font-semibold text-ink">Rule #${rule.ruleIndex}</span>
+               <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-canvas border border-borderSubtle text-muted">unnamed</span>`;
+
+          return `
+            <button
+              type="button"
+              onclick="selectTopDeclinedRule('${escapeHtml(ruleKey)}')"
+              class="w-full text-left p-3 rounded-xl border transition ${
+                isSelected
+                  ? 'bg-brand-soft/70 border-brand ring-2 ring-brand/15'
+                  : 'bg-surface border-borderSubtle hover:border-brand-border hover:bg-[#FAFBFD]'
+              }"
+            >
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    ${titleBadge}
+                  </div>
+                  <p class="font-mono text-[11px] text-muted truncate mt-0.5">${escapeHtml(rule.template)}</p>
+                </div>
+
+                <span class="font-mono text-sm font-bold text-ink tabular-nums shrink-0">
+                  ${rule.count}
+                </span>
+              </div>
+
+              <div class="w-full h-1.5 rounded-full bg-canvas overflow-hidden">
+                <div class="h-full rounded-full bg-brand transition-all duration-300" style="width: ${pctWidth}%;"></div>
+              </div>
+            </button>
+          `;
+        })
+        .join('');
+    }
+
+    function renderRuleBreakdownTable(scopedRows, totalAttempted, currency) {
+      const tbody = document.getElementById('ruleBreakdownTableBody');
+      const tfoot = document.getElementById('ruleBreakdownTableFoot');
+      const searchQ = document.getElementById('breakdownSearchInput').value.trim().toLowerCase();
+
+      // Update active rule chip
+      const ruleChip = document.getElementById('activeRuleChip');
+      if (selectedRuleFilter) {
+        const [tpl, idx] = selectedRuleFilter.split('::');
+        document.getElementById('activeRuleChipLabel').textContent = `${tpl} (Rule #${idx})`;
+        ruleChip.classList.remove('hidden');
+      } else {
+        ruleChip.classList.add('hidden');
+      }
+
+      const visibleRows = scopedRows.filter((r) => {
+        if (breakdownStatusFilter !== 'all' && r.status !== breakdownStatusFilter) return false;
+        if (selectedRuleFilter) {
+          const key = `${r.template}::${r.ruleIndex}`;
+          if (key !== selectedRuleFilter) return false;
+        }
+        if (searchQ) {
+          const hay = `${r.template} ${r.ruleName || ''} rule #${r.ruleIndex ?? ''}`.toLowerCase();
+          if (!hay.includes(searchQ)) return false;
+        }
+        return true;
+      });
+
+      document.getElementById('breakdownRowCountBadge').textContent =
+        `${visibleRows.length} ${visibleRows.length === 1 ? 'row' : 'rows'}`;
+
+      if (visibleRows.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-10 px-6 text-center text-xs text-muted">
+              No breakdown entries match the current status or rule filter.
+            </td>
+          </tr>
+        `;
+        tfoot.innerHTML = '';
+        return;
+      }
+
+      // Compute exact ratios relative to totalAttempted (summing cleanly to 100.0% when unfiltered)
+      const denomCount = visibleRows.reduce((acc, r) => acc + r.count, 0);
+      let runningRatio = 0;
+
+      tbody.innerHTML = visibleRows
+        .map((r, i) => {
+          let ratioVal;
+          if (i === visibleRows.length - 1 && denomCount > 0) {
+            ratioVal = Math.max(0, 100 - runningRatio);
+          } else {
+            ratioVal = denomCount > 0 ? Number(((r.count / denomCount) * 100).toFixed(1)) : 0;
+            runningRatio = Number((runningRatio + ratioVal).toFixed(1));
+          }
+
+          const statusStyles = {
+            decline: {
+              pill: 'bg-[#FEE2E2] text-[#DC2626] border-rose-200',
+              dot: 'bg-[#DC2626]',
+            },
+            three_ds: {
+              pill: 'bg-[#DBEAFE] text-[#2563EB] border-blue-200',
+              dot: 'bg-[#2563EB]',
+            },
+            accept: {
+              pill: 'bg-[#DCFCE7] text-[#16A34A] border-emerald-200',
+              dot: 'bg-[#16A34A]',
+            },
+          };
+
+          const st = statusStyles[r.status] || statusStyles.three_ds;
+
+          const templateCell = r.isUnchecked
+            ? `<span class="inline-flex items-center font-mono text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-canvas border border-borderSubtle text-muted">RULE_NOT_CHECKED</span>`
+            : `<a href="#tpl-${escapeHtml(r.template)}" onclick="showToast('Inspecting template: ${escapeHtml(r.template)}', 'info'); return false;" class="font-mono text-xs font-semibold text-ink hover:text-brand hover:underline transition">${escapeHtml(r.template)}</a>`;
+
+          let checkedRuleCell = '<span class="text-muted">&mdash;</span>';
+          if (!r.isUnchecked) {
+            checkedRuleCell = r.ruleName
+              ? `<span class="font-mono text-xs font-semibold text-ink">${escapeHtml(r.ruleName)}</span> <span class="font-mono text-[11px] text-muted">(Rule #${r.ruleIndex})</span>`
+              : `<span class="font-mono text-xs font-semibold text-ink">Rule #${r.ruleIndex}</span> <span class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-canvas border border-borderSubtle text-muted">unnamed</span>`;
+          }
+
+          return `
+            <tr class="hover:bg-[#FAFBFD] transition">
+              <td class="py-3.5 pl-5 pr-3 whitespace-nowrap">
+                <span class="inline-flex items-center gap-1.5 font-mono text-[11px] font-semibold px-2.5 py-1 rounded-full border ${st.pill}">
+                  <span class="w-1.5 h-1.5 rounded-full ${st.dot}"></span>
+                  ${escapeHtml(r.status)}
+                </span>
+              </td>
+              <td class="py-3.5 px-3 whitespace-nowrap">${templateCell}</td>
+              <td class="py-3.5 px-3 whitespace-nowrap">${checkedRuleCell}</td>
+              <td class="py-3.5 px-3 text-right font-mono text-xs font-semibold text-ink tabular-nums whitespace-nowrap">
+                ${formatCurrencyValue(r.baseSumRub, currency)} <span class="text-muted font-medium">${currency}</span>
+              </td>
+              <td class="py-3.5 px-3 text-right font-mono text-xs font-semibold text-ink tabular-nums whitespace-nowrap">
+                ${r.count.toLocaleString('en-US')}
+              </td>
+              <td class="py-3.5 pl-3 pr-5 text-right font-mono text-xs font-semibold text-ink tabular-nums whitespace-nowrap">
+                ${ratioVal.toFixed(1)}%
+              </td>
+            </tr>
+          `;
+        })
+        .join('');
+
+      const totalSumRub = visibleRows.reduce((acc, r) => acc + r.baseSumRub, 0);
+      tfoot.innerHTML = `
+        <tr>
+          <td colspan="3" class="py-3 pl-5 pr-3 text-muted">Total (${visibleRows.length} rule groups)</td>
+          <td class="py-3 px-3 text-right font-mono text-ink tabular-nums">
+            ${formatCurrencyValue(totalSumRub, currency)} <span class="text-muted font-medium">${currency}</span>
+          </td>
+          <td class="py-3 px-3 text-right font-mono text-ink tabular-nums">${denomCount.toLocaleString('en-US')}</td>
+          <td class="py-3 pl-3 pr-5 text-right font-mono text-brand tabular-nums">100.0%</td>
+        </tr>
+      `;
+    }
+
+    // =========================================================================
+    // HELPERS & GLOBAL LISTENERS
+    // =========================================================================
+    function exportAnalyticsReport() {
+      const ds = getActiveDataset();
+      const currency = document.getElementById('currencySelect').value;
+      showToast(`Exported Analytics (${ds.label}, ${currency}) to CSV`, 'success');
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+
+      const styles = {
+        success: 'bg-ink text-white border-slate-700',
+        info: 'bg-surface text-ink border-borderStrong',
+      };
+
+      const dotColors = {
+        success: 'bg-emerald-400',
+        info: 'bg-brand',
+      };
+
+      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 rounded-xl border shadow-lg text-xs font-medium transition-all duration-200 transform translate-y-2 opacity-0 ${styles[type] || styles.info}`;
+      toast.innerHTML = `
+        <span class="w-2 h-2 rounded-full shrink-0 ${dotColors[type] || dotColors.info}"></span>
+        <span>${escapeHtml(message)}</span>
+      `;
+
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-2', 'opacity-0');
+        setTimeout(() => toast.remove(), 200);
+      }, 2600);
+    }
+
+    // Close popovers & autocompletes on outside click
+    document.addEventListener('click', (e) => {
+      const dateAnchor = document.getElementById('dateRangeAnchor');
+      if (popoverOpen && dateAnchor && !dateAnchor.contains(e.target)) {
+        closeDatePopover();
+      }
+
+      if (!e.target.closest('#merchantInput') && !e.target.closest('#merchantSuggestions')) {
+        document.getElementById('merchantSuggestions').classList.add('hidden');
+      }
+      if (!e.target.closest('#shopInput') && !e.target.closest('#shopSuggestions')) {
+        document.getElementById('shopSuggestions').classList.add('hidden');
+      }
+    });
+
+    // Sidebar accordion & mobile menu
+    document.getElementById('paymentsToggle').addEventListener('click', () => {
+      document.getElementById('paymentsSubmenu').classList.toggle('hidden');
+      document.getElementById('paymentsChevron').classList.toggle('rotate-180');
+    });
+
+    document.getElementById('payoutsToggle').addEventListener('click', () => {
+      document.getElementById('payoutsSubmenu').classList.toggle('hidden');
+      document.getElementById('payoutsChevron').classList.toggle('rotate-180');
+    });
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+    mobileMenuBtn.addEventListener('click', () => {
+      sidebar.classList.remove('-translate-x-full');
+      sidebarBackdrop.classList.remove('hidden');
+    });
+
+    sidebarBackdrop.addEventListener('click', () => {
+      sidebar.classList.add('-translate-x-full');
+      sidebarBackdrop.classList.add('hidden');
+    });
+
+    // Initial render
+    renderAnalyticsDashboard();
+  </script>
+</body>
+</html>

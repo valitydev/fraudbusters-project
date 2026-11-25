@@ -2,19 +2,19 @@
 
 ## Источники
 
-Общее оформление задают девять HTML-прототипов редизайна. Они не входят в репозиторий и
-хранятся вместе с материалами ревью интерфейса. Ниже перечислены их имена и разделы, которые
-по ним реализованы.
+Общее оформление задают девять HTML-прототипов редизайна в [`docs/prototypes`](docs/prototypes).
+Это статичные эталоны: откройте файл в браузере, чтобы сверить экран. Они не входят в сборку и
+не проверяются Prettier.
 
-| Зона         | Прототипы                                                                                      | Реализация                                                                         |
-| ------------ | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Аналитика    | `analytics_dashboard_fraud_monitoring_ui.html`                                                 | `sections/analytics`. Фильтры периода, KPI, график риска и таблица правил.         |
-| История      | `historical_data_refactored_ui_prototype.html`                                                 | `sections/historical-data/records`. Фильтры, таблица, детали записи.               |
-| Дата и время | `datetime_range_picker_refactored_ui_prototype.html`                                           | `fb-datetime-range`. Дата, дата и время, одно значение или диапазон.               |
-| Шаблоны      | `templates_flow_list_create_edit_prototype.html`, `edit_template_refactored_ui_prototype.html` | Каталог шаблонов, `fb-template-editor` и `fb-fraudo-editor` для платежей и выплат. |
-| Группы       | `new_group_refactored_ui_prototype.html`                                                       | Каталог групп и `fb-group-editor`. Детали группы, порядок и веса шаблонов.         |
-| Привязки     | `new_references_refactored_ui_prototype.html`                                                  | `fb-reference-form` и `fb-reference-table`. Привязки шаблонов и групп.             |
-| Списки       | `lists_refactored_ui_prototype.html`, `new_rows_refactored_ui_prototype.html`                  | Каталоги списков и кандидатов, `list-rows-form`, общий `fb-csv-panel`.             |
+| Зона         | Прототипы                                                                                                                                                                                                                      | Реализация                                                                         |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| Аналитика    | [`analytics_dashboard_fraud_monitoring_ui.html`](docs/prototypes/analytics_dashboard_fraud_monitoring_ui.html)                                                                                                                 | `sections/analytics`. Фильтры периода, KPI, график риска и таблица правил.         |
+| История      | [`historical_data_refactored_ui_prototype.html`](docs/prototypes/historical_data_refactored_ui_prototype.html)                                                                                                                 | `sections/historical-data/records`. Фильтры, таблица, детали записи.               |
+| Дата и время | [`datetime_range_picker_refactored_ui_prototype.html`](docs/prototypes/datetime_range_picker_refactored_ui_prototype.html)                                                                                                     | `fb-datetime-range`. Дата, дата и время, одно значение или диапазон.               |
+| Шаблоны      | [`templates_flow_list_create_edit_prototype.html`](docs/prototypes/templates_flow_list_create_edit_prototype.html), [`edit_template_refactored_ui_prototype.html`](docs/prototypes/edit_template_refactored_ui_prototype.html) | Каталог шаблонов, `fb-template-editor` и `fb-fraudo-editor` для платежей и выплат. |
+| Группы       | [`new_group_refactored_ui_prototype.html`](docs/prototypes/new_group_refactored_ui_prototype.html)                                                                                                                             | Каталог групп и `fb-group-editor`. Детали группы, порядок и веса шаблонов.         |
+| Привязки     | [`new_references_refactored_ui_prototype.html`](docs/prototypes/new_references_refactored_ui_prototype.html)                                                                                                                   | `fb-reference-form` и `fb-reference-table`. Привязки шаблонов и групп.             |
+| Списки       | [`lists_refactored_ui_prototype.html`](docs/prototypes/lists_refactored_ui_prototype.html), [`new_rows_refactored_ui_prototype.html`](docs/prototypes/new_rows_refactored_ui_prototype.html)                                   | Каталоги списков и кандидатов, `list-rows-form`, общий `fb-csv-panel`.             |
 
 ## Основа
 
