@@ -1,20 +1,25 @@
 @mixin mat-button-override() {
+    .mat-mdc-button-base {
+        --mdc-text-button-container-shape: var(--fb-radius-control);
+        --mdc-outlined-button-container-shape: var(--fb-radius-control);
+        --mdc-filled-button-container-shape: var(--fb-radius-control);
+        --mdc-protected-button-container-shape: var(--fb-radius-control);
+    }
+
     .mat-button.mat-accent,
-    .mat-mdc-button.mat-accent,
     .mat-mdc-button.mat-accent {
-        background-color: #f6f2ff;
+        background-color: var(--fb-selected, #f6f2ff);
 
         .mat-button-wrapper,
         .mat-mdc-button-wrapper,
         .mdc-button__label {
-            color: #673ab7;
+            color: var(--fb-accent, #673ab7);
         }
     }
 
     .mat-button.mat-primary,
-    .mat-mdc-button.mat-primary,
     .mat-mdc-button.mat-primary {
-        background-color: #673ab7;
+        background-color: var(--fb-accent, #673ab7);
 
         .mat-button-wrapper,
         .mdc-button__label {

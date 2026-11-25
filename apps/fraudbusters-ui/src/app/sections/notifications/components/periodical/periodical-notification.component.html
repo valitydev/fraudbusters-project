@@ -1,28 +1,102 @@
-<div fxLayout="column" [fxLayoutGap]="layoutGapM">
-    <div class="fb-page-toolbar">
-        <fb-periodical-search (valueChanges)="search($event)">
-            <h1 class="fb-page-title">Notifications</h1>
-        </fb-periodical-search>
-        <button mat-button color="primary" (click)="addNotification()">ADD NOTIFICATION</button>
+<fb-catalog-panel
+    *ngIf="view$ | async as view"
+    label="Periodical notifications"
+    searchLabel="Search notifications by name"
+    itemName="notifications"
+    [paginated]="true"
+    [count]="view.rows.length"
+    [busy]="view.busy"
+>
+    <div *ngIf="view.rows.length" class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Notifications table">
+        <table class="fb-catalog-table" aria-label="Periodical notifications">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Template ID</th>
+                    <th scope="col">Channel</th>
+                    <th scope="col">Period</th>
+                    <th scope="col">Frequency</th>
+                    <th scope="col">Subject</th>
+                    <th scope="col">Created at</th>
+                    <th scope="col" class="fb-catalog-action-cell">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let notification of view.rows">
+                    <th scope="row" class="name">{{ notification.name || '—' }}</th>
+                    <td>
+                        <span
+                            *ngIf="notification.status; else missing"
+                            class="fb-pill fb-pill-status"
+                            [ngClass]="pill(notification.status)"
+                            >{{ notification.status | lowercase }}</span
+                        >
+                    </td>
+                    <td>
+                        <span *ngIf="notification.templateId !== undefined; else missing" class="fb-catalog-mono">{{
+                            notification.templateId
+                        }}</span>
+                    </td>
+                    <td>
+                        <span *ngIf="notification.channel; else missing" class="fb-catalog-mono">{{
+                            notification.channel
+                        }}</span>
+                    </td>
+                    <td>
+                        <span *ngIf="notification.period; else missing" class="chip fb-catalog-mono">{{
+                            notification.period
+                        }}</span>
+                    </td>
+                    <td>
+                        <span *ngIf="notification.frequency; else missing" class="chip fb-catalog-mono">{{
+                            notification.frequency
+                        }}</span>
+                    </td>
+                    <td class="subject">{{ notification.subject || '—' }}</td>
+                    <td class="fb-catalog-time">
+                        {{ (notification.createdAt | date : 'yyyy-MM-dd HH:mm:ss') || '—' }}
+                    </td>
+                    <td class="fb-catalog-action-cell">
+                        <button
+                            mat-icon-button
+                            type="button"
+                            [matMenuTriggerFor]="menu"
+                            [attr.aria-label]="'More actions for ' + notification.name"
+                        >
+                            <mat-icon>more_vert</mat-icon>
+                        </button>
+                        <mat-menu #menu="matMenu">
+                            <button mat-menu-item type="button" (click)="edit(notification.id)">
+                                <mat-icon>settings</mat-icon>Notification settings
+                            </button>
+                            <button
+                                *ngIf="notification.status !== 'ARCHIVE'"
+                                mat-menu-item
+                                type="button"
+                                (click)="archive(notification)"
+                            >
+                                <mat-icon>archive</mat-icon>Send to archive
+                            </button>
+                        </mat-menu>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
-    <div fxLayout="column" [fxLayoutGap]="layoutGapM" *ngIf="notifications$ | async as notifications">
-        <fb-periodical-notifications-list
-            *ngIf="notifications.length; else Empty"
-            [notifications]="notifications"
-            (editItem)="editNotification($event)"
-            (sendToArchiveItem)="sendToArchiveNotification($event)"
-        ></fb-periodical-notifications-list>
-        <fb-show-more-panel
-            *ngIf="hasMore$ | async"
-            [isLoading]="inProgress$ | async"
-            (showMore)="fetchMore(notifications[notifications.length - 1].id)"
-        ></fb-show-more-panel>
-    </div>
+    <footer *ngIf="view.rows.length" class="table-footer">
+        <span>Showing {{ view.rows.length }} {{ view.rows.length === 1 ? 'notification' : 'notifications' }}</span>
+        <button
+            *ngIf="view.hasMore"
+            class="load-more"
+            mat-button
+            type="button"
+            [disabled]="view.busy"
+            (click)="fetchMore(view.rows)"
+        >
+            Show more
+        </button>
+    </footer>
+</fb-catalog-panel>
 
-    <div *ngIf="inProgress$ | async" fxLayout fxLayoutAlign="center">
-        <mat-progress-spinner color="primary" mode="indeterminate" diameter="48"></mat-progress-spinner>
-    </div>
-    <ng-template #Empty>
-        <fb-empty-search-result *ngIf="!(inProgress$ | async)"></fb-empty-search-result>
-    </ng-template>
-</div>
+<ng-template #missing><span class="missing">—</span></ng-template>

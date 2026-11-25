@@ -1,0 +1,122 @@
+<section class="filter-card" aria-label="Filters" [formGroup]="form">
+    <div class="period-row">
+        <div class="period">
+            <span class="field-label" id="historical-period-label">Time range</span>
+            <div class="presets" role="group" aria-labelledby="historical-period-label">
+                <button
+                    *ngFor="let period of periods"
+                    type="button"
+                    class="preset"
+                    [attr.aria-pressed]="isPeriod(period.duration)"
+                    (click)="setPeriod(period.duration)"
+                >
+                    {{ period.label }}
+                </button>
+                <button
+                    type="button"
+                    class="preset"
+                    [attr.aria-pressed]="isCustomPeriod"
+                    (click)="picker.toggle('from')"
+                >
+                    Custom
+                </button>
+            </div>
+        </div>
+        <fb-datetime-range
+            #picker
+            class="range"
+            [from]="fromDate"
+            [to]="toDate"
+            (rangeChange)="setRange($event)"
+        ></fb-datetime-range>
+        <span *ngIf="windowText" class="window-chip" aria-live="polite">
+            <span class="dot" aria-hidden="true"></span>
+            Window: <strong>{{ windowText }}</strong> selected
+        </span>
+    </div>
+
+    <div class="field-grid">
+        <div class="field">
+            <label class="field-label" for="historical-id">ID</label>
+            <input
+                class="fb-filter-control fb-control-mono"
+                id="historical-id"
+                formControlName="id"
+                autocomplete="off"
+                [placeholder]="isPayout ? 'Payout ID' : 'Payment ID'"
+            />
+        </div>
+        <div class="field">
+            <label class="field-label" for="historical-email">Email</label>
+            <input
+                class="fb-filter-control"
+                id="historical-email"
+                formControlName="email"
+                autocomplete="off"
+                placeholder="e.g. user@example.test"
+            />
+        </div>
+        <div class="field">
+            <label class="field-label" for="historical-party">Party ID</label>
+            <input
+                class="fb-filter-control fb-control-mono"
+                id="historical-party"
+                formControlName="partyId"
+                autocomplete="off"
+                placeholder="Party ID"
+            />
+        </div>
+        <div class="field">
+            <label class="field-label" for="historical-scope">{{ scopeLabel }}</label>
+            <input
+                class="fb-filter-control fb-control-mono"
+                id="historical-scope"
+                formControlName="scopeId"
+                autocomplete="off"
+                [placeholder]="scopeLabel"
+            />
+        </div>
+    </div>
+
+    <div class="more">
+        <button
+            type="button"
+            class="more-toggle"
+            [attr.aria-expanded]="additionalOpen"
+            [attr.aria-controls]="drawerId"
+            (click)="toggleAdditional()"
+        >
+            <mat-icon aria-hidden="true">{{ additionalOpen ? 'expand_less' : 'expand_more' }}</mat-icon>
+            Additional filters
+            <span *ngIf="additionalCount" class="more-count" aria-label="filled">{{ additionalCount }}</span>
+        </button>
+        <span class="hint">{{ kind.filterHint }}</span>
+    </div>
+    <div *ngIf="additionalOpen" class="field-grid" [id]="drawerId">
+        <div *ngFor="let name of kind.additional" class="field">
+            <label class="field-label" [id]="'historical-label-' + name" [attr.for]="'historical-' + name">{{
+                name === 'status' ? kind.statusLabel : labels[name].label
+            }}</label>
+            <mat-select
+                *ngIf="name === 'status'; else textField"
+                class="select-box fb-filter-control fb-control-mono"
+                [id]="'historical-' + name"
+                [aria-labelledby]="'historical-label-' + name"
+                [formControlName]="name"
+                placeholder="All statuses"
+            >
+                <mat-option value="">All statuses</mat-option>
+                <mat-option *ngFor="let status of kind.statuses" [value]="status">{{ status }}</mat-option>
+            </mat-select>
+            <ng-template #textField>
+                <input
+                    class="fb-filter-control fb-control-mono"
+                    [id]="'historical-' + name"
+                    [formControlName]="name"
+                    autocomplete="off"
+                    [placeholder]="labels[name].placeholder"
+                />
+            </ng-template>
+        </div>
+    </div>
+</section>

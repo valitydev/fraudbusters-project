@@ -1,65 +1,85 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
+import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
 
 import { PaymentReference } from '../../../../api/fb-management/swagger-codegen/model/paymentReference';
 import { OperationType } from '../../../../shared/constants/operation-type';
-import { LAYOUT_GAP_M } from '../../../../tokens';
+import { SortOrder } from '../../../../shared/constants/sort-order';
 import { FetchDefaultReferencesService } from '../../services/fetch-default-references.service';
 import { RemoveDefaultReferenceService } from '../../services/remove-default-reference.service';
 
 @Component({
-    templateUrl: 'default-payment-references.component.html',
+    templateUrl: '../payment-references/payment-references.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [FetchDefaultReferencesService, RemoveDefaultReferenceService],
 })
 export class DefaultPaymentReferencesComponent {
-    references$ = this.fetchDefaultReferencesService.searchResult$;
+    references$ = this.fetchDefaultReferencesService.fetchResultChanges$.pipe(
+        startWith({ result: [], count: 0, hasMore: false })
+    );
+
     inProgress$ = this.fetchDefaultReferencesService.inProgress$;
-    hasMore$ = this.fetchDefaultReferencesService.hasMore$;
+
+    readonly sortOptions = [
+        { value: SortOrder.Asc, label: 'Template ID (A–Z)' },
+        { value: SortOrder.Desc, label: 'Template ID (Z–A)' },
+    ];
+
+    sort = SortOrder.Asc;
+    readonly targetFragment = OperationType.Payment;
+    readonly tableLabel = 'Default references';
+
+    private searchValue = '';
 
     constructor(
-        private router: Router,
+        route: ActivatedRoute,
         private fetchDefaultReferencesService: FetchDefaultReferencesService,
-        private removeDefaultReferenceService: RemoveDefaultReferenceService,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
+        private removeDefaultReferenceService: RemoveDefaultReferenceService
     ) {
-        this.removeDefaultReferenceService.removed$.subscribe(() => {
-            this.fetchDefaultReferencesService.refresh();
+        const destroyRef = inject(DestroyRef);
+        route.queryParamMap
+            .pipe(
+                map((params) => (params.get('searchQuery') ?? '').trim()),
+                distinctUntilChanged(),
+                takeUntilDestroyed(destroyRef)
+            )
+            .subscribe((query) => {
+                this.searchValue = query;
+                this.search();
+            });
+        this.removeDefaultReferenceService.removed$.pipe(takeUntilDestroyed(destroyRef)).subscribe(() => {
+            this.search();
         });
     }
 
-    createReference() {
-        void this.router.navigate(['/default-references/new/payment'], {
-            queryParams: { returnUrl: this.router.url },
-        });
+    setSort(order: SortOrder): void {
+        this.sort = order;
+        this.search();
     }
 
-    search(searchValue: string) {
-        this.fetchDefaultReferencesService.search({
-            searchValue,
-            isGlobal: false,
-            isDefault: false,
-        });
-    }
-
-    fetchMore(sortFieldValue: string) {
+    fetchMore(sortFieldValue: string): void {
         this.fetchDefaultReferencesService.fetchMore({
             sortFieldValue,
+            searchValue: this.searchValue,
+            sortOrder: this.sort,
             isGlobal: false,
             isDefault: false,
-        });
-    }
-
-    goToTemplate(id: string) {
-        void this.router.navigate([`/template/${id}`], {
-            fragment: OperationType.Payment,
-            queryParams: { returnUrl: this.router.url },
         });
     }
 
     removeReference(reference: PaymentReference) {
         this.removeDefaultReferenceService.removeReference({
             reference,
+        });
+    }
+
+    private search(): void {
+        this.fetchDefaultReferencesService.search({
+            searchValue: this.searchValue,
+            sortOrder: this.sort,
+            isGlobal: false,
+            isDefault: false,
         });
     }
 }

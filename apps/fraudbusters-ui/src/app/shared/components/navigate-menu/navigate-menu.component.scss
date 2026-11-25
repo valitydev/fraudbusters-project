@@ -2,37 +2,35 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background-color: #ffffff;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-    width: 100%;
     min-height: 0;
+    background: var(--fb-surface, #fff);
 }
 
-.toolbar {
-    background-color: #ffffff;
-    border-bottom: 1px solid #e8eaed;
-    padding: 6px 4px;
-    height: 48px;
-    box-shadow: none;
+.brand {
+    box-sizing: border-box;
     display: flex;
+    flex: 0 0 58px;
     align-items: center;
     justify-content: center;
+    padding-inline: 18px;
 
     a {
-        display: flex;
-        align-items: center;
-        text-decoration: none;
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+    }
 
-        img {
-            height: 34px;
-            width: auto;
-        }
+    img {
+        height: 28px;
+        width: auto;
     }
 }
 
 .nav-list {
-    padding: 8px;
+    flex: 1 1 auto;
     min-height: 0;
-    flex: 1;
     overflow-y: auto;
+    padding: 8px 12px;
 }

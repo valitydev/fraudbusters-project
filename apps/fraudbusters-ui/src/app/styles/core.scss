@@ -1,4 +1,6 @@
 @use '@angular/material' as mat;
+@use './tokens';
+@use './primitives';
 @import '@angular/material/prebuilt-themes/deeppurple-amber.css';
 
 @import './themes/deeppurple-amber';
@@ -8,7 +10,7 @@
 @import './overrides/mat-card';
 @import './overrides/mat-expansion-panel';
 @import './search-filters';
-@import './template-table';
+@import './data-table';
 
 @import './utils/typography';
 @import './utils/shadow';
@@ -26,8 +28,60 @@
     @include fb-base-typography($config);
 }
 
+// Brand violet of the refactored UI prototypes (#6338F5), as a Material palette.
+$fb-brand-hues: (
+    50: #f3effe,
+    100: #e4dbfd,
+    200: #ddd6fe,
+    300: #b39bf9,
+    400: #8b66f7,
+    500: tokens.$brand,
+    600: #5128d9,
+    700: #4320b5,
+    800: #371b92,
+    900: #2b1673,
+    A100: #ddd6fe,
+    A200: #b39bf9,
+    A400: #7c4dff,
+    A700: #5128d9,
+    contrast: (
+        50: rgba(black, 0.87),
+        100: rgba(black, 0.87),
+        200: rgba(black, 0.87),
+        300: rgba(black, 0.87),
+        400: white,
+        500: white,
+        600: white,
+        700: white,
+        800: white,
+        900: white,
+        A100: rgba(black, 0.87),
+        A200: rgba(black, 0.87),
+        A400: white,
+        A700: white,
+    ),
+);
+$fb-brand-palette: mat.define-palette($fb-brand-hues, 500);
+
+html:not(.fb-dark) {
+    @include mat.all-component-colors(
+        mat.define-light-theme(
+            (
+                color: (
+                    primary: $fb-brand-palette,
+                    accent: $fb-brand-palette,
+                ),
+            )
+        )
+    );
+}
+
+html {
+    @include mat.all-component-typographies(mat.define-typography-config($font-family: tokens.$font-sans));
+}
+
 @include fb-overrides();
-@include fb-typography(fb-typography-config());
+@include fb-typography(fb-typography-config($font-family: tokens.$font-sans));
 
 // Restore mat-headline styles after Angular Material update
 .mat-h1,
@@ -35,7 +89,7 @@
 .mat-typography .mat-h1,
 .mat-typography .mat-headline,
 .mat-typography h1 {
-    font: 400 24px / 32px Roboto, 'Helvetica Neue', sans-serif;
+    font: 400 24px / 32px var(--fb-font-sans);
     letter-spacing: normal;
     margin: 0 0 16px;
 }
@@ -43,8 +97,8 @@
 // Restore mat-drawer-container styles after Angular Material update
 .mat-drawer-container,
 .mat-mdc-drawer-container {
-    background-color: #fafafa;
-    color: #000000de;
+    background-color: var(--fb-canvas, #fafafa);
+    color: var(--fb-text, #000000de);
 }
 
 .mat-mdc-tab-header.mat-mdc-tab-nav-bar-stretch-tabs .mat-mdc-tab-link {
@@ -53,5 +107,287 @@
 
 .mat-mdc-tab-nav-bar,
 .mat-mdc-tab-header {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    border-bottom: 1px solid var(--fb-line);
+}
+
+// Room between a tab bar and the page under it (filters, toolbars, tables).
+.mat-mdc-tab-nav-panel {
+    display: block;
+    padding-top: 16px;
+}
+
+// Dialogs: rounded surface, matching the 12px cards and tables.
+.mat-mdc-dialog-container {
+    --mdc-dialog-container-shape: var(--fb-radius-panel);
+}
+
+// Selects drawn as fields keep their padding on the host; the trigger's click area
+// is stretched over the whole host so the select opens from anywhere inside its border,
+// including the arrow.
+.mat-mdc-select {
+    position: relative;
+
+    .mat-mdc-select-trigger {
+        position: static;
+
+        &::before {
+            position: absolute;
+            inset: 0;
+            content: '';
+        }
+    }
+}
+
+// Menus, select and autocomplete options use the same overlay surface.
+.mat-mdc-menu-panel,
+.mat-mdc-select-panel,
+.mat-mdc-autocomplete-panel {
+    @include primitives.panel;
+    box-shadow: 0 8px 24px -8px rgba(37, 35, 53, 0.18);
+}
+
+// Material flattens the corners next to the trigger based on overlay position.
+div.mat-mdc-select-panel,
+div.mat-mdc-autocomplete-panel,
+div.mat-mdc-menu-panel {
+    border-radius: var(--fb-radius-panel) !important;
+}
+
+// Every menu (row actions, account) shares the option scale of the select panel.
+.mat-mdc-menu-panel {
+    --mat-menu-item-label-text-font: var(--fb-font-sans);
+    --mat-menu-item-label-text-size: 13px;
+    --mat-menu-item-label-text-line-height: 20px;
+    --mat-menu-item-label-text-tracking: normal;
+    --mat-menu-item-label-text-weight: 400;
+    --mat-menu-item-label-text-color: var(--fb-text);
+    --mat-menu-item-icon-color: var(--fb-muted);
+    --mat-menu-item-hover-state-layer-color: var(--fb-raised);
+    --mat-menu-item-focus-state-layer-color: var(--fb-raised);
+    min-width: 180px;
+
+    .mat-mdc-menu-content {
+        padding: 4px;
+    }
+
+    .mat-mdc-menu-item {
+        box-sizing: border-box;
+        min-height: 36px;
+        padding-inline: 10px 12px;
+        border-radius: var(--fb-radius-control);
+
+        &:hover:not([disabled]),
+        &.cdk-keyboard-focused,
+        &.cdk-program-focused {
+            background: var(--fb-raised);
+        }
+
+        .mat-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            font-size: 18px;
+            line-height: 18px;
+        }
+    }
+
+    // Destructive actions keep the danger colour for both the label and the icon.
+    .mat-mdc-menu-item.fb-menu-danger {
+        --mat-menu-item-icon-color: var(--fb-danger);
+        color: var(--fb-danger);
+
+        &:hover:not([disabled]),
+        &.cdk-keyboard-focused,
+        &.cdk-program-focused {
+            background: var(--fb-danger-bg);
+        }
+    }
+
+    .mat-divider {
+        margin: 4px 0;
+        border-top-color: var(--fb-line);
+    }
+}
+
+.mat-mdc-menu-panel.fb-account-menu {
+    width: 280px;
+    max-width: calc(100vw - 32px);
+
+    .mat-mdc-menu-content {
+        padding: 0 0 4px;
+    }
+
+    .mat-mdc-menu-item {
+        width: calc(100% - 8px);
+        margin-inline: 4px;
+    }
+
+    .mat-divider {
+        margin-top: 0;
+    }
+}
+
+html.fb-dark {
+    @include mat.all-component-colors(
+        mat.define-dark-theme(
+            (
+                color: (
+                    // The same brand violet as the light theme (lighter hue for dark surfaces), never amber.
+                    primary: mat.define-palette($fb-brand-hues, 300),
+                    accent: mat.define-palette($fb-brand-hues, 300),
+                ),
+            )
+        )
+    );
+
+    & {
+        --mdc-elevated-card-container-color: transparent;
+        --mdc-outlined-card-container-color: transparent;
+        --mat-expansion-container-background-color: transparent;
+        --mat-table-background-color: transparent;
+        --mat-paginator-container-background-color: transparent;
+        --mat-tree-container-background-color: transparent;
+        --mat-stepper-container-color: transparent;
+        --mat-menu-container-color: var(--fb-surface);
+        --mat-select-panel-background-color: var(--fb-surface);
+        --mat-autocomplete-background-color: var(--fb-surface);
+        --mat-datepicker-calendar-container-background-color: var(--fb-surface);
+        --mat-bottom-sheet-container-background-color: var(--fb-surface);
+        --mat-sidenav-container-background-color: var(--fb-surface);
+        --mdc-dialog-container-color: var(--fb-surface);
+    }
+
+    body .mat-mdc-card,
+    body .mat-expansion-panel,
+    body .mat-mdc-button {
+        color: var(--fb-text);
+    }
+
+    .fb-form-card {
+        background-color: transparent;
+    }
+
+    .apexcharts-text {
+        fill: var(--fb-muted);
+    }
+
+    .apexcharts-legend-text {
+        color: var(--fb-muted) !important;
+    }
+
+    .apexcharts-tooltip.apexcharts-theme-light,
+    .apexcharts-tooltip.apexcharts-theme-light .apexcharts-tooltip-title {
+        background: var(--fb-surface);
+        color: var(--fb-text);
+    }
+}
+
+.fb-template-back.mat-mdc-outlined-button {
+    flex: 0 0 auto;
+    min-width: var(--fb-filter-height);
+    height: var(--fb-filter-height);
+    padding: 0;
+    border: 1px solid var(--fb-line);
+    border-radius: var(--fb-radius-control);
+    background: var(--fb-surface);
+    color: var(--fb-text);
+
+    .mat-icon {
+        margin: 0;
+    }
+}
+
+.fb-page-title,
+.mat-typography .fb-page-title {
+    margin: 0;
+    color: var(--fb-text);
+    font: 600 var(--fb-title-font-size) / var(--fb-title-line-height) var(--fb-font-sans);
+    letter-spacing: -0.025em;
+}
+
+.fb-page-subtitle,
+.mat-typography .fb-page-subtitle {
+    margin: 4px 0 0;
+    color: var(--fb-muted);
+    font: 400 14px / 20px var(--fb-font-sans);
+    letter-spacing: normal;
+}
+
+.fb-section-title,
+.mat-typography .fb-section-title {
+    margin: 0;
+    color: var(--fb-text);
+    font: 600 var(--fb-section-title-font-size) / var(--fb-section-title-line-height) var(--fb-font-sans);
+    letter-spacing: normal;
+}
+
+.fb-filter-control,
+.fb-form-control {
+    @include primitives.control(var(--fb-control-height), var(--fb-control-font, var(--fb-font-sans)));
+}
+
+.fb-filter-control {
+    --fb-control-height: var(--fb-filter-height);
+}
+
+.fb-form-control {
+    --fb-control-height: var(--fb-form-control-height);
+}
+
+.fb-control-mono {
+    --fb-control-font: var(--fb-font-mono);
+}
+
+code,
+kbd,
+pre {
+    font-family: var(--fb-font-mono);
+}
+
+.list-dot {
+    display: inline-block;
+    flex: 0 0 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--fb-neutral-dot);
+}
+
+.list-dot-black {
+    background: var(--fb-danger-dot);
+}
+
+.list-dot-white {
+    background: var(--fb-success-dot);
+}
+
+.list-dot-grey {
+    background: var(--fb-warning-dot);
+}
+
+.list-dot-candidates {
+    background: var(--fb-info-dot);
+}
+
+// Page wrappers: a column of page blocks and a header row with the back button and title.
+.fb-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.fb-page-catalog {
+    gap: 8px;
+}
+
+.fb-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 16px;
+
+    > div {
+        flex: 1 1 270px;
+        min-width: 0;
+    }
 }

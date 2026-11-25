@@ -1,0 +1,46 @@
+table {
+    min-width: 820px;
+}
+
+.id-column {
+    width: 16%;
+}
+.author-column {
+    width: 11rem;
+}
+.actions-column {
+    width: 160px;
+}
+
+.template-detail {
+    td {
+        border-top: 1px solid var(--fb-line, #e0e3ed);
+        padding: 12px 20px;
+    }
+
+    pre {
+        margin: 0;
+        padding: 12px;
+        border: 1px solid var(--fb-line, #e0e3ed);
+        border-radius: 8px;
+        background: var(--fb-surface, #fff);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+}
+
+.detail-toolbar,
+.detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+}
+
+.detail-toolbar {
+    justify-content: space-between;
+    margin-block-end: 6px;
+    color: var(--fb-muted, #625f74);
+    font-size: 13px;
+    font-weight: 600;
+}

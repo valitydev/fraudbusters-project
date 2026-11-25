@@ -1,0 +1,25 @@
+<th scope="row">
+    <code>{{ group.groupId }}</code>
+</th>
+<td>
+    <div class="group-preview" *ngIf="group.priorityTemplates?.length; else empty">
+        <code>{{ group.priorityTemplates[0].id }}</code>
+        <span *ngIf="group.priorityTemplates.length > 1" class="fb-pill more-templates">
+            +{{ group.priorityTemplates.length - 1 }} more
+        </span>
+    </div>
+    <ng-template #empty>—</ng-template>
+</td>
+<td class="fb-catalog-time">
+    {{ (group.lastUpdate | date : 'yyyy-MM-dd HH:mm:ss' : 'UTC') || '—' }}
+</td>
+<td class="fb-catalog-action-cell">
+    <div class="fb-catalog-row-actions">
+        <fb-actions
+            [id]="group.groupId"
+            (editItem)="editItem.emit($event)"
+            (deleteItem)="deleteItem.emit($event)"
+            (duplicateItem)="duplicateItem.emit($event)"
+        ></fb-actions>
+    </div>
+</td>

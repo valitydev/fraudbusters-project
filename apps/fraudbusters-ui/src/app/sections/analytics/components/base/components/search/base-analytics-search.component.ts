@@ -1,11 +1,12 @@
 import { DatePipe } from '@angular/common';
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { catchError, debounceTime, map, switchMap, take } from 'rxjs/operators';
 
+import { DateTimeRange } from '../../../../../../shared/components/datetime-range/datetime-range.component';
 import { DateFormat } from '../../../../../../shared/constants/date-format';
 import {
     ANALYTICS_PERIODS,
@@ -20,6 +21,9 @@ import { BaseAnalyticsService } from '../../services/base-analytics.service';
     styleUrls: ['./base-analytics-search.component.scss'],
 })
 export class BaseAnalyticsSearchComponent implements OnInit {
+    @Input() breakdownFiltered = false;
+    @Output() readonly filtersReset = new EventEmitter<void>();
+
     readonly periods = ANALYTICS_PERIODS;
     readonly currencies$ = this.analytics.currencies$.pipe(catchError(() => of([])));
     readonly form = this.fb.nonNullable.group({
@@ -30,7 +34,9 @@ export class BaseAnalyticsSearchComponent implements OnInit {
         from: { value: '', disabled: true },
         to: { value: '', disabled: true },
     });
-    readonly today = this.dates.dateInputValue(new Date());
+    readonly now = new Date();
+    /** "Reset to 7 days" in the picker: today and the six days before it. */
+    readonly sixDays = 6 * 24 * 60 * 60 * 1000;
     private readonly destroyRef = inject(DestroyRef);
 
     constructor(
@@ -45,6 +51,12 @@ export class BaseAnalyticsSearchComponent implements OnInit {
     get invalidRange(): boolean {
         const { time, from, to } = this.form.getRawValue();
         return time === 'custom' && !this.dates.resolveRange(time, from, to);
+    }
+
+    get granularity(): string {
+        const { time, from, to } = this.form.getRawValue();
+        const unit = this.dates.resolveRange(time, from, to)?.splitUnit;
+        return unit ? { hour: 'Hourly (UTC)', day: 'Daily (UTC)', month: 'Monthly (UTC)' }[unit] : '—';
     }
 
     ngOnInit(): void {
@@ -94,6 +106,20 @@ export class BaseAnalyticsSearchComponent implements OnInit {
         }
     }
 
+    utcDay(value: string): Date | null {
+        const date = /^\d{4}-\d{2}-\d{2}$/.test(value ?? '') ? new Date(value + 'T00:00:00Z') : null;
+        return date && !Number.isNaN(date.getTime()) ? date : null;
+    }
+
+    setCustomRange({ from, to }: DateTimeRange): void {
+        this.form.patchValue({
+            time: 'custom',
+            from: this.dates.dateInputValue(from),
+            to: this.dates.dateInputValue(to),
+        });
+        this.updateDateControls();
+    }
+
     hasActiveFilters(defaultCurrency: string): boolean {
         const { partyId, shopId, type, time } = this.form.getRawValue();
         return !!(partyId || shopId || type !== defaultCurrency || time !== DEFAULT_ANALYTICS_PERIOD);
@@ -110,6 +136,7 @@ export class BaseAnalyticsSearchComponent implements OnInit {
             to: this.dates.dateInputValue(range.to),
         });
         this.updateDateControls();
+        this.filtersReset.emit();
     }
 
     private updateDateControls(): void {

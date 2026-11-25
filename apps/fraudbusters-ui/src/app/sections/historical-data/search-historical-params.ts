@@ -15,6 +15,7 @@ export interface SearchHistoricalParams {
     userId?: string;
     email?: string;
     terminal?: string;
+    providerCountry?: string;
     maskedPan?: string;
     template?: string;
     rule?: string;

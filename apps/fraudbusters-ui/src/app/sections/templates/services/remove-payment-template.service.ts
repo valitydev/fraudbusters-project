@@ -23,7 +23,13 @@ export class RemovePaymentTemplateService {
             combineLatest([
                 of(params),
                 this.dialog
-                    .open(ConfirmActionDialogComponent, { data: { title: `Remove template ${params.templateID}?` } })
+                    .open(ConfirmActionDialogComponent, {
+                        data: {
+                            confirmLabel: 'Remove',
+                            destructive: true,
+                            title: `Remove template ${params.templateID}?`,
+                        },
+                    })
                     .afterClosed()
                     .pipe(filter((r) => r === 'confirm')),
             ])

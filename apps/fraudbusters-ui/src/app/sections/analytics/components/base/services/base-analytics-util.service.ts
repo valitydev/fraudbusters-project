@@ -12,7 +12,7 @@ export const ANALYTICS_PERIODS = [
     { key: 'custom', label: 'Custom range' },
 ] as const;
 
-export const DEFAULT_ANALYTICS_PERIOD = '7-days';
+export const DEFAULT_ANALYTICS_PERIOD = 'today';
 
 export interface AnalyticsRange {
     from: Date;
@@ -23,12 +23,23 @@ export interface AnalyticsRange {
 @Injectable()
 export class BaseAnalyticsUtilService {
     resolveRange(period: string, fromDate = '', toDate = '', now = new Date()): AnalyticsRange | null {
+        const range = this.calendarRange(period, fromDate, toDate, now);
+        // The API includes both endpoints, including the final millisecond of a completed day.
+        if (range && range.to.getTime() - range.from.getTime() + 1 < 2 * DAY_MS) {
+            return { ...range, splitUnit: 'hour' };
+        }
+        return range;
+    }
+
+    dateInputValue(date: Date): string {
+        return date.toISOString().slice(0, 10);
+    }
+
+    private calendarRange(period: string, fromDate: string, toDate: string, now: Date): AnalyticsRange | null {
         const year = now.getUTCFullYear();
         const month = now.getUTCMonth();
         const day = now.getUTCDate();
         switch (period) {
-            case 'today':
-                return { from: this.utcDay(year, month, day), to: now, splitUnit: 'hour' };
             case 'yesterday':
                 return {
                     from: this.utcDay(year, month, day - 1),
@@ -52,13 +63,11 @@ export class BaseAnalyticsUtilService {
                 return { from: new Date(now.getFullYear(), now.getMonth(), 0), to: now, splitUnit: 'day' };
             case 'last year':
                 return { from: new Date(now.getFullYear(), 0, 0), to: now, splitUnit: 'month' };
-            default:
+            case '7-days':
                 return { from: this.utcDay(year, month, day - 6), to: now, splitUnit: 'day' };
+            default:
+                return { from: this.utcDay(year, month, day), to: now, splitUnit: 'hour' };
         }
-    }
-
-    dateInputValue(date: Date): string {
-        return date.toISOString().slice(0, 10);
     }
 
     private customRange(fromDate: string, toDate: string, now: Date): AnalyticsRange | null {
@@ -69,7 +78,7 @@ export class BaseAnalyticsUtilService {
         }
         const days = (lastDay.getTime() - from.getTime()) / DAY_MS + 1;
         const to = new Date(Math.min(lastDay.getTime() + DAY_MS - 1, now.getTime()));
-        return { from, to, splitUnit: days === 1 ? 'hour' : days <= 92 ? 'day' : 'month' };
+        return { from, to, splitUnit: days <= 92 ? 'day' : 'month' };
     }
 
     private parseDateInput(value: string): Date | null {

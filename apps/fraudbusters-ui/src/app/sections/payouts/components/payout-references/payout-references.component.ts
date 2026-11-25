@@ -1,13 +1,19 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
-import { Router } from '@angular/router';
-import { debounceTime, map, switchMap } from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { map, switchMap } from 'rxjs/operators';
 
 import { PayoutReference } from '../../../../api/fb-management/swagger-codegen/model/payoutReference';
 import { PayoutsService } from '../../../../api/payouts';
-import { LAYOUT_GAP_M } from '../../../../tokens';
-import { PAYOUT_PAGE_SIZE, PayoutPageFetcher } from '../../services/payout-page-fetcher';
+import { ConfigService } from '../../../../config';
+import { ReferenceRow } from '../../../../shared/components/reference-table/reference-table.component';
+import {
+    CATALOG_SORT_OPTIONS,
+    catalogTimestamp,
+    compareCatalogRows,
+    loadCatalog,
+} from '../../../../shared/utils/catalog';
+import { CatalogCollection } from '../../../../shared/utils/catalog-collection';
 import { describePayoutScope } from '../../services/payout-scope';
 import { PayoutsFeedbackService } from '../../services/payouts-feedback.service';
 
@@ -16,40 +22,40 @@ import { PayoutsFeedbackService } from '../../services/payouts-feedback.service'
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PayoutReferencesComponent {
-    searchForm = this.fb.group({ searchQuery: [''] });
-    readonly fetcher = new PayoutPageFetcher<PayoutReference, string>((searchValue, lastId) =>
-        this.payoutsService.findReferences({ searchValue, lastId, size: PAYOUT_PAGE_SIZE })
-    );
-    references$ = this.fetcher.searchResult$;
-    hasMore$ = this.fetcher.hasMore$;
-    inProgress$ = this.fetcher.inProgress$;
+    readonly sortOptions = CATALOG_SORT_OPTIONS;
+    readonly catalog: CatalogCollection<ReferenceRow<PayoutReference>>;
 
     constructor(
         private payoutsService: PayoutsService,
         private feedback: PayoutsFeedbackService,
-        private router: Router,
-        private fb: FormBuilder,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
+        route: ActivatedRoute,
+        config: ConfigService
     ) {
-        this.searchForm.controls.searchQuery.valueChanges
-            .pipe(
-                debounceTime(300),
-                map((value) => (value ?? '').trim())
-            )
-            .subscribe((searchValue) => this.fetcher.search(searchValue));
-        this.fetcher.search('');
-    }
-
-    fetchMore() {
-        this.fetcher.fetchMore();
-    }
-
-    createReference() {
-        void this.router.navigate(['/payouts/reference/new'], { queryParams: { returnUrl: this.router.url } });
-    }
-
-    goToTemplate(id: string) {
-        void this.router.navigate([`/payouts/template/${id}`], { queryParams: { returnUrl: this.router.url } });
+        this.catalog = new CatalogCollection<ReferenceRow<PayoutReference>>(
+            route,
+            config.pageSize,
+            (query) =>
+                loadCatalog((lastId) =>
+                    this.payoutsService.findReferences({ lastId, searchValue: query, size: config.pageSize })
+                ).pipe(
+                    map((rows) =>
+                        rows.map((source) => ({
+                            ...source,
+                            targetId: source.templateId,
+                            scopeId: source.walletId,
+                            source,
+                        }))
+                    )
+                ),
+            (a, b, sort) =>
+                compareCatalogRows(
+                    a.targetId,
+                    b.targetId,
+                    catalogTimestamp(a.lastUpdateDate),
+                    catalogTimestamp(b.lastUpdateDate),
+                    sort
+                )
+        );
     }
 
     removeReference(reference: PayoutReference) {
@@ -57,7 +63,7 @@ export class PayoutReferencesComponent {
             .confirm(`Remove the reference of ${describePayoutScope(reference)} to ${reference.templateId}?`)
             .pipe(switchMap(() => this.payoutsService.removeReference(reference)))
             .subscribe({
-                next: () => this.fetcher.refresh(),
+                next: () => this.catalog.refresh(),
                 error: (error: HttpErrorResponse) => this.feedback.failed(error),
             });
     }

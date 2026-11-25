@@ -1,0 +1,166 @@
+<div class="records-page">
+    <header class="records-header">
+        <button
+            mat-stroked-button
+            type="button"
+            class="fb-template-back"
+            aria-label="Back to candidate batches"
+            (click)="back()"
+        >
+            <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="heading">
+            <h1 class="fb-page-title">Batch records</h1>
+            <p class="fb-page-subtitle">
+                <span *ngIf="source()" class="source"
+                    ><mat-icon aria-hidden="true">inventory_2</mat-icon>{{ source() }}</span
+                >
+                <span class="mono">{{ batchId }}</span>
+                <span *ngIf="!busy() && !failed()"
+                    >· {{ rows().length }} {{ rows().length === 1 ? 'record' : 'records' }}</span
+                >
+            </p>
+        </div>
+    </header>
+
+    <p *ngIf="issues()" class="issues" role="status">
+        <mat-icon aria-hidden="true">warning_amber</mat-icon>
+        {{ issues() }} {{ issues() === 1 ? 'record has' : 'records have' }} no value or list and cannot be added. Fix
+        the source data and load the batch again.
+    </p>
+
+    <fb-catalog-panel
+        label="Batch records"
+        searchLabel="Search value, list, party or shop"
+        itemName="records"
+        [summaryInFooter]="true"
+        [count]="visible().length"
+        [visible]="visible().length"
+        [total]="rows().length"
+        [busy]="busy() || approving()"
+        [failed]="failed()"
+        (retry)="load()"
+    >
+        <label catalogFilters class="filter-control">
+            List type
+            <span class="catalog-select">
+                <mat-select [value]="listType()" (valueChange)="setListType($event)" aria-label="List type">
+                    <mat-option value="">All types</mat-option>
+                    <mat-option *ngFor="let item of listTypes" [value]="item">
+                        {{ labels[item] }}
+                    </mat-option>
+                </mat-select>
+            </span>
+        </label>
+        <label catalogFilters class="filter-control">
+            List name
+            <span class="catalog-select">
+                <mat-select [value]="listName()" (valueChange)="listName.set($event)" aria-label="List name">
+                    <mat-option value="">All lists</mat-option>
+                    <mat-option *ngFor="let item of listNames()" [value]="item">
+                        {{ item }}
+                    </mat-option>
+                </mat-select>
+            </span>
+        </label>
+
+        <div
+            *ngIf="visible().length"
+            class="fb-catalog-scroll"
+            tabindex="0"
+            role="region"
+            aria-label="Batch records table"
+        >
+            <table class="fb-catalog-table records-table" aria-label="Batch records">
+                <colgroup>
+                    <col class="check-column" />
+                    <col class="type-column" />
+                    <col class="name-column" />
+                    <col class="id-column" />
+                    <col class="id-column" />
+                    <col class="value-column" />
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th scope="col" class="check">
+                            <mat-checkbox
+                                color="primary"
+                                aria-label="Select all records shown"
+                                [checked]="allSelected()"
+                                [indeterminate]="someSelected()"
+                                [disabled]="!selectable().length || approving()"
+                                (change)="toggleAll()"
+                            ></mat-checkbox>
+                        </th>
+                        <th scope="col">List type</th>
+                        <th scope="col">List name</th>
+                        <th scope="col">Party ID</th>
+                        <th scope="col">Shop ID</th>
+                        <th scope="col">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr
+                        *ngFor="let row of visible()"
+                        [class.selected]="selected().has(row.id)"
+                        [class.invalid]="row.issue"
+                        (click)="toggle(row)"
+                    >
+                        <td class="check" (click)="$event.stopPropagation()">
+                            <mat-checkbox
+                                color="primary"
+                                [attr.aria-label]="'Select ' + (row.value || row.listName || row.id)"
+                                [checked]="selected().has(row.id)"
+                                [disabled]="!!row.issue || approving()"
+                                [matTooltip]="row.issue ? row.issue + ': this record cannot be added' : ''"
+                                (change)="toggle(row)"
+                            ></mat-checkbox>
+                        </td>
+                        <td>
+                            <span class="list-type">
+                                <span class="list-dot" [ngClass]="listDot(row.listType)" aria-hidden="true"></span>
+                                {{ row.listType ? labels[row.listType] : 'Unknown' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span
+                                *ngIf="row.listName; else missing"
+                                class="fb-pill fb-catalog-mono list-name"
+                                [ngClass]="namePill(row.listName)"
+                                >{{ row.listName }}</span
+                            >
+                        </td>
+                        <td>
+                            <span *ngIf="row.partyId; else missing" class="fb-catalog-mono">{{ row.partyId }}</span>
+                        </td>
+                        <td>
+                            <span *ngIf="row.shopId; else missing" class="fb-catalog-mono">{{ row.shopId }}</span>
+                        </td>
+                        <th scope="row">
+                            <code *ngIf="row.value" class="value-chip">{{ row.value }}</code>
+                            <span *ngIf="row.issue" class="fb-pill fb-pill-status fb-pill-warning">{{
+                                row.issue
+                            }}</span>
+                        </th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </fb-catalog-panel>
+
+    <footer *ngIf="selectedRows().length" class="selection-bar" role="region" aria-label="Selected records">
+        <div class="selection-summary" aria-live="polite">
+            <strong>{{ selectedRows().length }} selected</strong>
+            <span>{{ breakdown() }}</span>
+        </div>
+        <div class="selection-actions">
+            <button mat-stroked-button type="button" [disabled]="approving()" (click)="clearSelection()">Clear</button>
+            <button mat-flat-button color="primary" type="button" [disabled]="approving()" (click)="approve()">
+                <mat-icon>playlist_add</mat-icon>
+                Add to list ({{ selectedRows().length }})
+            </button>
+        </div>
+    </footer>
+</div>
+
+<ng-template #missing><span class="missing">—</span></ng-template>

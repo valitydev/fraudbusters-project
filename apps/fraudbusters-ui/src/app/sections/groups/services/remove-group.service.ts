@@ -31,7 +31,9 @@ export class RemoveGroupService {
                 combineLatest([
                     of(params),
                     this.dialog
-                        .open(ConfirmActionDialogComponent, { data: { title: `Remove group ${params.id}?` } })
+                        .open(ConfirmActionDialogComponent, {
+                            data: { confirmLabel: 'Remove', destructive: true, title: `Remove group ${params.id}?` },
+                        })
                         .afterClosed()
                         .pipe(filter((r) => r === 'confirm')),
                 ])

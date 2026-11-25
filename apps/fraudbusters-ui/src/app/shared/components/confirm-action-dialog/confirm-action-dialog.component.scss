@@ -1,4 +1,45 @@
-.mat-headline,
-.mat-mdc-headline {
-    word-wrap: anywhere;
+// Compact confirmation: dark title, optional muted message, actions on the right.
+.fb-dialog-title {
+    margin: 0;
+    padding: 20px 24px 0;
+    color: var(--fb-text, #252335);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 26px;
+    letter-spacing: normal;
+    overflow-wrap: anywhere;
+
+    &::before {
+        display: none;
+    }
+}
+
+.fb-dialog-message {
+    padding: 8px 24px 0;
+    color: var(--fb-muted, #5f5b70);
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.fb-dialog-actions {
+    gap: 8px;
+    min-height: 0;
+    padding: 20px 24px;
+
+    button {
+        min-width: 88px;
+        height: 36px;
+        margin: 0;
+        letter-spacing: normal;
+    }
+}
+
+.fb-dialog-cancel {
+    --mdc-outlined-button-outline-color: var(--fb-filter-outline);
+    --mdc-outlined-button-label-text-color: var(--fb-text, #252335);
+}
+
+.fb-dialog-danger {
+    --mdc-filled-button-container-color: #b4283b;
+    --mdc-filled-button-label-text-color: #fff;
 }

@@ -1,0 +1,68 @@
+th {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.rule-preview,
+.author {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rule-preview code,
+.more-rules {
+    border: 1px solid var(--fb-line, #e0e3ed);
+    border-radius: 7px;
+}
+
+.rule-preview code {
+    min-width: 0;
+    padding: 2px 7px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: var(--fb-raised, #f5f6fa);
+
+    [class^='fb-code-result-'] {
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 18%, transparent);
+    }
+}
+
+.more-rules {
+    flex-shrink: 0;
+    padding: 2px 7px;
+    background: var(--fb-selected, #eee9fc);
+    color: var(--fb-accent, #6741b7);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--fb-table-value-font-size);
+}
+
+.initial {
+    display: grid;
+    place-items: center;
+    flex: 0 0 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--fb-selected, #eee9fc);
+    color: var(--fb-accent, #6741b7);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.author {
+    min-width: 0;
+}
+
+// One line per author; the full name is in the tooltip.
+.author-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.missing {
+    color: var(--fb-muted, #625f74);
+}

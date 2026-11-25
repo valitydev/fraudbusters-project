@@ -1,12 +1,9 @@
-<div *ngIf="display()" class="menu-item-wrapper">
+<ng-container *ngIf="display()">
     <ng-container *ngIf="hasChildren(); else link">
-        <button type="button" class="menu-item" (click)="toggle()" [attr.aria-expanded]="expanded">
-            <div class="menu-content" [style.padding-left.px]="12 + depth * 12">
-                <mat-icon>{{ item.iconName }}</mat-icon>
-                <span class="menu-text">{{ item.displayName }}</span>
-                <span class="menu-spacer"></span>
-                <mat-icon class="menu-expand">{{ expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
-            </div>
+        <button type="button" class="menu-item menu-section" (click)="toggle()" [attr.aria-expanded]="expanded">
+            <mat-icon aria-hidden="true">{{ item.iconName }}</mat-icon>
+            <span>{{ item.displayName }}</span>
+            <mat-icon aria-hidden="true" class="menu-expand">{{ expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
         </button>
         <div *ngIf="expanded" class="menu-children">
             <fb-menu-list-item
@@ -17,11 +14,15 @@
         </div>
     </ng-container>
     <ng-template #link>
-        <a class="menu-item" [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page">
-            <div class="menu-content" [style.padding-left.px]="12 + depth * 12">
-                <mat-icon>{{ item.iconName }}</mat-icon>
-                <span class="menu-text">{{ item.displayName }}</span>
-            </div>
+        <a
+            class="menu-item"
+            [class.menu-child]="depth > 0"
+            [class.active]="active"
+            [routerLink]="'/' + item.route"
+            [attr.aria-current]="active ? 'page' : null"
+        >
+            <mat-icon aria-hidden="true">{{ item.iconName }}</mat-icon>
+            <span>{{ item.displayName }}</span>
         </a>
     </ng-template>
-</div>
+</ng-container>

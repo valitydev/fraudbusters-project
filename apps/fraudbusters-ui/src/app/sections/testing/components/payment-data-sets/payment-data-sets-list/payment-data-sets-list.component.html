@@ -1,10 +1,67 @@
-<div fxLayout="column" [fxLayoutGap]="layoutGapM">
-    <fb-payment-data-set-header></fb-payment-data-set-header>
-    <div *ngFor="let dataSet of dataSets" fxLayout="column" [fxLayoutGap]="layoutGapM">
-        <fb-payment-data-set-item
-            [dataSet]="dataSet"
-            (editItem)="goToDataSet.emit($event)"
-            (deleteItem)="deleteItem.emit($event)"
-        ></fb-payment-data-set-item>
-    </div>
+<div class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Data sets table">
+    <table class="fb-catalog-table" aria-label="Data sets">
+        <colgroup>
+            <col class="id-column" />
+            <col />
+            <col class="rows-column" />
+            <col class="author-column" />
+            <col class="fb-catalog-date-column" />
+            <col class="actions-column" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col" class="numeric">Rows</th>
+                <th scope="col">Modified by</th>
+                <th scope="col">Last update</th>
+                <th class="fb-catalog-action-cell" scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let dataSet of dataSets">
+                <td>
+                    <code [attr.title]="dataSet.id">{{ dataSet.id || '—' }}</code>
+                </td>
+                <th scope="row" class="name fb-catalog-row-label" [attr.title]="dataSet.name">
+                    {{ dataSet.name || '—' }}
+                </th>
+                <td class="numeric">{{ dataSet.rows?.length ?? '—' }}</td>
+                <td>{{ dataSet.lastModificationInitiator || '—' }}</td>
+                <td class="fb-catalog-time">
+                    {{ (dataSet.lastModificationAt | date : 'yyyy-MM-dd HH:mm:ss') || '—' }}
+                </td>
+                <td class="fb-catalog-action-cell">
+                    <div *ngIf="dataSet.id" class="fb-catalog-row-actions">
+                        <button
+                            mat-stroked-button
+                            type="button"
+                            class="fb-primary-action"
+                            (click)="goToDataSet.emit(dataSet.id)"
+                        >
+                            Test
+                        </button>
+                        <button
+                            mat-icon-button
+                            type="button"
+                            [matMenuTriggerFor]="actions"
+                            aria-label="Data set actions"
+                        >
+                            <mat-icon>more_vert</mat-icon>
+                        </button>
+                        <mat-menu #actions="matMenu">
+                            <button
+                                mat-menu-item
+                                type="button"
+                                class="fb-menu-danger"
+                                (click)="deleteItem.emit(dataSet.id)"
+                            >
+                                <mat-icon>delete_outline</mat-icon> Remove
+                            </button>
+                        </mat-menu>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>

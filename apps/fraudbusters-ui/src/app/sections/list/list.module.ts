@@ -1,10 +1,9 @@
 import { NgModule } from '@angular/core';
 
 import { ListRoutingModule } from './list-routing.module';
-import { ListComponent } from './list.component';
+import { PaymentListsModule } from '../../api/payments/lists';
 
 @NgModule({
-    imports: [ListRoutingModule],
-    declarations: [ListComponent],
+    imports: [ListRoutingModule, PaymentListsModule],
 })
 export class ListModule {}

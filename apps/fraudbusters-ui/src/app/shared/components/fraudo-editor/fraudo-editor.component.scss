@@ -1,0 +1,275 @@
+:host {
+    --editor-font-size: 14px;
+    --editor-line-height: 22px;
+    --editor-top-padding: 12px;
+}
+
+// The highlighted layer and the textarea must share every metric that affects layout.
+%editor-text {
+    box-sizing: border-box;
+    margin: 0;
+    padding: var(--editor-top-padding) 16px 12px;
+    border: 0;
+    font-family: var(--fb-font-mono);
+    font-size: var(--editor-font-size);
+    line-height: var(--editor-line-height);
+    font-kerning: none;
+    font-variant-ligatures: none;
+    letter-spacing: normal;
+    tab-size: 4;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.fb-fraudo-editor {
+    position: relative;
+    border: 1px solid var(--fb-line, #dcdae5);
+    border-radius: 6px;
+    background: var(--fb-surface, #fff);
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+
+    &:focus-within {
+        border-color: var(--fb-accent, #6741b7);
+        box-shadow: 0 0 0 3px rgba(103, 65, 183, 0.12);
+    }
+
+    &.disabled {
+        background: var(--fb-raised, #faf9fd);
+    }
+}
+
+:host(.fill-panel) {
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-viewport {
+    position: relative;
+}
+
+.fixed-height {
+    // Keep the last line clear of horizontal overlay scrollbars.
+    --editor-bottom-padding: 30px;
+    height: clamp(224px, 42dvh, 460px);
+
+    .fb-fraudo-editor,
+    textarea,
+    .folded-preview {
+        height: 100%;
+        min-height: 0;
+    }
+
+    textarea,
+    .highlight,
+    .folded-preview,
+    .line-numbers {
+        padding-bottom: var(--editor-bottom-padding);
+    }
+
+    textarea,
+    .folded-preview {
+        overflow: auto;
+        overscroll-behavior: contain;
+        resize: none;
+    }
+
+    .folded-preview {
+        white-space: pre;
+        overflow-wrap: normal;
+    }
+}
+
+:host(.fill-panel) .fixed-height {
+    flex: 1 1 0;
+    height: auto;
+    min-height: 0;
+}
+
+.fb-fraudo-editor[hidden] {
+    display: none;
+}
+
+.folded-preview {
+    @extend %editor-text;
+    background: var(--fb-surface, #fff);
+    color: var(--fb-text, #34313b);
+    cursor: text;
+}
+
+.highlight {
+    @extend %editor-text;
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    color: var(--fb-text, #34313b);
+    pointer-events: none;
+}
+
+textarea {
+    @extend %editor-text;
+    position: relative;
+    display: block;
+    width: 100%;
+    resize: vertical;
+    background: transparent;
+    color: transparent;
+    caret-color: var(--fb-text, #252335);
+    outline: none;
+
+    &::placeholder {
+        color: var(--fb-muted, #8a869a);
+    }
+
+    &::selection {
+        background: rgba(103, 65, 183, 0.2);
+    }
+}
+
+// The browser gives <code> its own monospace font unless it is inherited explicitly.
+.highlight code,
+.folded-preview code {
+    font: inherit;
+    font-kerning: inherit;
+    font-variant-ligatures: inherit;
+    letter-spacing: inherit;
+}
+
+// Tokens must not change glyph advance, or the caret drifts from the visible text:
+// no padding or weight changes, pill "padding" is drawn with a shadow instead.
+.highlight span,
+.folded-preview span {
+    font-weight: inherit !important;
+}
+
+.highlight [class^='fb-code-result-'] {
+    padding: 0;
+    border-radius: 3px;
+}
+
+.highlight .fb-code-result-decline {
+    box-shadow: 0 0 0 2px var(--fb-danger-bg, #fdeced);
+}
+
+.highlight .fb-code-result-accept {
+    box-shadow: 0 0 0 2px var(--fb-success-bg, #e8f6ee);
+}
+
+.highlight .fb-code-result-review {
+    box-shadow: 0 0 0 2px var(--fb-warning-bg, #fdf3e4);
+}
+
+.numbered {
+    padding-inline-start: 3rem;
+
+    .fb-fraudo-editor {
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .highlight,
+    .folded-preview,
+    textarea {
+        white-space: pre;
+        overflow-wrap: normal;
+    }
+
+    textarea {
+        resize: none;
+    }
+
+    &:focus-within .current {
+        color: var(--fb-accent, #6741b7);
+    }
+}
+
+.line-numbers,
+.cursor-position {
+    color: var(--fb-muted, #625f74);
+    background: var(--fb-raised, #f6f7fb);
+    font: 12px / var(--editor-line-height) var(--fb-font-mono);
+}
+
+.line-numbers {
+    box-sizing: border-box;
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3rem;
+    padding: var(--editor-top-padding) 10px 12px;
+    font-size: var(--editor-font-size);
+    overflow: hidden;
+    border-inline-end: 1px solid var(--fb-line, #e2e4ee);
+    text-align: end;
+
+    .current {
+        color: var(--fb-text, #252335);
+        font-weight: 600;
+    }
+}
+
+.cursor-position {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 3px 16px;
+    border-block: 1px solid var(--fb-line, #e2e4ee);
+}
+
+.problem-message {
+    color: var(--fb-danger, #be123c);
+}
+
+.fold-toggle {
+    margin-inline-start: auto;
+    color: var(--fb-accent, #6741b7);
+    letter-spacing: normal;
+}
+
+.fold-marker {
+    margin-inline-start: 0.65ch;
+    padding: 0 0.4em;
+    border: 1px solid var(--fb-accent, #6741b7);
+    border-radius: 5px;
+    background: var(--fb-selected, #eee9fc);
+    color: var(--fb-accent, #6741b7);
+    font: inherit;
+    font-weight: 700;
+    line-height: 1.15;
+    cursor: pointer;
+
+    &:hover {
+        background: var(--fb-accent, #6741b7);
+        color: var(--fb-surface, #fff);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--fb-accent, #6741b7);
+        outline-offset: 2px;
+    }
+}
+
+.diagnostics {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.error-line {
+    position: absolute;
+    inset-inline: 0;
+    top: calc(
+        var(--editor-top-padding) + var(--source-line) * var(--editor-line-height) - var(--source-scroll-top, 0px)
+    );
+    box-sizing: border-box;
+    height: var(--editor-line-height);
+    border-inline-start: 3px solid var(--fb-danger, #c41d39);
+    background: var(--fb-danger-bg, #fdeced);
+}
+
+.numbered .line-numbers .error-number {
+    color: var(--fb-danger, #c41d39);
+    font-weight: 700;
+}

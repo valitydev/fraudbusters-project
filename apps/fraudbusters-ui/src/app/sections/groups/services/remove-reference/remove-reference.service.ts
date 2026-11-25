@@ -25,7 +25,11 @@ export class RemoveReferenceService {
                 of(params),
                 this.dialog
                     .open(ConfirmActionDialogComponent, {
-                        data: { title: `Remove group reference ${params.reference.id}?` },
+                        data: {
+                            confirmLabel: 'Remove',
+                            destructive: true,
+                            title: `Remove group reference ${params.reference.id}?`,
+                        },
                     })
                     .afterClosed()
                     .pipe(filter((r) => r === 'confirm')),

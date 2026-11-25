@@ -1,75 +1,25 @@
-<div fxLayout="column" [fxLayoutGap]="layoutGapM">
-    <div class="fb-page-toolbar">
-        <form class="fb-search-heading" [formGroup]="searchForm">
-            <h1 class="fb-page-title">Templates</h1>
-            <fb-compact-search
-                formControlName="searchQuery"
-                label="Search templates"
-                placeholder="Search by ID"
-            ></fb-compact-search>
-        </form>
-        <button mat-stroked-button type="button" class="fb-create-template" (click)="createTemplate()">
-            Create template
-        </button>
-    </div>
-    <div *ngIf="templates$ | async as templates">
-        <div *ngIf="templates.length; else Empty" class="fb-template-table" fxLayout="column">
-            <fb-list-header [reserveToggleSpace]="true">
-                <div class="fb-body-2" fxFlex>ID</div>
-                <div class="fb-body-2" fxFlex="0 0 160px">Last update</div>
-                <div class="fb-body-2" fxFlex>Modified by</div>
-            </fb-list-header>
-            <div *ngFor="let template of templates" class="fb-template-row">
-                <mat-expansion-panel>
-                    <mat-expansion-panel-header>
-                        <div fxLayout fxFlexFill fxLayoutAlign="start center" [fxLayoutGap]="layoutGapM">
-                            <div class="fb-body-2" fxFlex>{{ template.id }}</div>
-                            <div class="fb-body-2" fxFlex="0 0 160px">
-                                {{ template.lastUpdateDate | date : 'yyyy-MM-dd HH:mm:ss' }}
-                            </div>
-                            <div class="fb-body-2" fxFlex>{{ template.modifiedByUser || '—' }}</div>
-                        </div>
-                    </mat-expansion-panel-header>
-                    <div class="fb-template-detail">
-                        <div class="fb-template-rules">
-                            <div class="fb-template-rules-label">Rules</div>
-                            <div class="fb-template-rules-code">
-                                <code *ngFor="let rule of template.template | templateToRules">{{ rule }}</code>
-                            </div>
-                        </div>
-                        <div class="fb-template-actions" role="group" aria-label="Template actions">
-                            <button
-                                mat-stroked-button
-                                type="button"
-                                class="fb-template-remove"
-                                (click)="removeTemplate(template.id)"
-                            >
-                                Remove
-                            </button>
-                            <button mat-stroked-button type="button" (click)="copyTemplate(template.id)">Copy</button>
-                            <button
-                                mat-stroked-button
-                                type="button"
-                                class="fb-template-edit"
-                                (click)="editTemplate(template.id)"
-                            >
-                                Edit
-                            </button>
-                        </div>
-                    </div>
-                </mat-expansion-panel>
-            </div>
-            <fb-show-more-panel
-                *ngIf="hasMore$ | async"
-                [isLoading]="inProgress$ | async"
-                (showMore)="fetchMore()"
-            ></fb-show-more-panel>
-        </div>
-    </div>
-    <div *ngIf="inProgress$ | async" fxLayout fxLayoutAlign="center">
-        <mat-progress-spinner color="primary" mode="indeterminate" diameter="48"></mat-progress-spinner>
-    </div>
-    <ng-template #Empty>
-        <fb-empty-search-result *ngIf="!(inProgress$ | async)"></fb-empty-search-result>
-    </ng-template>
-</div>
+<fb-catalog-panel
+    *ngIf="catalog.view$ | async as view"
+    label="Payout templates"
+    searchLabel="Search templates by ID or rule"
+    itemName="templates"
+    [count]="view.count"
+    [visible]="view.rows.length"
+    [summaryInFooter]="true"
+    [busy]="view.busy"
+    [failed]="view.failed"
+    [sort]="view.sort"
+    [sortOptions]="sortOptions"
+    (sortChange)="catalog.sort($any($event))"
+    (more)="catalog.more()"
+    (retry)="catalog.refresh()"
+>
+    <fb-payment-templates-list
+        label="Payout templates"
+        *ngIf="view.rows.length"
+        [templates]="view.rows"
+        (editItem)="editTemplate($event)"
+        (copyItem)="copyTemplate($event)"
+        (deleteItem)="removeTemplate($event)"
+    ></fb-payment-templates-list>
+</fb-catalog-panel>

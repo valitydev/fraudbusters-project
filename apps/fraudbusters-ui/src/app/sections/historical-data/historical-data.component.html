@@ -1,15 +1,27 @@
-<div class="mat-headline">{{ title$ | async }}</div>
-<div fxLayout="column" fxLayoutGap="8px">
-    <nav mat-tab-nav-bar [tabPanel]="tabPanel">
+<div class="historical-page">
+    <header class="fb-page-toolbar">
+        <div class="heading">
+            <h1 class="fb-page-title">{{ title }}</h1>
+            <p class="fb-page-subtitle">{{ subtitle }}</p>
+        </div>
+        <div class="header-actions">
+            <ng-container *ngTemplateOutlet="actions.template$ | async"></ng-container>
+        </div>
+    </header>
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="fb-template-catalog-tabs" [attr.aria-label]="title + ' tabs'">
         <a
             mat-tab-link
-            *ngFor="let link of links$ | async"
+            *ngFor="let link of links"
             [routerLink]="link.path"
+            queryParamsHandling="preserve"
             routerLinkActive
             #rla="routerLinkActive"
-            [active]="rla.isActive || hasActiveFragments(link.otherActiveUrlFragments)"
+            [active]="rla.isActive"
         >
-            {{ link.name }}
+            <span class="tab-label">
+                <span class="tab-dot" [style.background]="link.dot" aria-hidden="true"></span>
+                {{ link.name }}
+            </span>
         </a>
     </nav>
     <mat-tab-nav-panel #tabPanel>

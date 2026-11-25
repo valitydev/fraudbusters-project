@@ -4,25 +4,21 @@ import { shareReplay, distinctUntilChanged } from 'rxjs/operators';
 
 import { Group } from '../../../api/fb-management/swagger-codegen/model/group';
 import { PaymentGroupsService } from '../../../api/payments/groups';
-import { ConfigService } from '../../../config';
-import { SortOrder } from '../../../shared/constants/sort-order';
 import { FetchResult, PartialFetcher } from '../../../shared/utils/partial-fetcher';
 
-export interface FetchTemplatesParams {
+interface GroupFilters {
     searchValue?: string;
-    sortOrder?: SortOrder;
-    pageSize?: number;
 }
 
 @Injectable()
-export class FetchGroupsService extends PartialFetcher<Group, FetchTemplatesParams> {
+export class FetchGroupsService extends PartialFetcher<Group, GroupFilters> {
     inProgress$ = this.doAction$.pipe(distinctUntilChanged(), shareReplay(1));
 
-    constructor(private paymentGroupsService: PaymentGroupsService, private configService: ConfigService) {
-        super();
+    constructor(private paymentGroupsService: PaymentGroupsService) {
+        super(0);
     }
 
-    protected fetch(params: FetchTemplatesParams): Observable<FetchResult<Group>> {
+    protected fetch(params: GroupFilters): Observable<FetchResult<Group>> {
         return this.paymentGroupsService.filter(params.searchValue);
     }
 }

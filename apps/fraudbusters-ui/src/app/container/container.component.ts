@@ -5,6 +5,8 @@ import { MatSidenav } from '@angular/material/sidenav';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, shareReplay, withLatestFrom } from 'rxjs/operators';
 
+import { FilterRolesPipe } from './components/user-info/filter-roles.pipe';
+import { FormatRolePipe } from './components/user-info/format-role.pipe';
 import { ProfileService } from './services/profile/profile.service';
 
 @Component({
@@ -38,6 +40,19 @@ export class ContainerComponent {
             });
     }
 
+    get darkTheme(): boolean {
+        return document.documentElement.classList.contains('fb-dark');
+    }
+
+    toggleTheme(): void {
+        const dark = document.documentElement.classList.toggle('fb-dark');
+        try {
+            localStorage.setItem('fb-theme', dark ? 'dark' : 'light');
+        } catch {
+            // The selected theme still applies when browser storage is unavailable.
+        }
+    }
+
     get userInitial(): string {
         return this.getUsername()?.trim().charAt(0).toUpperCase() || '?';
     }
@@ -48,6 +63,15 @@ export class ContainerComponent {
 
     getUserRoles(): string[] {
         return this.profileService.getUserRoles();
+    }
+
+    /** Second line of the sidebar account button, e.g. "Officer, Auditor". */
+    get roleSummary(): string {
+        const format = new FormatRolePipe();
+        return new FilterRolesPipe()
+            .transform(this.getUserRoles() ?? [])
+            .map((role) => format.transform(role))
+            .join(', ');
     }
 
     logout() {

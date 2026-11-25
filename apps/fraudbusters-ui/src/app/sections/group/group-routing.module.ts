@@ -1,10 +1,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
-import { AuthGuard, Roles } from '../../auth';
-import { CreateGroupComponent } from './create-group/create-group.component';
-import { EditGroupComponent } from './edit-group/edit-group.component';
 import { GroupComponent } from './group.component';
+import { AuthGuard, Roles } from '../../auth';
+import { PaymentGroupFormComponent } from './payment-group-form/payment-group-form.component';
 
 @NgModule({
     imports: [
@@ -17,13 +16,13 @@ import { GroupComponent } from './group.component';
                 children: [
                     {
                         path: 'new',
-                        component: CreateGroupComponent,
+                        component: PaymentGroupFormComponent,
                         canActivate: [AuthGuard],
                         data: { roles: [Roles.FraudOfficer] },
                     },
                     {
                         path: ':id',
-                        component: EditGroupComponent,
+                        component: PaymentGroupFormComponent,
                         canActivate: [AuthGuard],
                         data: { roles: [Roles.FraudOfficer] },
                     },

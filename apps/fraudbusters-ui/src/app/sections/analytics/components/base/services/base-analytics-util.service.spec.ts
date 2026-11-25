@@ -25,6 +25,11 @@ describe('Analytics date ranges', () => {
         expect(range.splitUnit).toBe('hour');
     });
 
+    it('uses hours below 48 hours and days for two completed UTC days', () => {
+        expect(service.resolveRange('custom', '2026-11-23', '2026-11-24', now).splitUnit).toBe('hour');
+        expect(service.resolveRange('custom', '2026-11-22', '2026-11-23', now).splitUnit).toBe('day');
+    });
+
     it('rejects invalid calendar dates, future dates, and reversed ranges', () => {
         expect(service.resolveRange('custom', '2026-10-32', '2026-11-18', now)).toBeNull();
         expect(service.resolveRange('custom', '2026-11-20', '2026-11-25', now)).toBeNull();

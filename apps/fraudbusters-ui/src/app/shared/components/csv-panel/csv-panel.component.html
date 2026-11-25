@@ -1,0 +1,58 @@
+<section class="csv-panel" aria-labelledby="csv-panel-title">
+    <header class="csv-header">
+        <div>
+            <h3 class="fb-section-title" id="csv-panel-title">{{ heading }}</h3>
+            <p>{{ description }}</p>
+        </div>
+        <button mat-icon-button type="button" aria-label="Close CSV importer" (click)="closed.emit()">
+            <mat-icon>close</mat-icon>
+        </button>
+    </header>
+    <div class="file-actions">
+        <input #files type="file" hidden accept=".csv,text/csv" multiple (change)="loadFiles(files)" />
+        <button mat-stroked-button type="button" [disabled]="reading" (click)="files.click()">
+            <mat-icon>upload_file</mat-icon> Choose CSV files
+        </button>
+        <a mat-button [href]="sampleUrl" [attr.download]="sampleName">Download sample CSV</a>
+    </div>
+    <div class="csv-grid">
+        <div class="csv-column">
+            <label for="csv-panel-input" class="column-title">Or paste CSV rows</label>
+            <textarea
+                #paste
+                id="csv-panel-input"
+                rows="4"
+                [placeholder]="columns"
+                (input)="parsePasted(paste.value)"
+            ></textarea>
+        </div>
+        <div class="csv-column">
+            <h4 class="column-title">
+                Preview <span *ngIf="rows.length">· {{ rows.length }} ready</span>
+            </h4>
+            <div class="preview">
+                <p *ngIf="reading" role="status">Reading CSV files…</p>
+                <p *ngIf="!reading && !rows.length && !issues.length">Imported rows will appear here.</p>
+                <ul *ngIf="rows.length">
+                    <li *ngFor="let row of rows | slice : 0 : 12">
+                        <ng-container *ngTemplateOutlet="rowTemplate; context: { $implicit: row }"></ng-container>
+                    </li>
+                </ul>
+                <p *ngIf="rows.length > 12">And {{ rows.length - 12 }} more</p>
+                <p *ngFor="let issue of issues" role="status">{{ issue }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="csv-actions">
+        <button mat-button type="button" [disabled]="reading" (click)="reset(paste)">Clear</button>
+        <button
+            mat-stroked-button
+            class="fb-primary-action"
+            type="button"
+            [disabled]="!rows.length || reading"
+            (click)="append.emit(rows)"
+        >
+            Add {{ rows.length }} to queue
+        </button>
+    </div>
+</section>

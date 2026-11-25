@@ -29,7 +29,7 @@ export class FetchDefaultReferencesService extends PartialFetcher<PaymentReferen
         private paymentDefaultReferencesService: PaymentDefaultReferencesService,
         private configService: ConfigService
     ) {
-        super();
+        super(0);
     }
 
     protected fetch(params: FetchDefaultReferencesParams, lastId?: string): Observable<FetchResult<PaymentReference>> {
@@ -40,7 +40,7 @@ export class FetchDefaultReferencesService extends PartialFetcher<PaymentReferen
             sortOrder: sortOrder || SortOrder.Asc,
             size: size ? size : this.pageSize,
             ...(lastId ? { lastId } : {}),
-            ...(sortBy ? { sortBy } : {}),
+            sortBy: sortBy || 'template_id',
             ...(id ? { id } : {}),
             ...(name ? { name } : {}),
         });

@@ -1,10 +1,12 @@
-<div class="user-info" fxLayout="column" fxLayoutAlign="center center" [fxLayoutGap]="layoutGapS">
-    <div class="username">{{ username }}</div>
-    <div class="fb-caption roles" fxLayoutGap="8px">
-        <fb-tag
-            *ngFor="let role of roles | filterRoles"
-            [color]="role | roleToColor"
-            [title]="role | formatRole"
-        ></fb-tag>
+<div class="account-header">
+    <span class="account-avatar" aria-hidden="true">{{ initial }}</span>
+    <div class="account-identity">
+        <div class="account-name">{{ username }}</div>
+        <div class="account-caption">Access roles</div>
     </div>
 </div>
+<ng-container *ngIf="roles | filterRoles as visibleRoles">
+    <ul *ngIf="visibleRoles.length" class="account-roles" aria-label="Access roles">
+        <li *ngFor="let role of visibleRoles">{{ role | formatRole }}</li>
+    </ul>
+</ng-container>

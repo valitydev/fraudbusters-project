@@ -21,7 +21,7 @@ export class ArchiveNotificationService {
                 of(notification),
                 this.dialog
                     .open(ConfirmActionDialogComponent, {
-                        data: { title: `Archive notification ${notification.name}?` },
+                        data: { confirmLabel: 'Archive', title: `Archive notification ${notification.name}?` },
                     })
                     .afterClosed()
                     .pipe(filter((r) => r === 'confirm')),

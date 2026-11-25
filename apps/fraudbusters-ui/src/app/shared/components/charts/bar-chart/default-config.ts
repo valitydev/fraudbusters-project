@@ -30,6 +30,7 @@ export const DEFAULT_CONFIG: ApexOptions = {
         enabled: false,
     },
     legend: { ...DEFAULT_LEGEND, position: 'top', horizontalAlign: 'right' },
+    grid: { borderColor: 'var(--fb-line)', strokeDashArray: 4 },
     fill: {
         opacity: 1,
     },
@@ -37,6 +38,7 @@ export const DEFAULT_CONFIG: ApexOptions = {
         bar: {
             horizontal: false,
             columnWidth: COLUMN_WIDTH,
+            borderRadius: 4,
         },
     },
     xaxis: {

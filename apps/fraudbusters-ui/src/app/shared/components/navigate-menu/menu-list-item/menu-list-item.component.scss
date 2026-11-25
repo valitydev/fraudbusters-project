@@ -1,77 +1,68 @@
-.menu-item-wrapper {
-    margin: 0 0 4px 0;
+:host {
+    display: block;
 }
 
 .menu-item {
-    height: 40px;
-    width: 100%;
     box-sizing: border-box;
-    border: 0;
-    border-radius: 7px;
-    background: transparent;
-    text-align: start;
-    padding: 0;
-    transition: background-color 0.2s ease;
-    cursor: pointer;
     display: flex;
     align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 36px;
+    margin: 0 0 2px;
+    padding: 6px 10px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--fb-muted, #655f76);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.35;
+    text-align: start;
     text-decoration: none;
-    color: inherit;
+    cursor: pointer;
 
     &:hover {
-        background-color: #f1f3f4;
-        color: #673ab7;
+        background-color: var(--fb-raised, #f6f7fb);
+        color: var(--fb-text, #252335);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--fb-accent, #6741b7);
+        outline-offset: -2px;
     }
 
     &.active {
-        background-color: #eee9fb;
-
-        .menu-content {
-            color: #673ab7;
-            font-weight: 500;
-        }
-
-        mat-icon {
-            color: #673ab7;
-        }
+        background: var(--fb-selected, #eee9fb);
+        color: var(--fb-accent, #673ab7);
+        font-weight: 600;
     }
 
-    .menu-content {
-        display: flex;
-        align-items: center;
-        color: #5f6368;
-        font-size: 14px;
-        font-weight: 400;
-        padding: 0 12px;
-        width: 100%;
-        height: 100%;
+    mat-icon {
+        flex: 0 0 18px;
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
+    }
 
-        mat-icon {
-            margin-right: 8px;
-            color: #5f6368;
-            font-size: 20px;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .menu-text {
-            line-height: 1.4;
-            font-family: 'Roboto', 'Helvetica Neue', sans-serif;
-        }
+    .menu-expand {
+        margin-inline-start: auto;
     }
 }
 
-.menu-spacer {
-    flex: 1 1 auto;
+.menu-section[aria-expanded='true'] {
+    color: var(--fb-text, #252335);
+
+    mat-icon {
+        color: var(--fb-muted, #655f76);
+    }
 }
 
-.menu-item .menu-content mat-icon.menu-expand {
-    margin-right: 0;
+.menu-children {
+    margin: 2px 0 8px;
 }
 
-.menu-children .menu-item-wrapper {
-    margin-bottom: 0;
+.menu-child {
+    padding-inline-start: 16px;
 }

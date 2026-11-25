@@ -1,10 +1,9 @@
 export interface Series {
     name?: string;
+    color?: string;
     data: {
         x: string | number | Date;
         y: string | number;
-        fillColor?: string;
-        strokeColor?: string;
     }[];
 }
 

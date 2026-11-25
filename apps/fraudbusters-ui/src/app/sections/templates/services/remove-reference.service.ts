@@ -26,7 +26,13 @@ export class RemoveReferenceService {
             combineLatest([
                 of(params),
                 this.dialog
-                    .open(ConfirmActionDialogComponent, { data: { title: `Remove reference ${params.reference.id}?` } })
+                    .open(ConfirmActionDialogComponent, {
+                        data: {
+                            confirmLabel: 'Remove',
+                            destructive: true,
+                            title: `Remove reference ${params.reference.id}?`,
+                        },
+                    })
                     .afterClosed()
                     .pipe(filter((r) => r === 'confirm')),
             ])

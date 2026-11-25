@@ -1,15 +1,53 @@
-<div class="mat-headline">Lists</div>
-<div fxLayout="column" fxLayoutGap="8px">
-    <nav mat-tab-nav-bar [tabPanel]="tabPanel">
+<div class="fb-page fb-page-catalog">
+    <header class="fb-page-toolbar">
+        <div class="lists-heading">
+            <h1 class="fb-page-title">Lists</h1>
+            <p class="fb-page-subtitle">
+                Block, allow and limit entities, and review candidate batches before they enter a list.
+            </p>
+        </div>
+        <div *ngIf="activeTab()?.listType as listType" class="lists-actions">
+            <input #csv hidden type="file" accept=".csv,text/csv" (change)="cleanByCsv(csv)" />
+            <button mat-stroked-button type="button" [disabled]="cleaning" (click)="csv.click()">
+                <mat-icon>delete_sweep</mat-icon>
+                Clean by CSV
+            </button>
+            <a
+                mat-stroked-button
+                class="fb-primary-action"
+                [routerLink]="['/list', listType, 'new']"
+                [queryParams]="{ returnUrl: returnUrl }"
+            >
+                <mat-icon>add</mat-icon>
+                Create record
+            </a>
+        </div>
+    </header>
+    <nav
+        *ngIf="{ counts: counts$ | async } as tabs"
+        mat-tab-nav-bar
+        [tabPanel]="tabPanel"
+        class="fb-template-catalog-tabs"
+        aria-label="List types"
+    >
         <a
             mat-tab-link
             *ngFor="let link of links"
             [routerLink]="link.path"
             routerLinkActive
             #rla="routerLinkActive"
-            [active]="rla.isActive || hasActiveFragments(link.otherActiveUrlFragments)"
+            [active]="rla.isActive"
+            [matTooltip]="
+                link.path === 'candidates' && tabs.counts?.candidates
+                    ? tabs.counts.candidates + (tabs.counts.candidates === '1' ? ' batch' : ' batches')
+                    : ''
+            "
         >
-            {{ link.name }}
+            <span class="fb-template-tab-label">
+                <span class="list-dot" [ngClass]="'list-dot-' + link.path" aria-hidden="true"></span>
+                {{ link.name }}
+                <span *ngIf="tabs.counts?.[link.path] as count" class="fb-template-tab-count">{{ count }}</span>
+            </span>
         </a>
     </nav>
     <mat-tab-nav-panel #tabPanel>

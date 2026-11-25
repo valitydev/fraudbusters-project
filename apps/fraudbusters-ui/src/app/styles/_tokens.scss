@@ -1,0 +1,109 @@
+$font-sans: Inter, 'Helvetica Neue', Arial, sans-serif;
+$brand: #6338f5;
+
+:root {
+    --fb-font-sans: #{$font-sans};
+    --fb-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --fb-accent: #{$brand};
+    --fb-radius-control: 8px;
+    --fb-radius-panel: 12px;
+    --fb-filter-height: 36px;
+    --fb-form-control-height: 40px;
+    --fb-row-control-height: 32px;
+    --fb-input-font-size: 13px;
+    --fb-input-line-height: 20px;
+    --fb-title-font-size: 22px;
+    --fb-title-line-height: 28px;
+    --fb-section-title-font-size: 14px;
+    --fb-section-title-line-height: 20px;
+    --fb-table-font-size: 13px;
+    --fb-table-line-height: 18px;
+    --fb-table-value-font-size: 12px;
+    --fb-table-heading-font-size: 11px;
+    --fb-table-heading-line-height: 16px;
+    --fb-table-row-height: 56px;
+    --fb-table-header-height: 37px;
+    --fb-table-footer-height: 44px;
+    --fb-table-cell-padding-block: 8px;
+    --fb-table-cell-padding-inline: 12px;
+    --fb-table-edge-padding: 20px;
+    --fb-table-toolbar-padding-block: 14px;
+    --fb-filter-outline: var(--fb-line);
+    --fb-filter-outline-hover: var(--fb-line-strong);
+    --fb-accent-hover: #5128d9;
+    --fb-accent-soft: #f3effe;
+    --fb-accent-border: #ddd6fe;
+    --fb-selected: #f3effe;
+    --fb-text: #1e293b;
+    --fb-muted: #64748b;
+    --fb-subtle: #94a3b8;
+    --fb-line: #e2e8f0;
+    --fb-line-strong: #cbd5e1;
+    --fb-canvas: #f8f9fb;
+    --fb-surface: #ffffff;
+    --fb-raised: #f8f9fb;
+    --fb-success: #047857;
+    --fb-success-bg: #ecfdf5;
+    --fb-danger: #be123c;
+    --fb-danger-bg: #fff1f2;
+    --fb-info: #0369a1;
+    --fb-info-bg: #f0f9ff;
+    --fb-warning: #b45309;
+    --fb-warning-bg: #fffbeb;
+    --fb-success-border: #a7f3d0;
+    --fb-success-dot: #10b981;
+    --fb-danger-border: #fecdd3;
+    --fb-danger-dot: #f43f5e;
+    --fb-info-border: #bae6fd;
+    --fb-info-dot: #0ea5e9;
+    --fb-warning-border: #fde68a;
+    --fb-warning-dot: #f59e0b;
+    --fb-neutral: #475569;
+    --fb-neutral-bg: #f1f5f9;
+    --fb-neutral-border: #e2e8f0;
+    --fb-neutral-dot: #94a3b8;
+}
+
+@media (pointer: coarse) {
+    :root {
+        --fb-filter-height: 44px;
+        --fb-form-control-height: 44px;
+    }
+}
+
+html.fb-dark {
+    color-scheme: dark;
+    --fb-info: #a9c5ff;
+    --fb-info-bg: #293952;
+    --fb-surface: #24232b;
+    --fb-canvas: #19181f;
+    --fb-raised: #302e39;
+    --fb-text: #eeeaf5;
+    --fb-muted: #c4bed0;
+    --fb-line: #494552;
+    --fb-accent: #c9acff;
+    --fb-selected: #393047;
+    --fb-danger: #ff9aa9;
+    --fb-success: #86dba4;
+    --fb-warning: #ffca82;
+    --fb-danger-bg: #482c36;
+    --fb-success-bg: #223c30;
+    --fb-warning-bg: #443725;
+    --fb-accent-hover: #d9c6ff;
+    --fb-accent-soft: #393047;
+    --fb-accent-border: #5b4a7d;
+    --fb-line-strong: #625e70;
+    --fb-subtle: #8e889c;
+    --fb-success-border: #2f5d47;
+    --fb-success-dot: #4ade80;
+    --fb-danger-border: #6b3442;
+    --fb-danger-dot: #fb7185;
+    --fb-info-border: #34507a;
+    --fb-info-dot: #38bdf8;
+    --fb-warning-border: #66512f;
+    --fb-warning-dot: #fbbf24;
+    --fb-neutral: #c4bed0;
+    --fb-neutral-bg: #302e39;
+    --fb-neutral-border: #494552;
+    --fb-neutral-dot: #8e889c;
+}

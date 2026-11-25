@@ -1,0 +1,33 @@
+table {
+    min-width: 900px;
+    table-layout: auto;
+}
+
+.name {
+    font-weight: 600;
+}
+
+.chip {
+    display: inline-block;
+    padding: 2px 7px;
+    border: 1px solid var(--fb-line);
+    border-radius: 6px;
+    background: var(--fb-canvas);
+}
+
+.subject {
+    max-width: 280px;
+    overflow-wrap: anywhere;
+}
+
+.missing {
+    color: var(--fb-muted);
+}
+
+.fb-catalog-action-cell {
+    width: 72px;
+}
+
+.table-footer {
+    justify-content: space-between;
+}

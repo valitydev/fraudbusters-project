@@ -1,0 +1,123 @@
+table {
+    min-width: 900px;
+}
+
+table.grey {
+    min-width: 1300px;
+}
+
+.name-column {
+    width: 150px;
+}
+
+.id-column {
+    width: 17%;
+}
+
+.value-column {
+    min-width: 200px;
+}
+
+table.grey .id-column {
+    width: 150px;
+}
+
+.count-column {
+    width: 72px;
+}
+
+.window-column {
+    width: 370px;
+}
+
+.author-column {
+    width: 130px;
+}
+
+.actions-column {
+    width: 96px;
+}
+
+td,
+th {
+    overflow-wrap: anywhere;
+}
+
+.list-name {
+    font-weight: 600;
+}
+
+.value-cell {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+}
+
+.value-chip {
+    min-width: 0;
+    padding: 3px 8px;
+    border: 1px solid var(--fb-line, #e2e1eb);
+    border-radius: 6px;
+    background: var(--fb-canvas, #fff);
+    color: var(--fb-text, #252335);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.copy-value {
+    display: grid;
+    place-items: center;
+    flex: 0 0 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--fb-muted, #625f74);
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+        background: var(--fb-selected, #eee9fc);
+        color: var(--fb-accent, #6741b7);
+    }
+
+    mat-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .copy-value {
+        opacity: 0;
+    }
+
+    .value-cell:hover .copy-value,
+    .value-cell:focus-within .copy-value {
+        opacity: 1;
+    }
+}
+
+.numeric {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.window {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+}
+
+.window-range {
+    white-space: normal;
+}
+
+.missing {
+    color: var(--fb-muted, #8a869a);
+}

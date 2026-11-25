@@ -1,75 +1,91 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, Inject, Input, OnInit } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    EventEmitter,
+    Input,
+    OnChanges,
+    Output,
+    SimpleChanges,
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { finalize } from 'rxjs/operators';
 
 import { ChannelService } from './services/channel.service';
 import { Channel } from '../../../api/fb-management/swagger-codegen/model/channel';
 import { ChannelType } from '../../../api/fb-management/swagger-codegen/model/channelType';
-import { LAYOUT_GAP_L, LAYOUT_GAP_M } from '../../../tokens';
-import { ErrorHandlerService } from '../../services/utils/error-handler.service';
 
+/** Channel form with its page header, used by the New and Edit channel routes. */
 @Component({
     selector: 'fb-create-channel',
     templateUrl: './create-channel.component.html',
+    styleUrls: [
+        '../reference-form/reference-form.component.scss',
+        '../create-notification/create-notification.component.scss',
+    ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [ChannelService],
 })
-export class CreateChannelComponent implements OnInit {
-    @Input() channel: Channel;
+export class CreateChannelComponent implements OnChanges {
+    @Input() channel?: Channel;
+    @Input() editing = false;
+    @Input() loading = false;
+    @Input() loadFailed = false;
+    @Output() retry = new EventEmitter<void>();
 
     form = this.channelService.form;
-
     channelTypes = Object.values(ChannelType);
 
-    saved$ = this.channelService.saved$;
-    inProgress$ = this.channelService.inProgress$;
+    saving = false;
+    error = '';
 
     constructor(
         private router: Router,
         private channelService: ChannelService,
-        private errorHandlerService: ErrorHandlerService,
         private snackBar: MatSnackBar,
-        @Inject(LAYOUT_GAP_L) public layoutGapL: string,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
+        private cdr: ChangeDetectorRef
     ) {}
 
-    ngOnInit() {
-        if (this.channel) {
-            this.form.setValue({
-                name: this.channel.name,
-                type: this.channel.type,
-                destination: this.channel.destination,
-            });
-            this.form.get('name').disable();
+    ngOnChanges({ channel }: SimpleChanges) {
+        if (channel && this.channel) {
+            const { name, type, destination } = this.channel;
+            this.form.setValue({ name, type, destination });
+            // The channel name is its ID and cannot be changed after creation.
+            this.form.controls.name.disable();
         }
-        this.saved$.subscribe(
-            (channel) => {
-                if (this.channel) {
-                    this.snackBar.open(`Saved success: ${channel.name}`, 'OK', {
-                        duration: 3000,
-                    });
-                } else {
-                    this.snackBar.open(`Channel has been created`, 'OK', {
-                        duration: 3000,
-                    });
-                    this.back();
-                }
-            },
-            (error: HttpErrorResponse) => this.errorHandlerService.handleError(error, this.snackBar)
-        );
     }
 
     saveChannel() {
-        this.channelService.saveChannel({
-            destination: this.form.getRawValue().destination,
-            name: this.form.getRawValue().name,
-            type: this.form.getRawValue().type,
-            createdAt: new Date(Date.now()),
-        });
+        if (this.saving) {
+            return;
+        }
+        const { name, type, destination } = this.form.getRawValue();
+        this.saving = true;
+        this.error = '';
+        this.channelService
+            .save({ name, type, destination, createdAt: new Date(Date.now()) })
+            .pipe(
+                finalize(() => {
+                    this.saving = false;
+                    this.cdr.markForCheck();
+                })
+            )
+            .subscribe({
+                next: () => {
+                    this.snackBar.open(this.editing ? 'Channel saved' : 'Channel created', 'OK', { duration: 3000 });
+                    if (!this.editing) {
+                        this.back();
+                    }
+                },
+                error: ({ status }: HttpErrorResponse) => {
+                    this.error = `Could not save the channel${status ? ` (${status})` : ''}. Try again.`;
+                },
+            });
     }
 
     back() {
-        this.router.navigate([`../notifications/channels`]);
+        void this.router.navigate(['/notifications/channels']);
     }
 }

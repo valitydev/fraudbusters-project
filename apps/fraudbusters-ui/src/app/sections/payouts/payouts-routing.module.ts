@@ -6,7 +6,7 @@ import { PayoutGroupFormComponent } from './components/payout-group-form/payout-
 import { PayoutGroupReferenceFormComponent } from './components/payout-group-reference-form/payout-group-reference-form.component';
 import { PayoutGroupReferencesComponent } from './components/payout-group-references/payout-group-references.component';
 import { PayoutGroupsComponent } from './components/payout-groups/payout-groups.component';
-import { PayoutListRowsFormComponent } from './components/payout-list-rows-form/payout-list-rows-form.component';
+import { ListRowsFormComponent } from '../list/list-rows-form/list-rows-form.component';
 import { PayoutListsComponent } from './components/payout-lists/payout-lists.component';
 import { PayoutReferenceFormComponent } from './components/payout-reference-form/payout-reference-form.component';
 import { PayoutReferencesComponent } from './components/payout-references/payout-references.component';
@@ -34,9 +34,21 @@ const listTab = (path: string, listType: ListType) => ({
                 canActivate: [AuthGuard],
                 data: {
                     roles: [Roles.FraudOfficer],
+                    title: 'Templates',
+                    subtitle: 'Manage payout rules and bind templates to parties and wallets.',
                     links: [
-                        { path: 'templates', name: 'Templates' },
-                        { path: 'references', name: 'References' },
+                        {
+                            path: 'templates',
+                            name: 'Templates',
+                            createUrl: '/payouts/template/new',
+                            createLabel: 'Create template',
+                        },
+                        {
+                            path: 'references',
+                            name: 'References',
+                            createUrl: '/payouts/reference/new',
+                            createLabel: 'Create reference',
+                        },
                     ],
                 },
                 children: [
@@ -51,9 +63,16 @@ const listTab = (path: string, listType: ListType) => ({
                 canActivate: [AuthGuard],
                 data: {
                     roles: [Roles.FraudOfficer],
+                    title: 'Groups',
+                    subtitle: 'Set the order of payout rule templates and manage their bindings.',
                     links: [
-                        { path: 'list', name: 'Groups' },
-                        { path: 'references', name: 'References' },
+                        { path: 'list', name: 'Groups', createUrl: '/payouts/group/new', createLabel: 'Create group' },
+                        {
+                            path: 'references',
+                            name: 'References',
+                            createUrl: '/payouts/group-reference/new',
+                            createLabel: 'Create reference',
+                        },
                     ],
                 },
                 children: [
@@ -68,11 +87,37 @@ const listTab = (path: string, listType: ListType) => ({
                 canActivate: [AuthGuard],
                 data: {
                     roles: LIST_ROLES,
+                    title: 'Lists',
+                    subtitle: 'Block, allow and limit entities in payouts.',
                     links: [
-                        { path: 'black', name: 'Black' },
-                        { path: 'white', name: 'White' },
-                        { path: 'grey', name: 'Grey' },
-                        { path: 'named', name: 'Named' },
+                        {
+                            path: 'black',
+                            name: 'Black',
+                            listType: ListType.Black,
+                            createUrl: '/payouts/list/new/black',
+                            createLabel: 'Create record',
+                        },
+                        {
+                            path: 'white',
+                            name: 'White',
+                            listType: ListType.White,
+                            createUrl: '/payouts/list/new/white',
+                            createLabel: 'Create record',
+                        },
+                        {
+                            path: 'grey',
+                            name: 'Grey',
+                            listType: ListType.Grey,
+                            createUrl: '/payouts/list/new/grey',
+                            createLabel: 'Create record',
+                        },
+                        {
+                            path: 'named',
+                            name: 'Named',
+                            listType: ListType.Naming,
+                            createUrl: '/payouts/list/new/naming',
+                            createLabel: 'Create record',
+                        },
                     ],
                 },
                 children: [
@@ -97,9 +142,9 @@ const listTab = (path: string, listType: ListType) => ({
             { path: 'group-reference/new', component: PayoutGroupReferenceFormComponent, ...OFFICER },
             {
                 path: 'list/new/:listType',
-                component: PayoutListRowsFormComponent,
+                component: ListRowsFormComponent,
                 canActivate: [AuthGuard],
-                data: { roles: LIST_ROLES },
+                data: { roles: LIST_ROLES, payout: true },
             },
             { path: '', redirectTo: 'templates', pathMatch: 'full' },
         ]),

@@ -1,0 +1,93 @@
+<ng-template #headerActions>
+    <button mat-stroked-button type="button" [disabled]="!rows.length" (click)="exportCsv()">
+        <mat-icon>download</mat-icon>
+        Export CSV
+    </button>
+    <a *ngIf="kind.key === 'fraud-payments'" mat-stroked-button class="fb-primary-action" routerLink="/load/fraud">
+        <mat-icon>add</mat-icon>
+        Load fraud
+    </a>
+</ng-template>
+
+<div class="records">
+    <fb-historical-filters [kind]="kind" (filtersChange)="search($event)"></fb-historical-filters>
+
+    <div *ngIf="kind.selection && selected.size" class="selection-bar" role="region" aria-label="Selected records">
+        <div class="selection-summary" aria-live="polite">
+            <strong>{{ selected.size }} selected</strong>
+            <span>{{ selectionHint }}</span>
+        </div>
+        <div class="selection-actions">
+            <button mat-stroked-button type="button" [disabled]="working" (click)="clearSelection()">
+                Clear selection
+            </button>
+            <button mat-flat-button color="primary" type="button" [disabled]="working" (click)="runSelectionAction()">
+                <mat-icon>{{ kind.selection === 'candidates' ? 'playlist_add' : 'science' }}</mat-icon>
+                {{ kind.selection === 'candidates' ? 'Add to list candidates' : 'Create data set' }} ({{
+                    selected.size
+                }})
+            </button>
+        </div>
+    </div>
+
+    <section class="fb-catalog-panel" [attr.aria-label]="kind.title" [attr.aria-busy]="busy">
+        <div class="table-toolbar">
+            <div class="table-meta" aria-live="polite">
+                <strong>{{ kind.title }}</strong>
+                <span *ngIf="searched && !failed">
+                    · Showing {{ rows.length }} {{ rows.length === 1 ? 'record' : 'records'
+                    }}<ng-container *ngIf="continuationId"> · more available</ng-container>
+                </span>
+            </div>
+            <label class="sort-control">
+                Sort by
+                <span class="catalog-select">
+                    <mat-select [value]="sortOrder" (valueChange)="setSort($event)" aria-label="Sort by">
+                        <mat-option *ngFor="let option of sortOptions" [value]="option.value">{{
+                            option.label
+                        }}</mat-option>
+                    </mat-select>
+                </span>
+            </label>
+        </div>
+
+        <fb-historical-table
+            *ngIf="rows.length"
+            [kind]="kind"
+            [rows]="rows"
+            [selected]="kind.selection ? selected : null"
+            (toggle)="toggle($event)"
+            (toggleAll)="toggleAll($event)"
+        ></fb-historical-table>
+
+        <footer *ngIf="rows.length" class="table-footer">
+            <span>Times in your time zone · open a row for its details</span>
+            <button
+                *ngIf="continuationId"
+                class="load-more"
+                mat-button
+                type="button"
+                [disabled]="busy"
+                (click)="more()"
+            >
+                Show more
+            </button>
+        </footer>
+
+        <mat-progress-bar
+            *ngIf="busy"
+            mode="indeterminate"
+            [attr.aria-label]="'Loading ' + kind.title"
+        ></mat-progress-bar>
+
+        <div *ngIf="failed" class="table-state" role="alert">
+            Could not load {{ kind.title | lowercase }}.
+            <button mat-button type="button" (click)="rows.length ? more() : reload()">Retry</button>
+        </div>
+        <div *ngIf="searched && !busy && !failed && !rows.length" class="empty">
+            <mat-icon aria-hidden="true">manage_search</mat-icon>
+            <strong>No records match your filters</strong>
+            <p>Widen the time range or clear some filters.</p>
+        </div>
+    </section>
+</div>

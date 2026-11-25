@@ -1,0 +1,26 @@
+// Layout comes from the reference form styles; these are the settings-form parts.
+
+.reference-entry + .reference-entry {
+    border-top: 1px solid var(--fb-line, #dde1eb);
+}
+
+.field mat-select {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 6px 0;
+    padding: 8px 12px;
+}
+
+.shortcut .required {
+    color: var(--fb-danger, #b4283b);
+}
+
+.state {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: var(--entry-padding);
+    color: var(--fb-muted, #625f74);
+}

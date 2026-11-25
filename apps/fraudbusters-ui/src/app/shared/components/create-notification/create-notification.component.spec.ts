@@ -1,4 +1,5 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { ChangeDetectorRef, SimpleChange } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormBuilder } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -8,7 +9,6 @@ import { CreateNotificationComponent } from './create-notification.component';
 import { NotificationService } from './services/notification.service';
 import { NotificationsService } from '../../../api/payments/notifications';
 import { ConfigService } from '../../../config';
-import { ErrorHandlerService } from '../../services/utils/error-handler.service';
 
 describe('CreateNotificationComponent contract', () => {
     let component: CreateNotificationComponent;
@@ -31,17 +31,14 @@ describe('CreateNotificationComponent contract', () => {
         component = new CreateNotificationComponent(
             jasmine.createSpyObj<Router>('Router', ['navigate']),
             service,
-            jasmine.createSpyObj<ErrorHandlerService>('ErrorHandlerService', ['handleError']),
             jasmine.createSpyObj<MatSnackBar>('MatSnackBar', ['open']),
-            '24px',
-            '16px'
+            jasmine.createSpyObj<ChangeDetectorRef>('ChangeDetectorRef', ['markForCheck'])
         );
     });
 
     afterEach(() => http.verify());
 
     it('creates a notification with a numeric template ID in the HTTP payload', () => {
-        component.ngOnInit();
         component.form.patchValue({
             name: 'Daily fraud report',
             type: 42,
@@ -71,7 +68,8 @@ describe('CreateNotificationComponent contract', () => {
             frequency: '10m',
             subject: 'Original subject',
         };
-        component.ngOnInit();
+        component.editing = true;
+        component.ngOnChanges({ notification: new SimpleChange(undefined, component.notification, true) });
         component.form.patchValue({ subject: 'Updated subject' });
 
         component.saveNotification();
@@ -81,5 +79,33 @@ describe('CreateNotificationComponent contract', () => {
             jasmine.objectContaining({ id: 7, templateId: 42, subject: 'Updated subject', period: '7d' })
         );
         request.flush({ id: 7 });
+    });
+
+    it('keeps the form usable after a failed save', () => {
+        component.form.patchValue({
+            name: 'Daily fraud report',
+            type: 42,
+            channel: 'test-channel',
+            period: '1d',
+            frequency: '60m',
+            subject: 'Report',
+        });
+
+        component.saveNotification();
+        http.expectOne('/api/notifications').flush('fail', { status: 500, statusText: 'Server Error' });
+        expect(component.saving).toBeFalse();
+        expect(component.error).toContain('500');
+
+        component.saveNotification();
+        http.expectOne('/api/notifications').flush({ id: 7 });
+        expect(component.error).toBe('');
+    });
+
+    it('requires every field the notificator stores', () => {
+        expect(component.form.invalid).toBeTrue();
+        component.form.patchValue({ name: 'Report', type: 42, channel: 'mail', period: '1d', frequency: '1m' });
+        expect(component.form.invalid).toBeTrue();
+        component.form.patchValue({ subject: 'Report' });
+        expect(component.form.valid).toBeTrue();
     });
 });

@@ -1,0 +1,51 @@
+@mixin panel {
+    border: 1px solid var(--fb-line);
+    border-radius: var(--fb-radius-panel);
+    background: var(--fb-surface);
+}
+
+@mixin control-focus {
+    border-color: var(--fb-accent);
+    outline: 1px solid var(--fb-accent);
+    background: var(--fb-surface);
+}
+
+@mixin control($height, $font: var(--fb-font-sans)) {
+    box-sizing: border-box;
+    min-height: $height;
+    border: 1px solid var(--fb-line);
+    border-radius: var(--fb-radius-control);
+    background: var(--fb-canvas);
+    color: var(--fb-text);
+    font: 400 var(--fb-input-font-size) / var(--fb-input-line-height) $font;
+
+    --mat-select-trigger-text-font: #{$font};
+    --mat-select-trigger-text-size: var(--fb-input-font-size);
+    --mat-select-enabled-trigger-text-color: var(--fb-text);
+    --mat-select-placeholder-text-color: var(--fb-muted);
+
+    &::placeholder {
+        color: var(--fb-muted);
+        opacity: 1;
+    }
+
+    &:hover {
+        border-color: var(--fb-line-strong);
+    }
+
+    &:focus-visible,
+    &:focus-within,
+    &.mat-mdc-select-focused {
+        @include control-focus;
+    }
+
+    &[readonly],
+    &:disabled,
+    &[aria-disabled='true'] {
+        color: var(--fb-muted);
+    }
+
+    &[aria-invalid='true'] {
+        border-color: var(--fb-danger);
+    }
+}

@@ -13,7 +13,7 @@ import { IdResponse } from '../../fb-management/swagger-codegen/model/idResponse
 import { ListResponse } from '../../fb-management/swagger-codegen/model/listResponse';
 import { Template } from '../../fb-management/swagger-codegen/model/template';
 import { TemplatesResponse } from '../../fb-management/swagger-codegen/model/templatesResponse';
-import { ValidationResponse } from '../../fb-management/swagger-codegen/model/validationResponse';
+import { ValidateTemplatesResponse } from '../../fb-management/swagger-codegen/model/validateTemplatesResponse';
 
 @Injectable()
 export class PaymentTemplatesService {
@@ -56,8 +56,8 @@ export class PaymentTemplatesService {
         );
     }
 
-    validateTemplate(template: Template): Observable<ValidationResponse> {
-        return this.http.post<ValidationResponse>(
+    validateTemplate(template: Template): Observable<ValidateTemplatesResponse> {
+        return this.http.post<ValidateTemplatesResponse>(
             `${this.fbPaymentTemplatesEndpoint}/validate`,
             template,
             new HttpRequestModel()

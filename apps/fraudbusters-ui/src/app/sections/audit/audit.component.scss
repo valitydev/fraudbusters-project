@@ -1,40 +1,130 @@
-.audit-table {
-    border-radius: 8px;
+.audit-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
 }
 
-.table-scroll {
-    overflow-x: auto;
+.filter-card {
+    display: grid;
+    gap: 16px;
+    padding: 16px 20px;
+    border: 1px solid var(--fb-line);
+    border-radius: 12px;
+    background: var(--fb-surface);
+}
+
+.field-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--fb-line);
+
+    @media (max-width: 900px) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.field {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.field-label {
+    color: var(--fb-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.field input,
+.select-box {
+    box-sizing: border-box;
+    width: 100%;
+    height: var(--fb-filter-height, 36px);
+    padding: 0 10px;
+    border: 1px solid var(--fb-line);
+    border-radius: 8px;
+    background: var(--fb-canvas);
+    color: var(--fb-text);
+    font-size: 13px;
+
+    &:hover {
+        border-color: var(--fb-line-strong);
+    }
+}
+
+.field input {
+    font-family: var(--fb-font-mono);
+
+    &:focus {
+        border-color: var(--fb-accent);
+        outline: 1px solid var(--fb-accent);
+        background: var(--fb-surface);
+    }
+
+    &::placeholder {
+        color: var(--fb-subtle);
+    }
+}
+
+.select-box {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+
+    // Keep the value inside the box: long selections end with an ellipsis.
+    ::ng-deep .mat-mdc-select-trigger,
+    ::ng-deep .mat-mdc-select-value {
+        min-width: 0;
+        width: 100%;
+    }
+
+    ::ng-deep .mat-mdc-select-value-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    --mat-select-enabled-trigger-text-color: var(--fb-text);
+    --mat-select-placeholder-text-color: var(--fb-subtle);
+    --mat-select-trigger-text-size: 13px;
+
+    &.mat-mdc-select-focused {
+        border-color: var(--fb-accent);
+        outline: 1px solid var(--fb-accent);
+    }
+}
+
+.table-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    color: var(--fb-muted);
+    font-size: 13px;
+
+    strong {
+        color: var(--fb-text);
+        font-size: 14px;
+    }
 }
 
 table {
-    width: 100%;
-    min-width: 650px;
-    background: transparent;
+    min-width: 760px;
+    table-layout: auto;
 }
 
-.mat-mdc-header-row {
-    height: 38px;
-    background: #f3f1f8;
+.missing {
+    color: var(--fb-muted);
 }
 
-.mat-mdc-row {
-    height: 44px;
+.initiator {
+    font-weight: 600;
 }
 
-.mat-column-insertTime {
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-}
-
-.command {
-    display: inline-block;
-    padding: 3px 6px;
-    border-radius: 5px;
-    background-color: #f3f1f8;
-}
-
-footer {
-    display: flex;
-    justify-content: flex-end;
-    padding: 9px 12px;
+.object {
+    overflow-wrap: anywhere;
 }

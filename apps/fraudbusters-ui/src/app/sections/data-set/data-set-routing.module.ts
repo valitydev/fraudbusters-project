@@ -1,10 +1,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
-import { AuthGuard, Roles } from '../../auth';
-import { CreateDataSetComponent } from './create/create-data-set.component';
 import { DataSetComponent } from './data-set.component';
-import { EditDataSetComponent } from './edit/edit-data-set.component';
+import { AuthGuard, Roles } from '../../auth';
 import { TestingDataSetComponent } from './testing/testing-data-set.component';
 
 @NgModule({
@@ -17,26 +15,8 @@ import { TestingDataSetComponent } from './testing/testing-data-set.component';
                 data: { roles: [Roles.FraudOfficer] },
                 children: [
                     {
-                        path: 'new',
-                        component: CreateDataSetComponent,
-                        canActivate: [AuthGuard],
-                        data: { roles: [Roles.FraudOfficer] },
-                    },
-                    {
-                        path: ':id',
-                        component: EditDataSetComponent,
-                        canActivate: [AuthGuard],
-                        data: { roles: [Roles.FraudOfficer] },
-                    },
-                    {
                         path: ':id/testing',
                         component: TestingDataSetComponent,
-                        canActivate: [AuthGuard],
-                        data: { roles: [Roles.FraudOfficer] },
-                    },
-                    {
-                        path: ':id',
-                        component: EditDataSetComponent,
                         canActivate: [AuthGuard],
                         data: { roles: [Roles.FraudOfficer] },
                     },

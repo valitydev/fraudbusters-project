@@ -30,7 +30,7 @@ export class FetchReferencesService extends PartialFetcher<GroupReference, Fetch
         private paymentGroupsReferencesService: PaymentGroupsReferencesService,
         private configService: ConfigService
     ) {
-        super();
+        super(0);
     }
 
     protected fetch(params: FetchReferencesParams, lastId?: string): Observable<GroupsReferencesResponse> {

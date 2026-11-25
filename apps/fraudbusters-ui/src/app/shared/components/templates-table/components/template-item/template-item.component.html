@@ -1,0 +1,52 @@
+<th scope="row">
+    <code>{{ template.id }}</code>
+</th>
+<td>
+    <div class="rule-preview" *ngIf="preview; else missing">
+        <code class="fb-fraudo-code"
+            ><span *ngFor="let token of preview | fraudoTokens" [class]="'fb-code-' + token.kind">{{
+                token.text
+            }}</span></code
+        >
+        <button
+            *ngIf="additionalRules"
+            class="more-rules"
+            type="button"
+            (click)="toggleDetail.emit()"
+            [attr.aria-controls]="detailsId"
+            [attr.aria-expanded]="expanded"
+        >
+            +{{ additionalRules }} more
+        </button>
+    </div>
+</td>
+<td class="fb-catalog-time">{{ (template.lastUpdateDate | date : 'yyyy-MM-dd HH:mm:ss' : 'UTC') || '—' }}</td>
+<td *ngIf="showAuthor">
+    <div class="author" *ngIf="template.modifiedByUser; else missing">
+        <span class="initial" aria-hidden="true">{{ template.modifiedByUser.charAt(0) | uppercase }}</span>
+        <span class="author-name" [title]="template.modifiedByUser">{{ template.modifiedByUser }}</span>
+    </div>
+</td>
+<td class="fb-catalog-action-cell">
+    <div class="fb-catalog-row-actions">
+        <fb-actions
+            [id]="template.id"
+            (editItem)="editItem.emit($event)"
+            (deleteItem)="deleteItem.emit($event)"
+            (copyItem)="copyItem.emit($event)"
+        ></fb-actions>
+        <button
+            *ngIf="preview"
+            class="fb-catalog-action-icon fb-catalog-action-expand"
+            mat-icon-button
+            type="button"
+            [attr.aria-label]="(expanded ? 'Hide' : 'Show') + ' rules for ' + template.id"
+            [attr.aria-controls]="detailsId"
+            [attr.aria-expanded]="expanded"
+            (click)="toggleDetail.emit()"
+        >
+            <mat-icon>{{ expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+    </div>
+</td>
+<ng-template #missing><span class="missing">—</span></ng-template>

@@ -1,86 +1,128 @@
-<div fxLayout="column" [fxLayoutGap]="layoutGapM">
-    <header class="fb-filter-toolbar">
-        <h1 class="fb-page-title">Audit</h1>
+<div class="audit-page">
+    <header class="fb-page-toolbar">
+        <div class="heading">
+            <h1 class="fb-page-title">Audit</h1>
+            <p class="fb-page-subtitle">Who created, changed or removed templates, groups and lists, and when.</p>
+        </div>
         <button mat-stroked-button type="button" (click)="refresh()">
             <mat-icon aria-hidden="true">refresh</mat-icon>
             Refresh
         </button>
     </header>
-    <form *ngIf="filter" class="fb-filter-fields">
-        <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic" class="fb-filter-date">
-            <mat-label>From</mat-label>
-            <input
-                matInput
-                name="dateFrom"
-                [ngxMatDatetimePicker]="pickerFrom"
-                (dateChange)="setDateFrom($event)"
-                [(ngModel)]="filter.from"
-            />
-            <mat-datepicker-toggle matIconSuffix [for]="pickerFrom"></mat-datepicker-toggle>
-            <ngx-mat-datetime-picker showSeconds="true" #pickerFrom></ngx-mat-datetime-picker>
-        </mat-form-field>
-        <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic" class="fb-filter-date">
-            <mat-label>To</mat-label>
-            <input
-                matInput
-                name="dateTo"
-                [ngxMatDatetimePicker]="pickerTo"
-                (dateChange)="setDateTo($event)"
-                [(ngModel)]="filter.to"
-            />
-            <mat-datepicker-toggle matIconSuffix [for]="pickerTo"></mat-datepicker-toggle>
-            <ngx-mat-datetime-picker showSeconds="true" #pickerTo></ngx-mat-datetime-picker>
-        </mat-form-field>
-        <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
-            <mat-label>Command types</mat-label>
-            <mat-select (selectionChange)="selectionCommand()" multiple [(value)]="filter.commandTypes">
-                <mat-option *ngFor="let name of commandsTypes$ | async" value="{{ name }}">{{ name }}</mat-option>
-            </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
-            <mat-label>Object types</mat-label>
-            <mat-select (selectionChange)="selectionObject()" multiple [(value)]="filter.objectTypes">
-                <mat-option *ngFor="let name of objectsTypes$ | async" value="{{ name }}">{{ name }}</mat-option>
-            </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
-            <mat-label>User</mat-label>
-            <input matInput (keyup)="search($event)" [value]="filter.user" />
-        </mat-form-field>
-    </form>
-    <mat-card class="audit-table">
-        <div class="table-scroll">
-            <table mat-table [dataSource]="logs$ | async" class="fb-table" matSort (matSortChange)="sortData($event)">
-                <ng-container matColumnDef="insertTime">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Timestamp</th>
-                    <td mat-cell *matCellDef="let element">
-                        {{ element.insertTime | date : 'yyyy-MM-dd HH:mm:ss' }}
-                    </td>
-                </ng-container>
-                <ng-container matColumnDef="initiator">
-                    <th mat-header-cell *matHeaderCellDef>Initiator</th>
-                    <td mat-cell *matCellDef="let element">{{ element.initiator }}</td>
-                </ng-container>
-                <ng-container matColumnDef="objectType">
-                    <th mat-header-cell *matHeaderCellDef>Object type</th>
-                    <td mat-cell *matCellDef="let element">{{ element.objectType }}</td>
-                </ng-container>
-                <ng-container matColumnDef="commandType">
-                    <th mat-header-cell *matHeaderCellDef>Command type</th>
-                    <td mat-cell *matCellDef="let element">
-                        <span class="command">{{ element.commandType }}</span>
-                    </td>
-                </ng-container>
-                <ng-container matColumnDef="text">
-                    <th mat-header-cell *matHeaderCellDef>Object</th>
-                    <td mat-cell *matCellDef="let element">{{ element.object }}</td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+    <section *ngIf="filter" class="filter-card" aria-label="Filters">
+        <fb-datetime-range [from]="filter.from" [to]="filter.to" (rangeChange)="setRange($event)"></fb-datetime-range>
+        <div class="field-grid">
+            <div class="field">
+                <span class="field-label" id="audit-commands-label">Command types</span>
+                <mat-select
+                    class="select-box"
+                    aria-labelledby="audit-commands-label"
+                    multiple
+                    placeholder="All commands"
+                    [(value)]="filter.commandTypes"
+                    (selectionChange)="selectionCommand()"
+                >
+                    <mat-select-trigger>{{
+                        selectionLabel(filter.commandTypes, commandsTypes$ | async, 'All commands')
+                    }}</mat-select-trigger>
+                    <mat-option *ngFor="let name of commandsTypes$ | async" [value]="name">{{
+                        name | lowercase
+                    }}</mat-option>
+                </mat-select>
+            </div>
+            <div class="field">
+                <span class="field-label" id="audit-objects-label">Object types</span>
+                <mat-select
+                    class="select-box"
+                    aria-labelledby="audit-objects-label"
+                    multiple
+                    placeholder="All objects"
+                    [(value)]="filter.objectTypes"
+                    (selectionChange)="selectionObject()"
+                >
+                    <mat-select-trigger>{{
+                        selectionLabel(filter.objectTypes, objectsTypes$ | async, 'All objects')
+                    }}</mat-select-trigger>
+                    <mat-option *ngFor="let name of objectsTypes$ | async" [value]="name">{{
+                        name | lowercase
+                    }}</mat-option>
+                </mat-select>
+            </div>
+            <div class="field">
+                <label class="field-label" for="audit-user">User</label>
+                <input
+                    id="audit-user"
+                    autocomplete="off"
+                    placeholder="Initiator, e.g. analyst.demo"
+                    [value]="filter.user"
+                    (keyup)="search($event)"
+                />
+            </div>
+        </div>
+    </section>
+
+    <section *ngIf="view$ | async as view" class="fb-catalog-panel" aria-label="Audit log" [attr.aria-busy]="view.busy">
+        <div class="table-toolbar">
+            <div class="table-meta" aria-live="polite">
+                <strong>Changes</strong>
+                <span *ngIf="view.logs.length">· Showing {{ view.logs.length }} of {{ total }}</span>
+            </div>
+            <div class="table-controls">
+                <label class="sort-control">
+                    Sort by
+                    <span class="catalog-select">
+                        <mat-select [value]="view.sort" (valueChange)="setSort($event)" aria-label="Sort by">
+                            <mat-option [value]="sortOrder.Desc">Time (newest)</mat-option>
+                            <mat-option [value]="sortOrder.Asc">Time (oldest)</mat-option>
+                        </mat-select>
+                    </span>
+                </label>
+            </div>
+        </div>
+        <div *ngIf="view.logs.length" class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Audit table">
+            <table class="fb-catalog-table" aria-label="Audit log">
+                <thead>
+                    <tr>
+                        <th scope="col">Time</th>
+                        <th scope="col">Initiator</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Command</th>
+                        <th scope="col">Object</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let log of view.logs">
+                        <td class="fb-catalog-time">{{ log.insertTime | date : 'yyyy-MM-dd HH:mm:ss' }}</td>
+                        <th scope="row" class="initiator">{{ log.initiator || '—' }}</th>
+                        <td>
+                            <span *ngIf="log.objectType; else missing" class="fb-pill fb-pill-status">{{
+                                log.objectType | lowercase
+                            }}</span>
+                        </td>
+                        <td>
+                            <span
+                                *ngIf="log.commandType; else missing"
+                                class="fb-pill fb-pill-status"
+                                [ngClass]="pill(log.commandType)"
+                                >{{ log.commandType | lowercase }}</span
+                            >
+                        </td>
+                        <td class="object">
+                            <span *ngIf="log.object; else missing" class="fb-catalog-mono">{{ log.object }}</span>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
-        <footer *ngIf="isLoadMore$ | async">
-            <button mat-stroked-button type="button" (click)="loadMore()">Show more</button>
+        <footer *ngIf="view.logs.length && view.hasMore" class="table-footer">
+            <button class="load-more" mat-button type="button" [disabled]="view.busy" (click)="loadMore()">
+                Show more
+            </button>
         </footer>
-    </mat-card>
+        <mat-progress-bar *ngIf="view.busy" mode="indeterminate" aria-label="Loading audit log"></mat-progress-bar>
+        <p *ngIf="!view.busy && !view.logs.length" class="table-state">No changes in this period</p>
+    </section>
 </div>
+
+<ng-template #missing><span class="missing">—</span></ng-template>

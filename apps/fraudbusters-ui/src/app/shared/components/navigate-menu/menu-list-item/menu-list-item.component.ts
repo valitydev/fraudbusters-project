@@ -31,25 +31,26 @@ export class MenuListItemComponent implements OnInit {
     constructor(public router: Router, protected readonly keycloak: KeycloakService, private cdr: ChangeDetectorRef) {}
 
     ngOnInit() {
-        if (!this.hasChildren()) {
-            return;
-        }
-        this.expanded = this.containsCurrentPage(this.item);
+        this.expanded = this.hasChildren() && this.containsCurrentPage(this.item);
         this.router.events
             .pipe(
                 filter((event) => event instanceof NavigationEnd),
                 takeUntilDestroyed(this.destroyRef)
             )
             .subscribe(() => {
-                if (this.containsCurrentPage(this.item)) {
+                if (this.hasChildren() && this.containsCurrentPage(this.item)) {
                     this.expanded = true;
-                    this.cdr.markForCheck();
                 }
+                this.cdr.markForCheck();
             });
     }
 
     hasChildren(): boolean {
         return !!this.item.children?.length;
+    }
+
+    get active(): boolean {
+        return this.containsCurrentPage(this.item);
     }
 
     display(): boolean {
@@ -68,10 +69,11 @@ export class MenuListItemComponent implements OnInit {
     }
 
     private containsCurrentPage(item: NavItem): boolean {
-        if (item.children?.length) {
-            return this.isUnder(item.route) || item.children.some((child) => this.containsCurrentPage(child));
-        }
-        return this.isUnder(item.route);
+        return (
+            this.isUnder(item.route) ||
+            (item.activeRoutes?.some((route) => this.isUnder(route)) ?? false) ||
+            (item.children?.some((child) => this.isAllowed(child) && this.containsCurrentPage(child)) ?? false)
+        );
     }
 
     private isUnder(route?: string): boolean {

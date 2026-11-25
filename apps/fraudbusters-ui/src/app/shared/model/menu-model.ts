@@ -5,7 +5,7 @@ export class MenuModel {
     public static navItems: NavItem[] = [
         {
             displayName: 'Payments',
-            iconName: 'payments',
+            iconName: 'credit_card',
             children: [
                 {
                     displayName: 'Analytics',
@@ -15,32 +15,37 @@ export class MenuModel {
                 },
                 {
                     displayName: 'Templates',
-                    iconName: 'business',
+                    iconName: 'description',
                     route: 'templates',
+                    activeRoutes: ['template', 'reference', 'default-references'],
                     roles: [Roles.FraudOfficer],
                 },
                 {
                     displayName: 'Groups',
-                    iconName: 'group_work',
+                    iconName: 'group',
                     route: 'groups',
+                    activeRoutes: ['group', 'create-group-reference'],
                     roles: [Roles.FraudOfficer],
                 },
                 {
                     displayName: 'Lists',
-                    iconName: 'list_alt',
+                    iconName: 'format_list_bulleted',
                     route: 'lists',
+                    activeRoutes: ['list', 'candidates'],
                     roles: [Roles.FraudOfficer, Roles.FraudMonitoring],
                 },
                 {
                     displayName: 'Testing',
                     iconName: 'bug_report',
                     route: 'testing/data-sets',
+                    activeRoutes: ['testing', 'emulation', 'data-sets'],
                     roles: [Roles.FraudOfficer],
                 },
                 {
                     displayName: 'Historical data',
-                    iconName: 'history',
+                    iconName: 'schedule',
                     route: 'historical-data/payments',
+                    activeRoutes: ['load'],
                     roles: [Roles.FraudOfficer, Roles.FraudMonitoring],
                 },
             ],
@@ -52,25 +57,28 @@ export class MenuModel {
             children: [
                 {
                     displayName: 'Templates',
-                    iconName: 'business',
+                    iconName: 'description',
                     route: 'payouts/templates',
+                    activeRoutes: ['payouts/template', 'payouts/reference'],
                     roles: [Roles.FraudOfficer],
                 },
                 {
                     displayName: 'Groups',
-                    iconName: 'group_work',
+                    iconName: 'group',
                     route: 'payouts/groups',
+                    activeRoutes: ['payouts/group', 'payouts/group-reference'],
                     roles: [Roles.FraudOfficer],
                 },
                 {
                     displayName: 'Lists',
-                    iconName: 'list_alt',
+                    iconName: 'format_list_bulleted',
                     route: 'payouts/lists',
+                    activeRoutes: ['payouts/list'],
                     roles: [Roles.FraudOfficer, Roles.FraudMonitoring],
                 },
                 {
                     displayName: 'Historical data',
-                    iconName: 'history',
+                    iconName: 'schedule',
                     route: 'historical-data/payouts',
                     roles: [Roles.FraudOfficer, Roles.FraudMonitoring],
                 },
@@ -78,13 +86,14 @@ export class MenuModel {
         },
         {
             displayName: 'Notifications',
-            iconName: 'notifications',
+            iconName: 'notifications_none',
             route: 'notifications',
+            activeRoutes: ['notification', 'channel'],
             roles: [Roles.FraudOfficer],
         },
         {
             displayName: 'Audit',
-            iconName: 'wysiwyg',
+            iconName: 'article',
             route: 'audit',
             roles: [Roles.FraudOfficer, Roles.FraudMonitoring],
         },

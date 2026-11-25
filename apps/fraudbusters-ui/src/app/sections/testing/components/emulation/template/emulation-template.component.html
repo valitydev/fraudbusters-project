@@ -1,36 +1,52 @@
-<div fxLayout="column" [fxLayoutGap]="layoutGapM">
-    <div class="fb-filter-toolbar">
-        <div class="fb-filter-fields">
+<section *ngIf="view$ | async as view" class="fb-catalog-panel" aria-label="Emulation" [attr.aria-busy]="view.busy">
+    <form class="table-toolbar" (ngSubmit)="emulate()">
+        <div class="table-filters fb-filter-fields">
             <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
                 <mat-label>Party ID</mat-label>
-                <input matInput [(ngModel)]="filter.partyId" name="partyId" />
+                <input matInput [(ngModel)]="filter.partyId" name="partyId" autocomplete="off" />
             </mat-form-field>
             <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
                 <mat-label>Shop ID</mat-label>
-                <input matInput [(ngModel)]="filter.shopId" name="shopId" />
+                <input matInput [(ngModel)]="filter.shopId" name="shopId" autocomplete="off" />
             </mat-form-field>
         </div>
-        <button mat-button color="primary" (click)="emulate()">Emulate</button>
+        <button mat-stroked-button type="submit" class="fb-primary-action" [disabled]="view.busy">Emulate</button>
+    </form>
+    <mat-progress-bar *ngIf="view.busy" mode="indeterminate" aria-label="Running emulation"></mat-progress-bar>
+    <div
+        *ngIf="view.templates?.length"
+        class="fb-catalog-scroll"
+        tabindex="0"
+        role="region"
+        aria-label="Emulation results"
+    >
+        <table class="fb-catalog-table" aria-label="Matched templates">
+            <colgroup>
+                <col class="template-id-column" />
+                <col />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th scope="col">Template ID</th>
+                    <th scope="col">Rules</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let template of view.templates">
+                    <th scope="row" class="fb-catalog-row-label">
+                        <code>{{ template.id }}</code>
+                    </th>
+                    <td class="fb-template-rules-code">
+                        <code *ngFor="let rule of template.template | templateToRules"
+                            ><span *ngFor="let token of rule | fraudoTokens" [class]="'fb-code-' + token.kind">{{
+                                token.text
+                            }}</span></code
+                        >
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
-    <mat-card>
-        <mat-card-content>
-            <div fxLayout>
-                <div fxFlex="100">
-                    <table mat-table [dataSource]="templates$ | async" class="fb-table">
-                        <ng-container matColumnDef="id">
-                            <td mat-cell *matCellDef="let element" fxFlex="0 0 200px">{{ element.id }}</td>
-                        </ng-container>
-                        <ng-container matColumnDef="template">
-                            <td mat-cell *matCellDef="let element" fxLayout="column" fxLayoutGap="8px">
-                                <div *ngFor="let rule of element.template | templateToRules">
-                                    <code>{{ rule }}</code>
-                                </div>
-                            </td>
-                        </ng-container>
-                        <tr mat-row *matRowDef="let row; columns: ['id', 'template']"></tr>
-                    </table>
-                </div>
-            </div>
-        </mat-card-content>
-    </mat-card>
-</div>
+    <p *ngIf="view.failed" class="table-state" role="alert">Could not run emulation.</p>
+    <p *ngIf="view.templates?.length === 0" class="table-state">No matching templates found.</p>
+</section>

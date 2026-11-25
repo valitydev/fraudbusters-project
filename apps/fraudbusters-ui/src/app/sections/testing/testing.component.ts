@@ -1,8 +1,7 @@
-import { Component, Inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { hasActiveFragments } from '../../shared/utils/has-active-fragments';
-import { LAYOUT_GAP_S } from '../../tokens';
 
 @Component({
     templateUrl: 'testing.component.html',
@@ -21,7 +20,7 @@ export class TestingComponent {
         },
     ];
 
-    constructor(private router: Router, @Inject(LAYOUT_GAP_S) public layoutGapS: string) {}
+    constructor(private router: Router) {}
 
     hasActiveFragments(fragments: string[]): boolean {
         const ulrFragments = this.router.url.split('/');

@@ -42,6 +42,7 @@ export interface SearchWithdrawalsParams {
     email?: string;
     terminal?: string;
     providerCountry?: string;
+    maskedPan?: string;
 }
 
 export interface SearchWithdrawalInspectResultsParams {
@@ -61,6 +62,7 @@ export interface SearchWithdrawalInspectResultsParams {
     email?: string;
     template?: string;
     rule?: string;
+    maskedPan?: string;
 }
 
 /** Payout configuration in fraudbusters-management; payout templates, groups and lists are kept apart from payments. */

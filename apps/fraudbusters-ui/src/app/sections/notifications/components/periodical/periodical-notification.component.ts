@@ -1,49 +1,68 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
+import { combineLatest } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import { Notification } from '../../../../api/fb-management/swagger-codegen/model/notification';
-import { LAYOUT_GAP_M } from '../../../../tokens';
+import { statusPillClass } from '../../../../shared/utils/status-tone';
 import { ArchiveNotificationService } from '../../services/archive-notification.service';
 import { FetchNotificationsService } from '../../services/fetch-notifications.service';
 
+/** Periodic notifications: a searchable catalog table with settings and archive actions. */
 @Component({
     templateUrl: 'periodical-notification.component.html',
+    styleUrls: ['../notifications-table.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [FetchNotificationsService, ArchiveNotificationService],
 })
 export class PeriodicalNotificationComponent {
-    notifications$ = this.fetchNotificationsService.searchResult$;
-    inProgress$ = this.fetchNotificationsService.inProgress$;
-    hasMore$ = this.fetchNotificationsService.hasMore$;
+    readonly view$ = combineLatest({
+        rows: this.fetchNotificationsService.searchResult$,
+        busy: this.fetchNotificationsService.inProgress$,
+        hasMore: this.fetchNotificationsService.hasMore$,
+    });
+
+    private searchValue = '';
 
     constructor(
         private router: Router,
+        route: ActivatedRoute,
         private fetchNotificationsService: FetchNotificationsService,
         private archiveNotificationService: ArchiveNotificationService,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
+        destroyRef: DestroyRef
     ) {
-        this.archiveNotificationService.archive$.subscribe(() => {
-            this.fetchNotificationsService.search({});
+        route.queryParamMap
+            .pipe(
+                map((params) => (params.get('searchQuery') ?? '').trim()),
+                distinctUntilChanged(),
+                takeUntilDestroyed(destroyRef)
+            )
+            .subscribe((query) => {
+                this.searchValue = query;
+                this.fetchNotificationsService.search({ searchValue: query });
+            });
+        this.archiveNotificationService.archive$
+            .pipe(takeUntilDestroyed(destroyRef))
+            .subscribe(() => this.fetchNotificationsService.search({ searchValue: this.searchValue }));
+    }
+
+    pill(status?: string): string {
+        return statusPillClass(status);
+    }
+
+    edit(id: number): void {
+        void this.router.navigate(['/notification', id]);
+    }
+
+    archive(notification: Notification): void {
+        this.archiveNotificationService.archiveNotification({ ...notification });
+    }
+
+    fetchMore(rows: Notification[]): void {
+        this.fetchNotificationsService.fetchMore({
+            searchValue: this.searchValue,
+            lastId: String(rows[rows.length - 1].id),
         });
-    }
-
-    addNotification() {
-        this.router.navigate([`/notification/new`]);
-    }
-
-    search(searchValue: string) {
-        return this.fetchNotificationsService.search({ searchValue });
-    }
-
-    editNotification(id: number) {
-        this.router.navigate([`/notification/${id}`]);
-    }
-
-    sendToArchiveNotification(notification: Notification) {
-        this.archiveNotificationService.archiveNotification(notification);
-    }
-
-    fetchMore(id: number) {
-        return this.fetchNotificationsService.fetchMore({ lastId: String(id) });
     }
 }

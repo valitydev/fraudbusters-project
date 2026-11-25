@@ -18,7 +18,10 @@ import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static dev.vality.fraudbusters.management.domain.tables.FGroup.F_GROUP;
@@ -37,14 +40,22 @@ public class PaymentGroupDao extends AbstractDao implements GroupDao {
     @Transactional
     public void insert(GroupModel groupModel) {
         cleanRemovedTemplates(groupModel);
-        List<Query> inserts = groupModel.getPriorityTemplates().stream()
+        LocalDateTime updatedAt = LocalDateTime.now(ZoneOffset.UTC);
+        var templatesById = groupModel.getPriorityTemplates().stream()
+                .collect(Collectors.toMap(PriorityIdModel::getId, Function.identity(), (first, ignored) -> first,
+                        LinkedHashMap::new));
+        List<Query> inserts = templatesById.values().stream()
                 .map(pair -> getDslContext()
                         .insertInto(F_GROUP)
                         .columns(F_GROUP.GROUP_ID, F_GROUP.PRIORITY, F_GROUP.TEMPLATE_ID, F_GROUP.MODIFIED_BY_USER)
                         .values(groupModel.getGroupId(), pair.getPriority(), pair.getId(),
                                 groupModel.getModifiedByUser())
                         .onConflict(F_GROUP.GROUP_ID, F_GROUP.TEMPLATE_ID)
-                        .doNothing()
+                        .doUpdate()
+                        .set(F_GROUP.PRIORITY, pair.getPriority())
+                        .set(F_GROUP.MODIFIED_BY_USER, groupModel.getModifiedByUser())
+                        .set(F_GROUP.LAST_UPDATE_DATE, updatedAt)
+                        .where(F_GROUP.PRIORITY.ne(pair.getPriority()))
                 ).collect(Collectors.toList());
         batchExecute(inserts);
     }

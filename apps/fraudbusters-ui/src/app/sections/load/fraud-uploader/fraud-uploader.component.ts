@@ -1,128 +1,172 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { Papa } from 'ngx-papaparse';
+import { filter } from 'rxjs/operators';
 
-import { UploadStatus } from './constants/upload-status';
-import { UploadFile, ExtendedFile } from './model/upload-file';
+import { FRAUD_REPORT_COLUMNS, fraudReportRow, FraudReportRow, missingColumns } from './fraud-report';
 import { PaymentLoadDataService } from '../../../api/payments/load-data';
-import { ErrorHandlerService } from '../../../shared/services/utils/error-handler.service';
-import { LAYOUT_GAP_L, LAYOUT_GAP_M } from '../../../tokens';
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const PREVIEW_ROWS = 50;
+
+/** Uploads a CSV of confirmed fraud payments after checking every row the way the backend will. */
 @Component({
     templateUrl: './fraud-uploader.component.html',
     styleUrls: ['./fraud-uploader.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FraudUploaderComponent {
-    files: ExtendedFile[] = [];
-    uploadFiles = new Map<string, UploadFile>();
+    readonly columns = FRAUD_REPORT_COLUMNS.join(', ');
+    readonly previewLimit = PREVIEW_ROWS;
+    readonly sampleUrl =
+        'data:text/csv;charset=utf-8,' +
+        encodeURIComponent(
+            `${FRAUD_REPORT_COLUMNS.join(',')}\n` +
+                '100200.1,card_testing,Confirmed by the bank,2026-01-15 10:30:00\n' +
+                '100201.1,account_takeover,,2026-01-15\n'
+        );
+
+    file: File | null = null;
+    rows: FraudReportRow[] = [];
+    fileIssue = '';
+    dragging = false;
+    uploading = false;
+    error = '';
 
     constructor(
         private router: Router,
-        private fraudUploadService: PaymentLoadDataService,
-        private errorHandlerService: ErrorHandlerService,
+        private loadData: PaymentLoadDataService,
+        private papa: Papa,
         private snackBar: MatSnackBar,
-        @Inject(LAYOUT_GAP_L) public layoutGapL: string,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
+        private cdr: ChangeDetectorRef,
+        private destroyRef: DestroyRef
     ) {}
 
-    uploadFileToActivity(): void {
-        if (this.files.length === 0) {
-            this.errorHandlerService.handleStringError('File for upload is not find!', this.snackBar);
+    get invalidRows(): FraudReportRow[] {
+        return this.rows.filter((row) => row.issue);
+    }
+
+    get canUpload(): boolean {
+        return Boolean(this.file && this.rows.length && !this.fileIssue && !this.invalidRows.length && !this.uploading);
+    }
+
+    get footerNote(): string {
+        if (!this.file) {
+            return 'Choose a CSV file to check it before uploading.';
         }
-        this.files
-            .filter((file) => !this.uploadFiles.has(file.name))
-            .forEach((item) => {
-                this.startProgress(this.files.indexOf(item), this.calcProgressCoef(item.size));
-                this.fraudUploadService.postFile(item).subscribe(
-                    () => {
-                        this.finishProgress(this.files.indexOf(item), UploadStatus.Success);
-                        this.uploadFiles.set(item.name, { file: item, status: UploadStatus.Success });
-                    },
-                    (error: HttpErrorResponse) => {
-                        this.finishProgress(this.files.indexOf(item), UploadStatus.Error);
-                        this.uploadFiles.set(item.name, {
-                            file: item,
-                            status: UploadStatus.Error,
-                            errorMessage: error.message,
-                        });
-                    }
-                );
+        if (this.fileIssue) {
+            return this.fileIssue;
+        }
+        if (this.invalidRows.length) {
+            const count = this.invalidRows.length;
+            return `Fix ${count} ${
+                count === 1 ? 'row' : 'rows'
+            } and choose the file again: the backend rejects the whole file.`;
+        }
+        return `${this.rows.length} ${this.rows.length === 1 ? 'payment' : 'payments'} will be marked as fraud.`;
+    }
+
+    choose(input: HTMLInputElement): void {
+        const file = input.files?.[0];
+        input.value = '';
+        if (file) {
+            void this.read(file);
+        }
+    }
+
+    drop(event: DragEvent): void {
+        event.preventDefault();
+        this.dragging = false;
+        const file = event.dataTransfer?.files?.[0];
+        if (file) {
+            void this.read(file);
+        }
+    }
+
+    dragOver(event: DragEvent): void {
+        event.preventDefault();
+        this.dragging = true;
+    }
+
+    removeFile(): void {
+        this.file = null;
+        this.rows = [];
+        this.fileIssue = '';
+        this.error = '';
+    }
+
+    back(): void {
+        if (!this.uploading) {
+            void this.router.navigate(['/historical-data/payments/fraud-payments']);
+        }
+    }
+
+    upload(): void {
+        if (!this.canUpload) {
+            return;
+        }
+        this.uploading = true;
+        this.error = '';
+        const count = this.rows.length;
+        this.loadData
+            .postFile(this.file)
+            .pipe(
+                filter((event) => event.type === HttpEventType.Response),
+                takeUntilDestroyed(this.destroyRef)
+            )
+            .subscribe({
+                next: () => {
+                    this.uploading = false;
+                    this.snackBar.open(`${count} fraud ${count === 1 ? 'payment' : 'payments'} loaded`, 'OK', {
+                        duration: 3000,
+                    });
+                    this.back();
+                },
+                error: (error: HttpErrorResponse) => {
+                    this.uploading = false;
+                    this.error =
+                        error.status === 400 || error.status === 422
+                            ? 'The server rejected the file. Check the columns and dates.'
+                            : 'Could not upload the file. Try again.';
+                    this.cdr.markForCheck();
+                },
             });
     }
 
-    onFileDropped($event): void {
-        this.prepareFilesList($event);
-    }
-
-    fileBrowseHandler(files): void {
-        this.prepareFilesList(files);
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    prepareFilesList(files: Array<any>): void {
-        for (const item of files) {
-            if (item.type !== 'text/csv') {
-                this.errorHandlerService.handleStringError('File only csv format!', this.snackBar);
-            } else {
-                const extendedFile = item as ExtendedFile;
-                extendedFile.progress = 0;
-                this.files.push(extendedFile);
+    private async read(file: File): Promise<void> {
+        this.file = file;
+        this.rows = [];
+        this.error = '';
+        this.fileIssue = '';
+        if (!/\.csv$/i.test(file.name) || file.size > MAX_FILE_SIZE) {
+            this.fileIssue = `${file.name}: choose a CSV file up to 10 MB.`;
+        } else {
+            try {
+                this.parse(await file.text());
+            } catch {
+                this.fileIssue = `${file.name}: could not read the file.`;
             }
         }
+        this.cdr.markForCheck();
     }
 
-    startProgress(index: number, loadCoef: number): void {
-        setTimeout(() => {
-            const progressInterval = setInterval(() => {
-                if (this.files[index].progress >= 100) {
-                    clearInterval(progressInterval);
-                } else {
-                    this.files[index].progress += 5 * loadCoef;
-                }
-            }, 300);
-        }, 300);
-    }
-
-    finishProgress(index: number, status: UploadStatus): void {
-        this.files[index].progress = 100;
-        this.files[index].status = status;
-    }
-
-    deleteFile(index: number): void {
-        this.uploadFiles.delete(this.files[index].name);
-        this.files.splice(index, 1);
-    }
-
-    formatBytes(bytes: number, decimals?: number): string {
-        if (bytes === 0) {
-            return '0 Bytes';
+    private parse(text: string): void {
+        const parsed = this.papa.parse(text.trim(), {
+            header: true,
+            skipEmptyLines: 'greedy',
+            transformHeader: (name: string) => name.trim().toLowerCase(),
+        });
+        const missing = missingColumns(parsed.meta?.fields ?? []);
+        if (missing.length) {
+            this.fileIssue = `The file has no ${missing.join(', ')} column${missing.length === 1 ? '' : 's'}.`;
+            return;
         }
-        const k = 1024;
-        const dm = decimals <= 0 ? 0 : decimals || 2;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-    }
-
-    calcProgressCoef(bytes): number {
-        if (bytes === 0) {
-            return 20;
+        this.rows = (parsed.data as Record<string, string>[]).map((record, index) => fraudReportRow(record, index + 2));
+        if (!this.rows.length) {
+            this.fileIssue = 'The file has no rows.';
         }
-        const k = 1024;
-        return k / bytes;
-    }
-
-    isLoadError(name: string): boolean {
-        return !!this.uploadFiles.get(name) && this.uploadFiles.get(name).status === UploadStatus.Error;
-    }
-
-    isLoadSuccess(name: string): boolean {
-        return !!this.uploadFiles.get(name) && this.uploadFiles.get(name).status === UploadStatus.Success;
-    }
-
-    back() {
-        this.router.navigate([`/historical-data/payments/fraud-payments`]);
     }
 }

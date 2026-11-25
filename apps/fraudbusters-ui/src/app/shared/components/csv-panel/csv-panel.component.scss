@@ -1,0 +1,85 @@
+.csv-panel {
+    margin-top: 20px;
+    padding: 16px;
+    border: 1px solid var(--fb-line, #dde1eb);
+    border-radius: 10px;
+    background: var(--fb-raised, #f5f6fa);
+}
+
+.csv-header,
+.file-actions,
+.csv-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+p {
+    margin: 6px 0 0;
+    color: var(--fb-muted, #625f74);
+}
+
+.csv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 16px;
+    margin-block: 0 12px;
+}
+
+.file-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    margin-block: 12px;
+}
+
+.csv-column {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.column-title {
+    display: block;
+    margin: 0 0 5px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 20px;
+}
+
+textarea,
+.preview {
+    box-sizing: border-box;
+    width: 100%;
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--fb-line, #dde1eb);
+    border-radius: var(--fb-radius-control);
+    background: var(--fb-surface, #fff);
+    color: inherit;
+}
+
+textarea {
+    resize: vertical;
+    font: var(--fb-input-font-size) / var(--fb-input-line-height) var(--fb-font-mono);
+}
+
+.preview {
+    max-height: 170px;
+    overflow: auto;
+    overflow-wrap: anywhere;
+
+    > :first-child {
+        margin-top: 0;
+    }
+
+    ul {
+        margin-block: 4px;
+        padding-inline-start: 18px;
+    }
+}
+
+.csv-actions {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}

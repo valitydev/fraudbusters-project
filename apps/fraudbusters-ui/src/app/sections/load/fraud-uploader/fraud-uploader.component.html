@@ -1,56 +1,128 @@
-<div fxLayout="column" [fxLayoutGap]="layoutGapL">
-    <div fxLayout fxLayoutAlign="start center" [fxLayoutGap]="layoutGapM">
-        <mat-icon (click)="back()">keyboard_backspace</mat-icon>
-        <h3 class="fb-headline">Load fraud</h3>
-    </div>
-    <mat-card>
-        <mat-card-content>
-            <div class="container" appDnd (fileDropped)="onFileDropped($event)">
-                <input
-                    type="file"
-                    #fileDropRef
-                    id="fileDropRef"
-                    multiple
-                    (change)="fileBrowseHandler($event.target.files)"
-                />
-                <span class="material-icons md-48"> cloud_upload </span>
-                <h3>Drag and drop file here</h3>
-                <h3>or</h3>
-                <label for="fileDropRef">Browse for file</label>
-            </div>
-            <div class="files-list">
-                <div class="single-file" *ngFor="let file of files; let i = index">
-                    <div class="file-icon">
-                        <span class="material-icons md-36"> text_snippet </span>
-                    </div>
-                    <div class="info">
-                        <div fxLayout>
-                            <h4 class="name">
-                                {{ file?.name }}
-                            </h4>
-                            <mat-icon
-                                matTooltip="{{ uploadFiles.get(file?.name).errorMessage }}"
-                                *ngIf="isLoadError(file?.name)"
-                                class="md-18 error"
-                                >info</mat-icon
-                            >
-                            <mat-icon *ngIf="isLoadSuccess(file?.name)" class="md-18 success">done_outline</mat-icon>
-                        </div>
-                        <p class="size">
-                            {{ formatBytes(file?.size) }}
-                        </p>
-                        <fb-progress [progress]="file?.progress" [status]="file?.status"></fb-progress>
-                    </div>
-                    <div class="delete" (click)="deleteFile(i)">
-                        <span class="material-icons"> delete_forever </span>
-                    </div>
+<div class="load-page">
+    <header class="page-header">
+        <button
+            mat-stroked-button
+            type="button"
+            class="fb-template-back"
+            aria-label="Back to fraud payments"
+            (click)="back()"
+        >
+            <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="heading">
+            <h1 class="fb-page-title">Load fraud</h1>
+            <p class="fb-page-subtitle">
+                Upload a CSV file with confirmed fraud payments. They appear in Historical data → Fraud payments.
+            </p>
+        </div>
+    </header>
+
+    <section class="upload-card" [attr.aria-busy]="uploading">
+        <div class="card-body">
+            <div class="card-header">
+                <div>
+                    <h2 class="fb-section-title">Fraud report file</h2>
+                    <p>
+                        CSV with the columns <code>{{ columns }}</code
+                        >. Event time is optional: <code>yyyy-MM-dd</code> or <code>yyyy-MM-dd HH:mm:ss</code>.
+                    </p>
                 </div>
+                <a mat-button [href]="sampleUrl" download="fraud-payments-sample.csv">Download sample CSV</a>
             </div>
-        </mat-card-content>
-        <mat-card-footer>
-            <div fxLayout fxLayoutAlign="end center" [fxLayoutGap]="layoutGapM">
-                <button mat-button color="primary" (click)="uploadFileToActivity()">Upload</button>
+
+            <input #fileInput hidden type="file" accept=".csv,text/csv" (change)="choose(fileInput)" />
+            <div
+                *ngIf="!file; else chosen"
+                class="dropzone"
+                [class.dragging]="dragging"
+                (dragover)="dragOver($event)"
+                (dragleave)="dragging = false"
+                (drop)="drop($event)"
+            >
+                <span class="drop-icon"><mat-icon>upload_file</mat-icon></span>
+                <strong>Drag and drop a file here</strong>
+                <span>or</span>
+                <button mat-stroked-button type="button" (click)="fileInput.click()">Browse for file</button>
             </div>
-        </mat-card-footer>
-    </mat-card>
+
+            <ng-template #chosen>
+                <div class="file-chip">
+                    <span class="file-icon"><mat-icon>description</mat-icon></span>
+                    <div class="file-info">
+                        <strong>{{ file.name }}</strong>
+                        <span *ngIf="!fileIssue"
+                            >{{ rows.length }} {{ rows.length === 1 ? 'row' : 'rows' }} parsed ·
+                            {{ rows.length - invalidRows.length }} valid</span
+                        >
+                        <span *ngIf="fileIssue" class="issue">{{ fileIssue }}</span>
+                    </div>
+                    <button mat-button type="button" [disabled]="uploading" (click)="removeFile()">Remove file</button>
+                </div>
+
+                <div *ngIf="rows.length" class="preview">
+                    <div class="preview-header">
+                        <span>Parsed records</span>
+                        <span
+                            class="fb-pill fb-pill-status"
+                            [class.fb-pill-success]="!invalidRows.length"
+                            [class.fb-pill-warning]="invalidRows.length"
+                            >{{
+                                invalidRows.length
+                                    ? invalidRows.length + ' to fix'
+                                    : rows.length + ' valid ' + (rows.length === 1 ? 'record' : 'records')
+                            }}</span
+                        >
+                    </div>
+                    <div class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Parsed records">
+                        <table class="fb-catalog-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="line-column">Line</th>
+                                    <th scope="col">Payment ID</th>
+                                    <th scope="col">Fraud type</th>
+                                    <th scope="col">Comment</th>
+                                    <th scope="col">Event time</th>
+                                    <th scope="col">Check</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let row of rows.slice(0, previewLimit)" [class.invalid]="row.issue">
+                                    <td class="muted">{{ row.line }}</td>
+                                    <td class="fb-catalog-mono">{{ row.id || '—' }}</td>
+                                    <td class="fb-catalog-mono">{{ row.fraudType || '—' }}</td>
+                                    <td>{{ row.comment || '—' }}</td>
+                                    <td class="fb-catalog-time">{{ row.eventTime || 'Now' }}</td>
+                                    <td>
+                                        <span *ngIf="!row.issue" class="fb-pill fb-pill-status fb-pill-success"
+                                            >valid</span
+                                        >
+                                        <span *ngIf="row.issue" class="fb-pill fb-pill-status fb-pill-warning">{{
+                                            row.issue
+                                        }}</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p *ngIf="rows.length > previewLimit" class="more">
+                        Showing the first {{ previewLimit }} of {{ rows.length }} rows; every row is checked.
+                    </p>
+                </div>
+            </ng-template>
+        </div>
+
+        <mat-progress-bar *ngIf="uploading" mode="indeterminate" aria-label="Uploading"></mat-progress-bar>
+        <footer class="card-footer">
+            <p *ngIf="error; else note" class="error" role="alert">{{ error }}</p>
+            <ng-template #note
+                ><p aria-live="polite">{{ footerNote }}</p></ng-template
+            >
+            <div class="footer-actions">
+                <button mat-stroked-button type="button" [disabled]="uploading" (click)="back()">Cancel</button>
+                <button mat-flat-button color="primary" type="button" [disabled]="!canUpload" (click)="upload()">
+                    Upload ({{ invalidRows.length || fileIssue ? 0 : rows.length }})
+                </button>
+            </div>
+        </footer>
+    </section>
 </div>

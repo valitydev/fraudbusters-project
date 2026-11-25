@@ -2,26 +2,18 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { AuthGuard, Roles } from '../../auth';
-import { CandidatesBatchesComponent } from './components/approve-lists-raws/candidates-batches.component';
-import { ListsCandidatesBatchesComponent } from './lists-candidates-batches.component';
+import { CandidateRecordsComponent } from './candidate-records/candidate-records.component';
 
 @NgModule({
     imports: [
         RouterModule.forChild([
             {
-                path: '',
-                component: ListsCandidatesBatchesComponent,
+                path: ':id',
+                component: CandidateRecordsComponent,
                 canActivate: [AuthGuard],
                 data: { roles: [Roles.FraudOfficer] },
-                children: [
-                    {
-                        path: ':id',
-                        component: CandidatesBatchesComponent,
-                        canActivate: [AuthGuard],
-                        data: { roles: [Roles.FraudOfficer] },
-                    },
-                ],
             },
+            { path: '', redirectTo: '/lists/candidates', pathMatch: 'full' },
         ]),
     ],
     exports: [RouterModule],

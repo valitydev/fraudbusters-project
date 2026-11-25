@@ -1,38 +1,29 @@
-import { Component, Inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component } from '@angular/core';
+import { map } from 'rxjs/operators';
 
-import { OperationType } from '../../../../shared/constants/operation-type';
-import { LAYOUT_GAP_M } from '../../../../tokens';
-import { CreatePaymentReferenceService } from '../../services/create-payment-reference.service';
+import { PaymentGroupsService } from '../../../../api/payments/groups';
+import { PaymentGroupsReferencesService } from '../../../../api/payments/groups-references';
+import {
+    ReferenceFormConfig,
+    toPaymentGroupReference,
+} from '../../../../shared/components/reference-form/reference-draft';
 
 @Component({
-    templateUrl: 'create-payment-reference.component.html',
-    providers: [CreatePaymentReferenceService],
+    template: '<fb-reference-form [config]="config"></fb-reference-form>',
 })
 export class CreatePaymentReferenceComponent {
-    forms = this.createPaymentReferenceService.forms;
-    operationType = OperationType;
-    inProgress$ = this.createPaymentReferenceService.inProgress$;
+    readonly config: ReferenceFormConfig = {
+        title: 'New group references',
+        target: 'group',
+        scope: 'shop',
+        backUrl: '/groups/references',
+        loadTargetNames: (prefix) =>
+            this.groups.filter(prefix).pipe(map((response) => response.result.map((group) => group.groupId))),
+        saveBatch: (rows) => this.references.saveGroupReference(rows.map(toPaymentGroupReference)),
+    };
 
     constructor(
-        private createPaymentReferenceService: CreatePaymentReferenceService,
-        private router: Router,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
-    ) {
-        this.createPaymentReferenceService.created$.subscribe(() => {
-            void this.router.navigate(['/groups/references']);
-        });
-    }
-
-    addItem() {
-        this.createPaymentReferenceService.addItem();
-    }
-
-    removeItem(index: number) {
-        this.createPaymentReferenceService.removeItem(index);
-    }
-
-    createReference() {
-        this.createPaymentReferenceService.create();
-    }
+        private readonly references: PaymentGroupsReferencesService,
+        private readonly groups: PaymentGroupsService
+    ) {}
 }

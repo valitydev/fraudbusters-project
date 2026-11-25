@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, Inject, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 import { FraudResultSummary } from '../../../../../../../../api/fb-management/swagger-codegen/model/fraudResultSummary';
-import { LAYOUT_GAP_M, LAYOUT_GAP_S } from '../../../../../../../../tokens';
+import { statusPillClass } from '../../../../../../../../shared/utils/status-tone';
 
 @Component({
     selector: 'fb-fraud-summary-item',
@@ -13,9 +13,18 @@ export class FraudSummaryItemComponent {
     @Input()
     summary: FraudResultSummary;
 
-    constructor(@Inject(LAYOUT_GAP_S) public layoutGapS: string, @Inject(LAYOUT_GAP_M) public layoutGapM: string) {}
+    @Input()
+    currency: string;
 
-    formatRatio(value: number): number | null {
-        return Number.isFinite(value) ? value : null;
+    get ruleIndex(): string | undefined {
+        return /^(?:Rule #)?(\d+)$/.exec(this.summary.checkedRule ?? '')?.[1];
+    }
+
+    pill(status: string): string {
+        return statusPillClass(status);
+    }
+
+    metricValue(value: number): number | null {
+        return Number.isFinite(value) && value >= 0 ? value : null;
     }
 }

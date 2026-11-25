@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
-import { OperationType } from '../../../../shared/constants/operation-type';
-import { LAYOUT_GAP_M } from '../../../../tokens';
-import { Action, ActionType } from '../../action';
+import { ConfigService } from '../../../../config';
+import { createTemplateCatalog } from '../../../../shared/components/templates-table/template-catalog';
+import { CATALOG_SORT_OPTIONS } from '../../../../shared/utils/catalog';
 import { FetchPaymentTemplatesService } from '../../services/fetch-payment-templates.service';
 import { RemovePaymentTemplateService } from '../../services/remove-payment-template.service';
 
@@ -14,77 +15,32 @@ import { RemovePaymentTemplateService } from '../../services/remove-payment-temp
     providers: [FetchPaymentTemplatesService, RemovePaymentTemplateService],
 })
 export class PaymentTemplatesComponent {
-    templates$ = this.fetchTemplatesService.searchResult$;
-    inProgress$ = this.fetchTemplatesService.inProgress$;
-    hasMore$ = this.fetchTemplatesService.hasMore$;
+    readonly sortOptions = CATALOG_SORT_OPTIONS;
+    readonly catalog = createTemplateCatalog(this.route, this.config.pageSize, () => this.fetchTemplatesService.all());
 
     constructor(
         private router: Router,
+        private route: ActivatedRoute,
+        private config: ConfigService,
         private fetchTemplatesService: FetchPaymentTemplatesService,
         private removeTemplateService: RemovePaymentTemplateService,
-        private snackBar: MatSnackBar,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
+        snackBar: MatSnackBar
     ) {
-        this.removeTemplateService.removed$.subscribe((id) => {
-            this.snackBar.open(`Template ${id} has been deleted`, 'OK', {
-                duration: 1500,
-            });
-            this.fetchTemplatesService.search({});
-        });
-
-        this.fetchTemplatesService.errors$.subscribe((error) => {
-            const errorMessage =
-                error && typeof error === 'object' && 'message' in error
-                    ? (error as { message: string }).message
-                    : String(error);
-            this.snackBar.open(`Error loading templates: ${errorMessage}`, 'OK', {
-                duration: 3000,
-            });
+        this.removeTemplateService.removed$.pipe(takeUntilDestroyed(inject(DestroyRef))).subscribe((id) => {
+            snackBar.open(`Template ${id} has been deleted`, 'OK', { duration: 1500 });
+            this.catalog.refresh();
         });
     }
 
-    action(action: Action) {
-        switch (action.type) {
-            case ActionType.CreateTemplate:
-                this.router.navigate(['/template/new'], { fragment: OperationType.Payment });
-                break;
-            case ActionType.EditTemplate:
-                this.router.navigate([`/template/${action.templateID}`], { fragment: OperationType.Payment });
-                break;
-            case ActionType.RemoveTemplate:
-                this.removeTemplateService.removeTemplate({
-                    templateID: action.templateID,
-                });
-                break;
-            case ActionType.SortTemplates:
-                this.fetchTemplatesService.search({ sortOrder: action.sortDirection });
-                break;
-            default:
-                console.error('Wrong template action.');
-        }
+    editTemplate(id: string): void {
+        void this.router.navigate(['/template', id], { queryParams: { returnUrl: this.router.url } });
     }
 
-    createTemplate() {
-        this.router.navigate(['/template/new']);
+    copyTemplate(id: string): void {
+        void this.router.navigate(['/template/new', id], { queryParams: { returnUrl: this.router.url } });
     }
 
-    editTemplate(id: string) {
-        this.router.navigate([`/template/${id}`]);
-    }
-
-    copyTemplate(id: string) {
-        this.router.navigate([`/template/new/${id}`]);
-    }
-
-    removeTemplate(templateID: string) {
+    removeTemplate(templateID: string): void {
         this.removeTemplateService.removeTemplate({ templateID });
-    }
-
-    search(searchValue: string) {
-        this.fetchTemplatesService.search({ searchValue });
-    }
-
-    fetchMore() {
-        this.fetchTemplatesService.fetchMore();
     }
 }

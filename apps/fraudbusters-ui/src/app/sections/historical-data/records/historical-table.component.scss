@@ -1,0 +1,174 @@
+// Columns size to their content like the prototype; a wide page scrolls inside the panel.
+table.fb-catalog-table {
+    min-width: 100%;
+    table-layout: auto;
+
+    th,
+    td {
+        white-space: nowrap;
+    }
+}
+
+.id-cell,
+.fb-catalog-link {
+    white-space: nowrap;
+}
+
+.check-column {
+    width: 44px;
+}
+
+.chevron-column {
+    width: 30px;
+}
+
+.check,
+.chevron {
+    text-align: center;
+}
+
+.record {
+    cursor: pointer;
+
+    &:hover {
+        background: var(--fb-raised, #f7f8fb);
+    }
+
+    &.selected {
+        background: var(--fb-selected, #eee9fc);
+    }
+
+    &.open {
+        background: var(--fb-raised, #f7f8fb);
+
+        td,
+        th {
+            border-bottom-color: transparent;
+        }
+
+        .expand mat-icon {
+            transform: rotate(180deg);
+        }
+    }
+}
+
+.muted,
+.missing,
+.fb-catalog-time,
+.currency {
+    color: var(--fb-muted, #625f74);
+}
+
+.numeric {
+    text-align: right;
+}
+
+.amount {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+
+    .currency {
+        font-size: 12px;
+    }
+}
+
+.id-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+}
+
+.chip {
+    display: inline-block;
+    padding: 2px 7px;
+    border: 1px solid var(--fb-line, #e2e1eb);
+    border-radius: 6px;
+    background: var(--fb-canvas, #fff);
+}
+
+.copy,
+.expand {
+    display: inline-grid;
+    place-items: center;
+    width: var(--fb-row-control-height);
+    height: var(--fb-row-control-height);
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--fb-muted, #625f74);
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+        background: var(--fb-selected, #eee9fc);
+        color: var(--fb-accent, #6741b7);
+    }
+
+    mat-icon {
+        transition: transform 150ms ease;
+    }
+}
+
+.copy mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .copy {
+        opacity: 0;
+    }
+
+    .id-cell:hover .copy,
+    .id-cell:focus-within .copy {
+        opacity: 1;
+    }
+}
+
+// Stronger than the nowrap table cells above: detail values wrap inside their grid column.
+table.fb-catalog-table .detail-row > td {
+    padding: 0 20px 16px;
+    white-space: normal;
+    background: var(--fb-raised, #f7f8fb);
+}
+
+.details {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px 24px;
+    margin: 0;
+    padding: 14px 16px;
+    border: 1px solid var(--fb-line, #e2e1eb);
+    border-radius: 10px;
+    background: var(--fb-surface, #fff);
+
+    dt {
+        margin-bottom: 2px;
+        color: var(--fb-muted, #625f74);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    dd {
+        min-width: 0;
+        margin: 0;
+        font-size: 13px;
+        overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 900px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.no-details {
+    margin: 0;
+    padding: 12px 16px;
+    color: var(--fb-muted, #625f74);
+    font-size: 13px;
+}

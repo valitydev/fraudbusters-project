@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
+import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
 
 import { PaymentReference } from '../../../../api/fb-management/swagger-codegen/model/paymentReference';
 import { OperationType } from '../../../../shared/constants/operation-type';
-import { LAYOUT_GAP_M } from '../../../../tokens';
+import { SortOrder } from '../../../../shared/constants/sort-order';
 import { FetchReferencesService } from '../../services/fetch-references.service';
 import { RemoveReferenceService } from '../../services/remove-reference.service';
 
@@ -13,46 +15,56 @@ import { RemoveReferenceService } from '../../services/remove-reference.service'
     providers: [FetchReferencesService, RemoveReferenceService],
 })
 export class PaymentReferencesComponent {
-    references$ = this.fetchReferencesService.searchResult$;
+    references$ = this.fetchReferencesService.fetchResultChanges$.pipe(
+        startWith({ result: [], count: 0, hasMore: false })
+    );
+
     inProgress$ = this.fetchReferencesService.inProgress$;
-    hasMore$ = this.fetchReferencesService.hasMore$;
+
+    readonly sortOptions = [
+        { value: SortOrder.Asc, label: 'Template ID (A–Z)' },
+        { value: SortOrder.Desc, label: 'Template ID (Z–A)' },
+    ];
+
+    sort = SortOrder.Asc;
+    readonly targetFragment = undefined;
+    readonly tableLabel = 'References';
+
+    private searchValue = '';
 
     constructor(
-        private router: Router,
+        route: ActivatedRoute,
         private fetchReferencesService: FetchReferencesService,
-        private removeReferenceService: RemoveReferenceService,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
+        private removeReferenceService: RemoveReferenceService
     ) {
-        this.removeReferenceService.removed$.subscribe(() => {
-            this.fetchReferencesService.refresh();
+        const destroyRef = inject(DestroyRef);
+        route.queryParamMap
+            .pipe(
+                map((params) => (params.get('searchQuery') ?? '').trim()),
+                distinctUntilChanged(),
+                takeUntilDestroyed(destroyRef)
+            )
+            .subscribe((query) => {
+                this.searchValue = query;
+                this.search();
+            });
+        this.removeReferenceService.removed$.pipe(takeUntilDestroyed(destroyRef)).subscribe(() => {
+            this.search();
         });
     }
 
-    createReference() {
-        void this.router.navigate(['/reference/new/payment'], {
-            queryParams: { returnUrl: this.router.url },
-        });
+    setSort(order: SortOrder): void {
+        this.sort = order;
+        this.search();
     }
 
-    search(searchValue: string) {
-        this.fetchReferencesService.search({
-            searchValue,
-            isGlobal: false,
-            isDefault: false,
-        });
-    }
-
-    fetchMore(sortFieldValue: string) {
+    fetchMore(sortFieldValue: string): void {
         this.fetchReferencesService.fetchMore({
             sortFieldValue,
+            searchValue: this.searchValue,
+            sortOrder: this.sort,
             isGlobal: false,
             isDefault: false,
-        });
-    }
-
-    goToTemplate(id: string) {
-        void this.router.navigate([`/template/${id}`], {
-            queryParams: { returnUrl: this.router.url },
         });
     }
 
@@ -60,6 +72,15 @@ export class PaymentReferencesComponent {
         this.removeReferenceService.removeReference({
             type: OperationType.Payment,
             reference,
+        });
+    }
+
+    private search(): void {
+        this.fetchReferencesService.search({
+            searchValue: this.searchValue,
+            sortOrder: this.sort,
+            isGlobal: false,
+            isDefault: false,
         });
     }
 }

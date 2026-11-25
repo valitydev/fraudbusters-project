@@ -1,47 +1,26 @@
-import { Component, Inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component } from '@angular/core';
 
-import { OperationType } from '../../../../../shared/constants/operation-type';
-import { CsvUtilsService } from '../../../../../shared/services/utils/csv-utils.service';
-import { LAYOUT_GAP_M } from '../../../../../tokens';
-import { CreatePaymentReferenceService } from '../../services/create-payment-reference.service';
+import { PaymentReferencesService } from '../../../../../api/payments/references';
+import { PaymentTemplatesService } from '../../../../../api/payments/templates';
+import {
+    ReferenceFormConfig,
+    toPaymentReference,
+} from '../../../../../shared/components/reference-form/reference-draft';
 
 @Component({
-    templateUrl: 'create-payment-reference.component.html',
-    providers: [CreatePaymentReferenceService, CsvUtilsService],
+    template: '<fb-reference-form [config]="config"></fb-reference-form>',
 })
 export class CreatePaymentReferenceComponent {
-    forms = this.createPaymentReferenceService.forms;
-    operationType = OperationType;
-    inProgress$ = this.createPaymentReferenceService.inProgress$;
+    readonly config: ReferenceFormConfig = {
+        title: 'New references',
+        scope: 'shop',
+        backUrl: '/templates/references',
+        loadTargetNames: (prefix) => this.templates.getTemplatesName(prefix),
+        saveBatch: (rows) => this.references.saveReferences(rows.map(toPaymentReference)),
+    };
 
     constructor(
-        private createPaymentReferenceService: CreatePaymentReferenceService,
-        private route: ActivatedRoute,
-        private router: Router,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
-    ) {
-        this.createPaymentReferenceService.created$.subscribe(() => {
-            void this.router.navigateByUrl(
-                this.route.snapshot.queryParamMap.get('returnUrl') || '/templates/references'
-            );
-        });
-    }
-
-    addItem() {
-        this.createPaymentReferenceService.addItem();
-    }
-
-    removeItem(index: number) {
-        this.createPaymentReferenceService.removeItem(index);
-    }
-
-    createReference() {
-        this.createPaymentReferenceService.create();
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    prepareFilesList(files: Array<any>): void {
-        this.createPaymentReferenceService.prepareFilesList(files);
-    }
+        private readonly references: PaymentReferencesService,
+        private readonly templates: PaymentTemplatesService
+    ) {}
 }
