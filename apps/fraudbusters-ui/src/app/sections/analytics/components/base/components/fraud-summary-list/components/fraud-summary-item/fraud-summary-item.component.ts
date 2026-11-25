@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 import { FraudResultSummary } from '../../../../../../../../api/fb-management/swagger-codegen/model/fraudResultSummary';
+import { unnamedRuleIndex } from '../../../../../../../../shared/pipes/rule-label.pipe';
 import { statusPillClass } from '../../../../../../../../shared/utils/status-tone';
 
 @Component({
@@ -17,7 +18,7 @@ export class FraudSummaryItemComponent {
     currency: string;
 
     get ruleIndex(): string | undefined {
-        return /^(?:Rule #)?(\d+)$/.exec(this.summary.checkedRule ?? '')?.[1];
+        return unnamedRuleIndex(this.summary.checkedRule) ?? undefined;
     }
 
     pill(status: string): string {

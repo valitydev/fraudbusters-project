@@ -6,7 +6,9 @@
                     <h1 class="fb-page-title">Analytics</h1>
                     <span class="utc-badge"><span aria-hidden="true"></span>UTC+00:00</span>
                 </div>
-                <p class="fb-page-subtitle">Track payment volume, blocked payments and the rules behind declines.</p>
+                <p class="fb-page-subtitle">
+                    Track payments blocked in processing and the fraud rules behind decline decisions.
+                </p>
             </div>
             <button
                 mat-stroked-button
@@ -43,13 +45,13 @@
                         {{ data.attemptedChange > 0 ? '+' : '' }}{{ data.attemptedChange | percent : '1.1-1' }}
                     </span>
                     <dd>{{ data.attempted | number }}</dd>
-                    <div class="metric-note">Payments evaluated</div>
+                    <div class="metric-note">Payments received by processing</div>
                 </div>
                 <div>
                     <dt>Blocked payments</dt>
                     <span class="metric-badge danger">{{ data.blocked | number }} blocked</span>
                     <dd>{{ data.blocked | number }}</dd>
-                    <div class="metric-note">Rejected by fraud rules</div>
+                    <div class="metric-note" [title]="blockedDefinition">Failed in processing for high risk score</div>
                 </div>
                 <div>
                     <dt>Blocked share</dt>
@@ -57,7 +59,7 @@
                         {{ data.blocked | number }} / {{ data.attempted | number }}
                     </span>
                     <dd>{{ (data.ratio | percent : '1.0-2') ?? '—' }}</dd>
-                    <div class="metric-note">Of attempted payments</div>
+                    <div class="metric-note" [title]="blockedDefinition">Blocked in processing, of attempted</div>
                 </div>
                 <div>
                     <dt>Blocked amount</dt>
@@ -65,14 +67,14 @@
                     <dd>
                         {{ data.blockedAmount | number : '1.0-2' }} <small>{{ data.currency }}</small>
                     </dd>
-                    <div class="metric-note">Total value of blocked payments</div>
+                    <div class="metric-note" [title]="blockedDefinition">Value of payments blocked in processing</div>
                 </div>
             </dl>
 
             <div class="analytics-charts">
                 <section class="analytics-card risk-card">
                     <h2>Risk distribution</h2>
-                    <p class="card-caption">Share of checks by risk score, %</p>
+                    <p class="card-caption">Share of rule checks by result per day, %</p>
                     <fb-bar-chart
                         *ngIf="data.chart.series.length; else noChart"
                         [series]="data.chart.series"
@@ -84,12 +86,17 @@
 
                 <section class="analytics-card ranking-card">
                     <h2>Top declined rules</h2>
-                    <p class="card-caption">Top 5 by number of decline results</p>
+                    <p class="card-caption">Top 5 rules by decline decisions, before processing</p>
                     <ul *ngIf="data.topDeclines.length; else noDeclines" class="rule-ranking">
                         <li *ngFor="let row of data.topDeclines">
                             <button type="button" [attr.aria-pressed]="isSelected(row)" (click)="toggleRule(row)">
                                 <span class="rule-name">
-                                    <strong>{{ row.checkedRule }}</strong>
+                                    <strong *ngIf="row.checkedRule | unnamedRuleIndex as index; else namedRule"
+                                        >Rule #{{ index }} <span class="unnamed-tag">unnamed</span></strong
+                                    >
+                                    <ng-template #namedRule
+                                        ><strong>{{ row.checkedRule }}</strong></ng-template
+                                    >
                                     <small *ngIf="row.template">{{ row.template }}</small>
                                 </span>
                                 <span class="rule-count">{{ row.summary.count | number }}</span>
@@ -106,7 +113,7 @@
                         <span>Select a rule to filter the breakdown</span>
                         <strong
                             >{{ data.declineCount | number }}
-                            {{ data.declineCount === 1 ? 'decline' : 'declines' }}</strong
+                            {{ data.declineCount === 1 ? 'decline decision' : 'decline decisions' }}</strong
                         >
                     </footer>
                 </section>
@@ -126,7 +133,7 @@
                             aria-label="Remove rule filter"
                             (click)="selectedRule = null"
                         >
-                            {{ selectedRule.template }} · {{ selectedRule.checkedRule }}
+                            {{ selectedRule.template }} · {{ selectedRule.checkedRule | ruleLabel }}
                             <span aria-hidden="true">×</span>
                         </button>
                     </div>

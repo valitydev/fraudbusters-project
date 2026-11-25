@@ -16,6 +16,10 @@ export class BaseAnalyticsComponent {
     readonly statuses = ['All', 'decline', 'three_ds', 'accept'];
     readonly search = new FormControl('', { nonNullable: true });
     status = 'All';
+    /** The blocked metrics count payments, not rule decisions (see AnalyticsQuery in fraudbusters-management). */
+    readonly blockedDefinition =
+        'Payments that failed in processing with no_route_found:risk_score_is_too_high. ' +
+        'Rule decisions without a processed payment are not counted here.';
     selectedRule: { template?: string; checkedRule?: string } | null = null;
 
     private readonly document = inject(DOCUMENT);

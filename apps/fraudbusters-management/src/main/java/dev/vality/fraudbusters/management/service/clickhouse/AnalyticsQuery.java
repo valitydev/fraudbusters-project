@@ -105,6 +105,7 @@ public class AnalyticsQuery {
                             AND currency = :currency
                             AND like(shopId, :shopId)
                             AND like(partyId, :partyId)
+                            AND shopId != 'TEST'
                         GROUP BY status, rule, template
                     """;
 

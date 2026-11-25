@@ -208,6 +208,19 @@ h2 {
             color: var(--fb-muted);
             font-size: 12px;
         }
+
+        // Same tag as the unnamed rules of the breakdown table.
+        .unnamed-tag {
+            display: inline-block;
+            margin-inline-start: 6px;
+            padding: 0 6px;
+            border: 1px solid var(--fb-line);
+            border-radius: 4px;
+            background: var(--fb-raised);
+            color: var(--fb-muted);
+            font: 500 10px / 16px var(--fb-font-sans);
+            vertical-align: middle;
+        }
     }
 
     .rule-count {
