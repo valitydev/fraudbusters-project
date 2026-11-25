@@ -1,12 +1,58 @@
-.username {
-    font-weight: 500;
-    line-break: anywhere;
+:host {
+    display: block;
+    padding: 16px 16px 12px;
 }
 
-.roles {
-    color: #c4c4c4;
+.account-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-.user-info {
-    padding: 8px;
+.account-avatar {
+    display: grid;
+    place-items: center;
+    flex: 0 0 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--fb-selected, #eee9fc);
+    color: var(--fb-accent, #6943b9);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.account-identity {
+    min-width: 0;
+}
+
+.account-name {
+    color: var(--fb-text, #252335);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    overflow-wrap: anywhere;
+}
+
+.account-caption {
+    color: var(--fb-muted, #8a869a);
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.account-roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: var(--fb-raised, #f1f0f6);
+        color: var(--fb-muted, #5f5b70);
+        font-size: 12px;
+        line-height: 16px;
+    }
 }

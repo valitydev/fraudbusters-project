@@ -1,13 +1,22 @@
-<div class="mat-headline">Notifications</div>
-<div fxLayout="column" fxLayoutGap="8px">
-    <nav mat-tab-nav-bar [tabPanel]="tabPanel">
+<div class="notifications-page">
+    <header class="fb-page-toolbar">
+        <div class="heading">
+            <h1 class="fb-page-title">Notifications</h1>
+            <p class="fb-page-subtitle">Periodic reports on rule results and the channels they are sent to.</p>
+        </div>
+        <a *ngIf="activeTab() as tab" mat-stroked-button class="fb-primary-action" [routerLink]="tab.createUrl">
+            <mat-icon>add</mat-icon>
+            {{ tab.createLabel }}
+        </a>
+    </header>
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="fb-template-catalog-tabs" aria-label="Notification sections">
         <a
             mat-tab-link
             *ngFor="let link of links"
             [routerLink]="link.path"
             routerLinkActive
             #rla="routerLinkActive"
-            [active]="rla.isActive || hasActiveFragments(link.otherActiveUrlFragments)"
+            [active]="rla.isActive"
         >
             {{ link.name }}
         </a>

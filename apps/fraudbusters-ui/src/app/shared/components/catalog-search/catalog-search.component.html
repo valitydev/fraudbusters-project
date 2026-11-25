@@ -1,0 +1,20 @@
+<div class="template-search">
+    <mat-icon aria-hidden="true">search</mat-icon>
+    <input
+        #searchInput
+        type="search"
+        [attr.aria-label]="label"
+        aria-keyshortcuts="/"
+        [placeholder]="label + '…'"
+        [formControl]="query"
+    />
+    <button
+        *ngIf="!query.value"
+        class="search-shortcut"
+        type="button"
+        aria-label="Focus search"
+        (click)="searchInput.focus()"
+    >
+        <kbd aria-hidden="true">/</kbd>
+    </button>
+</div>

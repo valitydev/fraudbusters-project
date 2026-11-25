@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject } from 'rxjs';
-import { catchError, debounceTime, map, scan, switchMap, tap } from 'rxjs/operators';
+import { catchError, debounceTime, finalize, map, scan, switchMap, tap } from 'rxjs/operators';
 
 import { Filter } from './model/filter';
 import { Log } from './model/log';
@@ -27,6 +27,7 @@ export class AuditService {
 
     isLoadMore$ = new Observable<boolean>();
     isLoadMoreSubject$ = new BehaviorSubject<boolean>(false);
+    inProgress$ = new BehaviorSubject<boolean>(false);
 
     count = 0;
     isRefresh;
@@ -59,6 +60,7 @@ export class AuditService {
         this.loadMoreAction$.subscribe(() => (this.isRefresh = false));
         this.logs$ = combineLatest([this.searchFilter$, this.loadMoreAction$, this.sort$]).pipe(
             switchMap((value) => {
+                this.inProgress$.next(true);
                 return this.auditRemoteService
                     .findLogs({
                         searchValue: value[0].user + '%',
@@ -66,7 +68,7 @@ export class AuditService {
                         commandTypes: value[0].commandTypes,
                         from: this.datepipe.transform(value[0].from, DateFormat._yyyyMMDdHHMmSs),
                         to: this.datepipe.transform(value[0].to, DateFormat._yyyyMMDdHHMmSs),
-                        sortOrder: SortOrder.Desc,
+                        sortOrder: value[2],
                         size: this.size,
                         lastId: this.isLoadMore(value) ? this.last.id : null,
                         sortFieldValue: this.isLoadMore(value) ? this.last.insertTime : null,
@@ -80,7 +82,8 @@ export class AuditService {
                             this.last = ref.result ? ref.result[ref.result.length - 1] : [];
                             this.count = ref.count;
                             return { logs: ref.result, filter: value, count: ref.count };
-                        })
+                        }),
+                        finalize(() => this.inProgress$.next(false))
                     );
             }),
             scan((logs, result) => {

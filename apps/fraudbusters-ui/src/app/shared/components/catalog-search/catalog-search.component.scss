@@ -1,0 +1,45 @@
+@use '../../../styles/primitives';
+
+.template-search {
+    @include primitives.control(var(--fb-filter-height));
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-inline: 12px;
+    color: var(--fb-muted);
+
+    &:focus-within {
+        @include primitives.control-focus;
+    }
+}
+
+input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--fb-text, #252335);
+    font: inherit;
+
+    &::placeholder {
+        color: var(--fb-muted);
+    }
+}
+
+mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.search-shortcut {
+    flex-shrink: 0;
+    padding: 0 5px;
+    color: inherit;
+    cursor: pointer;
+    border: 1px solid var(--fb-line, #dcdae5);
+    border-radius: 4px;
+    background: var(--fb-surface, #fff);
+}

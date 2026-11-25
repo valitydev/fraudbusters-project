@@ -1,0 +1,132 @@
+@use '../../../../../../styles/primitives';
+
+.filter-card {
+    @include primitives.panel;
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+    padding: 16px 20px;
+}
+
+.period-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.period-presets {
+    display: grid;
+    gap: 6px;
+}
+
+.period-label {
+    color: var(--fb-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.period-dates {
+    flex: 0 1 344px;
+    max-width: 100%;
+}
+
+.granularity {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    min-height: var(--fb-filter-height);
+    margin-inline-start: auto;
+    color: var(--fb-muted);
+    font-size: 12px;
+
+    &::before {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--fb-accent);
+        content: '';
+    }
+
+    strong {
+        color: var(--fb-text);
+        font-family: var(--fb-font-mono);
+    }
+}
+
+.filter-card button {
+    --mdc-outlined-button-container-shape: var(--fb-radius-control);
+    --mdc-outlined-button-outline-color: var(--fb-line);
+    height: var(--fb-filter-height);
+    padding-inline: 12px;
+    letter-spacing: normal;
+}
+
+.filter-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 2fr) minmax(85px, 1fr) auto;
+    align-items: end;
+    gap: 12px 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--fb-line);
+
+    > label,
+    .currency-field {
+        display: grid;
+        gap: 5px;
+        min-width: 0;
+        color: var(--fb-muted);
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    input,
+    mat-select {
+        width: 100%;
+        padding-inline: 12px;
+    }
+
+    mat-select {
+        display: flex;
+        align-items: center;
+    }
+
+    button {
+        justify-self: end;
+        margin-inline-start: 16px;
+    }
+}
+
+.date-error {
+    margin: 0;
+    color: var(--fb-danger);
+    font-size: 13px;
+}
+
+@container (max-width: 740px) {
+    .filter-fields {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .granularity {
+        margin-inline-start: 0;
+    }
+}
+
+@container (max-width: 440px) {
+    .filter-card {
+        padding: 14px;
+    }
+
+    .filter-fields {
+        grid-template-columns: minmax(0, 1fr);
+
+        button {
+            justify-self: start;
+            margin-inline-start: 0;
+        }
+    }
+}

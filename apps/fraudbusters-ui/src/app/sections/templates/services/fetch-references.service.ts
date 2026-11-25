@@ -26,7 +26,7 @@ export class FetchReferencesService extends PartialFetcher<PaymentReference, Fet
     private pageSize = this.configService.pageSize;
 
     constructor(private paymentReferencesService: PaymentReferencesService, private configService: ConfigService) {
-        super();
+        super(0);
     }
 
     protected fetch(params: FetchReferencesParams, lastId?: string): Observable<FetchResult<PaymentReference>> {
@@ -39,7 +39,7 @@ export class FetchReferencesService extends PartialFetcher<PaymentReference, Fet
             size: size ? size : this.pageSize,
             isGlobal,
             ...(lastId ? { lastId } : {}),
-            ...(sortBy ? { sortBy } : {}),
+            sortBy: sortBy || 'template_id',
             ...(id ? { id } : {}),
             ...(name ? { name } : {}),
         });

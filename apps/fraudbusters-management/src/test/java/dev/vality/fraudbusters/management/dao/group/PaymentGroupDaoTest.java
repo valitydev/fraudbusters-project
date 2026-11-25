@@ -73,10 +73,14 @@ public class PaymentGroupDaoTest {
         assertEquals(2L, foundGroupModel.getPriorityTemplates().size());
 
         groupModel.getPriorityTemplates().get(0).setId(CHANGED_TEMPLATE_ID);
+        groupModel.getPriorityTemplates().get(1).setPriority(7L);
         groupDao.insert(groupModel);
         foundGroupModel = groupDao.getById(UPDATE_GROUP);
         assertEquals(2L, foundGroupModel.getPriorityTemplates().size());
 
+        assertEquals(7L, foundGroupModel.getPriorityTemplates().stream()
+                .filter(row -> TEST_TEMPL_2.equals(row.getId()))
+                .findFirst().orElseThrow().getPriority());
         Optional<PriorityIdModel> template = isChangedTemplatePresent(foundGroupModel);
 
         groupModel.setPriorityTemplates(List.of(template.get()));

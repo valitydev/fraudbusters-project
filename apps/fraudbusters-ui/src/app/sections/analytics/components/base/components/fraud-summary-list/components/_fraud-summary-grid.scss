@@ -1,5 +1,23 @@
 @mixin fraud-summary-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) repeat(3, 140px);
+    grid-template-columns: 14% 28% 22% 14% 10% 12%;
     align-items: center;
+
+    > * {
+        min-width: 0;
+        padding-inline: var(--fb-table-cell-padding-inline);
+    }
+
+    > :first-child {
+        padding-inline-start: var(--fb-table-edge-padding);
+    }
+
+    > :last-child {
+        padding-inline-end: var(--fb-table-edge-padding);
+    }
+}
+
+@mixin fraud-summary-number {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
 }

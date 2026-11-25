@@ -12,9 +12,10 @@ import { ConfirmActionDialogComponent } from '../../../shared/components/confirm
 export class PayoutsFeedbackService {
     constructor(private dialog: MatDialog, private snackBar: MatSnackBar) {}
 
+    /** Every payout confirmation removes something, so the action is a red "Remove". */
     confirm(title: string): Observable<void> {
         return this.dialog
-            .open(ConfirmActionDialogComponent, { data: { title } })
+            .open(ConfirmActionDialogComponent, { data: { title, confirmLabel: 'Remove', destructive: true } })
             .afterClosed()
             .pipe(
                 filter((result) => result === 'confirm'),

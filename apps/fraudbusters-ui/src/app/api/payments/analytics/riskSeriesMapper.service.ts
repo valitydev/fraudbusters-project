@@ -11,23 +11,25 @@ export class RiskSeriesMapperService {
             (value) =>
                 ({
                     name: value.score,
+                    color: this.getSeriesColor(value),
                     data: value.offsetCountRatio.map((offsetCountRatioValue) => ({
                         x: new Date(offsetCountRatioValue.offset),
-                        y: offsetCountRatioValue.countRatio,
-                        fillColor: this.getFillColor(value),
+                        y: offsetCountRatioValue.countRatio >= 0 ? offsetCountRatioValue.countRatio : null,
                     })),
                 } as Series)
         );
     }
 
-    private getFillColor(value: RiskScoreOffsetCountRatio) {
+    private getSeriesColor(value: RiskScoreOffsetCountRatio) {
         switch (value.score) {
             case 'low':
-                return '#1ab152';
+                return '#10b981';
             case 'fatal':
-                return '#cf1c1d';
+                return '#ef4444';
+            case 'high':
+                return '#94a3b8';
             default:
-                return '#c4c4c4';
+                return '#6338f5';
         }
     }
 }

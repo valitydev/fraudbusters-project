@@ -1,25 +1,29 @@
-<div fxLayout="column" [fxLayoutGap]="layoutGapM">
-    <div fxLayout fxLayoutAlign="space-between center">
-        <fb-data-sets-search (valueChanges)="search($event)"></fb-data-sets-search>
-        <button mat-button color="primary" (click)="createDataSet()">CREATE DATA SET</button>
-    </div>
-    <div *ngIf="dataSets$ | async as dataSets; else Empty" fxLayout="column" [fxLayoutGap]="layoutGapM">
-        <fb-payment-data-sets-list
-            *ngIf="dataSets.length > 0; else Empty"
-            [dataSets]="dataSets"
-            (goToDataSet)="goToDataSet($event)"
-            (deleteItem)="removeDataSet($event)"
-        ></fb-payment-data-sets-list>
-        <fb-show-more-panel
-            *ngIf="hasMore$ | async"
-            [isLoading]="inProgress$ | async"
-            (showMore)="fetchMore(dataSets[dataSets.length - 1].id)"
-        ></fb-show-more-panel>
-    </div>
-    <ng-template #Empty>
-        <div *ngIf="inProgress$ | async" fxLayout fxLayoutAlign="center">
-            <mat-progress-spinner color="primary" mode="indeterminate" diameter="48"></mat-progress-spinner>
-        </div>
-        <fb-empty-search-result *ngIf="!(inProgress$ | async)"></fb-empty-search-result>
-    </ng-template>
-</div>
+<fb-catalog-panel
+    *ngIf="{ dataSets: (dataSets$ | async) ?? [] } as view"
+    label="Data sets"
+    searchLabel="Search data sets by name"
+    searchParam="searchValue"
+    itemName="data sets"
+    singularItemName="data set"
+    [summaryInFooter]="true"
+    [count]="view.dataSets.length"
+    [visible]="view.dataSets.length"
+    [busy]="(inProgress$ | async) ?? true"
+    [failed]="failed$ | async"
+    [continuationAvailable]="(hasMore$ | async) ?? false"
+    (more)="fetchMore()"
+    (retry)="reload()"
+>
+    <fb-datetime-range
+        catalogFilters
+        [from]="range.from"
+        [to]="range.to"
+        (rangeChange)="setRange($event)"
+    ></fb-datetime-range>
+    <fb-payment-data-sets-list
+        *ngIf="view.dataSets.length"
+        [dataSets]="view.dataSets"
+        (goToDataSet)="goToDataSet($event)"
+        (deleteItem)="removeDataSet($event)"
+    ></fb-payment-data-sets-list>
+</fb-catalog-panel>

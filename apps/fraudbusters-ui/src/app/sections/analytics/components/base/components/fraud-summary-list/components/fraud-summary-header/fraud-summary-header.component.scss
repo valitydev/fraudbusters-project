@@ -2,5 +2,16 @@
 
 .fraud-summary-grid {
     @include fraud-summary-grid;
-    width: 100%;
+    min-height: var(--fb-table-header-height);
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--fb-line);
+    background: var(--fb-raised);
+    color: var(--fb-muted);
+    font: 600 var(--fb-table-heading-font-size) / var(--fb-table-heading-line-height) var(--fb-font-sans);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+
+    > :nth-child(n + 4) {
+        @include fraud-summary-number;
+    }
 }

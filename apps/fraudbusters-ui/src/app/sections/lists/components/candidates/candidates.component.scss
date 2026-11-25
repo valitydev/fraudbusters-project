@@ -1,0 +1,140 @@
+:host {
+    display: grid;
+    // Wide tables scroll inside their panel instead of stretching the page.
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+}
+
+.candidates-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0;
+    padding: 10px 14px;
+    border: 1px solid var(--fb-line, #dfe5fb);
+    border-radius: 10px;
+    background: var(--fb-info-bg, #f3f5fe);
+    color: var(--fb-text, #2b3a73);
+    font-size: 13px;
+    line-height: 1.45;
+
+    mat-icon {
+        flex: 0 0 18px;
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
+        color: var(--fb-info, #2f58c4);
+    }
+}
+
+table {
+    min-width: 860px;
+}
+
+.source-column {
+    width: 170px;
+}
+
+.id-column {
+    width: 230px;
+}
+
+.size-column {
+    width: 72px;
+}
+
+.actions-column {
+    width: 190px;
+}
+
+.source {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+
+    mat-icon {
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
+        color: var(--fb-muted, #625f74);
+    }
+}
+
+.batch-id {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.batch-name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.field {
+    font-weight: 600;
+}
+
+.fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.copy-id {
+    display: grid;
+    place-items: center;
+    flex: 0 0 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--fb-muted, #625f74);
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+        background: var(--fb-selected, #eee9fc);
+        color: var(--fb-accent, #6741b7);
+    }
+
+    mat-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+    }
+}
+
+.fb-catalog-table .numeric {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.muted,
+.missing {
+    color: var(--fb-muted, #625f74);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+
+.fb-catalog-action-cell {
+    a {
+        white-space: nowrap;
+
+        &:hover {
+            background-color: var(--fb-selected, #eee9fc);
+        }
+    }
+}
+
+.truncated {
+    margin: 0;
+    padding: 10px 16px;
+    color: var(--fb-muted, #625f74);
+    font-size: 13px;
+}

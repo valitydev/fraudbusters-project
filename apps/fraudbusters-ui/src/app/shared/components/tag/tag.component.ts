@@ -1,25 +1,30 @@
-import { Component, ElementRef, Input, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 import { ThemePaletteEnum } from '../../../styles/utils/theme-palette-enum';
+import { StatusTone, tonePillClass } from '../../utils/status-tone';
 
+const PALETTE_TONES: Record<ThemePaletteEnum, StatusTone> = {
+    [ThemePaletteEnum.Success]: 'success',
+    [ThemePaletteEnum.Failed]: 'danger',
+    [ThemePaletteEnum.Warn]: 'danger',
+    [ThemePaletteEnum.Pending]: 'warning',
+    [ThemePaletteEnum.Blue]: 'info',
+    [ThemePaletteEnum.Primary]: 'info',
+    [ThemePaletteEnum.Cancel]: 'neutral',
+    [ThemePaletteEnum.Unknown]: 'neutral',
+};
+
+/** A status badge in the shared pill style; the colour comes from the status pipes' palette. */
 @Component({
     selector: 'fb-tag',
     templateUrl: 'tag.component.html',
-    styleUrls: ['tag.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TagComponent implements OnInit {
-    @Input()
-    title: string;
+export class TagComponent {
+    @Input() title: string;
+    @Input() color: ThemePaletteEnum = ThemePaletteEnum.Primary;
 
-    @Input()
-    color: ThemePaletteEnum = ThemePaletteEnum.Primary;
-
-    @ViewChild('tag', { static: true })
-    tag: ElementRef;
-
-    constructor(private renderer: Renderer2) {}
-
-    ngOnInit() {
-        this.renderer.addClass(this.tag.nativeElement, `fb-tag-${this.color}`);
+    get pill(): string {
+        return tonePillClass(PALETTE_TONES[this.color] ?? 'neutral');
     }
 }

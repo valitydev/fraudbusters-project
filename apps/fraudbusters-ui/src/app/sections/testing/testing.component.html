@@ -1,6 +1,11 @@
-<div class="mat-headline">Testing</div>
-<div fxLayout="column" fxLayoutGap="8px">
-    <nav mat-tab-nav-bar [tabPanel]="tabPanel">
+<div class="fb-page fb-page-catalog">
+    <header class="fb-page-toolbar">
+        <div>
+            <h1 class="fb-page-title">Testing</h1>
+            <p class="fb-page-subtitle">Run payment rules on data sets and emulate individual transactions.</p>
+        </div>
+    </header>
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="fb-template-catalog-tabs" aria-label="Testing sections">
         <a
             mat-tab-link
             *ngFor="let link of links"
@@ -9,7 +14,7 @@
             #rla="routerLinkActive"
             [active]="rla.isActive || hasActiveFragments(link.otherActiveUrlFragments)"
         >
-            {{ link.name }}
+            <span class="fb-template-tab-label">{{ link.name }}</span>
         </a>
     </nav>
     <mat-tab-nav-panel #tabPanel>

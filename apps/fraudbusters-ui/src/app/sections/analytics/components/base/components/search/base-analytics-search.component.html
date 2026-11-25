@@ -1,27 +1,85 @@
-<form [formGroup]="form">
-    <div fxLayout fxLayoutAlign="space-between center" *ngIf="this.currencies$ | async">
-        <div [fxLayoutGap]="layoutGapM">
-            <mat-form-field appearance="outline">
-                <input matInput placeholder="merchant" formControlName="partyId" autocomplete="false" />
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-                <input matInput placeholder="shop" formControlName="shopId" autocomplete="false" />
-            </mat-form-field>
-            <mat-form-field class="select" appearance="outline" *ngIf="currencies$ | async as currencies">
-                <mat-select formControlName="type">
-                    <mat-option *ngFor="let name of currencies" [value]="name">{{ name }}</mat-option>
-                </mat-select>
-            </mat-form-field>
-        </div>
-        <div fxLayout fxLayoutAlign="space-between end">
-            <div *ngIf="inProgress | async" fxLayout fxLayoutAlign="center" style="height: 30px; width: 40px">
-                <mat-progress-spinner color="primary" mode="indeterminate" diameter="20"></mat-progress-spinner>
+<form *ngIf="currencies$ | async as currencies; else loading" class="filter-card" [formGroup]="form">
+    <div class="period-row">
+        <div class="period-presets">
+            <span class="period-label">Period</span>
+            <div class="fb-filter-presets" role="group" aria-label="Period">
+                <button
+                    *ngFor="let period of periods"
+                    mat-stroked-button
+                    type="button"
+                    [attr.aria-pressed]="form.value.time === period.key"
+                    (click)="setPeriod(period.key); period.key === 'custom' && picker.toggle('from')"
+                >
+                    {{ period.label }}
+                </button>
             </div>
-            <mat-form-field class="select" appearance="outline" *ngIf="units">
-                <mat-select formControlName="time">
-                    <mat-option *ngFor="let name of units" value="{{ name }}">{{ name }}</mat-option>
-                </mat-select>
-            </mat-form-field>
+        </div>
+        <fb-datetime-range
+            #picker
+            class="period-dates"
+            fromLabel="From (UTC)"
+            toLabel="To (UTC)"
+            [withTime]="false"
+            [utc]="true"
+            [max]="now"
+            [from]="utcDay(form.getRawValue().from)"
+            [to]="utcDay(form.getRawValue().to)"
+            [resetDuration]="sixDays"
+            resetLabel="7 days"
+            (rangeChange)="setCustomRange($event)"
+        ></fb-datetime-range>
+        <div class="granularity">
+            Granularity: <strong>{{ granularity }}</strong>
         </div>
     </div>
+    <p *ngIf="invalidRange" class="date-error" role="alert">
+        Enter a valid UTC date range. Earlier results use the last valid selection.
+    </p>
+    <div class="filter-fields">
+        <label for="analytics-merchant">
+            Merchant
+            <input
+                class="fb-filter-control fb-control-mono"
+                id="analytics-merchant"
+                formControlName="partyId"
+                placeholder="Merchant ID (e.g. party-wb-id)"
+                autocomplete="off"
+            />
+        </label>
+        <label for="analytics-shop">
+            Shop
+            <input
+                class="fb-filter-control fb-control-mono"
+                id="analytics-shop"
+                formControlName="shopId"
+                placeholder="Shop ID (e.g. shop-wb-id)"
+                autocomplete="off"
+            />
+        </label>
+        <div class="currency-field">
+            <span id="analytics-currency-label">Currency</span>
+            <mat-select
+                class="fb-filter-control fb-control-mono"
+                formControlName="type"
+                aria-labelledby="analytics-currency-label"
+            >
+                <mat-option *ngFor="let currency of currencies" [value]="currency">{{ currency }}</mat-option>
+            </mat-select>
+        </div>
+        <button
+            mat-stroked-button
+            type="button"
+            [disabled]="!currencies.length || (!breakdownFiltered && !hasActiveFilters(currencies[0]))"
+            (click)="resetFilters(currencies[0])"
+        >
+            <mat-icon>refresh</mat-icon>
+            Reset filters
+        </button>
+    </div>
+    <p *ngIf="!currencies.length" class="date-error" role="status">
+        No currencies are available for payment analytics.
+    </p>
 </form>
+<ng-template #loading>
+    <p role="status">Loading payment filters…</p>
+</ng-template>

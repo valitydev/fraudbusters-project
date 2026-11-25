@@ -1,19 +1,21 @@
-<div fxLayout="column" [fxLayoutGap]="layoutGapL">
-    <div fxLayout fxLayoutAlign="start center" [fxLayoutGap]="layoutGapM">
-        <mat-icon (click)="back()">keyboard_backspace</mat-icon>
-        <h3 class="fb-headline">Testing data set</h3>
-    </div>
-    <fb-data-set-template
-        *ngIf="dataSet$ | async as dataSet"
-        [dataSet]="dataSet"
-        (valueChanges)="updateSet($event)"
-    ></fb-data-set-template>
-</div>
-<div fxLayout="column" [fxLayoutGap]="layoutGapL">
-    <div fxLayout="column" [fxLayoutGap]="layoutGapM">
-        <fb-testing-data-data-set-list
-            *ngIf="dataSet$ | async as dataSet"
-            [dataSet]="dataSet"
-        ></fb-testing-data-data-set-list>
-    </div>
+<div class="fb-page">
+    <header class="fb-page-header">
+        <button
+            mat-stroked-button
+            type="button"
+            class="fb-template-back"
+            aria-label="Back to data sets"
+            (click)="back()"
+        >
+            <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div>
+            <h1 class="fb-page-title">Testing data set</h1>
+            <p class="fb-page-subtitle">Run rules on this data set and inspect the results.</p>
+        </div>
+    </header>
+    <ng-container *ngIf="dataSet$ | async as dataSet">
+        <fb-data-set-template [dataSet]="dataSet" (valueChanges)="updateSet()"></fb-data-set-template>
+        <fb-testing-data-data-set-list [dataSet]="dataSet"></fb-testing-data-data-set-list>
+    </ng-container>
 </div>

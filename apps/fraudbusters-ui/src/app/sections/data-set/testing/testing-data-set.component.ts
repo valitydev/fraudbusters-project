@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map, shareReplay, switchMap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { shareReplay, switchMap } from 'rxjs/operators';
 
+import { CheckedDataSet } from '../../../api/fb-management/swagger-codegen/model/checkedDataSet';
 import { DataSetService } from '../../../api/payments/data-set';
 import { TestingDataSetService } from '../../../shared/components/testing-data-set-list/services/data-set/testing-data-set.service';
-import { LAYOUT_GAP_L, LAYOUT_GAP_M } from '../../../tokens';
 
 @Component({
     selector: 'fb-testing-data-set',
@@ -13,30 +14,21 @@ import { LAYOUT_GAP_L, LAYOUT_GAP_M } from '../../../tokens';
     providers: [TestingDataSetService],
 })
 export class TestingDataSetComponent {
-    dataSet$ = this.route.params.pipe(
-        map((params) => params.id),
-        switchMap((id) => {
-            return this.dataSetService.getCheckedById(id);
-        }),
-        shareReplay(1)
-    );
+    readonly dataSet$: Observable<CheckedDataSet>;
+    private readonly refresh = new BehaviorSubject<void>(undefined);
 
-    constructor(
-        private route: ActivatedRoute,
-        private router: Router,
-        private dataSetService: DataSetService,
-        @Inject(LAYOUT_GAP_L) public layoutGapL: string,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
-    ) {}
-
-    updateSet(): void {
-        const currentUrl = this.router.url;
-        this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-            this.router.navigate([currentUrl]);
-        });
+    constructor(private route: ActivatedRoute, private router: Router, private dataSetService: DataSetService) {
+        this.dataSet$ = combineLatest([this.route.paramMap, this.refresh]).pipe(
+            switchMap(([params]) => this.dataSetService.getCheckedById(params.get('id'))),
+            shareReplay({ bufferSize: 1, refCount: true })
+        );
     }
 
-    back() {
-        this.router.navigate([`../testing/data-sets`]);
+    updateSet(): void {
+        this.refresh.next();
+    }
+
+    back(): void {
+        void this.router.navigate(['/testing/data-sets']);
     }
 }

@@ -1,52 +1,188 @@
-<mat-card>
-    <mat-card-content fxLayout="column" [fxLayoutGap]="layoutGapM">
-        <form [formGroup]="form" [fxLayoutGap]="layoutGapM">
-            <mat-form-field *ngIf="false">
-                <input matInput placeholder="Id" formControlName="id" autocomplete="false" />
-            </mat-form-field>
-            <mat-form-field fxFlex="25" appearance="outline">
-                <input matInput placeholder="Notification name" formControlName="name" autocomplete="false" />
-            </mat-form-field>
-            <mat-form-field fxFlex="25" appearance="outline">
-                <mat-select placeholder="Notification type" formControlName="type">
-                    <mat-option *ngFor="let template of notificationsTemplates$ | async" [value]="template.id">{{
-                        template.name
-                    }}</mat-option>
-                </mat-select>
-            </mat-form-field>
-            <mat-form-field fxFlex="25" appearance="outline">
-                <mat-select placeholder="Channel" formControlName="channel">
-                    <mat-option *ngFor="let channel of notificationsChannels$ | async" [value]="channel.name">{{
-                        channel.name
-                    }}</mat-option>
-                </mat-select>
-            </mat-form-field>
-            <mat-form-field fxFlex="25" appearance="outline">
-                <input matInput placeholder="Subject" formControlName="subject" autocomplete="false" />
-            </mat-form-field>
-            <mat-form-field fxFlex="25" appearance="outline">
-                <mat-select placeholder="Period" formControlName="period">
-                    <mat-option *ngFor="let name of periods" value="{{ name }}">{{ name }}</mat-option>
-                </mat-select>
-            </mat-form-field>
-            <mat-form-field fxFlex="25" appearance="outline">
-                <mat-select placeholder="Frequency" formControlName="frequency">
-                    <mat-option *ngFor="let name of frequencies" value="{{ name }}">{{ name }}</mat-option>
-                </mat-select>
-            </mat-form-field>
-        </form>
-        <div fxLayout fxLayoutAlign="end" [fxLayoutGap]="layoutGapM">
-            <button
-                mat-button
-                color="primary"
-                [disabled]="form.invalid || (inProgress$ | async)"
-                (click)="saveNotification()"
-            >
-                {{ notification ? 'Save' : 'Create' }}
-            </button>
+<div class="reference-page">
+    <header class="page-header">
+        <button
+            mat-stroked-button
+            type="button"
+            class="fb-template-back"
+            aria-label="Back to notifications"
+            [disabled]="saving"
+            (click)="back()"
+        >
+            <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="heading">
+            <h1 class="fb-page-title">{{ editing ? 'Edit notification' : 'New notification' }}</h1>
+            <p class="fb-page-subtitle">
+                {{
+                    editing
+                        ? 'Update the report settings, its schedule or its delivery channel.'
+                        : 'Choose what to report, when to send it and which channel receives it.'
+                }}
+            </p>
         </div>
-    </mat-card-content>
-    <mat-card-footer *ngIf="inProgress$ | async">
-        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-    </mat-card-footer>
-</mat-card>
+    </header>
+
+    <div *ngIf="loading" class="reference-card state" role="status">Loading notification…</div>
+    <div *ngIf="loadFailed" class="reference-card state" role="alert">
+        Could not load the notification.
+        <button mat-stroked-button type="button" (click)="retry.emit()">Retry</button>
+    </div>
+
+    <form
+        *ngIf="!loading && !loadFailed"
+        class="reference-card"
+        [formGroup]="form"
+        [attr.aria-busy]="saving"
+        (ngSubmit)="saveNotification()"
+    >
+        <section class="reference-entry" aria-labelledby="notification-report-title">
+            <div class="entry-header">
+                <h2 class="fb-section-title" id="notification-report-title">Report</h2>
+                <p class="shortcut">Fields marked <span class="required">*</span> are required.</p>
+            </div>
+            <div class="fields">
+                <div class="field">
+                    <label for="notification-name">Name <span class="required" aria-hidden="true">*</span></label>
+                    <input
+                        class="fb-form-control"
+                        id="notification-name"
+                        formControlName="name"
+                        type="text"
+                        autocomplete="off"
+                        required
+                        placeholder="e.g. Daily fraud report"
+                        aria-describedby="notification-name-hint"
+                    />
+                    <p id="notification-name-hint">Shown in the notifications list.</p>
+                </div>
+                <div class="field">
+                    <label id="notification-template-label" for="notification-template"
+                        >Template <span class="required" aria-hidden="true">*</span></label
+                    >
+                    <mat-select
+                        class="fb-form-control"
+                        id="notification-template"
+                        formControlName="type"
+                        placeholder="Choose a template"
+                        aria-labelledby="notification-template-label"
+                        aria-describedby="notification-template-hint"
+                        required
+                    >
+                        <mat-option *ngFor="let template of notificationsTemplates$ | async" [value]="template.id">{{
+                            template.name
+                        }}</mat-option>
+                    </mat-select>
+                    <p id="notification-template-hint">Report the notification is built from.</p>
+                </div>
+                <div class="field">
+                    <label for="notification-subject">Subject <span class="required" aria-hidden="true">*</span></label>
+                    <input
+                        class="fb-form-control"
+                        id="notification-subject"
+                        formControlName="subject"
+                        type="text"
+                        autocomplete="off"
+                        required
+                        placeholder="e.g. Fraud summary for the last day"
+                        aria-describedby="notification-subject-hint"
+                    />
+                    <p id="notification-subject-hint">Subject line of each report.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="reference-entry" aria-labelledby="notification-delivery-title">
+            <div class="entry-header">
+                <h2 class="fb-section-title" id="notification-delivery-title">Delivery</h2>
+                <p class="shortcut">Reports are sent to the channel on this schedule.</p>
+            </div>
+            <div class="fields">
+                <div class="field">
+                    <label id="notification-channel-label" for="notification-channel"
+                        >Channel <span class="required" aria-hidden="true">*</span></label
+                    >
+                    <mat-select
+                        class="fb-form-control fb-control-mono"
+                        id="notification-channel"
+                        formControlName="channel"
+                        placeholder="Choose a channel"
+                        aria-labelledby="notification-channel-label"
+                        aria-describedby="notification-channel-hint"
+                        required
+                    >
+                        <mat-option *ngFor="let channel of notificationsChannels$ | async" [value]="channel.name">{{
+                            channel.name
+                        }}</mat-option>
+                    </mat-select>
+                    <p id="notification-channel-hint">Channel that receives the report.</p>
+                </div>
+                <div class="field">
+                    <label id="notification-period-label" for="notification-period"
+                        >Period <span class="required" aria-hidden="true">*</span></label
+                    >
+                    <mat-select
+                        class="fb-form-control"
+                        id="notification-period"
+                        formControlName="period"
+                        placeholder="Choose a period"
+                        aria-labelledby="notification-period-label"
+                        aria-describedby="notification-period-hint"
+                        required
+                    >
+                        <mat-option *ngFor="let option of periods" [value]="option.value">{{
+                            option.label
+                        }}</mat-option>
+                    </mat-select>
+                    <p id="notification-period-hint">Time range each report covers.</p>
+                </div>
+                <div class="field">
+                    <label id="notification-frequency-label" for="notification-frequency"
+                        >Frequency <span class="required" aria-hidden="true">*</span></label
+                    >
+                    <mat-select
+                        class="fb-form-control"
+                        id="notification-frequency"
+                        formControlName="frequency"
+                        placeholder="Choose a frequency"
+                        aria-labelledby="notification-frequency-label"
+                        aria-describedby="notification-frequency-hint"
+                        required
+                    >
+                        <mat-option *ngFor="let option of frequencies" [value]="option.value">{{
+                            option.label
+                        }}</mat-option>
+                    </mat-select>
+                    <p id="notification-frequency-hint">How often the report is sent.</p>
+                </div>
+            </div>
+        </section>
+
+        <mat-progress-bar *ngIf="saving" mode="indeterminate" aria-label="Saving notification"></mat-progress-bar>
+        <footer class="page-footer">
+            <p *ngIf="error; else status" class="error" role="alert">{{ error }}</p>
+            <ng-template #status>
+                <p aria-live="polite">
+                    {{
+                        form.invalid
+                            ? 'Fill in all required fields to enable ' + (editing ? 'Save' : 'Create') + '.'
+                            : editing
+                            ? 'Changes are ready to save.'
+                            : 'The notification is ready to create.'
+                    }}
+                </p>
+            </ng-template>
+            <div class="footer-actions">
+                <button mat-stroked-button type="button" [disabled]="saving" (click)="back()">Cancel</button>
+                <button
+                    mat-flat-button
+                    color="primary"
+                    type="submit"
+                    class="create"
+                    [disabled]="form.invalid || saving"
+                >
+                    {{ editing ? 'Save' : 'Create' }}
+                </button>
+            </div>
+        </footer>
+    </form>
+</div>

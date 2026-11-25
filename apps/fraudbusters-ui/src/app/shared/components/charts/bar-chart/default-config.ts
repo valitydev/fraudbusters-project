@@ -3,7 +3,6 @@ import { ApexOptions } from 'ng-apexcharts';
 import { DEFAULT_ANIMATION } from '../default-animation';
 import { DEFAULT_LEGEND } from '../default-legend';
 import { DEFAULT_STATES } from '../default-states';
-import { formatAmount } from '../format-amount';
 
 const COLUMN_WIDTH = '30%';
 
@@ -30,7 +29,8 @@ export const DEFAULT_CONFIG: ApexOptions = {
     dataLabels: {
         enabled: false,
     },
-    legend: DEFAULT_LEGEND,
+    legend: { ...DEFAULT_LEGEND, position: 'top', horizontalAlign: 'right' },
+    grid: { borderColor: 'var(--fb-line)', strokeDashArray: 4 },
     fill: {
         opacity: 1,
     },
@@ -38,6 +38,7 @@ export const DEFAULT_CONFIG: ApexOptions = {
         bar: {
             horizontal: false,
             columnWidth: COLUMN_WIDTH,
+            borderRadius: 4,
         },
     },
     xaxis: {
@@ -57,9 +58,11 @@ export const DEFAULT_CONFIG: ApexOptions = {
         },
     },
     yaxis: {
-        forceNiceScale: true,
+        min: 0,
+        max: 100,
+        tickAmount: 4,
         labels: {
-            formatter: formatAmount,
+            formatter: (value) => value + '%',
         },
     },
     states: DEFAULT_STATES,

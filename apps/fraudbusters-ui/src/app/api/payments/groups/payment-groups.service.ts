@@ -21,7 +21,7 @@ export class PaymentGroupsService {
     }
 
     getGroupById(id: string): Observable<Group> {
-        return this.http.get<Group>(`${this.fbPaymentReferenceEndpoint}/${id}`);
+        return this.http.get<Group>(`${this.fbPaymentReferenceEndpoint}/${encodeURIComponent(id)}`);
     }
 
     delete(id: string): Observable<string> {

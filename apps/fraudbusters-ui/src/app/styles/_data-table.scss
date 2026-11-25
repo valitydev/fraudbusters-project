@@ -1,0 +1,698 @@
+@use './primitives';
+
+// One look for every list on every page: a shared table surface, a plain header and
+// rows split by hairlines. Rows are either expansion panels or cards.
+
+$fb-table-heading: var(--fb-text, #3d3a4b);
+$fb-table-line: var(--fb-line, #efeef4);
+$fb-action-primary: var(--fb-accent, #6741b7);
+$fb-action-danger: var(--fb-danger, #a4263a);
+$fb-action-neutral: var(--fb-muted, #625f74);
+$fb-table-ink: var(--fb-text, #252335);
+$fb-table-muted: var(--fb-muted, #5f5b70);
+$fb-table-caption: var(--fb-muted, #8a869a);
+// One tint for hover and for the whole open row; the left bar is the only accent.
+$fb-table-tint: var(--fb-raised, #faf9fd);
+$fb-table-control-line: var(--fb-line, #dcdae5);
+
+@mixin fb-table-button-label($size) {
+    --mdc-outlined-button-label-text-size: #{$size};
+    --mdc-outlined-button-label-text-tracking: normal;
+    --mdc-text-button-label-text-size: #{$size};
+    --mdc-text-button-label-text-tracking: normal;
+}
+
+// Outlined page-level action (Create …, Add …).
+@mixin fb-outlined-color($color, $outline: $color) {
+    --mdc-outlined-button-label-text-color: #{$color};
+    --mdc-outlined-button-outline-color: #{$outline};
+    color: $color;
+}
+
+.fb-primary-action {
+    @include fb-outlined-color($fb-action-primary);
+    @include fb-table-button-label(var(--fb-table-font-size));
+}
+
+.mat-mdc-card.fb-list-item,
+.fb-data-table .mat-expansion-panel {
+    background-color: transparent;
+}
+
+.fb-data-table {
+    @include primitives.panel;
+    box-shadow: 0 1px 2px rgba(37, 35, 53, 0.03);
+    overflow-x: auto;
+    container-type: inline-size;
+
+    // Header components and rows are custom elements: make them span the box.
+    > * {
+        display: block;
+        min-width: 520px;
+    }
+
+    // Rows: hairline between rows, none under the last one.
+    .mat-expansion-panel,
+    .mat-mdc-card.fb-list-item {
+        border: 0;
+        border-bottom: 1px solid $fb-table-line;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    > .fb-data-row:last-of-type {
+        .mat-expansion-panel,
+        .mat-mdc-card.fb-list-item {
+            border-bottom: 0;
+        }
+    }
+
+    .mat-mdc-card.fb-list-item {
+        min-height: 56px;
+        padding: 14px 24px !important;
+    }
+
+    .mat-expansion-panel-header {
+        box-sizing: border-box;
+        min-height: 56px;
+        padding: 14px 24px !important;
+    }
+
+    .mat-mdc-card.fb-list-item,
+    .mat-expansion-panel-header {
+        transition: background-color 120ms ease;
+    }
+
+    .mat-mdc-card.fb-list-item:hover,
+    .mat-expansion-panel-header:hover {
+        background-color: $fb-table-tint !important;
+    }
+
+    .mat-expansion-panel-header.mat-expanded {
+        background-color: transparent !important;
+        box-shadow: inset 3px 0 0 $fb-action-primary;
+    }
+
+    .mat-expansion-indicator::after {
+        color: $fb-table-caption;
+    }
+
+    .mat-expansion-panel-body {
+        padding: 0;
+    }
+
+    .mat-expansion-panel.mat-expanded .fb-row-detail {
+        box-shadow: inset 3px 0 0 $fb-action-primary;
+    }
+
+    // Cells: the first column names the row, the rest are supporting values.
+    .fb-list-item,
+    .mat-expansion-panel-header {
+        .fb-body-2 {
+            color: $fb-table-muted;
+            font-weight: 400;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .fb-body-2:first-child,
+        .fb-body-checkbox + .fb-body-2 {
+            color: $fb-table-ink;
+            font-weight: 500;
+        }
+    }
+
+    // Expanded row content: details and the row actions under them.
+    .fb-row-detail {
+        box-sizing: border-box;
+        display: grid;
+        gap: 8px;
+        grid-template-columns: minmax(0, 1fr);
+        max-inline-size: 100cqw;
+        padding: 10px 24px 12px;
+    }
+
+    // Row details: label above value, four columns, no separators.
+    .fb-details {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px 24px;
+        margin: 0;
+
+        dt {
+            margin-bottom: 2px;
+            color: $fb-table-caption;
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 16px;
+        }
+
+        dd {
+            margin: 0;
+            color: $fb-table-ink;
+            font-size: 14px;
+            line-height: 20px;
+            font-variant-numeric: tabular-nums;
+            overflow-wrap: anywhere;
+        }
+    }
+
+    @container (max-width: 720px) {
+        .fb-details {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    .fb-template-rules-code {
+        display: grid;
+        gap: 4px;
+        padding: 7px 10px;
+        border: 1px solid $fb-table-line;
+        border-radius: 6px;
+        background: var(--fb-surface, #fff);
+        color: var(--fb-text, #34313b);
+        overflow-wrap: anywhere;
+
+        code {
+            white-space: pre-wrap;
+        }
+    }
+
+    @container (max-width: 580px) {
+        .fb-row-detail {
+            padding-inline: 12px;
+        }
+    }
+}
+
+// Buttons under an expanded row (Remove / Copy / Edit …).
+.fb-row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+
+    // Same neutral outline for every row button; only Remove gets a colored label.
+    button {
+        @include fb-outlined-color($fb-table-ink, $fb-table-control-line);
+        background-color: var(--fb-surface, #fff);
+        min-width: 0;
+        height: var(--fb-row-control-height);
+        padding-inline: 10px;
+        letter-spacing: normal;
+    }
+
+    button.fb-action-remove {
+        @include fb-outlined-color($fb-action-danger, $fb-table-control-line);
+    }
+}
+
+.fb-catalog-row-actions,
+.fb-catalog-row-actions fb-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fb-catalog-row-actions {
+    justify-content: flex-end;
+}
+
+.fb-catalog-row-actions .fb-catalog-action-edit {
+    min-width: 0;
+    height: var(--fb-row-control-height);
+    padding-inline: 10px;
+}
+
+.fb-catalog-table .mat-mdc-icon-button {
+    --mdc-icon-button-state-layer-size: var(--fb-row-control-height);
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 var(--fb-row-control-height);
+    width: var(--fb-row-control-height);
+    height: var(--fb-row-control-height);
+    padding: 0;
+
+    mat-icon {
+        display: block;
+        width: 20px;
+        height: 20px;
+        margin: 0;
+        font-size: 20px;
+        line-height: 1;
+    }
+}
+
+.fb-catalog-row-actions .fb-catalog-action-expand {
+    color: var(--fb-muted, #625f74);
+}
+
+.fb-sort-header {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+
+    .mat-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+    }
+}
+
+// Soft colored pill for categorical values (command type, status …).
+// Badges from the prototypes: a 50 background, 700 text, 200 border and a 500 dot per tone.
+.fb-pill {
+    display: inline-block;
+    padding: 3px 9px;
+    border: 1px solid var(--fb-neutral-border, #e2e8f0);
+    border-radius: 6px;
+    background-color: var(--fb-neutral-bg, #f1f5f9);
+    color: var(--fb-neutral, #475569);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 18px;
+    --fb-pill-dot: var(--fb-neutral-dot, #94a3b8);
+
+    &.fb-pill-success {
+        border-color: var(--fb-success-border, #a7f3d0);
+        background-color: var(--fb-success-bg, #ecfdf5);
+        color: var(--fb-success, #047857);
+        --fb-pill-dot: var(--fb-success-dot, #10b981);
+    }
+
+    &.fb-pill-info {
+        border-color: var(--fb-info-border, #bae6fd);
+        background-color: var(--fb-info-bg, #f0f9ff);
+        color: var(--fb-info, #0369a1);
+        --fb-pill-dot: var(--fb-info-dot, #0ea5e9);
+    }
+
+    &.fb-pill-warning {
+        border-color: var(--fb-warning-border, #fde68a);
+        background-color: var(--fb-warning-bg, #fffbeb);
+        color: var(--fb-warning, #b45309);
+        --fb-pill-dot: var(--fb-warning-dot, #f59e0b);
+    }
+
+    &.fb-pill-danger {
+        border-color: var(--fb-danger-border, #fecdd3);
+        background-color: var(--fb-danger-bg, #fff1f2);
+        color: var(--fb-danger, #be123c);
+        --fb-pill-dot: var(--fb-danger-dot, #f43f5e);
+    }
+
+    &.fb-pill-accent {
+        border-color: var(--fb-accent-border, #ddd6fe);
+        background-color: var(--fb-selected, #f3effe);
+        color: $fb-action-primary;
+        --fb-pill-dot: var(--fb-accent, #6338f5);
+    }
+}
+
+// Status badge: the pill tones with a leading dot in monospace, as in the prototype tables.
+.fb-pill.fb-pill-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    font-family: var(--fb-font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 16px;
+    white-space: nowrap;
+
+    &::before {
+        flex: 0 0 6px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--fb-pill-dot);
+        content: '';
+    }
+}
+
+// Fraudo rule highlighting (tokens from the fraudoTokens pipe): table rows and the editor.
+.fb-template-rules-code,
+.fb-fraudo-code {
+    .fb-code-keyword {
+        color: $fb-action-primary;
+        font-weight: 600;
+    }
+
+    .fb-code-function {
+        color: var(--fb-info, #2f58c4);
+    }
+
+    .fb-code-string {
+        color: var(--fb-success, #1d7a46);
+    }
+
+    .fb-code-number {
+        color: var(--fb-warning, #b05a12);
+    }
+
+    .fb-code-name {
+        font-weight: 600;
+    }
+
+    .fb-code-operator,
+    .fb-code-punctuation {
+        color: $fb-table-caption;
+    }
+
+    // Editor checks (checkFraudo). Only colour, background and decoration: the editor
+    // overlay must keep the glyph metrics of the textarea above it.
+    .fb-code-problem {
+        color: var(--fb-danger);
+        text-decoration: underline wavy var(--fb-danger);
+        text-decoration-skip-ink: none;
+        text-underline-offset: 3px;
+    }
+
+    .fb-code-punctuation.fb-code-problem {
+        border-radius: 2px;
+        background: var(--fb-danger-bg);
+    }
+
+    // The bracket next to the caret and its pair.
+    .fb-code-pair:not(.fb-code-problem) {
+        border-radius: 2px;
+        background: var(--fb-accent-soft);
+        box-shadow: inset 0 0 0 1px var(--fb-accent-border);
+        color: var(--fb-accent);
+    }
+
+    [class^='fb-code-result-'] {
+        padding: 1px 4px;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+
+    .fb-code-result-decline {
+        background-color: var(--fb-danger-bg, #fdeced);
+        color: var(--fb-danger, #b4283b);
+    }
+
+    .fb-code-result-accept {
+        background-color: var(--fb-success-bg, #e8f6ee);
+        color: var(--fb-success, #1d7a46);
+    }
+
+    .fb-code-result-review {
+        background-color: var(--fb-warning-bg, #fdf3e4);
+        color: var(--fb-warning, #a35a00);
+    }
+}
+
+.fb-catalog-panel {
+    --fb-catalog-control-width: 320px;
+
+    @include primitives.panel;
+    overflow: hidden;
+
+    .table-toolbar,
+    .table-filters,
+    .table-controls,
+    .table-footer,
+    .sort-control,
+    .filter-control {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 12px;
+    }
+
+    .table-toolbar {
+        justify-content: space-between;
+        padding: var(--fb-table-toolbar-padding-block) var(--fb-table-edge-padding);
+    }
+
+    .table-controls,
+    .table-footer {
+        color: var(--fb-muted, #625f74);
+        font-size: var(--fb-table-font-size);
+    }
+
+    :where(.table-toolbar, .table-footer) :where(.mat-mdc-outlined-button, .mat-mdc-button) {
+        @include fb-table-button-label(var(--fb-table-font-size));
+    }
+
+    .table-footer {
+        box-sizing: border-box;
+        min-height: var(--fb-table-footer-height);
+        justify-content: flex-end;
+        padding: 4px var(--fb-table-edge-padding);
+
+        .load-more {
+            margin: 0;
+        }
+    }
+
+    .table-filters {
+        flex: 1 1 420px;
+        min-width: 0;
+    }
+
+    .table-filters:has(> fb-datetime-range) {
+        align-items: flex-end;
+    }
+
+    .filter-control {
+        max-width: 100%;
+        color: var(--fb-muted, #625f74);
+        font-size: var(--fb-table-font-size);
+    }
+
+    fb-catalog-search {
+        flex: 0 1 var(--fb-catalog-control-width);
+        min-width: 0;
+    }
+
+    .table-state {
+        margin: 0;
+        padding: 20px;
+        border-top: 1px solid var(--fb-line, #e0e3ed);
+        color: var(--fb-muted, #625f74);
+    }
+
+    .load-more {
+        display: block;
+        margin: 8px auto;
+    }
+
+    .catalog-select {
+        position: relative;
+        display: inline-block;
+        inline-size: var(--fb-catalog-control-width);
+        max-inline-size: 100%;
+        color: var(--fb-text, #252335);
+
+        &::after {
+            position: absolute;
+            inset-inline-end: 12px;
+            top: 50%;
+            width: 0;
+            height: 0;
+            border: solid transparent;
+            border-width: 5px 5px 0;
+            border-top-color: currentColor;
+            transform: translateY(-50%);
+            pointer-events: none;
+            content: '';
+        }
+
+        > mat-select {
+            @include primitives.control(var(--fb-filter-height));
+            display: flex;
+            align-items: center;
+            inline-size: 100%;
+            padding: 4px 32px 4px 12px;
+        }
+
+        .mat-mdc-select-arrow-wrapper {
+            display: none;
+        }
+
+        @media (forced-colors: active) {
+            &::after {
+                border-top-color: ButtonText;
+                forced-color-adjust: none;
+            }
+        }
+    }
+
+    .filter-control .catalog-select {
+        inline-size: calc(var(--fb-catalog-control-width) / 2);
+    }
+
+    @media (max-width: 480px) {
+        .filter-control,
+        .sort-control {
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        .table-controls {
+            width: 100%;
+        }
+    }
+}
+
+// Every select and autocomplete shares the option scale of the catalog filters.
+.mat-mdc-select-panel,
+.mat-mdc-autocomplete-panel {
+    box-sizing: border-box;
+
+    // Multiple selection looks like single selection in Lists: no checkbox squares,
+    // a check mark on the right of each chosen option.
+    .mat-mdc-option-multiple {
+        .mat-pseudo-checkbox-full {
+            display: none;
+        }
+
+        &.mdc-list-item--selected::after {
+            flex: 0 0 auto;
+            width: 12px;
+            height: 6px;
+            margin: 0 4px 4px auto;
+            border-bottom: 2px solid var(--fb-accent, #6338f5);
+            border-left: 2px solid var(--fb-accent, #6338f5);
+            transform: rotate(-45deg);
+            content: '';
+        }
+    }
+
+    .mat-mdc-option {
+        min-height: 36px;
+        padding-inline: 12px;
+        color: var(--fb-text, #252335);
+        font: 400 13px / 20px var(--fb-font-sans);
+        letter-spacing: normal;
+
+        &.mdc-list-item--selected {
+            background: var(--fb-selected, #f1ecfc);
+        }
+
+        &.mdc-list-item--selected:not(.mat-mdc-option-multiple) .mdc-list-item__primary-text {
+            color: var(--fb-accent, #6338f5);
+        }
+    }
+
+    .mat-pseudo-checkbox-minimal.mat-pseudo-checkbox-checked::after {
+        color: var(--fb-accent, #6338f5);
+    }
+}
+
+.fb-catalog-scroll {
+    overflow-x: auto;
+}
+
+.fb-catalog-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    color: var(--fb-text, #252335);
+    font: 400 var(--fb-table-font-size) / var(--fb-table-line-height) var(--fb-font-sans);
+    letter-spacing: normal;
+
+    > thead > tr {
+        height: var(--fb-table-header-height);
+    }
+
+    // A single spanning cell is the expanded detail, sized by its content.
+    > tbody > tr:not(:has(> td[colspan]:only-child)) {
+        height: var(--fb-table-row-height);
+    }
+
+    th,
+    td {
+        padding: var(--fb-table-cell-padding-block) var(--fb-table-cell-padding-inline);
+        text-align: start;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--fb-line);
+    }
+
+    > :is(thead, tbody) > tr {
+        > :first-child {
+            padding-inline-start: var(--fb-table-edge-padding);
+        }
+
+        > :last-child {
+            padding-inline-end: var(--fb-table-edge-padding);
+        }
+    }
+
+    .mat-mdc-checkbox {
+        --mdc-checkbox-state-layer-size: var(--fb-row-control-height);
+    }
+
+    thead th:has(> mat-checkbox) {
+        padding-block: 0;
+    }
+
+    .fb-catalog-action-cell {
+        text-align: end;
+    }
+
+    .fb-catalog-date-column {
+        width: 13rem;
+    }
+
+    .fb-catalog-row-label {
+        font-weight: 500;
+    }
+
+    :where(.fb-catalog-mono, :not(pre) > code) {
+        font-family: var(--fb-font-mono);
+        font-size: var(--fb-table-value-font-size);
+        line-height: var(--fb-table-line-height);
+    }
+
+    :where(.fb-catalog-time) {
+        color: var(--fb-muted);
+        font-size: var(--fb-table-value-font-size);
+        line-height: var(--fb-table-line-height);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+
+    .fb-catalog-link {
+        color: var(--fb-accent);
+        text-decoration: none;
+        text-underline-offset: 2px;
+
+        &:hover,
+        &:focus-visible {
+            color: var(--fb-accent-hover);
+            text-decoration: underline;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--fb-accent);
+            outline-offset: 2px;
+        }
+    }
+
+    :where(.mat-mdc-outlined-button, .mat-mdc-button) {
+        @include fb-table-button-label(var(--fb-table-value-font-size));
+        height: var(--fb-row-control-height);
+    }
+
+    thead th {
+        padding-block: calc((var(--fb-table-header-height) - var(--fb-table-heading-line-height) - 1px) / 2);
+        border-top: 1px solid var(--fb-line, #e0e3ed);
+        background: var(--fb-raised, #f7f8fb);
+        color: var(--fb-muted, #625f74);
+        text-transform: uppercase;
+        font-size: var(--fb-table-heading-font-size);
+        line-height: var(--fb-table-heading-line-height);
+        letter-spacing: 0.04em;
+    }
+}

@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New group — Fraud Monitoring</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+          },
+          colors: {
+            canvas: '#F6F7FB',
+            surface: '#FFFFFF',
+            borderSubtle: '#E5E7EB',
+            borderStrong: '#D1D5DB',
+            ink: '#1E2438',
+            muted: '#6E768E',
+            brand: {
+              DEFAULT: '#5E35B1',
+              hover: '#512DA8',
+              soft: '#F2EEFC',
+              border: '#D7C9F8',
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      background-color: #F6F7FB;
+      color: #1E2438;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D8DCE8;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #B8C0D4;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row">
+
+  <!-- Mobile Top Navigation Bar -->
+  <header class="lg:hidden bg-surface border-b border-borderSubtle px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+    <div class="flex items-center gap-3">
+      <button id="mobileMenuBtn" type="button" class="p-2 rounded-lg text-ink hover:bg-canvas transition" aria-label="Toggle navigation">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg bg-brand flex items-center justify-center text-white font-bold text-base shadow-sm">F</div>
+        <span class="font-semibold text-sm text-ink">FraudGuard</span>
+      </div>
+    </div>
+    <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-brand-soft text-brand border border-brand-border">
+      Groups
+    </span>
+  </header>
+
+  <!-- Mobile Sidebar Backdrop -->
+  <div id="sidebarBackdrop" class="fixed inset-0 bg-slate-900/30 z-30 hidden lg:hidden"></div>
+
+  <!-- Left Navigation Sidebar -->
+  <aside id="sidebar" class="fixed lg:sticky top-0 left-0 z-40 h-screen w-[224px] shrink-0 bg-surface border-r border-borderSubtle flex flex-col justify-between transition-transform duration-200 -translate-x-full lg:translate-x-0">
+    <div>
+      <!-- Brand Logo -->
+      <div class="h-14 px-5 flex items-center justify-center lg:justify-start">
+        <a href="#groups" onclick="showToast('Navigated to Groups list', 'info'); return false;" class="flex items-center gap-2.5 focus:outline-none">
+          <svg class="w-7 h-7 text-brand" viewBox="0 0 28 28" fill="none">
+            <rect x="4" y="3" width="6" height="22" rx="2.5" fill="currentColor" />
+            <rect x="4" y="3" width="18" height="5.5" rx="2.5" fill="currentColor" />
+            <rect x="4" y="11.5" width="13" height="5" rx="2.5" fill="#7E57C2" />
+            <circle cx="20.5" cy="14" r="2.5" fill="#9575CD" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Navigation List -->
+      <nav class="px-3 py-2 space-y-1 text-[13px] font-medium">
+        <div>
+          <button id="paymentsToggle" type="button" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-ink hover:bg-canvas transition">
+            <span class="flex items-center gap-2.5">
+              <svg class="w-4 h-4 text-muted" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <rect x="3" y="5" width="18" height="14" rx="2.5" />
+                <path d="M3 10h18" />
+              </svg>
+              Payments
+            </span>
+            <svg id="paymentsChevron" class="w-3.5 h-3.5 text-muted transition-transform duration-150" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+            </svg>
+          </button>
+
+          <div id="paymentsSubmenu" class="mt-1 space-y-0.5 pl-2">
+            <a href="#analytics" onclick="showToast('Navigation: Analytics', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+              </svg>
+              Analytics
+            </a>
+
+            <a href="#templates" onclick="showToast('Navigation: Templates', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <rect x="4" y="3" width="16" height="18" rx="2" />
+                <path stroke-linecap="round" d="M8 8h8M8 12h8M8 16h5" />
+              </svg>
+              Templates
+            </a>
+
+            <!-- Active Item: Groups -->
+            <a href="#groups" onclick="return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-brand-soft text-brand font-semibold transition">
+              <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+                <circle cx="9" cy="8" r="3" />
+                <circle cx="16" cy="10" r="2.5" />
+                <path stroke-linecap="round" d="M4 19c0-2.8 2.2-5 5-5s5 2.2 5 5M14 19c0-2 1.5-3.6 3.5-3.6 1.2 0 2.2.5 2.8 1.4" />
+              </svg>
+              Groups
+            </a>
+
+            <a href="#lists" onclick="showToast('Navigation: Lists', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" />
+              </svg>
+              Lists
+            </a>
+
+            <a href="#testing" onclick="showToast('Navigation: Testing', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M9 3h6l1 3h3v4l-2 2v5a3 3 0 01-3 3h-4a3 3 0 01-3-3v-5l-2-2V6h3l1-3z" />
+              </svg>
+              Testing
+            </a>
+
+            <a href="#historical" onclick="showToast('Navigation: Historical data', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Historical data
+            </a>
+          </div>
+        </div>
+
+        <div class="pt-1 space-y-0.5">
+          <button type="button" onclick="showToast('Navigation: Payouts', 'info')" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+            <span class="flex items-center gap-2.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <rect x="3" y="6" width="18" height="12" rx="2" />
+                <circle cx="16" cy="12" r="1.5" />
+              </svg>
+              Payouts
+            </span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          <a href="#notifications" onclick="showToast('Navigation: Notifications', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            Notifications
+          </a>
+
+          <a href="#audit" onclick="showToast('Navigation: Audit', 'info'); return false;" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-canvas transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Audit
+          </a>
+        </div>
+      </nav>
+    </div>
+
+    <!-- User Profile Footer -->
+    <div class="p-3 border-t border-borderSubtle">
+      <div class="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-canvas cursor-pointer transition">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-full bg-brand-soft text-brand font-semibold text-xs flex items-center justify-center shrink-0">
+            D
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs font-semibold text-ink truncate">dsfsdfadsf</p>
+            <p class="text-[11px] text-muted truncate">Officer, Monitoring</p>
+          </div>
+        </div>
+        <svg class="w-3.5 h-3.5 text-muted shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+        </svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 min-w-0 px-4 sm:px-8 py-6 max-w-[1360px] mx-auto w-full space-y-5">
+
+    <!-- Compact Prototype QA / State Sandbox Bar -->
+    <div class="bg-surface border border-borderSubtle rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2.5 shadow-2xs">
+      <div class="flex items-center gap-2 text-xs text-muted">
+        <span class="w-2 h-2 rounded-full bg-brand"></span>
+        <span class="font-semibold text-ink">Prototype State Sandbox</span>
+        <span class="hidden md:inline text-muted">— test validation states, sample batch, or reset</span>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-1.5">
+        <button
+          type="button"
+          onclick="fillSampleGroupScenario()"
+          class="px-2.5 py-1 rounded-lg bg-brand-soft hover:bg-[#E7DDFB] text-brand border border-brand-border/80 text-[11.5px] font-semibold transition"
+        >
+          Fill sample group (3 templates)
+        </button>
+        <button
+          type="button"
+          onclick="triggerValidationErrorsDemo()"
+          class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[11.5px] font-semibold transition"
+        >
+          Test validation errors
+        </button>
+        <button
+          type="button"
+          onclick="resetPrototypeForm()"
+          class="px-2.5 py-1 rounded-lg bg-canvas hover:bg-slate-200/70 text-ink border border-borderSubtle text-[11.5px] font-medium transition"
+        >
+          Reset form
+        </button>
+      </div>
+    </div>
+
+    <!-- 1. Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div class="flex items-center gap-3.5">
+        <button
+          type="button"
+          onclick="handleBackAction()"
+          class="w-9 h-9 rounded-lg bg-surface border border-borderSubtle hover:border-borderStrong hover:bg-slate-50 flex items-center justify-center text-ink transition shadow-2xs shrink-0"
+          title="Back to Groups"
+          aria-label="Back to Groups"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        </button>
+        <div>
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <h1 class="text-[22px] font-semibold tracking-tight text-ink leading-tight">New group</h1>
+            <span class="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-brand-soft text-brand border border-brand-border/70">
+              Draft
+            </span>
+          </div>
+          <p class="text-xs text-muted mt-0.5">Combine rule templates into an ordered group with execution weights.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Card 1: Group Details -->
+    <section class="bg-surface border border-borderSubtle rounded-xl p-6 shadow-2xs">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+        <div>
+          <h2 class="text-sm font-semibold text-ink">Group details</h2>
+          <p class="text-xs text-muted mt-0.5">Identify the rule group and optional operational notes</p>
+        </div>
+        <span class="inline-flex items-center gap-1.5 self-start sm:self-auto text-[11px] font-medium px-2.5 py-1 rounded-full bg-canvas border border-borderSubtle text-muted">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          Status: Ready on create
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        <!-- Group Name Input (Full-width primary or 7 cols + optional description 5 cols) -->
+        <div class="lg:col-span-7">
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="groupNameInput" class="text-xs font-semibold text-ink">
+              Group name <span class="text-red-500">*</span>
+            </label>
+            <span id="groupNameBadge" class="hidden items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full"></span>
+          </div>
+          <input
+            id="groupNameInput"
+            type="text"
+            placeholder="e.g. high-risk-cards-eu"
+            autocomplete="off"
+            spellcheck="false"
+            class="w-full font-mono text-xs px-3.5 py-2.5 rounded-lg bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 text-ink placeholder:text-[#9AA2B8] outline-none transition"
+          />
+          <p id="groupNameHelper" class="text-[11.5px] text-muted mt-1.5">
+            Use lowercase letters, numbers, and hyphens (slug format, e.g. <code class="font-mono text-ink">high-risk-cards-eu</code>).
+          </p>
+        </div>
+
+        <!-- Optional Description Input -->
+        <div class="lg:col-span-5">
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="groupDescriptionInput" class="text-xs font-semibold text-ink">
+              Description <span class="text-muted font-normal">(optional)</span>
+            </label>
+            <span id="descCharCounter" class="text-[11px] text-muted tabular-nums">0 / 140</span>
+          </div>
+          <input
+            id="groupDescriptionInput"
+            type="text"
+            maxlength="140"
+            placeholder="e.g. Blocks black-listed tokens and enforces velocity limits"
+            autocomplete="off"
+            class="w-full text-xs px-3.5 py-2.5 rounded-lg bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 text-ink placeholder:text-[#9AA2B8] outline-none transition"
+          />
+          <p class="text-[11.5px] text-muted mt-1.5">
+            Shown in group summaries and audit entries for faster triage.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Card 2: Group Templates & Staged Ordered List -->
+    <section class="bg-surface border border-borderSubtle rounded-xl shadow-2xs overflow-hidden">
+      <!-- Top Input Row -->
+      <div class="p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-4">
+          <div>
+            <h2 class="text-sm font-semibold text-ink">Group templates</h2>
+            <p class="text-xs text-muted mt-0.5">Add rule templates and set their execution weight / priority order</p>
+          </div>
+          <span class="text-[11px] text-muted hidden md:inline">
+            Press <kbd class="px-1.5 py-0.5 font-mono text-[10.5px] bg-canvas border border-borderSubtle rounded text-ink">Enter</kbd> in Weight to stage template
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+          <!-- Template ID Input with Datalist Autocomplete -->
+          <div class="md:col-span-7">
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="templateIdInput" class="text-xs font-semibold text-ink">
+                Template ID <span class="text-red-500">*</span>
+              </label>
+              <span id="templateIdBadge" class="hidden items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full"></span>
+            </div>
+            <input
+              id="templateIdInput"
+              type="text"
+              list="existingTemplatesList"
+              placeholder="e.g. black-list-template-id"
+              autocomplete="off"
+              spellcheck="false"
+              class="w-full font-mono text-xs px-3.5 py-2.5 rounded-lg bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 text-ink placeholder:text-[#9AA2B8] outline-none transition"
+            />
+            <datalist id="existingTemplatesList">
+              <option value="black-list-template-id"></option>
+              <option value="grey-list-template-id"></option>
+              <option value="white-list-template-id"></option>
+              <option value="test-columbus-templ-id"></option>
+              <option value="test-templ-aggr-id"></option>
+              <option value="test-templ-id"></option>
+            </datalist>
+            <p id="templateIdHelper" class="text-[11.5px] text-muted mt-1.5">
+              Pick from known templates or type an ID (e.g. <code class="font-mono text-ink">black-list-template-id</code>).
+            </p>
+          </div>
+
+          <!-- Weight / Priority Numeric Input -->
+          <div class="md:col-span-3">
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="templateWeightInput" class="text-xs font-semibold text-ink">
+                Weight / Priority <span class="text-red-500">*</span>
+              </label>
+              <span class="font-mono text-[11px] text-muted">int ≥ 1</span>
+            </div>
+            <input
+              id="templateWeightInput"
+              type="number"
+              min="1"
+              step="1"
+              value="1"
+              class="w-full font-mono text-xs font-semibold tabular-nums px-3.5 py-2.5 rounded-lg bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 text-ink outline-none transition"
+            />
+            <p id="templateWeightHelper" class="text-[11.5px] text-muted mt-1.5">
+              Lower weight runs earlier; equal weights follow list order.
+            </p>
+          </div>
+
+          <!-- + Add template Button -->
+          <div class="md:col-span-2 md:pt-[26px]">
+            <button
+              type="button"
+              onclick="addTemplateToGroup()"
+              class="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-lg bg-brand-soft hover:bg-[#E7DDFB] text-brand border border-brand-border/80 text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-brand/20 whitespace-nowrap"
+            >
+              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              Add template
+            </button>
+          </div>
+        </div>
+
+        <!-- Inline Stage Feedback -->
+        <div id="stageFeedbackBanner" class="hidden mt-3.5 px-3.5 py-2 rounded-lg text-xs font-medium flex items-center gap-2"></div>
+      </div>
+
+      <!-- Staged Templates List / Table -->
+      <div class="border-t border-borderSubtle bg-[#FAFBFD]/60">
+        <div class="px-6 py-3 border-b border-borderSubtle flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-ink">Staged templates</h3>
+            <span id="stagedTemplatesCount" class="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-canvas border border-borderSubtle text-muted tabular-nums">0</span>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button
+              id="sortByWeightBtn"
+              type="button"
+              onclick="sortStagedByWeight()"
+              class="hidden items-center gap-1 text-xs font-medium text-brand hover:underline"
+            >
+              Sort by weight ↑
+            </button>
+            <button
+              id="clearStagedTemplatesBtn"
+              type="button"
+              onclick="clearStagedTemplates()"
+              class="hidden text-xs font-medium text-muted hover:text-rose-600 transition"
+            >
+              Clear all
+            </button>
+          </div>
+        </div>
+
+        <!-- Clean Helper Note When Empty -->
+        <div id="stagedEmptyNote" class="py-9 px-6 text-center bg-surface">
+          <div class="w-10 h-10 rounded-xl bg-canvas border border-borderSubtle flex items-center justify-center mx-auto mb-2.5 text-muted">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10M4 18h6" />
+            </svg>
+          </div>
+          <p class="text-xs font-semibold text-ink">No templates staged yet</p>
+          <p class="text-xs text-muted max-w-lg mx-auto mt-1">
+            Enter a <span class="font-mono text-ink">Template ID</span> and <span class="font-medium text-ink">Weight / Priority</span> above, then click <span class="font-semibold text-brand">+ Add template</span> to stage multiple rules in order — or enter a Template ID and click <span class="font-semibold text-ink">Create</span> directly.
+          </p>
+        </div>
+
+        <!-- Staged Templates Table -->
+        <div id="stagedTableContainer" class="hidden overflow-x-auto bg-surface">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-borderSubtle bg-[#FAFBFD] text-[11px] font-semibold uppercase tracking-wider text-muted">
+                <th class="py-2.5 pl-6 pr-2 w-14">Order</th>
+                <th class="py-2.5 px-3 w-[44%]">Template ID</th>
+                <th class="py-2.5 px-3 w-[22%]">Weight / Priority</th>
+                <th class="py-2.5 px-3 w-[14%]">Position</th>
+                <th class="py-2.5 pl-2 pr-6 text-right w-[14%]">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="stagedTemplatesBody" class="divide-y divide-borderSubtle text-xs">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 4. Bottom Action Bar -->
+      <div class="px-6 py-4 bg-surface border-t border-borderSubtle flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div id="bottomStatusHint" class="text-xs text-muted flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+          <span>Enter a valid Group name and at least one Template ID to create the group</span>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5">
+          <button
+            type="button"
+            onclick="handleBackAction()"
+            class="px-4 py-2 rounded-lg bg-surface border border-borderStrong hover:bg-canvas text-ink text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-brand/20"
+          >
+            Back
+          </button>
+
+          <button
+            id="createGroupBtn"
+            type="button"
+            onclick="submitNewGroup()"
+            class="px-5 py-2 rounded-lg bg-brand hover:bg-brand-hover text-white text-xs font-semibold shadow-2xs transition focus:outline-none focus:ring-2 focus:ring-brand/40 tabular-nums"
+          >
+            Create
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Validation Error Summary Banner -->
+    <div id="validationAlertBanner" class="hidden bg-surface border border-rose-200 rounded-xl p-4 shadow-2xs">
+      <div class="flex items-start gap-3">
+        <div class="w-7 h-7 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0 mt-0.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="text-xs font-semibold text-rose-800">Please fix the following before creating the group:</h3>
+          <ul id="validationErrorList" class="mt-1 list-disc list-inside text-xs text-rose-700 space-y-0.5"></ul>
+        </div>
+        <button
+          type="button"
+          onclick="document.getElementById('validationAlertBanner').classList.add('hidden')"
+          class="text-xs font-medium text-muted hover:text-ink"
+        >
+          Hide
+        </button>
+      </div>
+    </div>
+
+    <!-- Created Group Confirmation Banner -->
+    <div id="createdGroupBanner" class="hidden bg-surface border border-emerald-200 rounded-xl p-5 shadow-2xs">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-borderSubtle">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <div>
+            <h3 id="createdGroupTitle" class="text-sm font-semibold text-ink">Group created</h3>
+            <p id="createdGroupSubtitle" class="text-xs text-muted mt-0.5"></p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onclick="document.getElementById('createdGroupBanner').classList.add('hidden')"
+          class="text-xs font-medium text-muted hover:text-ink self-start sm:self-auto"
+        >
+          Dismiss
+        </button>
+      </div>
+      <div id="createdGroupTemplatesPreview" class="mt-3 flex flex-wrap gap-2"></div>
+    </div>
+
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    // =========================================================================
+    // DATA & STATE
+    // =========================================================================
+    const KNOWN_TEMPLATES = new Set([
+      'black-list-template-id',
+      'grey-list-template-id',
+      'white-list-template-id',
+      'test-columbus-templ-id',
+      'test-templ-aggr-id',
+      'test-templ-id',
+    ]);
+
+    let stagedTemplates = [];
+    let nextStageUid = 1;
+
+    // DOM References
+    const groupNameInput = document.getElementById('groupNameInput');
+    const groupNameBadge = document.getElementById('groupNameBadge');
+    const groupNameHelper = document.getElementById('groupNameHelper');
+    const groupDescriptionInput = document.getElementById('groupDescriptionInput');
+    const descCharCounter = document.getElementById('descCharCounter');
+
+    const templateIdInput = document.getElementById('templateIdInput');
+    const templateIdBadge = document.getElementById('templateIdBadge');
+    const templateIdHelper = document.getElementById('templateIdHelper');
+    const templateWeightInput = document.getElementById('templateWeightInput');
+    const stageFeedbackBanner = document.getElementById('stageFeedbackBanner');
+
+    const stagedTemplatesCount = document.getElementById('stagedTemplatesCount');
+    const stagedEmptyNote = document.getElementById('stagedEmptyNote');
+    const stagedTableContainer = document.getElementById('stagedTableContainer');
+    const stagedTemplatesBody = document.getElementById('stagedTemplatesBody');
+    const sortByWeightBtn = document.getElementById('sortByWeightBtn');
+    const clearStagedTemplatesBtn = document.getElementById('clearStagedTemplatesBtn');
+
+    const createGroupBtn = document.getElementById('createGroupBtn');
+    const bottomStatusHint = document.getElementById('bottomStatusHint');
+    const validationAlertBanner = document.getElementById('validationAlertBanner');
+    const validationErrorList = document.getElementById('validationErrorList');
+    const createdGroupBanner = document.getElementById('createdGroupBanner');
+
+    // =========================================================================
+    // VALIDATION HELPERS
+    // =========================================================================
+    function validateGroupName() {
+      const raw = groupNameInput.value.trim();
+      groupNameBadge.className = 'hidden items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full';
+      groupNameInput.classList.remove('border-emerald-400', 'border-amber-400', 'border-red-400');
+
+      if (!raw) {
+        groupNameHelper.innerHTML = 'Use lowercase letters, numbers, and hyphens (slug format, e.g. <code class="font-mono text-ink">high-risk-cards-eu</code>).';
+        groupNameHelper.className = 'text-[11.5px] text-muted mt-1.5';
+        return { valid: false, reason: 'empty' };
+      }
+
+      const isSlug = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(raw);
+      if (!isSlug) {
+        groupNameBadge.classList.remove('hidden');
+        groupNameBadge.classList.add('inline-flex', 'bg-red-50', 'text-red-700', 'border', 'border-red-200');
+        groupNameBadge.textContent = 'Invalid slug';
+        groupNameInput.classList.add('border-red-400');
+        groupNameHelper.textContent = 'Must use lowercase letters (a-z), digits (0-9), and single hyphens without leading/trailing dashes.';
+        groupNameHelper.className = 'text-[11.5px] text-red-600 mt-1.5';
+        return { valid: false, reason: 'format' };
+      }
+
+      groupNameBadge.classList.remove('hidden');
+      groupNameBadge.classList.add('inline-flex', 'bg-emerald-50', 'text-emerald-700', 'border', 'border-emerald-200');
+      groupNameBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Valid slug';
+      groupNameInput.classList.add('border-emerald-400');
+      groupNameHelper.textContent = 'Group identifier is valid.';
+      groupNameHelper.className = 'text-[11.5px] text-emerald-700 mt-1.5';
+      return { valid: true };
+    }
+
+    function validateTemplateIdInput() {
+      const raw = templateIdInput.value.trim();
+      templateIdBadge.className = 'hidden items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full';
+      templateIdInput.classList.remove('border-emerald-400', 'border-amber-400', 'border-red-400');
+
+      if (!raw) {
+        templateIdHelper.innerHTML = 'Pick from known templates or type an ID (e.g. <code class="font-mono text-ink">black-list-template-id</code>).';
+        templateIdHelper.className = 'text-[11.5px] text-muted mt-1.5';
+        return { valid: false, reason: 'empty' };
+      }
+
+      if (!/^[a-zA-Z0-9._-]+$/.test(raw)) {
+        templateIdBadge.classList.remove('hidden');
+        templateIdBadge.classList.add('inline-flex', 'bg-red-50', 'text-red-700', 'border', 'border-red-200');
+        templateIdBadge.textContent = 'Invalid ID';
+        templateIdInput.classList.add('border-red-400');
+        templateIdHelper.textContent = 'Allowed characters: letters, numbers, hyphens, underscores, and dots.';
+        templateIdHelper.className = 'text-[11.5px] text-red-600 mt-1.5';
+        return { valid: false, reason: 'format' };
+      }
+
+      if (KNOWN_TEMPLATES.has(raw)) {
+        templateIdBadge.classList.remove('hidden');
+        templateIdBadge.classList.add('inline-flex', 'bg-emerald-50', 'text-emerald-700', 'border', 'border-emerald-200');
+        templateIdBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Known template';
+        templateIdInput.classList.add('border-emerald-400');
+        templateIdHelper.textContent = 'Matched existing rule template.';
+        templateIdHelper.className = 'text-[11.5px] text-emerald-700 mt-1.5';
+      } else {
+        templateIdBadge.classList.remove('hidden');
+        templateIdBadge.classList.add('inline-flex', 'bg-amber-50', 'text-amber-700', 'border', 'border-amber-200');
+        templateIdBadge.textContent = 'Custom ID';
+        templateIdInput.classList.add('border-amber-400');
+        templateIdHelper.textContent = 'Custom template ID will be bound to this group.';
+        templateIdHelper.className = 'text-[11.5px] text-amber-700 mt-1.5';
+      }
+
+      return { valid: true };
+    }
+
+    function parseWeightValue(raw) {
+      const num = Number(raw);
+      if (!Number.isInteger(num) || num < 1) {
+        return { valid: false, value: 1 };
+      }
+      return { valid: true, value: num };
+    }
+
+    function showStageFeedback(message, tone = 'info') {
+      if (!message) {
+        stageFeedbackBanner.classList.add('hidden');
+        return;
+      }
+
+      stageFeedbackBanner.classList.remove(
+        'hidden',
+        'bg-red-50',
+        'border-red-200',
+        'text-red-700',
+        'bg-amber-50',
+        'border-amber-200',
+        'text-amber-800',
+        'bg-emerald-50',
+        'border-emerald-200',
+        'text-emerald-800'
+      );
+
+      const tones = {
+        error: ['bg-red-50', 'border', 'border-red-200', 'text-red-700'],
+        warning: ['bg-amber-50', 'border', 'border-amber-200', 'text-amber-800'],
+        success: ['bg-emerald-50', 'border', 'border-emerald-200', 'text-emerald-800'],
+      };
+
+      stageFeedbackBanner.classList.add(...(tones[tone] || tones.warning));
+      stageFeedbackBanner.textContent = message;
+    }
+
+    // =========================================================================
+    // STAGED TEMPLATES LIST MANAGEMENT
+    // =========================================================================
+    function addTemplateToGroup() {
+      const tplRaw = templateIdInput.value.trim();
+      const weightCheck = parseWeightValue(templateWeightInput.value);
+
+      if (!tplRaw) {
+        templateIdInput.focus();
+        showStageFeedback('Enter a Template ID before clicking + Add template.', 'error');
+        return;
+      }
+
+      if (!/^[a-zA-Z0-9._-]+$/.test(tplRaw)) {
+        templateIdInput.focus();
+        showStageFeedback('Template ID has invalid characters.', 'error');
+        return;
+      }
+
+      if (!weightCheck.valid) {
+        templateWeightInput.focus();
+        showStageFeedback('Weight / Priority must be an integer greater than or equal to 1.', 'error');
+        return;
+      }
+
+      const existingIdx = stagedTemplates.findIndex((item) => item.templateId === tplRaw);
+      if (existingIdx !== -1) {
+        stagedTemplates[existingIdx].weight = weightCheck.value;
+        showStageFeedback(
+          `Updated weight to ${weightCheck.value} for already staged template "${tplRaw}".`,
+          'warning'
+        );
+      } else {
+        stagedTemplates.push({
+          uid: nextStageUid++,
+          templateId: tplRaw,
+          weight: weightCheck.value,
+        });
+        showStageFeedback('', 'info');
+      }
+
+      templateIdInput.value = '';
+      templateWeightInput.value = '1';
+      validateTemplateIdInput();
+      renderStagedTemplates();
+      templateIdInput.focus();
+    }
+
+    function updateStagedWeight(uid, rawValue) {
+      const parsed = parseWeightValue(rawValue);
+      const item = stagedTemplates.find((t) => t.uid === uid);
+      if (!item) return;
+
+      if (!parsed.valid) {
+        showToast('Weight must be an integer ≥ 1', 'error');
+        renderStagedTemplates();
+        return;
+      }
+
+      item.weight = parsed.value;
+      renderStagedTemplates();
+    }
+
+    function moveStagedTemplate(index, delta) {
+      const targetIndex = index + delta;
+      if (targetIndex < 0 || targetIndex >= stagedTemplates.length) return;
+      const temp = stagedTemplates[index];
+      stagedTemplates[index] = stagedTemplates[targetIndex];
+      stagedTemplates[targetIndex] = temp;
+      renderStagedTemplates();
+    }
+
+    function removeStagedTemplate(uid) {
+      stagedTemplates = stagedTemplates.filter((t) => t.uid !== uid);
+      renderStagedTemplates();
+    }
+
+    function sortStagedByWeight() {
+      stagedTemplates.sort((a, b) => a.weight - b.weight);
+      renderStagedTemplates();
+      showToast('Staged templates sorted by weight (ascending)', 'info');
+    }
+
+    function clearStagedTemplates() {
+      stagedTemplates = [];
+      showStageFeedback('', 'info');
+      renderStagedTemplates();
+      showToast('Cleared staged templates', 'info');
+    }
+
+    function renderStagedTemplates() {
+      const count = stagedTemplates.length;
+      stagedTemplatesCount.textContent = count;
+
+      if (count > 0) {
+        stagedTemplatesCount.className = 'px-2 py-0.5 text-[11px] font-semibold rounded-full bg-brand-soft text-brand border border-brand-border/70 tabular-nums';
+        stagedEmptyNote.classList.add('hidden');
+        stagedTableContainer.classList.remove('hidden');
+        clearStagedTemplatesBtn.classList.remove('hidden');
+        sortByWeightBtn.classList.toggle('inline-flex', count > 1);
+        sortByWeightBtn.classList.toggle('hidden', count <= 1);
+      } else {
+        stagedTemplatesCount.className = 'px-2 py-0.5 text-[11px] font-semibold rounded-full bg-canvas border border-borderSubtle text-muted tabular-nums';
+        stagedEmptyNote.classList.remove('hidden');
+        stagedTableContainer.classList.add('hidden');
+        clearStagedTemplatesBtn.classList.add('hidden');
+        sortByWeightBtn.classList.add('hidden');
+        sortByWeightBtn.classList.remove('inline-flex');
+      }
+
+      stagedTemplatesBody.innerHTML = stagedTemplates
+        .map((item, idx) => {
+          const isKnown = KNOWN_TEMPLATES.has(item.templateId);
+          return `
+            <tr class="hover:bg-[#FAFBFD] transition">
+              <!-- Execution Order -->
+              <td class="py-3 pl-6 pr-2 align-middle font-mono text-xs font-semibold text-muted tabular-nums">
+                #${idx + 1}
+              </td>
+
+              <!-- Template ID -->
+              <td class="py-3 px-3 align-middle">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <code class="font-mono text-xs font-semibold text-ink bg-canvas border border-borderSubtle px-2.5 py-1 rounded-md">
+                    ${escapeHtml(item.templateId)}
+                  </code>
+                  ${
+                    isKnown
+                      ? `<span class="text-[10.5px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80">Template</span>`
+                      : `<span class="text-[10.5px] font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200/80">Custom</span>`
+                  }
+                </div>
+              </td>
+
+              <!-- Editable Weight -->
+              <td class="py-3 px-3 align-middle">
+                <div class="inline-flex items-center gap-1.5">
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value="${item.weight}"
+                    aria-label="Weight for ${escapeHtml(item.templateId)}"
+                    onchange="updateStagedWeight(${item.uid}, this.value)"
+                    class="w-20 font-mono text-xs font-semibold tabular-nums px-2.5 py-1.5 rounded-lg bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand text-ink outline-none transition"
+                  />
+                </div>
+              </td>
+
+              <!-- Move Up / Down -->
+              <td class="py-3 px-3 align-middle whitespace-nowrap">
+                <div class="inline-flex items-center gap-1">
+                  <button
+                    type="button"
+                    onclick="moveStagedTemplate(${idx}, -1)"
+                    ${idx === 0 ? 'disabled' : ''}
+                    class="p-1.5 rounded-lg border border-borderSubtle bg-surface hover:bg-canvas disabled:opacity-35 disabled:pointer-events-none text-ink transition"
+                    title="Move up"
+                    aria-label="Move up"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onclick="moveStagedTemplate(${idx}, 1)"
+                    ${idx === count - 1 ? 'disabled' : ''}
+                    class="p-1.5 rounded-lg border border-borderSubtle bg-surface hover:bg-canvas disabled:opacity-35 disabled:pointer-events-none text-ink transition"
+                    title="Move down"
+                    aria-label="Move down"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+
+              <!-- Remove Action -->
+              <td class="py-3 pl-2 pr-6 align-middle text-right whitespace-nowrap">
+                <button
+                  type="button"
+                  onclick="removeStagedTemplate(${item.uid})"
+                  class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-rose-600 hover:bg-rose-50 transition"
+                  title="Remove template"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Remove
+                </button>
+              </td>
+            </tr>
+          `;
+        })
+        .join('');
+
+      updateBottomActionBar();
+    }
+
+    function updateBottomActionBar() {
+      const stagedCount = stagedTemplates.length;
+      const inlineTpl = templateIdInput.value.trim();
+      const effectiveCount = stagedCount > 0 ? stagedCount : inlineTpl ? 1 : 0;
+
+      createGroupBtn.textContent = effectiveCount > 1 ? `Create (${effectiveCount})` : 'Create';
+
+      if (stagedCount > 0) {
+        bottomStatusHint.innerHTML = `
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span class="text-ink font-medium">${stagedCount} ${stagedCount === 1 ? 'template' : 'templates'} staged in execution order</span>
+        `;
+      } else if (inlineTpl) {
+        bottomStatusHint.innerHTML = `
+          <span class="w-1.5 h-1.5 rounded-full bg-brand"></span>
+          <span class="text-ink font-medium">Direct create will include <code class="font-mono">${escapeHtml(inlineTpl)}</code> (or click + Add template first)</span>
+        `;
+      } else {
+        bottomStatusHint.innerHTML = `
+          <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+          <span>Enter a valid Group name and at least one Template ID to create the group</span>
+        `;
+      }
+    }
+
+    // =========================================================================
+    // SUBMIT, VALIDATION BANNER & SANDBOX HELPERS
+    // =========================================================================
+    function submitNewGroup() {
+      const errors = [];
+      const groupCheck = validateGroupName();
+
+      if (!groupCheck.valid) {
+        if (groupCheck.reason === 'empty') {
+          errors.push('Group name is required.');
+        } else {
+          errors.push('Group name must be a valid kebab-case slug (lowercase letters, numbers, and hyphens).');
+        }
+      }
+
+      // Build effective list: staged items, or direct input row if staged is empty
+      const effectiveTemplates = [...stagedTemplates];
+      const inlineTpl = templateIdInput.value.trim();
+      const inlineWeightCheck = parseWeightValue(templateWeightInput.value);
+
+      if (effectiveTemplates.length === 0) {
+        if (!inlineTpl) {
+          errors.push('At least one Template ID is required (stage with + Add template or enter in Template ID).');
+        } else {
+          if (!/^[a-zA-Z0-9._-]+$/.test(inlineTpl)) {
+            errors.push('Template ID contains invalid characters.');
+          }
+          if (!inlineWeightCheck.valid) {
+            errors.push('Weight / Priority must be an integer greater than or equal to 1.');
+          }
+          if (/^[a-zA-Z0-9._-]+$/.test(inlineTpl) && inlineWeightCheck.valid) {
+            effectiveTemplates.push({
+              uid: nextStageUid++,
+              templateId: inlineTpl,
+              weight: inlineWeightCheck.value,
+            });
+          }
+        }
+      } else if (inlineTpl) {
+        if (!/^[a-zA-Z0-9._-]+$/.test(inlineTpl)) {
+          errors.push('Unstaged Template ID input has invalid characters — clear it or fix before creating.');
+        } else if (!inlineWeightCheck.valid) {
+          errors.push('Unstaged Weight / Priority must be an integer ≥ 1.');
+        }
+      }
+
+      if (errors.length > 0) {
+        validationErrorList.innerHTML = errors.map((e) => `<li>${escapeHtml(e)}</li>`).join('');
+        validationAlertBanner.classList.remove('hidden');
+        createdGroupBanner.classList.add('hidden');
+        showToast('Please fix validation errors before creating group', 'error');
+        return;
+      }
+
+      validationAlertBanner.classList.add('hidden');
+
+      const groupName = groupNameInput.value.trim();
+      const description = groupDescriptionInput.value.trim();
+
+      document.getElementById('createdGroupTitle').textContent = `Group "${groupName}" created`;
+      document.getElementById('createdGroupSubtitle').textContent =
+        `${effectiveTemplates.length} ordered ${effectiveTemplates.length === 1 ? 'template' : 'templates'} bound` +
+        (description ? ` • "${description}"` : '');
+
+      document.getElementById('createdGroupTemplatesPreview').innerHTML = effectiveTemplates
+        .map(
+          (t, i) => `
+          <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-canvas border border-borderSubtle text-xs font-mono">
+            <span class="text-muted font-semibold">#${i + 1}</span>
+            <span class="font-semibold text-ink">${escapeHtml(t.templateId)}</span>
+            <span class="px-1.5 py-0.5 rounded bg-brand-soft text-brand font-semibold tabular-nums">w:${t.weight}</span>
+          </span>
+        `
+        )
+        .join('');
+
+      createdGroupBanner.classList.remove('hidden');
+      showToast(`Group "${groupName}" created with ${effectiveTemplates.length} templates`, 'success');
+    }
+
+    function fillSampleGroupScenario() {
+      groupNameInput.value = 'high-risk-cards-eu';
+      groupDescriptionInput.value = 'Evaluates blacklists, velocity counters, and high-value thresholds';
+      descCharCounter.textContent = `${groupDescriptionInput.value.length} / 140`;
+      validateGroupName();
+
+      stagedTemplates = [
+        { uid: nextStageUid++, templateId: 'black-list-template-id', weight: 1 },
+        { uid: nextStageUid++, templateId: 'test-templ-aggr-id', weight: 5 },
+        { uid: nextStageUid++, templateId: 'grey-list-template-id', weight: 10 },
+      ];
+
+      templateIdInput.value = '';
+      templateWeightInput.value = '1';
+      validateTemplateIdInput();
+      showStageFeedback('', 'info');
+      validationAlertBanner.classList.add('hidden');
+      renderStagedTemplates();
+      showToast('Filled sample group with 3 ordered templates', 'info');
+    }
+
+    function triggerValidationErrorsDemo() {
+      groupNameInput.value = 'Invalid Group Name!';
+      templateIdInput.value = 'bad template id$';
+      templateWeightInput.value = '0';
+      validateGroupName();
+      validateTemplateIdInput();
+      submitNewGroup();
+    }
+
+    function resetPrototypeForm() {
+      groupNameInput.value = '';
+      groupDescriptionInput.value = '';
+      descCharCounter.textContent = '0 / 140';
+      templateIdInput.value = '';
+      templateWeightInput.value = '1';
+      stagedTemplates = [];
+
+      validateGroupName();
+      validateTemplateIdInput();
+      showStageFeedback('', 'info');
+      validationAlertBanner.classList.add('hidden');
+      createdGroupBanner.classList.add('hidden');
+      renderStagedTemplates();
+      showToast('Form reset to initial state', 'info');
+    }
+
+    function handleBackAction() {
+      showToast('Returned to Groups list', 'info');
+    }
+
+    // =========================================================================
+    // EVENT LISTENERS & HELPERS
+    // =========================================================================
+    groupNameInput.addEventListener('input', () => {
+      validateGroupName();
+      updateBottomActionBar();
+    });
+
+    groupDescriptionInput.addEventListener('input', () => {
+      descCharCounter.textContent = `${groupDescriptionInput.value.length} / 140`;
+    });
+
+    templateIdInput.addEventListener('input', () => {
+      validateTemplateIdInput();
+      updateBottomActionBar();
+    });
+
+    templateWeightInput.addEventListener('input', () => {
+      updateBottomActionBar();
+    });
+
+    [templateIdInput, templateWeightInput].forEach((el) => {
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addTemplateToGroup();
+        }
+      });
+    });
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+
+      const styles = {
+        success: 'bg-ink text-white border-slate-700',
+        error: 'bg-rose-600 text-white border-rose-700',
+        info: 'bg-surface text-ink border-borderStrong',
+      };
+
+      const dotColors = {
+        success: 'bg-emerald-400',
+        error: 'bg-white',
+        info: 'bg-brand',
+      };
+
+      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 rounded-xl border shadow-lg text-xs font-medium transition-all duration-200 transform translate-y-2 opacity-0 ${styles[type] || styles.info}`;
+      toast.innerHTML = `
+        <span class="w-2 h-2 rounded-full shrink-0 ${dotColors[type] || dotColors.info}"></span>
+        <span>${escapeHtml(message)}</span>
+      `;
+
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-2', 'opacity-0');
+        setTimeout(() => toast.remove(), 200);
+      }, 2800);
+    }
+
+    // Sidebar collapse & mobile drawer
+    document.getElementById('paymentsToggle').addEventListener('click', () => {
+      document.getElementById('paymentsSubmenu').classList.toggle('hidden');
+      document.getElementById('paymentsChevron').classList.toggle('rotate-180');
+    });
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+    function toggleMobileSidebar(open) {
+      sidebar.classList.toggle('-translate-x-full', !open);
+      sidebarBackdrop.classList.toggle('hidden', !open);
+    }
+
+    mobileMenuBtn.addEventListener('click', () => toggleMobileSidebar(true));
+    sidebarBackdrop.addEventListener('click', () => toggleMobileSidebar(false));
+
+    // Initial render
+    validateGroupName();
+    validateTemplateIdInput();
+    renderStagedTemplates();
+  </script>
+</body>
+</html>

@@ -1,70 +1,112 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { debounceTime, switchMap } from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component, DestroyRef, EventEmitter, Output } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { catchError, distinctUntilChanged, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 
 import { ListType } from '../../../../api/fb-management/swagger-codegen/model/listType';
 import { PayoutListRow } from '../../../../api/fb-management/swagger-codegen/model/payoutListRow';
 import { PayoutsService } from '../../../../api/payouts';
-import { LAYOUT_GAP_M } from '../../../../tokens';
+import { ListRecordRow, payoutListRow } from '../../../../shared/components/list-records-table/list-record-row';
+import { SortOrder } from '../../../../shared/constants/sort-order';
 import { PAYOUT_PAGE_SIZE, PayoutPageFetcher } from '../../services/payout-page-fetcher';
 import { PayoutsFeedbackService } from '../../services/payouts-feedback.service';
 
 interface ListFilter {
     listNames: string[];
     searchValue: string;
+    sortOrder: SortOrder;
 }
 
-/** One payout list; the tab fixes the list type, as each payment list has its own tab. */
 @Component({
     templateUrl: 'payout-lists.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PayoutListsComponent {
-    listType = this.route.snapshot.data.listType as ListType;
-    isGrey = this.listType === ListType.Grey;
-    searchForm = this.fb.group({ types: [[] as string[]], searchQuery: [''] });
-    listNames$ = this.payoutsService.getCurrentListNames(this.listType);
-    readonly fetcher = new PayoutPageFetcher<PayoutListRow, ListFilter>((filter, lastId) =>
-        this.payoutsService.findListRows({ listType: this.listType, ...filter, lastId, size: PAYOUT_PAGE_SIZE })
-    );
-    rows$ = this.fetcher.searchResult$;
-    hasMore$ = this.fetcher.hasMore$;
-    inProgress$ = this.fetcher.inProgress$;
+    readonly listType = this.route.snapshot.data.listType as ListType;
+    readonly isGrey = this.listType === ListType.Grey;
+    readonly listNames = new FormControl<string[]>([], { nonNullable: true });
+    readonly sort = new BehaviorSubject(SortOrder.Desc);
+    readonly sortOptions = [
+        { value: SortOrder.Desc, label: 'Inserted at (newest)' },
+        { value: SortOrder.Asc, label: 'Inserted at (oldest)' },
+    ];
+    readonly listNames$: Observable<string[]>;
+    readonly failed$ = new BehaviorSubject(false);
+    readonly page$: Observable<{ rows: ListRecordRow<PayoutListRow>[]; count: number }>;
+    readonly inProgress$: Observable<boolean>;
+    @Output() readonly removed = new EventEmitter<void>();
+
+    private readonly reloadNames = new BehaviorSubject<void>(undefined);
+    private readonly fetcher: PayoutPageFetcher<PayoutListRow, ListFilter>;
 
     constructor(
         private route: ActivatedRoute,
-        private router: Router,
         private payoutsService: PayoutsService,
         private feedback: PayoutsFeedbackService,
-        private fb: FormBuilder,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
+        private destroyRef: DestroyRef
     ) {
-        this.searchForm.valueChanges
-            .pipe(debounceTime(300))
-            .subscribe(({ types, searchQuery }) =>
-                this.fetcher.search({ listNames: types ?? [], searchValue: (searchQuery ?? '').trim() })
+        this.listNames$ = this.reloadNames.pipe(
+            switchMap(() =>
+                this.payoutsService.getCurrentListNames(this.listType).pipe(catchError(() => of([] as string[])))
+            ),
+            shareReplay({ bufferSize: 1, refCount: true })
+        );
+        this.fetcher = new PayoutPageFetcher<PayoutListRow, ListFilter>((filter, lastId) => {
+            this.failed$.next(false);
+            return this.payoutsService
+                .findListRows({ listType: this.listType, ...filter, lastId, size: PAYOUT_PAGE_SIZE })
+                .pipe(
+                    catchError(() => {
+                        this.failed$.next(true);
+                        return of({ result: [], count: 0 });
+                    })
+                );
+        });
+        this.page$ = this.fetcher.fetchResultChanges$.pipe(
+            map(({ result, count }) => ({ rows: result.map(payoutListRow), count: count ?? result.length })),
+            startWith({ rows: [], count: 0 })
+        );
+        this.inProgress$ = this.fetcher.inProgress$;
+
+        const query$ = this.route.queryParamMap.pipe(
+            map((params) => (params.get('searchQuery') ?? '').trim()),
+            distinctUntilChanged()
+        );
+        combineLatest([this.listNames.valueChanges.pipe(startWith(this.listNames.value)), query$, this.sort])
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(([listNames, searchValue, sortOrder]) =>
+                this.fetcher.search({ listNames, searchValue, sortOrder })
             );
-        this.fetcher.search({ listNames: [], searchValue: '' });
     }
 
-    fetchMore() {
+    setSort(order: string): void {
+        this.sort.next(this.sortOptions.find((option) => String(option.value) === order)?.value ?? SortOrder.Desc);
+    }
+
+    fetchMore(): void {
         this.fetcher.fetchMore();
     }
 
-    createRow() {
-        void this.router.navigate([`/payouts/list/new/${this.listType}`], {
-            queryParams: { returnUrl: this.router.url },
-        });
+    retry(): void {
+        this.fetcher.refresh();
     }
 
-    removeRow(row: PayoutListRow) {
+    removeRow(row: PayoutListRow): void {
         this.feedback
             .confirm(`Remove ${row.listRecord.value} from ${row.listRecord.listName}?`)
-            .pipe(switchMap(() => this.payoutsService.removeListRow(row.id)))
+            .pipe(
+                switchMap(() => this.payoutsService.removeListRow(row.id)),
+                takeUntilDestroyed(this.destroyRef)
+            )
             .subscribe({
-                next: () => this.fetcher.refresh(),
+                next: () => {
+                    this.reloadNames.next();
+                    this.fetcher.refresh();
+                    this.removed.emit();
+                },
                 error: (error: HttpErrorResponse) => this.feedback.failed(error),
             });
     }

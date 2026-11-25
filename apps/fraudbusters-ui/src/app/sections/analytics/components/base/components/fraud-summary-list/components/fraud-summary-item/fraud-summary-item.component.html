@@ -1,8 +1,24 @@
-<mat-card class="fb-list-item fraud-summary-grid" [style.column-gap]="layoutGapM">
-    <div class="fb-body-2">{{ summary.status }}</div>
-    <div class="fb-body-2 wrap">{{ summary.template }}</div>
-    <div class="fb-body-2 wrap">{{ summary.checkedRule }}</div>
-    <div class="fb-body-2">{{ summary.summary.sum }}</div>
-    <div class="fb-body-2">{{ summary.summary.count }}</div>
-    <div class="fb-body-2">{{ numberFormat(summary.summary.ratio) | number : '.1-4' }}</div>
-</mat-card>
+<div class="fraud-summary-grid" role="row">
+    <div role="cell">
+        <span class="fb-pill fb-pill-status" [ngClass]="pill(summary.status)">{{ summary.status | lowercase }}</span>
+    </div>
+    <div role="cell">
+        <span [class.meta-tag]="summary.template === 'RULE_NOT_CHECKED'">
+            {{ summary.template || '—' }}
+        </span>
+    </div>
+    <div role="cell">
+        <ng-container *ngIf="ruleIndex as index; else namedRule">
+            Rule #{{ index }} <span class="meta-tag unnamed">unnamed</span>
+        </ng-container>
+        <ng-template #namedRule>
+            <span [class.muted]="!summary.checkedRule">{{ summary.checkedRule || '—' }}</span>
+        </ng-template>
+    </div>
+    <div role="cell">
+        {{ (metricValue(summary.summary.sum) | number : '1.0-2') ?? '—' }}
+        <span *ngIf="metricValue(summary.summary.sum) !== null" class="currency">{{ currency }}</span>
+    </div>
+    <div role="cell">{{ (metricValue(summary.summary.count) | number) ?? '—' }}</div>
+    <div role="cell">{{ (metricValue(summary.summary.ratio) | percent : '1.1-1') ?? '—' }}</div>
+</div>

@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { PaymentTemplatesService } from '../../../../api';
 import { CreateTemplateResponse } from '../../../../api/fb-management/swagger-codegen/model/createTemplateResponse';
 import { Template } from '../../../../api/fb-management/swagger-codegen/model/template';
-import { ValidationResponse } from '../../../../api/fb-management/swagger-codegen/model/validationResponse';
+import { ValidateTemplatesResponse } from '../../../../api/fb-management/swagger-codegen/model/validateTemplatesResponse';
 import { SortOrder } from '../../../../shared/constants/sort-order';
 import { HttpSearchResponse } from '../../../../shared/model/http-search-response';
 
@@ -38,7 +38,7 @@ export class TemplatesService {
         return this.paymentTemplatesService.saveTemplate(template);
     }
 
-    validateTemplate(template: Template): Observable<ValidationResponse> {
+    validateTemplate(template: Template): Observable<ValidateTemplatesResponse> {
         return this.paymentTemplatesService.validateTemplate(template);
     }
 }

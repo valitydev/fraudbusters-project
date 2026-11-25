@@ -1,55 +1,47 @@
-<mat-card>
-    <mat-card-content fxLayout="column" [fxLayoutGap]="layoutGapM">
-        <form [formGroup]="form" fxLayout="column" [fxLayoutGap]="layoutGapL">
-            <div fxLayout="row" [fxLayoutGap]="layoutGapL">
-                <mat-form-field floatLabel="always" class="date-picker" [fxLayoutGap]="layoutGapL" fxFlex="25%">
-                    <input
-                        placeholder="Timestamp for start (Cascading test)"
-                        matInput
-                        label="startCountTime"
-                        name="startCountTime"
-                        [ngxMatDatetimePicker]="pickerFrom"
-                        formControlName="checkingTimestamp"
-                    />
-                    <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
-                    <ngx-mat-datetime-picker showSeconds="true" #pickerFrom></ngx-mat-datetime-picker>
-                </mat-form-field>
-            </div>
-            <div fxLayout="row" [fxLayoutGap]="layoutGapM">
-                <mat-form-field floatLabel="always" fxFlex="25%">
-                    <input matInput placeholder="Party id (Cascading test)" formControlName="party" />
-                </mat-form-field>
-                <mat-form-field floatLabel="always" fxFlex="25%">
-                    <input matInput placeholder="Shop id (Cascading test)" formControlName="shop" />
-                </mat-form-field>
-            </div>
-            <mat-form-field floatLabel="always">
-                <textarea
-                    required
-                    matInput
-                    placeholder="Templates rules"
-                    formControlName="template"
-                    matTextareaAutosize
-                    matAutosizeMinRows="10"
-                    matAutosizeMaxRows="20"
-                ></textarea>
-            </mat-form-field>
-        </form>
-        <div fxLayout fxLayoutAlign="end" [fxLayoutGap]="layoutGapM">
-            <button mat-button color="accent" [disabled]="inProgress$ | async" (click)="validateTemplate()">
-                Validate
-            </button>
-            <button
-                mat-button
-                color="primary"
-                [disabled]="form.invalid || (inProgress$ | async)"
-                (click)="testTemplate()"
-            >
-                Test
-            </button>
-        </div>
-    </mat-card-content>
-    <mat-card-footer *ngIf="inProgress$ | async">
-        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-    </mat-card-footer>
-</mat-card>
+<form [formGroup]="form" class="fb-catalog-panel" aria-labelledby="rule-expression">
+    <div class="table-toolbar fb-filter-fields test-filters">
+        <fb-datetime-range
+            fromLabel="Start timestamp"
+            [single]="true"
+            [from]="timestamp"
+            (rangeChange)="form.controls.checkingTimestamp.setValue($event.from)"
+        ></fb-datetime-range>
+        <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+            <mat-label>Party ID</mat-label>
+            <input matInput formControlName="party" autocomplete="off" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+            <mat-label>Shop ID</mat-label>
+            <input matInput formControlName="shop" autocomplete="off" />
+        </mat-form-field>
+    </div>
+    <header class="table-toolbar editor-heading">
+        <h2 class="fb-section-title" id="rule-expression">Rule expression</h2>
+    </header>
+    <fb-fraudo-editor
+        formControlName="template"
+        label="Rules"
+        [validationMessage]="checkedRule === form.controls.template.value ? validationMessage() : ''"
+        [fixedHeight]="true"
+        [showLineNumbers]="true"
+    ></fb-fraudo-editor>
+    <footer class="table-footer">
+        <button mat-stroked-button type="button" [disabled]="inProgress$ | async" (click)="validateTemplate()">
+            Validate
+        </button>
+        <button
+            mat-stroked-button
+            type="button"
+            class="fb-primary-action"
+            [disabled]="form.invalid || (inProgress$ | async)"
+            (click)="testTemplate()"
+        >
+            Test
+        </button>
+    </footer>
+    <mat-progress-bar
+        *ngIf="inProgress$ | async"
+        mode="indeterminate"
+        aria-label="Running test or validation"
+    ></mat-progress-bar>
+</form>

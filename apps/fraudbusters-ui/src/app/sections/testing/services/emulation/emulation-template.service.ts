@@ -1,40 +1,47 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { combineLatest, Observable, of, Subject } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { Observable, of, Subject } from 'rxjs';
+import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 
 import { Template } from '../../../../api/fb-management/swagger-codegen/model/template';
 import { PaymentEmulateService } from '../../../../api/payments/emulate';
 import { ErrorHandlerService } from '../../../../shared/services/utils/error-handler.service';
 import { PaymentEmulateFilter } from '../../components/emulation/template/model/payment-emulate-filter';
 
+interface EmulationView {
+    templates?: Template[];
+    busy: boolean;
+    failed: boolean;
+}
+
 @Injectable()
 export class EmulationTemplateService {
-    queries$ = new Subject<PaymentEmulateFilter>();
-    templates$: Observable<Template[]>;
+    readonly view$: Observable<EmulationView>;
+
+    private readonly queries = new Subject<PaymentEmulateFilter>();
 
     constructor(
         private paymentEmulateService: PaymentEmulateService,
         private errorHandlerService: ErrorHandlerService,
         private snackBar: MatSnackBar
     ) {
-        this.templates$ = combineLatest([this.queries$]).pipe(
-            switchMap(([queries]) =>
-                this.emulate(queries).pipe(
-                    catchError((error) => {
+        this.view$ = this.queries.pipe(
+            switchMap((filter) =>
+                this.paymentEmulateService.emulate(filter).pipe(
+                    map((templates): EmulationView => ({ templates: templates ?? [], busy: false, failed: false })),
+                    catchError((error: HttpErrorResponse) => {
                         this.errorHandlerService.handleError(error, this.snackBar);
-                        return of(error);
-                    })
+                        return of({ busy: false, failed: true });
+                    }),
+                    startWith({ busy: true, failed: false })
                 )
-            )
+            ),
+            startWith({ busy: false, failed: false })
         );
     }
 
-    emulateNext(filter): void {
-        this.queries$.next(filter);
-    }
-
-    emulate(filter: PaymentEmulateFilter): Observable<Template[]> {
-        return this.paymentEmulateService.emulate(filter);
+    emulateNext(filter: PaymentEmulateFilter): void {
+        this.queries.next(filter);
     }
 }

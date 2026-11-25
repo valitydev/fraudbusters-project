@@ -17,7 +17,8 @@
     "fix": "npm run lint:fix; npm run prettier:fix",
     "e2e": "ng e2e",
     "swagger-codegen": "ts-node --project tools/tsconfig.json tools/swagger-codegen.ts",
-    "codegen": "run-p swagger-codegen",
+    "fraudo-codegen": "ts-node --project tools/tsconfig.json tools/fraudo-codegen.ts",
+    "codegen": "run-p swagger-codegen fraudo-codegen",
     "parallel-cmd": "concurrently --kill-others-on-fail --prefix-colors magenta,green,red,yellow,blue",
     "ci:test": "npm run test -- --configuration=ci",
     "ci:check": "npm run parallel-cmd -- --names PRETTIER,LINT \"npm run prettier\" \"npm run lint-cmd -- --quiet\""
@@ -32,7 +33,6 @@
     "@angular/common": "^17.3.12",
     "@angular/compiler": "^17.3.12",
     "@angular/core": "^17.3.12",
-    "@angular/flex-layout": "^15.0.0-beta.42",
     "@angular/forms": "^17.3.12",
     "@angular/material": "^17.3.10",
     "@angular/platform-browser": "^17.3.12",

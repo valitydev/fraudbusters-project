@@ -1,0 +1,71 @@
+table {
+    min-width: 720px;
+}
+
+table.with-metadata {
+    min-width: 870px;
+}
+
+.actions-column {
+    width: 88px;
+}
+
+.global-column {
+    width: 84px;
+}
+
+.author-column {
+    width: 11rem;
+}
+
+td,
+th {
+    overflow-wrap: anywhere;
+}
+
+.reference-id {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+}
+
+.fb-catalog-link {
+    min-width: 0;
+}
+
+.copy-id {
+    display: grid;
+    place-items: center;
+    flex: 0 0 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--fb-muted, #625f74);
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+        background: var(--fb-selected, #eee9fc);
+        color: var(--fb-accent, #6741b7);
+    }
+
+    mat-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .copy-id {
+        opacity: 0;
+    }
+
+    .reference-id:hover .copy-id,
+    .reference-id:focus-within .copy-id {
+        opacity: 1;
+    }
+}

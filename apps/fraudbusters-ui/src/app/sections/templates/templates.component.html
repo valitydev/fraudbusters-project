@@ -1,6 +1,21 @@
-<div class="mat-headline">Templates</div>
-<div fxLayout="column" fxLayoutGap="8px">
-    <nav mat-tab-nav-bar [tabPanel]="tabPanel">
+<div class="fb-page fb-page-catalog">
+    <header class="fb-page-toolbar">
+        <div>
+            <h1 class="fb-page-title">Templates</h1>
+            <p class="fb-page-subtitle">Manage payment rules and bind templates to merchants and shops.</p>
+        </div>
+        <a
+            *ngIf="activeTab() as tab"
+            mat-stroked-button
+            class="fb-primary-action"
+            [routerLink]="tab.createUrl"
+            [queryParams]="tab.path === 'templates' ? null : { returnUrl: returnUrl }"
+        >
+            <mat-icon>add</mat-icon>
+            {{ tab.createLabel }}
+        </a>
+    </header>
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="fb-template-catalog-tabs" aria-label="Template sections">
         <a
             mat-tab-link
             *ngFor="let link of links"
@@ -9,10 +24,27 @@
             #rla="routerLinkActive"
             [active]="rla.isActive || hasActiveFragments(link.otherActiveUrlFragments)"
         >
-            {{ link.name }}
+            <span class="fb-template-tab-label">
+                {{ link.name }}
+                <ng-container *ngIf="rla.isActive && link.path === 'templates' && templateCatalog; else loadedCount">
+                    <!-- The open catalog shows its live total, so removals update it right away. -->
+                    <ng-container *ngIf="templateCatalog.view$ | async as catalog">
+                        <span *ngIf="!catalog.busy && !catalog.failed" class="fb-template-tab-count">{{
+                            catalog.total
+                        }}</span>
+                    </ng-container>
+                </ng-container>
+                <ng-template #loadedCount>
+                    <ng-container *ngIf="counts$ | async as counts">
+                        <span *ngIf="counts[link.path] !== null" class="fb-template-tab-count">{{
+                            counts[link.path]
+                        }}</span>
+                    </ng-container>
+                </ng-template>
+            </span>
         </a>
     </nav>
     <mat-tab-nav-panel #tabPanel>
-        <router-outlet></router-outlet>
+        <router-outlet (activate)="setTemplateCatalog($event)" (deactivate)="setTemplateCatalog(null)"></router-outlet>
     </mat-tab-nav-panel>
 </div>

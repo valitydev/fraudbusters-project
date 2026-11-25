@@ -1,5 +1,24 @@
-::ng-deep {
-    .fb-body-2 {
-        word-wrap: anywhere;
-    }
+.historical-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+}
+
+.header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+.tab-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tab-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
 }

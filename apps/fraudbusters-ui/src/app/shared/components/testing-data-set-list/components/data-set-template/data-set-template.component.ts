@@ -1,10 +1,17 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, EventEmitter, Inject, Input, OnInit, Output } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    DestroyRef,
+    EventEmitter,
+    signal,
+    Input,
+    OnInit,
+    Output,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
 
 import { CheckedDataSet } from '../../../../../api/fb-management/swagger-codegen/model/checkedDataSet';
-import { LAYOUT_GAP_L, LAYOUT_GAP_M } from '../../../../../tokens';
 import { checkValidateResponse } from '../../../../services/utils/check-validation-response';
 import { ErrorHandlerService } from '../../../../services/utils/error-handler.service';
 import { TestingDataSetService } from '../../services/data-set/testing-data-set.service';
@@ -19,10 +26,13 @@ import { TestingDataSetService } from '../../services/data-set/testing-data-set.
 export class DataSetTemplateComponent implements OnInit {
     @Input() dataSet: CheckedDataSet;
 
+    readonly validationMessage = signal('');
+    checkedRule: string | null = null;
+
     form = this.testingDataSetService.form;
 
     @Output()
-    valueChanges: EventEmitter<string> = new EventEmitter();
+    readonly valueChanges = new EventEmitter<string>();
 
     tested$ = this.testingDataSetService.tested$;
 
@@ -30,47 +40,40 @@ export class DataSetTemplateComponent implements OnInit {
     inProgress$ = this.testingDataSetService.inProgress$;
 
     constructor(
-        private router: Router,
         private testingDataSetService: TestingDataSetService,
         private errorHandlerService: ErrorHandlerService,
         private snackBar: MatSnackBar,
-        @Inject(LAYOUT_GAP_L) public layoutGapL: string,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
+        private destroyRef: DestroyRef
     ) {}
+
+    get timestamp(): Date | null {
+        const value = this.form.get('checkingTimestamp')?.value as Date | string | null;
+        const date = value ? new Date(value) : null;
+        return date && !Number.isNaN(date.getTime()) ? date : null;
+    }
 
     ngOnInit() {
         if (this.dataSet) {
             this.form.setValue({
-                template: this.dataSet.template,
-                party: this.dataSet.merchantInfo.partyId,
-                shop: this.dataSet.merchantInfo.shopId,
+                template: this.dataSet.template ?? '',
+                party: this.dataSet.merchantInfo?.partyId ?? '',
+                shop: this.dataSet.merchantInfo?.shopId ?? '',
                 checkingTimestamp: this.dataSet.checkingTimestamp,
             });
         }
-        this.tested$.subscribe(
-            (checkedSetId) => {
-                this.valueChanges.emit(checkedSetId);
-                if (this.dataSet) {
-                    this.snackBar.open(`Saved success: ${this.dataSet.id}`, 'OK', {
-                        duration: 3000,
-                    });
-                } else {
-                    this.snackBar.open(`Template has been created`, 'OK', {
-                        duration: 3000,
-                    });
-                    this.navigateToEdit(this.dataSet.id);
-                }
-            },
-            (error: HttpErrorResponse) => this.errorHandlerService.handleError(error, this.snackBar)
-        );
-        this.validated$.subscribe(
-            (response) => {
-                this.snackBar.open(checkValidateResponse(response), 'OK', {
-                    duration: 3000,
-                });
-            },
-            (error: HttpErrorResponse) => this.errorHandlerService.handleError(error, this.snackBar)
-        );
+        this.testingDataSetService.errors$
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((error) => this.errorHandlerService.handleError(error, this.snackBar));
+        this.tested$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((checkedSetId) => {
+            this.valueChanges.emit(checkedSetId);
+            this.snackBar.open('Test completed', 'OK', { duration: 3000 });
+        });
+        this.validated$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((response) => {
+            this.validationMessage.set(
+                response.validateResults?.flatMap((result) => result.errors ?? []).join('\n') ?? ''
+            );
+            this.snackBar.open(checkValidateResponse(response), 'OK', { duration: 3000 });
+        });
     }
 
     testTemplate() {
@@ -84,14 +87,9 @@ export class DataSetTemplateComponent implements OnInit {
     }
 
     validateTemplate() {
-        this.testingDataSetService.validateTemplate(this.form.get('template').value);
-    }
-
-    navigateToEdit(id) {
-        this.router.navigate([`../template/${id}`]);
-    }
-
-    back() {
-        this.router.navigate([`../templates`]);
+        const source = this.form.controls.template.value;
+        this.validationMessage.set('');
+        this.checkedRule = source;
+        this.testingDataSetService.validateTemplate(source);
     }
 }

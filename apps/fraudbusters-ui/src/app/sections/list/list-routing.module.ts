@@ -1,18 +1,16 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
+import { ListRowsFormComponent } from './list-rows-form/list-rows-form.component';
+import { AuthGuard, Roles } from '../../auth';
+
 const ROUTES: Routes = [
     {
-        path: 'black',
-        loadChildren: () => import('./black-list').then((m) => m.BlackListModule),
-    },
-    {
-        path: 'grey',
-        loadChildren: () => import('./grey-list').then((m) => m.GreyListModule),
-    },
-    {
-        path: 'white',
-        loadChildren: () => import('./white-list').then((m) => m.WhiteListModule),
+        // One page for black, white and grey rows; the list can also be switched on the page.
+        path: ':listType/new',
+        component: ListRowsFormComponent,
+        canActivate: [AuthGuard],
+        data: { roles: [Roles.FraudOfficer, Roles.FraudMonitoring] },
     },
 ];
 

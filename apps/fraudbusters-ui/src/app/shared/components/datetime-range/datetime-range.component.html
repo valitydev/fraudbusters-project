@@ -1,0 +1,223 @@
+<div class="triggers" cdkOverlayOrigin #origin="cdkOverlayOrigin">
+    <div class="trigger-field">
+        <span class="trigger-label">{{ fromLabel }}</span>
+        <button
+            type="button"
+            class="trigger fb-filter-control fb-control-mono"
+            [class.editing]="open && editing === 'from'"
+            [disabled]="disabled"
+            aria-haspopup="dialog"
+            [attr.aria-expanded]="open && editing === 'from'"
+            [attr.aria-label]="fromLabel + ': ' + (fromText || 'not set')"
+            (click)="toggle('from')"
+        >
+            <span class="trigger-value">{{ fromText || 'Select' }}</span>
+            <mat-icon aria-hidden="true">calendar_today</mat-icon>
+        </button>
+    </div>
+    <ng-container *ngIf="!single">
+        <mat-icon class="arrow" aria-hidden="true">arrow_forward</mat-icon>
+        <div class="trigger-field">
+            <span class="trigger-label">{{ toLabel }}</span>
+            <button
+                type="button"
+                class="trigger fb-filter-control fb-control-mono"
+                [class.editing]="open && editing === 'to'"
+                [disabled]="disabled"
+                aria-haspopup="dialog"
+                [attr.aria-expanded]="open && editing === 'to'"
+                [attr.aria-label]="toLabel + ': ' + (toText || 'not set')"
+                (click)="toggle('to')"
+            >
+                <span class="trigger-value">{{ toText || 'Select' }}</span>
+                <mat-icon aria-hidden="true">calendar_today</mat-icon>
+            </button>
+        </div>
+    </ng-container>
+</div>
+
+<ng-template
+    cdkConnectedOverlay
+    [cdkConnectedOverlayOrigin]="origin"
+    [cdkConnectedOverlayOpen]="open"
+    [cdkConnectedOverlayPositions]="positions"
+    [cdkConnectedOverlayHasBackdrop]="true"
+    cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+    [cdkConnectedOverlayPush]="true"
+    (backdropClick)="cancel()"
+    (detach)="cancel()"
+    (overlayKeydown)="$event.key === 'Escape' && cancel()"
+>
+    <section
+        class="popover"
+        [class.date-only]="!withTime"
+        role="dialog"
+        [attr.aria-label]="single ? fromLabel : 'Edit ' + (editing === 'from' ? fromLabel : toLabel)"
+    >
+        <header class="popover-header">
+            <span class="editing-label">
+                <span class="dot" aria-hidden="true"></span>
+                <ng-container *ngIf="single; else boundaryLabel">{{ fromLabel }}</ng-container>
+                <ng-template #boundaryLabel
+                    >Editing <strong>{{ editing === 'from' ? fromLabel : toLabel }}</strong> boundary</ng-template
+                >
+            </span>
+            <div *ngIf="!single" class="segmented" role="group" aria-label="Boundary">
+                <button type="button" [attr.aria-pressed]="editing === 'from'" (click)="edit('from')">
+                    {{ fromLabel }}
+                </button>
+                <button type="button" [attr.aria-pressed]="editing === 'to'" (click)="edit('to')">
+                    {{ toLabel }}
+                </button>
+            </div>
+        </header>
+
+        <div class="popover-body">
+            <div class="calendar">
+                <div class="calendar-nav">
+                    <button type="button" class="nav" aria-label="Previous month" (click)="shiftMonth(-1)">
+                        <mat-icon>chevron_left</mat-icon>
+                    </button>
+                    <mat-select
+                        class="nav-select"
+                        aria-label="Month"
+                        [value]="viewMonth"
+                        (valueChange)="setView($event, viewYear)"
+                    >
+                        <mat-option *ngFor="let name of months; let index = index" [value]="index">{{
+                            name
+                        }}</mat-option>
+                    </mat-select>
+                    <mat-select
+                        class="nav-select year"
+                        aria-label="Year"
+                        [value]="viewYear"
+                        (valueChange)="setView(viewMonth, $event)"
+                    >
+                        <mat-option *ngFor="let item of years" [value]="item">{{ item }}</mat-option>
+                    </mat-select>
+                    <button type="button" class="nav" aria-label="Next month" (click)="shiftMonth(1)">
+                        <mat-icon>chevron_right</mat-icon>
+                    </button>
+                </div>
+                <div class="weekdays" aria-hidden="true">
+                    <span *ngFor="let weekday of weekdays">{{ weekday }}</span>
+                </div>
+                <div class="days" role="grid">
+                    <div *ngFor="let cell of cells; trackBy: trackCell" class="day-cell" [ngClass]="band(cell)">
+                        <button
+                            type="button"
+                            class="day"
+                            [class.outside]="!cell.inMonth"
+                            [class.endpoint]="isEndpoint(cell)"
+                            [class.in-range]="inRange(cell)"
+                            [class.today]="isToday(cell)"
+                            [disabled]="isAfterMax(cell)"
+                            [attr.aria-pressed]="isEndpoint(cell)"
+                            [attr.aria-label]="pad(cell.day) + '/' + pad(cell.month + 1) + '/' + cell.year"
+                            (click)="selectDay(cell)"
+                        >
+                            {{ cell.day }}
+                        </button>
+                    </div>
+                </div>
+                <div class="legend">
+                    <span
+                        ><span class="swatch endpoint" aria-hidden="true"></span
+                        >{{ single ? 'Selected' : 'Start / End' }}</span
+                    >
+                    <span *ngIf="!single"><span class="swatch range" aria-hidden="true"></span>In range</span>
+                    <span class="today-legend"><span class="swatch today" aria-hidden="true"></span>Today</span>
+                </div>
+            </div>
+
+            <div *ngIf="withTime" class="time">
+                <div class="time-header">
+                    <strong>Time ({{ zone }})</strong>
+                    <span class="date-pill">{{ activeDate }}</span>
+                </div>
+                <div class="time-grid">
+                    <div *ngFor="let item of timeParts" class="time-part">
+                        <span class="time-label">{{ item.label }}</span>
+                        <div class="stepper">
+                            <button
+                                type="button"
+                                [attr.aria-label]="'Decrease ' + item.label"
+                                (click)="step(item.part, -1)"
+                            >
+                                −
+                            </button>
+                            <input
+                                #timeInput
+                                inputmode="numeric"
+                                maxlength="2"
+                                [attr.aria-label]="item.label"
+                                [value]="pad(value(item.part))"
+                                (change)="setTime(item.part, timeInput.value)"
+                                (keydown.enter)="setTime(item.part, timeInput.value)"
+                            />
+                            <button
+                                type="button"
+                                [attr.aria-label]="'Increase ' + item.label"
+                                (click)="step(item.part, 1)"
+                            >
+                                +
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="drums">
+                    <div
+                        *ngFor="let item of timeParts"
+                        #drum
+                        class="drum"
+                        [attr.aria-label]="item.label"
+                        role="listbox"
+                    >
+                        <button
+                            *ngFor="let option of item.values"
+                            type="button"
+                            role="option"
+                            [class.selected]="option === value(item.part)"
+                            [attr.aria-selected]="option === value(item.part)"
+                            (click)="setTime(item.part, option)"
+                        >
+                            {{ pad(option) }}
+                        </button>
+                    </div>
+                </div>
+                <span class="time-label presets-label">Quick time presets</span>
+                <div class="quick-times">
+                    <button
+                        *ngFor="let quick of quickTimes"
+                        type="button"
+                        class="quick"
+                        (click)="setTimeOfDay(quick.time)"
+                    >
+                        <span class="mono"
+                            >{{ pad(quick.time[0]) }}:{{ pad(quick.time[1]) }}:{{ pad(quick.time[2]) }}</span
+                        >
+                        <span>{{ quick.label }}</span>
+                    </button>
+                    <button type="button" class="quick now" (click)="setNow()">
+                        <span class="mono">Now</span>
+                        <span class="mono">{{ nowLabel }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <p *ngIf="feedback" class="feedback" role="status">{{ feedback }}</p>
+
+        <footer class="popover-footer">
+            <div class="footer-info">
+                <button *ngIf="!single" type="button" class="link" (click)="reset()">Reset to {{ resetLabel }}</button>
+                <span *ngIf="!single" class="window-pill">{{ draftWindowText }} selected</span>
+            </div>
+            <div class="footer-actions">
+                <button type="button" class="secondary" (click)="cancel()">Cancel</button>
+                <button type="button" class="primary" (click)="apply()">Apply</button>
+            </div>
+        </footer>
+    </section>
+</ng-template>

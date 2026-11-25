@@ -12,3 +12,4 @@ src/app/**/gen-model
 *.svg
 .angular
 fraudbusters-management.json
+docs/prototypes

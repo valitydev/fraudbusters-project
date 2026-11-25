@@ -2,8 +2,72 @@
 
 .fraud-summary-grid {
     @include fraud-summary-grid;
+    min-height: var(--fb-table-row-height);
+    box-sizing: border-box;
+    padding-block: var(--fb-table-cell-padding-block);
+    border-bottom: 1px solid var(--fb-line);
+    color: var(--fb-text);
+    font: 600 var(--fb-table-value-font-size) / var(--fb-table-line-height) var(--fb-font-mono);
+
+    > * {
+        overflow-wrap: anywhere;
+    }
+
+    > :nth-child(n + 4) {
+        @include fraud-summary-number;
+    }
+
+    &:hover {
+        background: var(--fb-raised);
+    }
 }
 
-.wrap {
-    word-wrap: anywhere;
+.fraud-summary-grid .fb-pill-status {
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+:host-context(html:not(.fb-dark)) {
+    .fb-pill-success {
+        --fb-success: #16a34a;
+        --fb-success-bg: #dcfce7;
+        --fb-success-dot: #16a34a;
+    }
+
+    .fb-pill-info {
+        --fb-info: #2563eb;
+        --fb-info-bg: #dbeafe;
+        --fb-info-border: #bfdbfe;
+        --fb-info-dot: #2563eb;
+    }
+
+    .fb-pill-danger {
+        --fb-danger: #dc2626;
+        --fb-danger-bg: #fee2e2;
+        --fb-danger-dot: #dc2626;
+    }
+}
+
+.meta-tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border: 1px solid var(--fb-line);
+    border-radius: 6px;
+    background: var(--fb-raised);
+    color: var(--fb-muted);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 16px;
+
+    &.unnamed {
+        padding: 0 6px;
+        border-radius: 4px;
+        font: 500 10px / 16px var(--fb-font-sans);
+    }
+}
+
+.currency,
+.muted {
+    color: var(--fb-muted);
+    font-weight: 500;
 }

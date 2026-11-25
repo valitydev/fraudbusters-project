@@ -1,6 +1,21 @@
-<div fxFlexFill fxLayout="column" [fxLayoutGap]="layoutGapM">
-    <fb-fraud-summary-header></fb-fraud-summary-header>
-    <div *ngFor="let summary of summaryRows" fxLayout="column" [fxLayoutGap]="layoutGapM">
-        <fb-fraud-summary-item [summary]="summary"></fb-fraud-summary-item>
+<div role="table" aria-label="Rule breakdown">
+    <fb-fraud-summary-header role="rowgroup"></fb-fraud-summary-header>
+    <div role="rowgroup">
+        <fb-fraud-summary-item
+            *ngFor="let summary of summaryRows"
+            [summary]="summary"
+            [currency]="currency"
+        ></fb-fraud-summary-item>
+    </div>
+    <div class="totals" role="row">
+        <div class="total-label" role="rowheader">
+            Total ({{ summaryRows.length | number }} {{ summaryRows.length === 1 ? 'rule group' : 'rule groups' }})
+        </div>
+        <div role="cell">
+            {{ (totalSum | number : '1.0-2') ?? '—' }}
+            <span class="currency" *ngIf="totalSum !== null">{{ currency }}</span>
+        </div>
+        <div role="cell">{{ (totalCount | number) ?? '—' }}</div>
+        <div role="cell">{{ (totalRatio | percent : '1.1-1') ?? '—' }}</div>
     </div>
 </div>

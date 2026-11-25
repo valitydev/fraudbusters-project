@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Inject, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
 import { PaymentReference } from '../../../api/fb-management/swagger-codegen/model/paymentReference';
-import { LAYOUT_GAP_M } from '../../../tokens';
+import { ReferenceRow } from '../reference-table/reference-table.component';
 
 @Component({
     selector: 'fb-payment-references-list',
@@ -9,14 +9,22 @@ import { LAYOUT_GAP_M } from '../../../tokens';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaymentReferencesListComponent {
-    @Input()
-    references: PaymentReference[];
+    rows: ReferenceRow<PaymentReference>[] = [];
 
-    @Output()
-    goToTemplate = new EventEmitter<string>();
+    @Input()
+    set references(references: PaymentReference[]) {
+        this.rows = references.map((source) => ({
+            ...source,
+            targetId: source.templateId,
+            scopeId: source.shopId,
+            source,
+        }));
+    }
+
+    @Input() targetFragment?: string;
 
     @Output()
     deleteItem = new EventEmitter<PaymentReference>();
 
-    constructor(@Inject(LAYOUT_GAP_M) public layoutGapM: string) {}
+    @Input() tableLabel = 'References';
 }

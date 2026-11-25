@@ -1,0 +1,35 @@
+table {
+    min-width: 760px;
+}
+
+.id-column {
+    width: 7rem;
+}
+
+.author-column {
+    width: 11rem;
+}
+
+.rows-column {
+    width: 72px;
+}
+
+.actions-column {
+    width: 144px;
+}
+
+td code,
+.name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+td code {
+    display: block;
+}
+
+.fb-catalog-table .numeric {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+}

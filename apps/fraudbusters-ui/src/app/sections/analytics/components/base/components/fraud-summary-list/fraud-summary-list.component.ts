@@ -1,16 +1,39 @@
-import { ChangeDetectionStrategy, Component, Inject, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 import { FraudResultSummary } from '../../../../../../api/fb-management/swagger-codegen/model/fraudResultSummary';
-import { LAYOUT_GAP_M } from '../../../../../../tokens';
 
 @Component({
     selector: 'fb-fraud-summary-templates-list',
     templateUrl: 'fraud-summary-list.component.html',
+    styleUrls: ['./fraud-summary-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FraudSummaryListComponent {
     @Input()
-    summaryRows: FraudResultSummary[];
+    set summaryRows(rows: FraudResultSummary[]) {
+        this.rows = rows;
+        this.totalSum = this.total('sum');
+        this.totalCount = this.total('count');
+        this.totalRatio = this.total('ratio');
+    }
 
-    constructor(@Inject(LAYOUT_GAP_M) public layoutGapM: string) {}
+    get summaryRows(): FraudResultSummary[] {
+        return this.rows;
+    }
+
+    totalSum: number | null;
+    totalCount: number | null;
+    totalRatio: number | null;
+
+    @Input()
+    currency: string;
+
+    private rows: FraudResultSummary[] = [];
+
+    private total(field: 'sum' | 'count' | 'ratio'): number | null {
+        const values = this.rows.map((row) => row.summary[field]);
+        return values.every((value) => Number.isFinite(value) && value >= 0)
+            ? values.reduce((total, value) => total + value, 0)
+            : null;
+    }
 }

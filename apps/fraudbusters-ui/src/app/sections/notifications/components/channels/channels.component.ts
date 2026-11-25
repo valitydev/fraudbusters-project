@@ -1,45 +1,60 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
+import { combineLatest } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import { Channel } from '../../../../api/fb-management/swagger-codegen/model/channel';
-import { LAYOUT_GAP_M } from '../../../../tokens';
 import { FetchChannelsService } from '../../services/fetch-channels.service';
 import { RemoveChannelsService } from '../../services/remove-channels.service';
 
+/** Notification channels: a searchable catalog table with edit and remove actions. */
 @Component({
     templateUrl: 'channels.component.html',
+    styleUrls: ['../notifications-table.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [FetchChannelsService, RemoveChannelsService],
 })
 export class ChannelsComponent {
-    channels$ = this.fetchChannelsService.searchResult$;
-    inProgress$ = this.fetchChannelsService.inProgress$;
-    hasMore$ = this.fetchChannelsService.hasMore$;
+    readonly view$ = combineLatest({
+        rows: this.fetchChannelsService.searchResult$,
+        busy: this.fetchChannelsService.inProgress$,
+        hasMore: this.fetchChannelsService.hasMore$,
+    });
+
+    private searchValue = '';
 
     constructor(
         private router: Router,
+        route: ActivatedRoute,
         private fetchChannelsService: FetchChannelsService,
         private removeChannelsService: RemoveChannelsService,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
+        destroyRef: DestroyRef
     ) {
-        this.removeChannelsService.removed$.subscribe(() => {
-            this.fetchChannelsService.search({});
-        });
+        route.queryParamMap
+            .pipe(
+                map((params) => (params.get('searchQuery') ?? '').trim()),
+                distinctUntilChanged(),
+                takeUntilDestroyed(destroyRef)
+            )
+            .subscribe((query) => {
+                this.searchValue = query;
+                this.fetchChannelsService.search({ searchValue: query });
+            });
+        this.removeChannelsService.removed$
+            .pipe(takeUntilDestroyed(destroyRef))
+            .subscribe(() => this.fetchChannelsService.search({ searchValue: this.searchValue }));
     }
 
-    addChannel() {
-        this.router.navigate([`/channel/new`]);
+    edit(name: string): void {
+        void this.router.navigate(['/channel', name]);
     }
 
-    search(searchValue: string) {
-        return this.fetchChannelsService.search({ searchValue });
-    }
-
-    removeChannel(channel: Channel) {
+    remove(channel: Channel): void {
         this.removeChannelsService.removeChannel(channel);
     }
 
-    goToChannel(id: string) {
-        this.router.navigate([`/channel/${id}`]);
+    fetchMore(): void {
+        this.fetchChannelsService.fetchMore({ searchValue: this.searchValue });
     }
 }

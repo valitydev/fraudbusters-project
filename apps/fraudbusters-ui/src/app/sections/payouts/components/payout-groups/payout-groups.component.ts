@@ -1,12 +1,14 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
-import { Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
-import { debounceTime, finalize, map, switchMap } from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { map, switchMap } from 'rxjs/operators';
 
 import { PayoutsService } from '../../../../api/payouts';
-import { LAYOUT_GAP_M, LAYOUT_GAP_S } from '../../../../tokens';
+import { ConfigService } from '../../../../config';
+import { GroupListRow, groupListRow } from '../../../../shared/components/groups-table/group-list-row';
+import { GroupTabCounts } from '../../../../shared/components/groups-table/group-tab-counts';
+import { CATALOG_SORT_OPTIONS, compareCatalogRows } from '../../../../shared/utils/catalog';
+import { CatalogCollection } from '../../../../shared/utils/catalog-collection';
 import { PayoutsFeedbackService } from '../../services/payouts-feedback.service';
 
 @Component({
@@ -14,36 +16,33 @@ import { PayoutsFeedbackService } from '../../services/payouts-feedback.service'
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PayoutGroupsComponent {
-    search$ = new BehaviorSubject<string>('');
-    inProgress$ = new BehaviorSubject<boolean>(false);
-    searchForm = this.fb.group({ searchQuery: [''] });
-    groups$ = this.search$.pipe(
-        switchMap((searchValue) => {
-            this.inProgress$.next(true);
-            return this.payoutsService.findGroups(searchValue).pipe(finalize(() => this.inProgress$.next(false)));
-        }),
-        map((response) => response.result)
-    );
+    readonly sortOptions = CATALOG_SORT_OPTIONS;
+    readonly catalog: CatalogCollection<GroupListRow>;
 
     constructor(
         private payoutsService: PayoutsService,
         private feedback: PayoutsFeedbackService,
         private router: Router,
-        private fb: FormBuilder,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string,
-        @Inject(LAYOUT_GAP_S) public layoutGapS: string
+        route: ActivatedRoute,
+        config: ConfigService,
+        private tabCounts: GroupTabCounts
     ) {
-        this.searchForm.controls.searchQuery.valueChanges
-            .pipe(debounceTime(300))
-            .subscribe((value) => this.search$.next((value ?? '').trim()));
-    }
-
-    createGroup() {
-        void this.router.navigate(['/payouts/group/new'], { queryParams: { returnUrl: this.router.url } });
+        this.catalog = new CatalogCollection<GroupListRow>(
+            route,
+            config.pageSize,
+            (query) => this.payoutsService.findGroups(query).pipe(map((response) => response.result.map(groupListRow))),
+            (a, b, sort) => compareCatalogRows(a.groupId, b.groupId, a.lastUpdate, b.lastUpdate, sort)
+        );
     }
 
     editGroup(groupId: string) {
         void this.router.navigate([`/payouts/group/${groupId}`], { queryParams: { returnUrl: this.router.url } });
+    }
+
+    duplicateGroup(id: string): void {
+        void this.router.navigate(['/payouts/group/new'], {
+            queryParams: { copyFrom: id, returnUrl: this.router.url },
+        });
     }
 
     removeGroup(groupId: string) {
@@ -51,7 +50,10 @@ export class PayoutGroupsComponent {
             .confirm(`Remove group ${groupId}?`)
             .pipe(switchMap(() => this.payoutsService.removeGroup(groupId)))
             .subscribe({
-                next: () => this.search$.next(this.search$.value),
+                next: () => {
+                    this.catalog.refresh();
+                    this.tabCounts.refresh();
+                },
                 error: (error: HttpErrorResponse) => this.feedback.failed(error),
             });
     }

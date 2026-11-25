@@ -1,30 +1,51 @@
 <mat-sidenav-container>
-    <mat-sidenav role="navigation" #sidenav mode="side" fixedInViewport="true" opened="true">
-        <fb-navigate-menu></fb-navigate-menu>
+    <mat-sidenav
+        #sidenav
+        role="navigation"
+        [mode]="(narrow$ | async) ? 'over' : 'side'"
+        [opened]="(narrow$ | async) === false"
+        [fixedInViewport]="true"
+    >
+        <fb-navigate-menu>
+            <div menu-footer class="profile-footer">
+                <button
+                    type="button"
+                    class="profile-trigger"
+                    [matMenuTriggerFor]="profileMenu"
+                    aria-label="Open account menu"
+                >
+                    <span class="profile-avatar" aria-hidden="true">{{ userInitial }}</span>
+                    <span class="profile-text">
+                        <span class="profile-name">{{ getUsername() }}</span>
+                        <span *ngIf="roleSummary" class="profile-roles">{{ roleSummary }}</span>
+                    </span>
+                    <mat-icon aria-hidden="true">unfold_more</mat-icon>
+                </button>
+            </div>
+        </fb-navigate-menu>
     </mat-sidenav>
 
-    <mat-sidenav-content role="main" class="content" fxLayout="column">
-        <mat-toolbar color="primary" class="toolbar">
-            <button mat-icon-button (click)="sidenav.toggle()">
+    <mat-menu #profileMenu="matMenu" yPosition="above" [overlapTrigger]="false" class="fb-account-menu">
+        <fb-user-info [username]="getUsername()" [roles]="getUserRoles()"></fb-user-info>
+        <mat-divider></mat-divider>
+        <!-- Names the theme the item switches to: moon for night, sun for day. -->
+        <button mat-menu-item type="button" (click)="toggleTheme()">
+            <mat-icon>{{ darkTheme ? 'light_mode' : 'dark_mode' }}</mat-icon>
+            <span>{{ darkTheme ? 'Light theme' : 'Dark theme' }}</span>
+        </button>
+        <button mat-menu-item type="button" (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sign out</span>
+        </button>
+    </mat-menu>
+
+    <mat-sidenav-content role="main" class="content">
+        <header *ngIf="narrow$ | async" class="mobile-header">
+            <button mat-icon-button type="button" aria-label="Open navigation" (click)="sidenav.toggle()">
                 <mat-icon>menu</mat-icon>
             </button>
-            <span class="fb-spacer"></span>
-            <button mat-icon-button [matMenuTriggerFor]="menu">
-                <mat-icon>account_circle</mat-icon>
-            </button>
-            <mat-menu #menu="matMenu">
-                <div fxLayout="column" [fxLayoutGap]="layoutGapS">
-                    <fb-user-info [username]="getUsername()" [roles]="getUserRoles()"></fb-user-info>
-                    <mat-divider></mat-divider>
-                    <button mat-menu-item (click)="logout()">
-                        <mat-icon>logout</mat-icon>
-                        <span>Logout</span>
-                    </button>
-                </div>
-            </mat-menu>
-        </mat-toolbar>
-        <div class="container-fluid">
-            <ng-content></ng-content>
-        </div>
+            <span>Fraudbusters</span>
+        </header>
+        <div class="workspace"><ng-content></ng-content></div>
     </mat-sidenav-content>
 </mat-sidenav-container>

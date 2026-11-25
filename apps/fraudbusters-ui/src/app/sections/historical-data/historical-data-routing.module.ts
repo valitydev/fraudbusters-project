@@ -1,17 +1,17 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
-import { AuthGuard, Roles } from '../../auth';
-import { HistoricalChargebacksDataComponent } from './components/chargebacks/historical-chargebacks-data.component';
-import { HistoricalFraudPaymentsDataComponent } from './components/fraud-payments/historical-fraud-payments-data.component';
-import { HistoricalInspectResultsDataComponent } from './components/inspect-results/historical-inspect-results-data.component';
-import { HistoricalPaymentsDataComponent } from './components/payments/historical-payments-data.component';
-import { HistoricalRefundsDataComponent } from './components/refunds/historical-refunds-data.component';
-import { HistoricalWithdrawalInspectResultsDataComponent } from './components/withdrawal-inspect-results/historical-withdrawal-inspect-results-data.component';
-import { HistoricalWithdrawalsDataComponent } from './components/withdrawals/historical-withdrawals-data.component';
 import { HistoricalDataComponent } from './historical-data.component';
+import { AuthGuard, Roles } from '../../auth';
+import { HistoricalKindKey } from './records/historical-kinds';
+import { HistoricalRecordsComponent } from './records/historical-records.component';
 
-const OFFICER = { canActivate: [AuthGuard], data: { roles: [Roles.FraudOfficer] } };
+const tab = (path: string, kind: HistoricalKindKey) => ({
+    path,
+    component: HistoricalRecordsComponent,
+    canActivate: [AuthGuard],
+    data: { roles: [Roles.FraudOfficer], kind },
+});
 
 @NgModule({
     imports: [
@@ -22,21 +22,22 @@ const OFFICER = { canActivate: [AuthGuard], data: { roles: [Roles.FraudOfficer] 
                 canActivate: [AuthGuard],
                 data: {
                     roles: [Roles.FraudOfficer],
-                    title: 'Payment historical data',
+                    title: 'Historical data',
+                    subtitle: 'Search rule evaluations, payments, refunds, chargebacks and fraud reports.',
                     links: [
-                        { path: 'inspect-results', name: 'Inspect results', otherActiveUrlFragments: [] },
-                        { path: 'payments', name: 'Payments', otherActiveUrlFragments: [] },
-                        { path: 'refunds', name: 'Refunds', otherActiveUrlFragments: [] },
-                        { path: 'chargebacks', name: 'Chargebacks', otherActiveUrlFragments: [] },
-                        { path: 'fraud-payments', name: 'Fraud payments', otherActiveUrlFragments: [] },
+                        { path: 'inspect-results', name: 'Inspect results', dot: '#6338f5' },
+                        { path: 'payments', name: 'Payments', dot: '#10b981' },
+                        { path: 'refunds', name: 'Refunds', dot: '#0ea5e9' },
+                        { path: 'chargebacks', name: 'Chargebacks', dot: '#f59e0b' },
+                        { path: 'fraud-payments', name: 'Fraud payments', dot: '#f43f5e' },
                     ],
                 },
                 children: [
-                    { path: 'inspect-results', component: HistoricalInspectResultsDataComponent, ...OFFICER },
-                    { path: 'payments', component: HistoricalPaymentsDataComponent, ...OFFICER },
-                    { path: 'refunds', component: HistoricalRefundsDataComponent, ...OFFICER },
-                    { path: 'fraud-payments', component: HistoricalFraudPaymentsDataComponent, ...OFFICER },
-                    { path: 'chargebacks', component: HistoricalChargebacksDataComponent, ...OFFICER },
+                    tab('inspect-results', 'inspect-results'),
+                    tab('payments', 'payments'),
+                    tab('refunds', 'refunds'),
+                    tab('chargebacks', 'chargebacks'),
+                    tab('fraud-payments', 'fraud-payments'),
                     { path: '', redirectTo: 'inspect-results', pathMatch: 'full' },
                 ],
             },
@@ -46,16 +47,19 @@ const OFFICER = { canActivate: [AuthGuard], data: { roles: [Roles.FraudOfficer] 
                 canActivate: [AuthGuard],
                 data: {
                     roles: [Roles.FraudOfficer],
-                    title: 'Payout historical data',
+                    title: 'Historical data',
+                    subtitle: 'Search payouts and their rule evaluations.',
                     links: [
-                        { path: 'withdrawals', name: 'Payouts', otherActiveUrlFragments: [] },
-                        { path: 'inspect-results', name: 'Inspect results', otherActiveUrlFragments: [] },
+                        { path: 'payouts', name: 'Payouts', dot: '#10b981' },
+                        { path: 'inspect-results', name: 'Inspect results', dot: '#6338f5' },
                     ],
                 },
                 children: [
-                    { path: 'withdrawals', component: HistoricalWithdrawalsDataComponent, ...OFFICER },
-                    { path: 'inspect-results', component: HistoricalWithdrawalInspectResultsDataComponent, ...OFFICER },
-                    { path: '', redirectTo: 'withdrawals', pathMatch: 'full' },
+                    tab('payouts', 'payouts'),
+                    tab('inspect-results', 'payout-inspect-results'),
+                    // Older links named the payouts tab after withdrawals.
+                    { path: 'withdrawals', redirectTo: 'payouts', pathMatch: 'full' },
+                    { path: '', redirectTo: 'payouts', pathMatch: 'full' },
                 ],
             },
             { path: '', redirectTo: 'payments', pathMatch: 'full' },

@@ -1,30 +1,125 @@
-<mat-card>
-    <mat-card-content fxLayout="column" [fxLayoutGap]="layoutGapM">
-        <form [formGroup]="form" [fxLayoutGap]="layoutGapM">
-            <mat-form-field fxFlex="25" appearance="outline">
-                <input required matInput placeholder="Name" formControlName="name" />
-            </mat-form-field>
-            <mat-form-field fxFlex="25" appearance="outline">
-                <mat-select placeholder="Channel type" formControlName="type">
-                    <mat-option *ngFor="let channel of channelTypes" [value]="channel">{{ channel }}</mat-option>
-                </mat-select>
-            </mat-form-field>
-            <mat-form-field fxFlex="25" appearance="outline">
-                <input required matInput placeholder="Destinations" formControlName="destination" />
-            </mat-form-field>
-        </form>
-        <div fxLayout fxLayoutAlign="end" [fxLayoutGap]="layoutGapM">
-            <button
-                mat-button
-                color="primary"
-                [disabled]="form.invalid || (inProgress$ | async)"
-                (click)="saveChannel()"
-            >
-                {{ channel ? 'Save' : 'Create' }}
-            </button>
+<div class="reference-page">
+    <header class="page-header">
+        <button
+            mat-stroked-button
+            type="button"
+            class="fb-template-back"
+            aria-label="Back to channels"
+            [disabled]="saving"
+            (click)="back()"
+        >
+            <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="heading">
+            <h1 class="fb-page-title">{{ editing ? 'Edit channel' : 'New channel' }}</h1>
+            <p class="fb-page-subtitle">
+                {{
+                    editing
+                        ? 'Update where notification reports are delivered.'
+                        : 'Set up a destination for notification reports.'
+                }}
+            </p>
         </div>
-    </mat-card-content>
-    <mat-card-footer *ngIf="inProgress$ | async">
-        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-    </mat-card-footer>
-</mat-card>
+    </header>
+
+    <div *ngIf="loading" class="reference-card state" role="status">Loading channel…</div>
+    <div *ngIf="loadFailed" class="reference-card state" role="alert">
+        Could not load the channel.
+        <button mat-stroked-button type="button" (click)="retry.emit()">Retry</button>
+    </div>
+
+    <form
+        *ngIf="!loading && !loadFailed"
+        class="reference-card"
+        [formGroup]="form"
+        [attr.aria-busy]="saving"
+        (ngSubmit)="saveChannel()"
+    >
+        <section class="reference-entry" aria-labelledby="channel-details-title">
+            <div class="entry-header">
+                <h2 class="fb-section-title" id="channel-details-title">Channel details</h2>
+                <p class="shortcut">Notifications pick a channel by its name.</p>
+            </div>
+            <div class="fields">
+                <div class="field">
+                    <label for="channel-name"
+                        >Name <span *ngIf="!editing" class="required" aria-hidden="true">*</span></label
+                    >
+                    <input
+                        class="fb-form-control fb-control-mono"
+                        id="channel-name"
+                        formControlName="name"
+                        type="text"
+                        autocomplete="off"
+                        [required]="!editing"
+                        placeholder="e.g. fraud-team-mail"
+                        aria-describedby="channel-name-hint"
+                    />
+                    <p id="channel-name-hint">
+                        {{ editing ? 'The channel name cannot be changed after creation.' : 'Unique channel name.' }}
+                    </p>
+                </div>
+                <div class="field">
+                    <label id="channel-type-label" for="channel-type"
+                        >Type <span class="required" aria-hidden="true">*</span></label
+                    >
+                    <mat-select
+                        class="fb-form-control"
+                        id="channel-type"
+                        formControlName="type"
+                        aria-labelledby="channel-type-label"
+                        aria-describedby="channel-type-hint"
+                        required
+                    >
+                        <mat-option *ngFor="let type of channelTypes" [value]="type">{{ type }}</mat-option>
+                    </mat-select>
+                    <p id="channel-type-hint">How reports are delivered.</p>
+                </div>
+                <div class="field">
+                    <label for="channel-destination"
+                        >Destination <span class="required" aria-hidden="true">*</span></label
+                    >
+                    <input
+                        class="fb-form-control fb-control-mono"
+                        id="channel-destination"
+                        formControlName="destination"
+                        type="text"
+                        autocomplete="off"
+                        required
+                        placeholder="e.g. fraud@example.com, risk@example.com"
+                        aria-describedby="channel-destination-hint"
+                    />
+                    <p id="channel-destination-hint">Email addresses separated by commas.</p>
+                </div>
+            </div>
+        </section>
+
+        <mat-progress-bar *ngIf="saving" mode="indeterminate" aria-label="Saving channel"></mat-progress-bar>
+        <footer class="page-footer">
+            <p *ngIf="error; else status" class="error" role="alert">{{ error }}</p>
+            <ng-template #status>
+                <p aria-live="polite">
+                    {{
+                        form.invalid
+                            ? 'Fill in all required fields to enable ' + (editing ? 'Save' : 'Create') + '.'
+                            : editing
+                            ? 'Changes are ready to save.'
+                            : 'The channel is ready to create.'
+                    }}
+                </p>
+            </ng-template>
+            <div class="footer-actions">
+                <button mat-stroked-button type="button" [disabled]="saving" (click)="back()">Cancel</button>
+                <button
+                    mat-flat-button
+                    color="primary"
+                    type="submit"
+                    class="create"
+                    [disabled]="form.invalid || saving"
+                >
+                    {{ editing ? 'Save' : 'Create' }}
+                </button>
+            </div>
+        </footer>
+    </form>
+</div>

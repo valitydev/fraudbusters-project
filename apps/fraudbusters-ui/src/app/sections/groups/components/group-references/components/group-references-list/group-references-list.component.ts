@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Inject, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
 import { GroupReference } from '../../../../../../api/fb-management/swagger-codegen/model/groupReference';
-import { LAYOUT_GAP_M } from '../../../../../../tokens';
+import { ReferenceRow } from '../../../../../../shared/components/reference-table/reference-table.component';
 
 @Component({
     selector: 'fb-group-references-list',
@@ -9,14 +9,18 @@ import { LAYOUT_GAP_M } from '../../../../../../tokens';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GroupReferencesListComponent {
-    @Input()
-    references: GroupReference[];
+    rows: ReferenceRow<GroupReference>[] = [];
 
-    @Output()
-    goToGroup = new EventEmitter<string>();
+    @Input()
+    set references(references: GroupReference[]) {
+        this.rows = references.map((source) => ({
+            ...source,
+            targetId: source.groupId,
+            scopeId: source.shopId,
+            source,
+        }));
+    }
 
     @Output()
     deleteItem = new EventEmitter<GroupReference>();
-
-    constructor(@Inject(LAYOUT_GAP_M) public layoutGapM: string) {}
 }

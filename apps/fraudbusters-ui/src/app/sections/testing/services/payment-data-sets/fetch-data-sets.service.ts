@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { shareReplay } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { shareReplay, tap } from 'rxjs/operators';
 
 import { DataSet } from '../../../../api/fb-management/swagger-codegen/model/dataSet';
 import { DataSetService } from '../../../../api/payments/data-set';
@@ -23,6 +23,7 @@ export interface FetchDataSetsParams {
 
 @Injectable()
 export class FetchDataSetsService extends PartialFetcherContinuation<DataSet, FetchDataSetsParams> {
+    readonly failed$ = new BehaviorSubject(false);
     inProgress$ = this.doAction$.pipe(booleanDelay(), shareReplay(1));
     private pageSize = this.configService.pageSize;
 
@@ -36,14 +37,17 @@ export class FetchDataSetsService extends PartialFetcherContinuation<DataSet, Fe
 
     protected fetch(params: FetchDataSetsParams, lastId?: string): Observable<FetchResultContinuation<DataSet>> {
         const { sortOrder, sortBy, searchValue, size, from, to } = params;
-        return this.dataSetService.filterDataSets({
-            sortOrder: sortOrder || SortOrder.Desc,
-            size: size ? size : this.pageSize,
-            dataSetName: searchValue ? searchValue : null,
-            ...(lastId ? { lastId } : {}),
-            ...(sortBy ? { sortBy } : {}),
-            ...(from ? { from } : {}),
-            ...(to ? { to } : {}),
-        });
+        this.failed$.next(false);
+        return this.dataSetService
+            .filterDataSets({
+                sortOrder: sortOrder || SortOrder.Desc,
+                size: size ? size : this.pageSize,
+                dataSetName: searchValue ? searchValue : null,
+                ...(lastId ? { lastId } : {}),
+                ...(sortBy ? { sortBy } : {}),
+                ...(from ? { from } : {}),
+                ...(to ? { to } : {}),
+            })
+            .pipe(tap({ error: () => this.failed$.next(true) }));
     }
 }

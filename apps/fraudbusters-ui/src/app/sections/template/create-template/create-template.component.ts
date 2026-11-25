@@ -1,7 +1,5 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-
-import { LAYOUT_GAP_L, LAYOUT_GAP_M } from '../../../tokens';
 
 @Component({
     templateUrl: './create-template.component.html',
@@ -9,12 +7,7 @@ import { LAYOUT_GAP_L, LAYOUT_GAP_M } from '../../../tokens';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateTemplateComponent {
-    constructor(
-        private router: Router,
-        private route: ActivatedRoute,
-        @Inject(LAYOUT_GAP_L) public layoutGapL: string,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
-    ) {}
+    constructor(private router: Router, private route: ActivatedRoute) {}
 
     back() {
         this.router.navigate([`../templates`]);

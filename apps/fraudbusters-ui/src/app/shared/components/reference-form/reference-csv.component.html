@@ -1,0 +1,15 @@
+<fb-csv-panel
+    [description]="'Upload files with ' + targetLabel + ', Party ID and optional ' + scopeLabel + ' columns.'"
+    [columns]="columns"
+    [sampleRow]="sampleRow"
+    sampleName="references-sample.csv"
+    emptyIssue="no reference rows found"
+    [parse]="parse"
+    (append)="append.emit($event)"
+    (closed)="closed.emit()"
+>
+    <ng-template let-row>
+        <code>{{ row.targetId }}</code> · {{ row.partyId || 'All payouts' }} ·
+        {{ row.scopeId || (isPayout ? 'All wallets' : 'All shops') }}
+    </ng-template>
+</fb-csv-panel>

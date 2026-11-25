@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
@@ -7,7 +7,6 @@ import { finalize, map } from 'rxjs/operators';
 
 import { Template } from '../../../../api/fb-management/swagger-codegen/model/template';
 import { PayoutsService } from '../../../../api/payouts';
-import { LAYOUT_GAP_L, LAYOUT_GAP_M } from '../../../../tokens';
 import { PayoutsFeedbackService } from '../../services/payouts-feedback.service';
 
 /** Creates, edits or copies a payout template, as the payment template page does. */
@@ -25,35 +24,55 @@ export class PayoutTemplateFormComponent implements OnInit {
         template: ['', Validators.required],
     });
 
+    template?: Template;
+    loading = false;
+    loadFailed = false;
+
+    get validationMessage(): string {
+        return this.errors.length ? this.errors.join('\n') : 'No errors';
+    }
+
+    checkedRule: string | null = null;
+
     constructor(
         private route: ActivatedRoute,
         private router: Router,
         private payoutsService: PayoutsService,
         private feedback: PayoutsFeedbackService,
         private fb: FormBuilder,
-        private cdr: ChangeDetectorRef,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string,
-        @Inject(LAYOUT_GAP_L) public layoutGapL: string
+        private cdr: ChangeDetectorRef
     ) {}
 
     ngOnInit() {
         const id = this.route.snapshot.paramMap.get('id');
         this.editing = !!id && this.route.snapshot.data.mode === 'edit';
-        this.title = this.editing ? `Template ${id}` : 'New template';
+        this.title = this.editing ? 'Edit template' : 'New template';
         if (!id) {
             return;
         }
+        this.loading = true;
         this.payoutsService
             .findTemplates({ searchValue: id, size: 100 })
             .pipe(map((response) => response.result.find((template) => template.id === id)))
-            .subscribe((template) => {
-                if (template) {
-                    this.form.setValue({ id: this.editing ? template.id : '', template: template.template });
-                    if (this.editing) {
-                        this.form.controls.id.disable();
+            .subscribe({
+                next: (template) => {
+                    this.loading = false;
+                    this.loadFailed = !template;
+                    if (template) {
+                        this.template = template;
+                        this.form.setValue({ id: this.editing ? template.id : '', template: template.template });
+                        if (this.editing) {
+                            this.form.controls.id.disable();
+                        }
                     }
                     this.cdr.markForCheck();
-                }
+                },
+                error: (error: HttpErrorResponse) => {
+                    this.loading = false;
+                    this.loadFailed = true;
+                    this.feedback.failed(error);
+                    this.cdr.markForCheck();
+                },
             });
     }
 
@@ -63,15 +82,15 @@ export class PayoutTemplateFormComponent implements OnInit {
 
     validateTemplate() {
         this.inProgress$.next(true);
+        const rule = this.form.controls.template.value;
+        this.checkedRule = null;
         this.payoutsService
             .validateTemplate(this.value())
             .pipe(finalize(() => this.inProgress$.next(false)))
             .subscribe({
                 next: (response) => {
                     this.errors = response.validateResults.flatMap((result) => result.errors ?? []);
-                    if (!this.errors.length) {
-                        this.feedback.done('Template is valid');
-                    }
+                    this.checkedRule = rule;
                     this.cdr.markForCheck();
                 },
                 error: (error: HttpErrorResponse) => this.feedback.failed(error),
@@ -87,6 +106,7 @@ export class PayoutTemplateFormComponent implements OnInit {
                 next: (response) => {
                     this.errors = response.errors ?? [];
                     if (this.errors.length) {
+                        this.checkedRule = this.form.controls.template.value;
                         this.cdr.markForCheck();
                         return;
                     }

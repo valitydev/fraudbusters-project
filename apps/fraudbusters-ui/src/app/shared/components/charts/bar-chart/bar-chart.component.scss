@@ -26,3 +26,15 @@ $tooltip-border-radius: 4px;
         }
     }
 }
+
+:host ::ng-deep .apexcharts-legend-series {
+    align-items: center;
+    padding: 2px 6px;
+    border: 1px solid var(--fb-line);
+    border-radius: 6px;
+    background: var(--fb-raised);
+}
+
+:host ::ng-deep .apexcharts-legend-text {
+    color: var(--fb-text) !important;
+}

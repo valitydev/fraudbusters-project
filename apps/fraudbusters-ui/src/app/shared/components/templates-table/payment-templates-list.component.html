@@ -1,0 +1,53 @@
+<div class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Template table">
+    <table class="fb-catalog-table" [attr.aria-label]="label">
+        <colgroup>
+            <col class="id-column" />
+            <col />
+            <col class="fb-catalog-date-column" />
+            <col *ngIf="showAuthor" class="author-column" />
+            <col class="actions-column" />
+        </colgroup>
+        <thead>
+            <tr fb-template-header [showAuthor]="showAuthor"></tr>
+        </thead>
+        <tbody>
+            <ng-container *ngFor="let template of rows; trackBy: byId">
+                <tr
+                    fb-template-item
+                    [template]="template"
+                    [showAuthor]="showAuthor"
+                    [expanded]="expandedId === template.id"
+                    [detailsId]="'payment-template-details-' + template.id"
+                    (toggleDetail)="toggle(template.id)"
+                    (editItem)="editItem.emit($event)"
+                    (deleteItem)="deleteItem.emit($event)"
+                    (copyItem)="copyItem.emit($event)"
+                ></tr>
+                <tr
+                    class="template-detail"
+                    [id]="'payment-template-details-' + template.id"
+                    [hidden]="expandedId !== template.id"
+                >
+                    <td [attr.colspan]="showAuthor ? 5 : 4">
+                        <ng-container *ngIf="expandedId === template.id">
+                            <div class="detail-toolbar">
+                                <span>Full rule text</span>
+                                <div class="detail-actions">
+                                    <button mat-button type="button" (click)="copyRule(template.template)">
+                                        Copy rule
+                                    </button>
+                                    <button mat-button type="button" (click)="editItem.emit(template.id)">
+                                        Open in editor
+                                    </button>
+                                </div>
+                            </div>
+                            <pre
+                                class="fb-fraudo-code"
+                            ><code><span *ngFor="let token of template.template | fraudoTokens" [class]="'fb-code-' + token.kind">{{ token.text }}</span></code></pre>
+                        </ng-container>
+                    </td>
+                </tr>
+            </ng-container>
+        </tbody>
+    </table>
+</div>

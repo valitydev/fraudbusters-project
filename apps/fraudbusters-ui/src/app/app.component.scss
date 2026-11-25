@@ -1,19 +1,10 @@
 ::ng-deep {
-    .mat-card.mat-mdc-card.mdc-card.list-header {
-        height: 48px !important;
-    }
-
-    .mat-drawer-side,
-    .mat-mdc-drawer-side {
-        width: 240px;
-    }
-
     .mat-mdc-form-field-icon-suffix.mat-calendar-body-cell-content {
         padding: 0 !important;
     }
 
     .mat-calendar-body-cell.mat-calendar-body-active {
-        background-color: #673ab7;
+        background-color: var(--fb-accent, #673ab7);
         color: #fff;
         border-radius: 999px;
     }
@@ -23,7 +14,7 @@
     }
 
     .mdc-text-field--no-label:not(.mdc-text-field--textarea) .mat-mdc-form-field-input-control.mdc-text-field__input,
-    .mat-mdc-text-field-wrapper .mat-mdc-form-field-input-control {
+    .mat-mdc-text-field-wrapper:not(.fb-filter-fields *) .mat-mdc-form-field-input-control {
         height: 100%;
     }
 
@@ -31,7 +22,7 @@
         background: none;
     }
 
-    .mat-mdc-text-field-wrapper.mdc-text-field {
+    .mat-mdc-text-field-wrapper.mdc-text-field:not(.fb-filter-fields *) {
         .mat-mdc-form-field-has-icon-suffix {
             padding-right: 10px;
         }
@@ -80,25 +71,25 @@
     height: 48px;
 
     &.mat-primary {
-        background: #fff;
-        color: #655b76;
+        background: var(--fb-surface, #fff);
+        color: var(--fb-muted, #655b76);
     }
 
     .mat-button,
     .mat-stroked-button {
         margin: 8px;
-        border: 1px solid #e6ecf5;
+        border: 1px solid var(--fb-line, #e6ecf5);
     }
 
     &.toolbar.mat-primary.mat-toolbar-single-row {
-        border-bottom: 1px solid #e6ecf5;
+        border-bottom: 1px solid var(--fb-line, #e6ecf5);
         height: 48px;
     }
 }
 
 ::ng-deep {
     .content {
-        background: #f6f7fb;
+        background: var(--fb-canvas, #f6f7fb);
     }
 
     .container-fluid {
@@ -108,7 +99,7 @@
 
     textarea.code-editor {
         font-size: 14px;
-        font-family: monospace;
+        font-family: var(--fb-font-mono);
     }
 
     /* Datepicker and timepicker styles removed to reduce bundle size */
@@ -140,13 +131,8 @@
         }
     }
 
-    .mat-menu-panel,
-    .mat-mdc-menu-panel {
-        padding: 8px;
-    }
-
     .mat-mdc-card.mdc-card {
-        border: 1px solid #e6ecf5;
+        border: 1px solid var(--fb-line, #e6ecf5);
         box-shadow: none;
     }
 
@@ -175,7 +161,7 @@
     .mat-mdc-simple-snackbar {
         .mat-button,
         .mat-mdc-button {
-            color: #f6f2ff;
+            color: var(--fb-selected, #f6f2ff);
         }
     }
 
@@ -183,7 +169,7 @@
     .mat-mdc-form-field-disabled {
         .mat-form-field-infix:hover,
         .mat-mdc-form-field-infix:hover {
-            border-color: #e6ecf5 !important;
+            border-color: var(--fb-line, #e6ecf5) !important;
         }
     }
 
@@ -220,14 +206,14 @@
         }
     }
 
-    .mat-mdc-form-field-infix {
+    .mat-mdc-form-field-infix:not(.fb-filter-fields *) {
         height: 15px;
         padding: 0;
     }
 
-    .mat-mdc-text-field-wrapper.mdc-text-field {
+    .mat-mdc-text-field-wrapper.mdc-text-field:not(.fb-filter-fields *) {
         height: 100%;
-        border: 1px solid #e6ecf5;
+        border: 1px solid var(--fb-line, #e6ecf5);
         font-size: 13px;
         padding: 5px 20px;
         border-radius: 4px;
@@ -250,7 +236,7 @@
         &:active {
             outline: 0 none;
             box-shadow: none;
-            border-color: #673ab7;
+            border-color: var(--fb-accent, #673ab7);
         }
 
         .mat-mdc-form-field-infix {
@@ -297,8 +283,11 @@
         }
     }
 
-    .cdk-overlay-pane {
-        background-color: white;
-        border: 1px solid #e6ecf5;
+    // Overlays whose contents draw their own surface do not need a second frame.
+    .cdk-overlay-pane:not(.mat-mdc-dialog-panel):not(
+            :has(.mat-mdc-menu-panel, .mat-mdc-select-panel, .mat-mdc-autocomplete-panel)
+        ) {
+        background-color: var(--fb-surface, white);
+        border: 1px solid var(--fb-line, #e6ecf5);
     }
 }

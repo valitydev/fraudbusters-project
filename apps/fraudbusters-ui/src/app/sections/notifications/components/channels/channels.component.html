@@ -1,25 +1,72 @@
-<div fxLayout="column" [fxLayoutGap]="layoutGapM">
-    <div fxLayout fxLayoutAlign="space-between center">
-        <fb-periodical-search (valueChanges)="search($event)"></fb-periodical-search>
-        <button mat-button color="primary" (click)="addChannel()">ADD CHANNEL</button>
+<fb-catalog-panel
+    *ngIf="view$ | async as view"
+    label="Channels"
+    searchLabel="Search channels by name"
+    itemName="channels"
+    [paginated]="true"
+    [count]="view.rows.length"
+    [busy]="view.busy"
+>
+    <div *ngIf="view.rows.length" class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Channels table">
+        <table class="fb-catalog-table" aria-label="Channels">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Destination</th>
+                    <th scope="col">Created at</th>
+                    <th scope="col" class="fb-catalog-action-cell">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let channel of view.rows">
+                    <th scope="row" class="name">{{ channel.name || '—' }}</th>
+                    <td>
+                        <span *ngIf="channel.type; else missing" class="fb-pill fb-pill-status fb-pill-info">{{
+                            channel.type
+                        }}</span>
+                    </td>
+                    <td>
+                        <span *ngIf="channel.destination; else missing" class="fb-catalog-mono">{{
+                            channel.destination
+                        }}</span>
+                    </td>
+                    <td class="fb-catalog-time">{{ (channel.createdAt | date : 'yyyy-MM-dd HH:mm:ss') || '—' }}</td>
+                    <td class="fb-catalog-action-cell">
+                        <button
+                            mat-icon-button
+                            type="button"
+                            [matMenuTriggerFor]="menu"
+                            [attr.aria-label]="'More actions for ' + channel.name"
+                        >
+                            <mat-icon>more_vert</mat-icon>
+                        </button>
+                        <mat-menu #menu="matMenu">
+                            <button mat-menu-item type="button" (click)="edit(channel.name)">
+                                <mat-icon>edit</mat-icon>Edit channel
+                            </button>
+                            <button mat-menu-item type="button" class="fb-menu-danger" (click)="remove(channel)">
+                                <mat-icon>delete_outline</mat-icon>Remove channel
+                            </button>
+                        </mat-menu>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
-    <div *ngIf="channels$ | async as channels">
-        <fb-channels-list
-            *ngIf="channels.length; else Empty"
-            [channels]="channels"
-            (editItem)="goToChannel($event)"
-            (deleteItem)="removeChannel($event)"
-        ></fb-channels-list>
-    </div>
-    <fb-show-more-panel
-        *ngIf="hasMore$ | async"
-        [isLoading]="inProgress$ | async"
-        (showMore)="fetchMore()"
-    ></fb-show-more-panel>
-    <div *ngIf="inProgress$ | async" fxLayout fxLayoutAlign="center">
-        <mat-progress-spinner color="primary" mode="indeterminate" diameter="48"></mat-progress-spinner>
-    </div>
-    <ng-template #Empty>
-        <fb-empty-search-result *ngIf="!(inProgress$ | async)"></fb-empty-search-result>
-    </ng-template>
-</div>
+    <footer *ngIf="view.rows.length" class="table-footer">
+        <span>Showing {{ view.rows.length }} {{ view.rows.length === 1 ? 'channel' : 'channels' }}</span>
+        <button
+            *ngIf="view.hasMore"
+            class="load-more"
+            mat-button
+            type="button"
+            [disabled]="view.busy"
+            (click)="fetchMore()"
+        >
+            Show more
+        </button>
+    </footer>
+</fb-catalog-panel>
+
+<ng-template #missing><span class="missing">—</span></ng-template>

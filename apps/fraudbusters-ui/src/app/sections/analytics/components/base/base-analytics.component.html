@@ -1,68 +1,180 @@
-<div fxLayout="column" [fxLayoutGap]="layoutGapM">
-    <div fxLayout fxFlexFill fxLayoutAlign="space-between center">
-        <fb-base-analytics-search
-            fxFlexFill
-            [inProgress]="inProgress$"
-            (valueChanges)="search($event)"
-        ></fb-base-analytics-search>
-    </div>
-    <div fxFlexFill fxLayout="column" [fxLayoutGap]="layoutGapM">
-        <div fxLayout="row" fxlayoutgap="10px grid" fxLayoutAlign="space-between center" [fxLayoutGap]="layoutGapM">
-            <fb-info-card
-                fxFlex="25"
-                [headerText]="attemptedPayments"
-                [value]="attemptedPayments$ | async"
-                [inProgress]="inProgress$"
-                [type]="successStyle"
-            ></fb-info-card>
-            <fb-info-card
-                fxFlex="25"
-                [headerText]="blockedPayments"
-                [value]="blockedPayments$ | async"
-                [inProgress]="inProgress$"
-                [type]="errorStyle"
-            ></fb-info-card>
-            <fb-info-card
-                fxFlex="25"
-                [headerText]="ratioOfBlocked"
-                [value]="ratioOfBlocked$ | async"
-                [inProgress]="inProgress$"
-                [type]="errorStyle"
-                [formatNumber]="true"
-            ></fb-info-card>
-            <fb-info-card
-                fxFlex="25"
-                [headerText]="blockedSum"
-                [value]="blockedSum$ | async"
-                [inProgress]="inProgress$"
-                [type]="errorStyle"
-                [formatNumber]="true"
-            ></fb-info-card>
-        </div>
-        <div fxFlexFill fxLayout="column" fxLayoutAlign="space-between center" [fxLayoutGap]="layoutGapM">
-            <mat-card fxFlexFill fxLayoutAlign="start">
-                <mat-card-content fxFlexFill>
-                    <h4>Fraud result ratio</h4>
-                    <label>Ratio success and blocked operations</label>
-                    <fb-bar-chart
-                        *ngIf="chartData$ | async as chartData"
-                        fxFlexFill
-                        fxLayoutAlign="center"
-                        [series]="chartData.series"
-                        [colors]="colors"
-                    ></fb-bar-chart>
-                </mat-card-content>
-            </mat-card>
-        </div>
-
-        <div fxFlexFill fxLayout="column" fxLayoutAlign="space-between center" [fxLayoutGap]="layoutGapM">
-            <div fxFlexFill *ngIf="fraudSummary$ | async as summaries">
-                <fb-fraud-summary-templates-list
-                    fxFlexFill
-                    *ngIf="summaries.length"
-                    [summaryRows]="summaries | sort : 'summary.count'"
-                ></fb-fraud-summary-templates-list>
+<ng-container *ngIf="{ state: state$ | async } as view">
+    <div class="analytics">
+        <header class="analytics-header">
+            <div>
+                <div class="title-wrap">
+                    <h1 class="fb-page-title">Analytics</h1>
+                    <span class="utc-badge"><span aria-hidden="true"></span>UTC+00:00</span>
+                </div>
+                <p class="fb-page-subtitle">
+                    Track payments blocked in processing and the fraud rules behind decline decisions.
+                </p>
             </div>
-        </div>
+            <button
+                mat-stroked-button
+                class="export-button"
+                type="button"
+                [disabled]="!view.state?.data"
+                (click)="exportReport(view.state?.data)"
+            >
+                <mat-icon>file_download</mat-icon>
+                Export report
+            </button>
+        </header>
+
+        <fb-base-analytics-search
+            [breakdownFiltered]="status !== 'All' || !!selectedRule || !!search.value.trim()"
+            (filtersReset)="resetBreakdown()"
+        ></fb-base-analytics-search>
+
+        <p *ngIf="view.state?.loading" class="analytics-message" role="status">Loading analytics…</p>
+        <section *ngIf="view.state?.error" class="analytics-message" role="alert">
+            Analytics could not be loaded.
+            <button mat-stroked-button type="button" (click)="retry()">Retry</button>
+        </section>
+
+        <ng-container *ngIf="view.state?.data as data">
+            <dl class="metrics" aria-label="Payment analytics summary">
+                <div>
+                    <dt>Attempted payments</dt>
+                    <span
+                        *ngIf="data.attemptedChange !== null"
+                        class="metric-badge"
+                        title="Change vs. the preceding period at the same UTC hours"
+                    >
+                        {{ data.attemptedChange > 0 ? '+' : '' }}{{ data.attemptedChange | percent : '1.1-1' }}
+                    </span>
+                    <dd>{{ data.attempted | number }}</dd>
+                    <div class="metric-note">Payments received by processing</div>
+                </div>
+                <div>
+                    <dt>Blocked payments</dt>
+                    <span class="metric-badge danger">{{ data.blocked | number }} blocked</span>
+                    <dd>{{ data.blocked | number }}</dd>
+                    <div class="metric-note" [title]="blockedDefinition">Failed in processing for high risk score</div>
+                </div>
+                <div>
+                    <dt>Blocked share</dt>
+                    <span *ngIf="data.attempted" class="metric-badge accent">
+                        {{ data.blocked | number }} / {{ data.attempted | number }}
+                    </span>
+                    <dd>{{ (data.ratio | percent : '1.0-2') ?? '—' }}</dd>
+                    <div class="metric-note" [title]="blockedDefinition">Blocked in processing, of attempted</div>
+                </div>
+                <div>
+                    <dt>Blocked amount</dt>
+                    <span class="metric-badge currency">{{ data.currency }}</span>
+                    <dd>
+                        {{ data.blockedAmount | number : '1.0-2' }} <small>{{ data.currency }}</small>
+                    </dd>
+                    <div class="metric-note" [title]="blockedDefinition">Value of payments blocked in processing</div>
+                </div>
+            </dl>
+
+            <div class="analytics-charts">
+                <section class="analytics-card risk-card">
+                    <h2>Risk distribution</h2>
+                    <p class="card-caption">Share of rule checks by result per day, %</p>
+                    <fb-bar-chart
+                        *ngIf="data.chart.series.length; else noChart"
+                        [series]="data.chart.series"
+                        [categorical]="data.chart.categorical"
+                        [height]="258"
+                    ></fb-bar-chart>
+                    <ng-template #noChart><p class="empty">No risk results for this selection.</p></ng-template>
+                </section>
+
+                <section class="analytics-card ranking-card">
+                    <h2>Top declined rules</h2>
+                    <p class="card-caption">Top 5 rules by decline decisions, before processing</p>
+                    <ul *ngIf="data.topDeclines.length; else noDeclines" class="rule-ranking">
+                        <li *ngFor="let row of data.topDeclines">
+                            <button type="button" [attr.aria-pressed]="isSelected(row)" (click)="toggleRule(row)">
+                                <span class="rule-name">
+                                    <strong *ngIf="row.checkedRule | unnamedRuleIndex as index; else namedRule"
+                                        >Rule #{{ index }} <span class="unnamed-tag">unnamed</span></strong
+                                    >
+                                    <ng-template #namedRule
+                                        ><strong>{{ row.checkedRule }}</strong></ng-template
+                                    >
+                                    <small *ngIf="row.template">{{ row.template }}</small>
+                                </span>
+                                <span class="rule-count">{{ row.summary.count | number }}</span>
+                                <span class="rule-track" aria-hidden="true">
+                                    <span
+                                        [style.width.%]="(row.summary.count / data.topDeclines[0].summary.count) * 100"
+                                    ></span>
+                                </span>
+                            </button>
+                        </li>
+                    </ul>
+                    <ng-template #noDeclines><p class="empty">No declined rules for this selection.</p></ng-template>
+                    <footer *ngIf="data.topDeclines.length" class="rank-footer">
+                        <span>Select a rule to filter the breakdown</span>
+                        <strong
+                            >{{ data.declineCount | number }}
+                            {{ data.declineCount === 1 ? 'decline decision' : 'decline decisions' }}</strong
+                        >
+                    </footer>
+                </section>
+            </div>
+
+            <section class="analytics-card breakdown" *ngIf="visibleRows(data.summaries) as rows">
+                <header class="breakdown-header">
+                    <div class="breakdown-title">
+                        <h2>Rule breakdown</h2>
+                        <span class="row-count"
+                            >{{ rows.length | number }} {{ rows.length === 1 ? 'row' : 'rows' }}</span
+                        >
+                        <button
+                            *ngIf="selectedRule"
+                            class="fb-filter-chip active-rule"
+                            type="button"
+                            aria-label="Remove rule filter"
+                            (click)="selectedRule = null"
+                        >
+                            {{ selectedRule.template }} · {{ selectedRule.checkedRule | ruleLabel }}
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="breakdown-controls">
+                        <div class="status-filters" role="group" aria-label="Filter breakdown by status">
+                            <button
+                                *ngFor="let option of statuses"
+                                type="button"
+                                [attr.aria-pressed]="status === option"
+                                (click)="setStatus(option)"
+                            >
+                                {{ option }}
+                            </button>
+                        </div>
+                        <div class="breakdown-search">
+                            <mat-icon aria-hidden="true">search</mat-icon>
+                            <input
+                                type="search"
+                                aria-label="Search rule breakdown"
+                                placeholder="Template or rule…"
+                                [formControl]="search"
+                            />
+                        </div>
+                    </div>
+                </header>
+                <div *ngIf="rows.length; else noRules" class="table-scroll">
+                    <fb-fraud-summary-templates-list
+                        [summaryRows]="rows"
+                        [currency]="data.currency"
+                    ></fb-fraud-summary-templates-list>
+                </div>
+                <ng-template #noRules>
+                    <p class="empty breakdown-empty">
+                        {{
+                            data.summaries.length
+                                ? 'No rules match the breakdown filters.'
+                                : 'No rule results for this selection.'
+                        }}
+                    </p>
+                </ng-template>
+            </section>
+        </ng-container>
     </div>
-</div>
+</ng-container>

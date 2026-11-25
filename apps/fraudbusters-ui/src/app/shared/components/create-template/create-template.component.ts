@@ -1,12 +1,9 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, Inject, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, Input, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 
-import { Template } from '../../../api/fb-management/swagger-codegen/model/template';
-import { LAYOUT_GAP_L, LAYOUT_GAP_M } from '../../../tokens';
 import { TemplateService } from './services/template/template.service';
-import { checkValidateResponse } from '../../services/utils/check-validation-response';
+import { Template } from '../../../api/fb-management/swagger-codegen/model/template';
 import { ErrorHandlerService } from '../../services/utils/error-handler.service';
 
 @Component({
@@ -25,45 +22,41 @@ export class CreateTemplateComponent implements OnInit {
     validated$ = this.templateService.validated$;
     inProgress$ = this.templateService.inProgress$;
 
+    readonly validationMessage = signal('');
+    checkedRule: string | null = null;
+
     constructor(
         private router: Router,
         private templateService: TemplateService,
         private errorHandlerService: ErrorHandlerService,
-        private snackBar: MatSnackBar,
-        @Inject(LAYOUT_GAP_L) public layoutGapL: string,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
+        private snackBar: MatSnackBar
     ) {}
 
     ngOnInit() {
         if (this.template) {
-            this.form.setValue({ id: this.template.id, template: this.template.template });
+            this.form.setValue({ id: this.isEditableName ? '' : this.template.id, template: this.template.template });
             if (this.isEditableName === false) {
                 this.form.get('id').disable();
             }
         }
-        this.saved$.subscribe(
-            (template) => {
-                if (this.template) {
-                    this.snackBar.open(`Saved success: ${template.id}`, 'OK', {
-                        duration: 3000,
-                    });
-                } else {
-                    this.snackBar.open(`Template has been created`, 'OK', {
-                        duration: 3000,
-                    });
-                    this.navigateToEdit(template.id);
-                }
-            },
-            (error: HttpErrorResponse) => this.errorHandlerService.handleError(error, this.snackBar)
-        );
-        this.validated$.subscribe(
-            (response) => {
-                this.snackBar.open(checkValidateResponse(response), 'OK', {
+        this.templateService.errors$.subscribe((error) => this.errorHandlerService.handleError(error, this.snackBar));
+        this.saved$.subscribe((template) => {
+            if (!this.isEditableName) {
+                this.snackBar.open(`Saved success: ${template.id}`, 'OK', {
                     duration: 3000,
                 });
-            },
-            (error: HttpErrorResponse) => this.errorHandlerService.handleError(error, this.snackBar)
-        );
+            } else {
+                this.snackBar.open(`Template has been created`, 'OK', {
+                    duration: 3000,
+                });
+                this.navigateToEdit(template.id);
+            }
+        });
+        this.validated$.subscribe((response) => {
+            this.validationMessage.set(
+                response.validateResults?.flatMap((result) => result.errors ?? []).join('\n') || 'No errors'
+            );
+        });
     }
 
     saveTemplate() {
@@ -73,6 +66,8 @@ export class CreateTemplateComponent implements OnInit {
     }
 
     validateTemplate() {
+        this.validationMessage.set('');
+        this.checkedRule = this.form.controls.template.value;
         this.templateService.validateTemplate({
             template: { id: this.form.getRawValue().id, template: this.form.getRawValue().template },
         });

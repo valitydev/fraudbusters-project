@@ -24,7 +24,13 @@ export class RemoveDataSetsService {
             combineLatest([
                 of(params),
                 this.dialog
-                    .open(ConfirmActionDialogComponent, { data: { title: `Remove dataSet ${params.dataSet.id}?` } })
+                    .open(ConfirmActionDialogComponent, {
+                        data: {
+                            confirmLabel: 'Remove',
+                            destructive: true,
+                            title: `Remove data set ${params.dataSet.id}?`,
+                        },
+                    })
                     .afterClosed()
                     .pipe(filter((r) => r === 'confirm')),
             ])

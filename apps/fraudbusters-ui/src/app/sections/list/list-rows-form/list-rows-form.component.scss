@@ -1,0 +1,112 @@
+// Page layout and fields come from the reference form styles; these are list-specific parts.
+
+.list-fields {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.3fr);
+}
+
+.grey-fields {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    margin-top: 0;
+    padding-top: 16px;
+    border-top: 1px dashed var(--fb-line, #dde1eb);
+}
+
+@media (max-width: 900px) {
+    .list-fields {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 205px), 1fr));
+    }
+
+    .grey-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.field mat-select {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 6px 0;
+    padding: 8px 10px;
+    font-weight: 600;
+}
+
+.target-switch {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding: 6px;
+    border: 1px solid var(--fb-line, #dde1eb);
+    border-radius: 10px;
+    background: var(--fb-surface, #fff);
+}
+
+.target-label {
+    padding-inline: 8px 4px;
+    color: var(--fb-muted, #625f74);
+    font-size: 13px;
+}
+
+.target-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 4px 12px;
+    border: 1px solid transparent;
+    border-radius: var(--fb-radius-control);
+    background: transparent;
+    color: var(--fb-text, #252335);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        background: var(--fb-raised, #f5f6fa);
+    }
+
+    &[aria-checked='true'] {
+        border-color: var(--fb-accent, #6741b7);
+        background: var(--fb-selected, #eee9fc);
+        color: var(--fb-accent, #6741b7);
+        font-weight: 600;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--fb-accent, #6741b7);
+    }
+}
+
+.target-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.grey-fields .field {
+    input {
+        margin-bottom: 0;
+    }
+
+    p {
+        margin: 6px 0 0;
+    }
+}
+
+.inline-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--fb-accent, #6338f5);
+    font: inherit;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+        text-decoration: underline;
+    }
+}
+
+.limit-range {
+    white-space: normal;
+}

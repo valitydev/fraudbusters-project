@@ -1,8 +1,19 @@
-<div fxLayout="column" [fxLayoutGap]="layoutGapL">
-    <div fxLayout fxLayoutAlign="start center" [fxLayoutGap]="layoutGapM">
-        <mat-icon (click)="back()">keyboard_backspace</mat-icon>
-        <h3 class="fb-headline">Edit template</h3>
-    </div>
+<div class="fb-page">
+    <header class="fb-page-header">
+        <button
+            mat-stroked-button
+            class="fb-template-back"
+            type="button"
+            aria-label="Back to templates"
+            (click)="back()"
+        >
+            <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div>
+            <h1 class="fb-page-title">Edit template</h1>
+            <p class="fb-page-subtitle">Update and validate the rules in this payment template.</p>
+        </div>
+    </header>
     <fb-create-template
         *ngIf="template$ | async as template"
         [template]="template"

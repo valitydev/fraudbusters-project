@@ -1,0 +1,30 @@
+@import './components/fraud-summary-grid';
+
+.totals {
+    @include fraud-summary-grid;
+    min-height: 41px;
+    padding-block: 8px;
+    box-sizing: border-box;
+    background: var(--fb-raised);
+    color: var(--fb-text);
+    font: 600 12px / 18px var(--fb-font-mono);
+
+    .total-label {
+        grid-column: span 3;
+        color: var(--fb-muted);
+        font-family: var(--fb-font-sans);
+    }
+
+    > [role='cell'] {
+        @include fraud-summary-number;
+    }
+
+    > :last-child {
+        color: var(--fb-accent);
+    }
+
+    .currency {
+        color: var(--fb-muted);
+        font-weight: 500;
+    }
+}

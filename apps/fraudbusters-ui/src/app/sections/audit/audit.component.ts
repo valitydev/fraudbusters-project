@@ -1,13 +1,14 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { Sort } from '@angular/material/sort';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { AuditService } from './audit.service';
+import { Filter } from './model/filter';
+import { DateTimeRange } from '../../shared/components/datetime-range/datetime-range.component';
 import { SortOrder } from '../../shared/constants/sort-order';
 import { SearchFieldService } from '../../shared/services/utils/search-field.service';
-import { LAYOUT_GAP_M, LAYOUT_GAP_S } from '../../tokens';
-import { Filter } from './model/filter';
+import { statusPillClass } from '../../shared/utils/status-tone';
 
 @Component({
     templateUrl: './audit.component.html',
@@ -17,29 +18,31 @@ import { Filter } from './model/filter';
 export class AuditComponent {
     filter: Filter;
 
-    logs$ = this.auditService.logs$;
+    readonly view$ = combineLatest({
+        logs: this.auditService.logs$.pipe(map((logs) => logs ?? [])),
+        busy: this.auditService.inProgress$,
+        hasMore: this.auditService.isLoadMore$,
+        sort: this.auditService.sort$,
+    });
+
     commandsTypes$ = this.auditService.commandsTypes$;
     objectsTypes$ = this.auditService.objectsTypes$;
-    isLoadMore$ = this.auditService.isLoadMore$;
 
-    expanded = false;
-
-    displayedColumns = ['insertTime', 'initiator', 'objectType', 'commandType', 'text'];
+    readonly sortOrder = SortOrder;
 
     constructor(
         private auditService: AuditService,
         private searchFieldService: SearchFieldService,
-        private route: ActivatedRoute,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string,
-        @Inject(LAYOUT_GAP_S) public layoutGapS: string
+        private route: ActivatedRoute
     ) {
         combineLatest([this.commandsTypes$, this.objectsTypes$, this.route.queryParams]).subscribe((params) => {
+            // Query params come from shared links: fall back to defaults instead of failing on bad values.
             this.filter = {
                 user: !params[2].userId ? '' : params[2].userId,
-                commandTypes: !params[2].commandTypes ? params[0] : JSON.parse(params[2].commandTypes),
-                objectTypes: !params[2].objectTypes ? params[1] : JSON.parse(params[2].objectTypes),
-                from: !params[2].dateFrom ? this.searchFieldService.todayFromTime() : new Date(params[2].dateFrom),
-                to: !params[2].dateTo ? new Date() : new Date(params[2].dateTo),
+                commandTypes: parseList(params[2].commandTypes, params[0]),
+                objectTypes: parseList(params[2].objectTypes, params[1]),
+                from: parseDate(params[2].dateFrom) ?? this.searchFieldService.todayFromTime(),
+                to: parseDate(params[2].dateTo) ?? new Date(),
             };
             this.auditService.mergeQueryParam({
                 dateTo: this.filter.to,
@@ -52,8 +55,13 @@ export class AuditComponent {
         });
     }
 
-    sortData(sort: Sort): void {
-        this.auditService.sort$.next(sort.direction === 'asc' ? SortOrder.Asc : SortOrder.Desc);
+    /** Total matching changes reported with the last page. */
+    get total(): number {
+        return this.auditService.count;
+    }
+
+    setSort(order: string): void {
+        this.auditService.sort$.next(order as SortOrder);
     }
 
     loadMore(): void {
@@ -80,15 +88,38 @@ export class AuditComponent {
         this.auditService.searchField$.next($event.target.value);
     }
 
-    setDateFrom($event): void {
-        this.auditService.mergeQueryParam({
-            dateFrom: $event.value,
-        });
+    setRange({ from, to }: DateTimeRange): void {
+        this.auditService.mergeQueryParam({ dateFrom: from.toISOString(), dateTo: to.toISOString() });
     }
 
-    setDateTo($event): void {
-        this.auditService.mergeQueryParam({
-            dateTo: $event.value,
-        });
+    /** "All objects", a single value, or the first one and how many more, so the field never overflows. */
+    selectionLabel(selected: string[] | null, all: string[] | null, allLabel: string): string {
+        const values = selected ?? [];
+        if (!values.length || (all?.length && values.length === all.length)) {
+            return allLabel;
+        }
+        const first = values[0].toLowerCase();
+        return values.length === 1 ? first : `${first} +${values.length - 1} more`;
     }
+
+    pill(commandType: string): string {
+        return statusPillClass(commandType);
+    }
+}
+
+function parseList(raw: string | undefined, fallback: string[]): string[] {
+    if (!raw) {
+        return fallback;
+    }
+    try {
+        const value: unknown = JSON.parse(raw);
+        return Array.isArray(value) && value.every((item) => typeof item === 'string') ? value : fallback;
+    } catch {
+        return fallback;
+    }
+}
+
+function parseDate(raw: string | undefined): Date | null {
+    const date = raw ? new Date(raw) : null;
+    return date && !Number.isNaN(date.getTime()) ? date : null;
 }

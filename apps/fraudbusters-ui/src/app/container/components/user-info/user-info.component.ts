@@ -1,6 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, Input } from '@angular/core';
-
-import { LAYOUT_GAP_S } from '../../../tokens';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 @Component({
     selector: 'fb-user-info',
@@ -10,7 +8,9 @@ import { LAYOUT_GAP_S } from '../../../tokens';
 })
 export class UserInfoComponent {
     @Input() username: string;
-    @Input() roles: string[];
+    @Input() roles: string[] = [];
 
-    constructor(@Inject(LAYOUT_GAP_S) public layoutGapS: string) {}
+    get initial(): string {
+        return this.username?.trim().charAt(0).toUpperCase() || '?';
+    }
 }

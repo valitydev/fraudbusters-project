@@ -1,8 +1,98 @@
-.container-fluid {
-    padding: 24px;
-    min-height: calc(100vh - 134px);
+mat-sidenav-container {
+    min-height: 100dvh;
 }
 
-button.mat-mdc-menu-trigger.mdc-icon-button.mat-mdc-icon-button.mat-unthemed.mat-mdc-button-base {
-    margin-left: auto;
+mat-sidenav {
+    width: min(224px, 100vw);
+    border-inline-end: 1px solid var(--fb-line, #e2e1eb);
+}
+
+.workspace {
+    box-sizing: border-box;
+    min-height: 100dvh;
+    padding: 20px 24px 24px;
+    min-width: 0;
+}
+
+.profile-footer {
+    padding: 12px;
+    border-top: 1px solid var(--fb-line, #e2e1eb);
+}
+
+.profile-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 7px 6px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--fb-text, #34313b);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+
+    &:hover,
+    &[aria-expanded='true'] {
+        background: var(--fb-selected, #f6f2ff);
+    }
+}
+
+.profile-avatar {
+    display: grid;
+    place-items: center;
+    flex: 0 0 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--fb-selected, #eee9fc);
+    color: var(--fb-accent, #6943b9);
+    font-weight: 600;
+}
+
+.profile-text {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-name,
+.profile-roles {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile-name {
+    color: var(--fb-text, #252335);
+    font-weight: 600;
+    line-height: 20px;
+}
+
+.profile-roles {
+    color: var(--fb-muted, #8a869a);
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.profile-trigger mat-icon {
+    color: var(--fb-muted, #666174);
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+}
+
+.mobile-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--fb-surface, #fff);
+    border-bottom: 1px solid var(--fb-line, #e2e1eb);
+    font-weight: 600;
+}
+
+@media (max-width: 700px) {
+    .workspace {
+        padding: 14px;
+    }
 }

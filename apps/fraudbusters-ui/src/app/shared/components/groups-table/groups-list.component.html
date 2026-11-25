@@ -1,0 +1,23 @@
+<div class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Groups table">
+    <table class="fb-catalog-table groups-table" [attr.aria-label]="label">
+        <colgroup>
+            <col class="group-id" />
+            <col />
+            <col class="fb-catalog-date-column" />
+            <col class="group-actions" />
+        </colgroup>
+        <thead>
+            <tr fb-group-header></tr>
+        </thead>
+        <tbody>
+            <tr
+                fb-group-item
+                *ngFor="let group of groups; trackBy: byId"
+                [group]="group"
+                (editItem)="editItem.emit($event)"
+                (deleteItem)="deleteItem.emit($event)"
+                (duplicateItem)="duplicateItem.emit($event)"
+            ></tr>
+        </tbody>
+    </table>
+</div>

@@ -1,10 +1,9 @@
-<div fxLayout="column" [fxLayoutGap]="layoutGapL">
-    <div fxLayout fxLayoutAlign="start center" [fxLayoutGap]="layoutGapM">
-        <mat-icon (click)="back()">keyboard_backspace</mat-icon>
-        <h3 class="fb-headline">Edit notification</h3>
-    </div>
+<ng-container *ngIf="state$ | async as state">
     <fb-create-notification
-        *ngIf="notification$ | async as notification"
-        [notification]="notification"
+        [editing]="true"
+        [loading]="state.loading"
+        [loadFailed]="state.failed"
+        [notification]="state.notification"
+        (retry)="reload()"
     ></fb-create-notification>
-</div>
+</ng-container>

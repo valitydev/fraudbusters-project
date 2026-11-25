@@ -1,0 +1,338 @@
+<div class="group-page">
+    <header class="page-header">
+        <button
+            mat-stroked-button
+            type="button"
+            class="fb-template-back"
+            aria-label="Back to groups"
+            [disabled]="busy"
+            (click)="back()"
+        >
+            <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div>
+            <div class="page-title">
+                <h1 class="fb-page-title">{{ editing ? 'Edit group' : 'New group' }}</h1>
+                <span *ngIf="!editing" class="pill draft-pill">Draft</span>
+            </div>
+            <p class="fb-page-subtitle">
+                {{
+                    editing
+                        ? 'Update the templates and execution order for this group.'
+                        : 'Combine rule templates into an ordered group with execution weights.'
+                }}
+            </p>
+        </div>
+    </header>
+
+    <div *ngIf="loading" class="panel group-details" role="status">Loading group…</div>
+    <div *ngIf="loadFailed" class="panel group-details" role="alert">
+        Could not load the group.
+        <button mat-button type="button" (click)="retryLoad()">Retry</button>
+    </div>
+    <ng-container *ngIf="!loading && !loadFailed">
+        <section class="panel group-details" aria-labelledby="group-details-title">
+            <div class="card-heading">
+                <div>
+                    <h2 class="fb-section-title" id="group-details-title">Group details</h2>
+                    <p>Identify the rule group.</p>
+                </div>
+                <span *ngIf="!editing && canSave" class="pill ready-status">
+                    <span class="status-dot"></span> Status: Ready on create
+                </span>
+            </div>
+            <div class="details-fields" [formGroup]="details">
+                <div class="field">
+                    <div class="field-label">
+                        <label for="new-group-name">
+                            Group name <span *ngIf="!editing" class="required" aria-hidden="true">*</span>
+                        </label>
+                        <span *ngIf="!editing && validName" class="pill success-pill">
+                            <span class="status-dot"></span> Valid slug
+                        </span>
+                    </div>
+                    <input
+                        class="fb-form-control fb-control-mono"
+                        id="new-group-name"
+                        type="text"
+                        formControlName="groupId"
+                        [readOnly]="editing"
+                        [class.valid-name]="!editing && validName"
+                        autocomplete="off"
+                        [required]="!editing"
+                        placeholder="e.g. high-risk-cards-eu"
+                        aria-describedby="group-name-hint"
+                        [attr.aria-invalid]="groupId && !validName ? 'true' : null"
+                    />
+                    <p id="group-name-hint" [class.valid-hint]="!editing && validName">
+                        {{
+                            editing
+                                ? 'The group ID cannot be changed after creation.'
+                                : validName
+                                ? 'Group identifier is valid.'
+                                : 'Use lowercase letters, numbers, and hyphens.'
+                        }}
+                    </p>
+                </div>
+                <div class="field description-field">
+                    <div class="field-label">
+                        <label for="new-group-description">Description <span class="optional">(optional)</span></label>
+                        <span class="field-detail" aria-hidden="true">0 / 140</span>
+                    </div>
+                    <input
+                        class="fb-form-control"
+                        id="new-group-description"
+                        type="text"
+                        disabled
+                        placeholder="e.g. Blocks black-listed tokens and enforces velocity limits"
+                        aria-describedby="group-description-hint"
+                    />
+                    <p id="group-description-hint">Descriptions are currently unavailable for groups.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel" [attr.aria-busy]="busy" aria-labelledby="group-templates-title">
+            <div class="template-entry">
+                <div class="entry-header">
+                    <div>
+                        <h2 class="fb-section-title" id="group-templates-title">Group templates</h2>
+                        <p>Add rule templates and set their execution weights.</p>
+                    </div>
+                    <p class="shortcut">Press <kbd>Enter</kbd> in Weight to add the template.</p>
+                </div>
+                <form class="entry-fields" [formGroup]="entry" (ngSubmit)="stage()">
+                    <div class="field">
+                        <div class="field-label">
+                            <label for="group-template-id"
+                                >Template ID <span class="required" aria-hidden="true">*</span></label
+                            >
+                        </div>
+                        <input
+                            class="fb-form-control fb-control-mono"
+                            #templateInput
+                            id="group-template-id"
+                            type="text"
+                            formControlName="templateId"
+                            autocomplete="off"
+                            required
+                            placeholder="e.g. black-list-template-id"
+                            aria-describedby="group-template-hint"
+                            [matAutocomplete]="names"
+                        />
+                        <mat-autocomplete #names="matAutocomplete" autoActiveFirstOption>
+                            <mat-option *ngFor="let name of templateNames$ | async" [value]="name">{{
+                                name
+                            }}</mat-option>
+                        </mat-autocomplete>
+                        <p id="group-template-hint">Select or enter an existing template ID.</p>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">
+                            <label for="group-template-weight">
+                                Weight / Priority <span class="required" aria-hidden="true">*</span>
+                            </label>
+                            <span class="field-detail"
+                                ><code>int ≥ {{ minimumWeight }}</code></span
+                            >
+                        </div>
+                        <input
+                            class="fb-form-control fb-control-mono"
+                            id="group-template-weight"
+                            type="number"
+                            formControlName="priority"
+                            required
+                            [min]="minimumWeight"
+                            step="1"
+                            aria-describedby="group-weight-hint"
+                            [attr.aria-invalid]="!validPriority(entry.controls.priority.value)"
+                        />
+                        <p id="group-weight-hint">
+                            Use a whole number of at least {{ minimumWeight }}. Lower weights run first. Equal weights
+                            share a rank.
+                        </p>
+                    </div>
+                    <button mat-stroked-button type="submit" class="add-template" [disabled]="busy || !pending">
+                        <mat-icon>add</mat-icon> Add template
+                    </button>
+                </form>
+                <p *ngIf="notice" class="notice" role="status">{{ notice }}</p>
+            </div>
+
+            <section aria-labelledby="staged-templates-title">
+                <header class="staged-header">
+                    <h3 id="staged-templates-title">{{ editing ? 'Assigned templates' : 'Staged templates' }}</h3>
+                    <span class="pill count" aria-live="polite">{{ staged.length }}</span>
+                    <div *ngIf="staged.length" class="staged-actions">
+                        <button mat-button type="button" [disabled]="busy" (click)="clear()">Clear all</button>
+                    </div>
+                </header>
+                <div *ngIf="!staged.length; else stagedTable" class="empty">
+                    <span class="empty-icon"><mat-icon>sort</mat-icon></span>
+                    <strong>{{ editing ? 'No templates assigned' : 'No templates staged yet' }}</strong>
+                    <p>
+                        Use <strong>Add template</strong> to {{ editing ? 'assign' : 'stage' }} multiple templates, or
+                        click <strong>{{ editing ? 'Save' : 'Create' }}</strong> with the current template.
+                    </p>
+                </div>
+                <ng-template #stagedTable>
+                    <div class="fb-catalog-scroll" tabindex="0" role="region" aria-labelledby="staged-templates-title">
+                        <table class="fb-catalog-table" aria-labelledby="staged-templates-title">
+                            <colgroup>
+                                <col class="order-column" />
+                                <col />
+                                <col class="weight-column" />
+                                <col class="position-column" />
+                                <col class="actions-column" />
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Order</th>
+                                    <th scope="col">Template ID</th>
+                                    <th scope="col">Weight / Priority</th>
+                                    <th scope="col">Position</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody *ngIf="executionOrder as order">
+                                <ng-container *ngIf="orderedTemplates as ordered">
+                                    <tr
+                                        *ngFor="let row of staged; trackBy: trackTemplate"
+                                        [class.changed-row]="editing && templateChange(row)"
+                                    >
+                                        <td class="execution-order">
+                                            <ng-container *ngIf="order.get(row.priority) as rank; else unknownOrder">
+                                                <span class="rank">#{{ rank }}</span>
+                                            </ng-container>
+                                            <ng-template #unknownOrder>—</ng-template>
+                                        </td>
+                                        <td>
+                                            <code class="template-chip">{{ row.id }}</code>
+                                            <span class="pill success-pill template-kind">Template</span>
+                                            <ng-container *ngIf="editing">
+                                                <span *ngIf="templateChange(row) as change" class="row-change">{{
+                                                    change
+                                                }}</span>
+                                            </ng-container>
+                                        </td>
+                                        <td>
+                                            <input
+                                                #weight
+                                                type="number"
+                                                class="fb-form-control fb-control-mono staged-weight"
+                                                [class.weight-changed]="
+                                                    editing && templateChange(row) === 'Weight changed'
+                                                "
+                                                [min]="minimumWeight"
+                                                step="1"
+                                                [value]="row.priority"
+                                                [disabled]="busy"
+                                                [attr.aria-label]="'Weight for ' + row.id"
+                                                [attr.aria-invalid]="!validStagedPriority(row)"
+                                                (input)="updateWeight(row, weight.valueAsNumber)"
+                                            />
+                                        </td>
+                                        <td>
+                                            <div class="position-controls">
+                                                <button
+                                                    mat-icon-button
+                                                    type="button"
+                                                    [disabled]="busy || !validQueue || ordered[0] === row"
+                                                    [attr.aria-label]="'Move up ' + row.id"
+                                                    title="Move up in execution order"
+                                                    (click)="moveTemplate(row, -1)"
+                                                >
+                                                    <mat-icon>expand_less</mat-icon>
+                                                </button>
+                                                <button
+                                                    mat-icon-button
+                                                    type="button"
+                                                    [disabled]="
+                                                        busy || !validQueue || ordered[ordered.length - 1] === row
+                                                    "
+                                                    [attr.aria-label]="'Move down ' + row.id"
+                                                    title="Move down in execution order"
+                                                    (click)="moveTemplate(row, 1)"
+                                                >
+                                                    <mat-icon>expand_more</mat-icon>
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td class="row-actions">
+                                            <button
+                                                mat-button
+                                                type="button"
+                                                [disabled]="busy"
+                                                [attr.aria-label]="'Remove ' + row.id"
+                                                (click)="remove(row)"
+                                            >
+                                                <mat-icon>delete_outline</mat-icon> Remove
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                            </tbody>
+                        </table>
+                    </div>
+                </ng-template>
+            </section>
+
+            <mat-progress-bar
+                *ngIf="busy"
+                mode="indeterminate"
+                [attr.aria-label]="editing ? 'Saving group' : 'Creating group'"
+            ></mat-progress-bar>
+            <footer class="page-footer">
+                <p *ngIf="error; else status" class="error" role="alert">{{ error }}</p>
+                <ng-template #status>
+                    <p *ngIf="!validName || (!pending && !staged.length && !invalidDraft); else weightStatus">
+                        Enter a valid Group name and at least one Template ID.
+                    </p>
+                    <ng-template #weightStatus>
+                        <p *ngIf="!validQueue || invalidDraft; else changesStatus">
+                            All template weights must be whole numbers of at least {{ minimumWeight }}.
+                        </p>
+                        <ng-template #changesStatus>
+                            <p *ngIf="editing && hasChanges" role="status">Unsaved changes</p>
+                            <p *ngIf="!editing && canSave" class="ready-message" role="status">
+                                <span class="status-dot"></span>
+                                {{ templateCount }} {{ templateCount === 1 ? 'template' : 'templates' }}
+                                {{ pending ? 'ready to create' : 'staged in execution order' }}
+                            </p>
+                        </ng-template>
+                    </ng-template>
+                </ng-template>
+                <div class="footer-actions">
+                    <button
+                        *ngIf="!editing; else discard"
+                        mat-stroked-button
+                        type="button"
+                        [disabled]="busy"
+                        (click)="back()"
+                    >
+                        Back
+                    </button>
+                    <ng-template #discard>
+                        <button
+                            mat-stroked-button
+                            type="button"
+                            [disabled]="busy || !hasChanges"
+                            (click)="discardChanges()"
+                        >
+                            Discard changes
+                        </button>
+                    </ng-template>
+                    <button
+                        mat-flat-button
+                        color="primary"
+                        type="button"
+                        [disabled]="busy || !canSave"
+                        (click)="save()"
+                    >
+                        {{ editing ? 'Save' : templateCount ? 'Create (' + templateCount + ')' : 'Create' }}
+                    </button>
+                </div>
+            </footer>
+        </section>
+    </ng-container>
+</div>

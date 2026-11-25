@@ -12,7 +12,7 @@
     .mat-mdc-expansion-panel,
     .mat-mdc-expansion-panel {
         color: map-get($foreground, text);
-        border-color: map-get($foreground, divider);
+        border-color: var(--fb-line, #{map-get($foreground, divider)});
     }
 
     .mat-button,

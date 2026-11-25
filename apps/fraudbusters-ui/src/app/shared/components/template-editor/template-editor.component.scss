@@ -1,0 +1,359 @@
+@use '../../../styles/primitives';
+
+:host {
+    display: block;
+    min-width: 0;
+}
+
+.template-workspace {
+    --panel-border: var(--fb-line, #e0e3ed);
+    --panel-muted: var(--fb-muted, #625f74);
+    display: grid;
+    gap: 20px;
+    // Workspace padding, back-button row and the gap below it.
+    height: max(390px, calc(100dvh - 104px));
+    grid-template-rows: auto minmax(0, 1fr);
+    color: var(--fb-text, #252335);
+}
+
+.panel {
+    @include primitives.panel;
+    min-width: 0;
+}
+
+.template-config,
+.template-metadata,
+.syntax-panel {
+    padding: 20px;
+}
+
+.config-fields,
+.template-metadata {
+    display: grid;
+    gap: 16px 20px;
+}
+
+.config-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 16px;
+}
+
+.template-id,
+.preset-options {
+    display: grid;
+    align-content: start;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.template-id .required {
+    color: var(--fb-danger, #b4283b);
+}
+
+.snippet,
+.example {
+    border: 1px solid var(--panel-border);
+    border-radius: var(--fb-radius-control);
+    background: var(--fb-raised, #f5f6fa);
+    color: inherit;
+}
+
+input {
+    width: 100%;
+    padding-inline: 12px;
+}
+
+small,
+.template-result,
+.syntax-panel p {
+    color: var(--panel-muted);
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.template-metadata {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 215px), 1fr));
+    align-items: center;
+    margin: 0;
+
+    dt {
+        color: var(--panel-muted);
+        font-size: 12px;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+    }
+
+    dd {
+        margin: 6px 0 0;
+        overflow-wrap: anywhere;
+    }
+
+    button {
+        max-width: 100%;
+        height: auto;
+        min-height: 36px;
+        padding-block: 6px;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+}
+
+.template-columns {
+    --snippets-rail-width: 44px;
+    display: grid;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) var(--snippets-rail-width);
+    align-items: stretch;
+    gap: 8px;
+    overflow: hidden;
+
+    &.snippets-open {
+        grid-template-columns: minmax(0, 1fr) min(420px, 38%) var(--snippets-rail-width);
+    }
+}
+
+.editor-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    fb-fraudo-editor {
+        flex: 1 1 0;
+        min-height: 0;
+        min-width: 0;
+    }
+}
+
+.editor-toolbar,
+.editor-footer,
+.example-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.editor-toolbar,
+.editor-footer {
+    flex: 0 0 auto;
+    padding: 12px 16px;
+}
+
+.editor-toolbar {
+    border-bottom: 1px solid var(--panel-border);
+}
+
+.editor-buttons,
+.preset-buttons,
+.snippet-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.editor-footer .editor-buttons {
+    margin-inline-start: auto;
+}
+
+.template-result {
+    flex: 1 1 170px;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.preset-buttons button[aria-pressed='true'] {
+    color: var(--fb-accent, #6741b7);
+    border-color: currentColor;
+    background: var(--fb-selected, #eee9fc);
+}
+
+.snippets-toggle {
+    grid-column: -2 / -1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 12px 0;
+    color: var(--panel-muted);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+
+    span {
+        writing-mode: vertical-rl;
+    }
+
+    &:hover,
+    &[aria-expanded='true'] {
+        color: var(--fb-accent, #6741b7);
+        background: var(--fb-raised, #f5f6fa);
+    }
+
+    &:focus-visible {
+        outline-offset: -3px;
+    }
+}
+
+.syntax-panel {
+    grid-column: 2;
+    grid-row: 1;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+
+    &:not(.is-open) {
+        display: none;
+    }
+
+    p {
+        margin: 6px 0 0;
+    }
+
+    details {
+        margin-top: 12px;
+        border-top: 1px solid var(--panel-border);
+    }
+
+    summary {
+        padding: 10px 0 2px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    summary:focus-visible {
+        outline: 2px solid var(--fb-accent, #6741b7);
+        outline-offset: 2px;
+    }
+
+    .snippet-chips {
+        margin-top: 8px;
+    }
+}
+
+.snippet-list {
+    display: grid;
+    gap: 6px;
+    margin-top: 8px;
+
+    .snippet {
+        display: grid;
+        gap: 2px;
+    }
+}
+
+.snippet {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    text-align: start;
+    overflow-wrap: anywhere;
+
+    &:hover {
+        border-color: var(--fb-accent, #6741b7);
+    }
+}
+
+.outcome {
+    &[data-outcome='decline'] {
+        color: var(--fb-danger, #a4263a);
+        background: var(--fb-danger-bg, #fdeced);
+    }
+    &[data-outcome='3ds'] {
+        color: var(--fb-warning, #a35a00);
+        background: var(--fb-warning-bg, #fdf3e4);
+    }
+    &[data-outcome='accept'] {
+        color: var(--fb-success, #1d7a46);
+        background: var(--fb-success-bg, #e8f6ee);
+    }
+}
+
+.example {
+    margin-top: 8px;
+    padding: 10px 12px;
+    overflow-wrap: anywhere;
+}
+
+button:focus-visible {
+    outline: 2px solid var(--fb-accent, #6741b7);
+    outline-offset: 2px;
+}
+
+@media (max-width: 1050px) {
+    .config-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 700px), (max-height: 620px) {
+    .template-workspace {
+        height: auto;
+        grid-template-rows: auto auto;
+    }
+
+    .template-columns {
+        height: clamp(330px, 65dvh, 530px);
+    }
+}
+
+@media (max-width: 700px) {
+    .template-columns.snippets-open {
+        height: auto;
+        grid-template-columns: minmax(0, 1fr) var(--snippets-rail-width);
+        grid-template-rows: clamp(330px, 65dvh, 530px) auto;
+    }
+
+    .syntax-panel {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        max-height: 45dvh;
+    }
+}
+
+// Snippet search: the field filters every section; results replace the collapsible list.
+.snippet-search {
+    position: relative;
+    display: block;
+    margin: 12px 0 8px;
+
+    .mat-icon {
+        position: absolute;
+        inset-inline-start: 10px;
+        top: 50%;
+        width: 18px;
+        height: 18px;
+        color: var(--fb-muted);
+        font-size: 18px;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    input {
+        width: 100%;
+        padding: 0 12px 0 34px;
+    }
+}
+
+.syntax-panel .search-summary {
+    margin: 0 0 8px;
+    font-size: 12px;
+}
+
+.search-group {
+    padding: 8px 0;
+    border-top: 1px solid var(--fb-line);
+
+    h3 {
+        margin: 0;
+        color: var(--fb-muted);
+        font: 600 var(--fb-table-heading-font-size) / var(--fb-table-heading-line-height) var(--fb-font-sans);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+}

@@ -1,0 +1,242 @@
+@use '@angular/material' as mat;
+
+.fb-filter-stack {
+    display: grid;
+    gap: 16px;
+}
+
+.fb-filter-toolbar,
+.fb-filter-fields,
+.fb-filter-presets,
+.fb-filter-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.fb-filter-toolbar {
+    justify-content: space-between;
+    gap: 12px 16px;
+
+    > * {
+        min-width: 0;
+    }
+
+    // The filters take the free width so their fields sit in a row, not a column.
+    > :first-child {
+        flex: 1 1 auto;
+    }
+}
+
+.fb-filter-fields {
+    @include mat.form-field-density(
+        mat.define-light-theme(
+            (
+                density: -2,
+            )
+        )
+    );
+    --mdc-outlined-text-field-outline-color: var(--fb-filter-outline);
+    --mdc-outlined-text-field-hover-outline-color: var(--fb-filter-outline-hover);
+    --mdc-outlined-text-field-container-shape: var(--fb-radius-control);
+    --mdc-outlined-text-field-focus-outline-color: var(--fb-accent);
+    --mdc-outlined-text-field-focus-label-text-color: var(--fb-accent);
+    --mdc-outlined-text-field-input-text-placeholder-color: var(--fb-muted);
+    --mat-form-field-container-text-size: var(--fb-input-font-size);
+
+    // Filled like the prototype inputs: a quiet canvas that turns white on focus.
+    .mat-mdc-text-field-wrapper {
+        border-radius: var(--fb-radius-control);
+        background: var(--fb-canvas);
+    }
+
+    .mat-focused .mat-mdc-text-field-wrapper {
+        background: var(--fb-surface);
+    }
+    --mat-form-field-container-height: var(--fb-filter-height);
+    --mat-form-field-container-vertical-padding: calc((var(--fb-filter-height) - 24px) / 2);
+    gap: 12px 16px;
+
+    // Flexible widths so as many fields as fit share one row.
+    > mat-form-field {
+        flex: 1 1 170px;
+        min-width: 0;
+        max-width: 260px;
+    }
+
+    // Date-time values ("11/24/2026, 22:00:34") must stay readable; the input fills the
+    // field instead of the legacy fixed 160px from app.component.scss.
+    > .fb-filter-date {
+        flex: 1 0 240px;
+
+        .mat-mdc-input-element.mat-datepicker-input {
+            width: 100%;
+        }
+    }
+
+    .mat-datepicker-toggle .mat-mdc-icon-button {
+        --mdc-icon-button-state-layer-size: var(--fb-filter-height);
+        width: var(--fb-filter-height);
+        height: var(--fb-filter-height);
+        padding: calc((var(--fb-filter-height) - 24px) / 2);
+    }
+}
+
+// Equal columns: every field in a row has the same width, including the last row.
+.fb-filter-fields.fb-filter-fields-fill {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+
+    > mat-form-field {
+        min-width: 0;
+        max-width: none;
+    }
+}
+
+// Fixed four columns (two on narrow screens) for a long list of secondary fields.
+.fb-filter-fields.fb-filter-fields-fill.fb-filter-fields-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    @media (max-width: 720px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+// Quick period presets next to the From / To fields.
+.fb-filter-period {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 16px;
+
+    .fb-filter-presets button {
+        height: var(--fb-filter-height);
+        letter-spacing: normal;
+    }
+}
+
+.fb-filter-presets,
+.fb-filter-summary {
+    gap: 8px;
+}
+
+// "Additional filters" toggle between the main and the hidden filter fields.
+.fb-filter-more {
+    display: flex;
+
+    button {
+        --mdc-text-button-label-text-color: var(--fb-text);
+        height: var(--fb-filter-height);
+        padding-inline: 8px 12px;
+        letter-spacing: normal;
+    }
+
+    .mat-icon {
+        margin-right: 4px;
+    }
+}
+
+.fb-filter-presets .mat-mdc-outlined-button[aria-pressed='true'] {
+    border-color: var(--fb-accent, #6943b9);
+    background-color: var(--fb-selected, #eee9fc);
+    color: var(--fb-accent, #6943b9);
+}
+
+.fb-filter-summary {
+    padding-top: 8px;
+    border-top: 1px solid var(--fb-line, #e8eaed);
+
+    .mat-mdc-button {
+        color: var(--fb-accent, #6741b7);
+    }
+}
+
+.fb-filter-chip {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    max-width: 100%;
+    padding: 4px 12px;
+    border: 1px solid var(--fb-line, #d5d8e1);
+    border-radius: 16px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.fb-filter-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.fb-page-toolbar,
+.fb-search-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fb-page-toolbar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 0 0 4px;
+
+    > :first-child {
+        flex: 1 1 230px;
+        min-width: 0;
+    }
+}
+
+.fb-template-catalog-tabs {
+    .mat-mdc-tab-link {
+        font-size: var(--fb-table-font-size);
+        line-height: var(--fb-table-line-height);
+        letter-spacing: normal;
+    }
+
+    .mat-mdc-tab-link:first-child {
+        justify-content: flex-start;
+        min-width: 0;
+        padding-inline-start: 0;
+    }
+
+    + mat-tab-nav-panel {
+        padding-block-start: 12px;
+    }
+}
+
+.fb-template-tab-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fb-template-tab-count {
+    min-width: 20px;
+    padding-inline: 5px;
+    border-radius: 99px;
+    background: var(--fb-selected, #eee9fc);
+    color: var(--fb-accent, #6741b7);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    line-height: 20px;
+    letter-spacing: normal;
+    text-align: center;
+}
+
+.fb-search-heading {
+    gap: 5px;
+}
+
+@media (max-width: 420px) {
+    .fb-search-heading {
+        flex-wrap: wrap;
+    }
+}

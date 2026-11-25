@@ -1,0 +1,231 @@
+<div class="reference-page">
+    <header class="page-header">
+        <button
+            mat-stroked-button
+            type="button"
+            class="fb-template-back"
+            aria-label="Back to references"
+            [disabled]="saving"
+            (click)="back()"
+        >
+            <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="heading">
+            <h1 class="fb-page-title">{{ config.title }}</h1>
+            <p class="fb-page-subtitle" *ngIf="!isPayout; else payoutScope">
+                Bind {{ target.plural }} to merchants (Party ID) and shops (Shop ID).
+            </p>
+            <ng-template #payoutScope>
+                <p class="fb-page-subtitle">
+                    Bind {{ target.plural }} to a party or a specific wallet.<ng-container *ngIf="partyOptional">
+                        Without a party it applies to all payouts.</ng-container
+                    >
+                </p>
+            </ng-template>
+        </div>
+    </header>
+
+    <div class="reference-card" [attr.aria-busy]="saving">
+        <div class="reference-entry">
+            <div class="entry-header">
+                <h2 class="fb-section-title">Add reference</h2>
+                <p class="shortcut">Press <kbd>Enter</kbd> to add a row.</p>
+            </div>
+
+            <form [formGroup]="form" (ngSubmit)="addReference()">
+                <div class="fields">
+                    <div class="field">
+                        <label for="reference-target"
+                            >{{ target.id }} <span class="required" aria-hidden="true">*</span></label
+                        >
+                        <input
+                            class="fb-form-control fb-control-mono"
+                            #targetInput
+                            id="reference-target"
+                            formControlName="targetId"
+                            type="text"
+                            autocomplete="off"
+                            required
+                            aria-describedby="reference-target-hint"
+                            [placeholder]="config.target === 'group' ? 'e.g. group_id' : 'e.g. black-list-template-id'"
+                            [matAutocomplete]="targets"
+                        />
+                        <mat-autocomplete #targets="matAutocomplete" autoActiveFirstOption>
+                            <mat-option *ngFor="let name of targetNames$ | async" [value]="name">{{ name }}</mat-option>
+                        </mat-autocomplete>
+                        <p id="reference-target-hint">Select or enter an existing {{ target.noun }} ID.</p>
+                    </div>
+                    <div class="field">
+                        <label for="reference-party"
+                            >Party ID
+                            <span *ngIf="!partyOptional; else partyOptionalMark" class="required" aria-hidden="true"
+                                >*</span
+                            ><ng-template #partyOptionalMark
+                                ><span class="optional">(optional)</span></ng-template
+                            ></label
+                        >
+                        <input
+                            class="fb-form-control fb-control-mono"
+                            id="reference-party"
+                            formControlName="partyId"
+                            type="text"
+                            autocomplete="off"
+                            [required]="!partyOptional"
+                            aria-describedby="reference-party-hint"
+                            placeholder="e.g. party-columbus-id"
+                        />
+                        <p id="reference-party-hint">
+                            {{ partyOptional ? 'Leave empty to apply to all payouts.' : 'Merchant identifier.' }}
+                        </p>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">
+                            <label for="reference-shop"
+                                >{{ scopeLabel }} ID <span class="optional">(optional)</span></label
+                            >
+                            <span class="scope"
+                                >Scope: {{ form.controls.scopeId.value.trim() ? config.scope : 'party' }}-level</span
+                            >
+                        </div>
+                        <input
+                            class="fb-form-control fb-control-mono"
+                            id="reference-shop"
+                            formControlName="scopeId"
+                            type="text"
+                            autocomplete="off"
+                            aria-describedby="reference-shop-hint"
+                            [placeholder]="'e.g. ' + config.scope + '-columbus-id'"
+                        />
+                        <p id="reference-shop-hint">
+                            Leave empty to apply across all {{ scopePlural }} of the Party ID.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="entry-actions">
+                    <p *ngIf="notice" class="notice" role="status">{{ notice }}</p>
+                    <button
+                        mat-stroked-button
+                        type="button"
+                        #csvTrigger
+                        class="csv-button"
+                        [disabled]="saving"
+                        [attr.aria-expanded]="csvOpen"
+                        aria-controls="reference-import"
+                        (click)="csvOpen = !csvOpen"
+                    >
+                        <mat-icon>description</mat-icon> Add from CSV
+                    </button>
+                    <button mat-stroked-button type="submit" [disabled]="!draft || saving">
+                        <mat-icon>add</mat-icon> Add reference
+                    </button>
+                </div>
+            </form>
+
+            <div id="reference-import">
+                <fb-reference-csv
+                    *ngIf="csvOpen"
+                    [scope]="config.scope"
+                    [target]="config.target ?? 'template'"
+                    [partyOptional]="partyOptional"
+                    [attr.inert]="saving ? '' : null"
+                    (closed)="csvOpen = false; csvTrigger.focus()"
+                    (append)="addCsvRows($event); csvTrigger.focus()"
+                ></fb-reference-csv>
+            </div>
+        </div>
+
+        <section aria-labelledby="staged-references-title">
+            <header class="staged-header">
+                <h2 id="staged-references-title">Staged references</h2>
+                <span class="count" aria-live="polite">{{ staged.length }}</span>
+                <button
+                    *ngIf="staged.length"
+                    mat-button
+                    type="button"
+                    class="clear"
+                    [disabled]="saving"
+                    (click)="clearQueue()"
+                >
+                    Clear all
+                </button>
+            </header>
+            <div *ngIf="!staged.length; else queue" class="empty" [class.empty-compact]="csvOpen">
+                <span *ngIf="!csvOpen" class="empty-icon"><mat-icon>link</mat-icon></span>
+                <strong>No references queued yet</strong>
+                <p *ngIf="!csvOpen">Use <strong>Add reference</strong> to build a batch, or import rows from CSV.</p>
+            </div>
+            <ng-template #queue>
+                <div class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Staged references table">
+                    <table class="fb-catalog-table" aria-labelledby="staged-references-title">
+                        <thead>
+                            <tr>
+                                <th scope="col">{{ target.id }}</th>
+                                <th scope="col">Party ID</th>
+                                <th scope="col">{{ scopeLabel }} ID</th>
+                                <th scope="col" class="row-actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let row of staged; let i = index">
+                                <td>
+                                    <code>{{ row.targetId }}</code>
+                                </td>
+                                <td [class.fb-catalog-mono]="row.partyId">{{ row.partyId || 'All payouts' }}</td>
+                                <td [class.fb-catalog-mono]="row.scopeId">{{ row.scopeId || 'All ' + scopePlural }}</td>
+                                <td>
+                                    <button
+                                        mat-icon-button
+                                        type="button"
+                                        [disabled]="saving"
+                                        [attr.aria-label]="'Remove staged reference ' + (i + 1)"
+                                        (click)="removeRow(i)"
+                                    >
+                                        <mat-icon>delete_outline</mat-icon>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </ng-template>
+        </section>
+
+        <mat-progress-bar *ngIf="saving" mode="indeterminate" aria-label="Creating references"></mat-progress-bar>
+        <footer class="page-footer">
+            <p *ngIf="error; else ready" class="error" role="alert">{{ error }}</p>
+            <ng-template #ready>
+                <p aria-live="polite">
+                    <ng-container *ngIf="draftIncomplete || !createCount; else countReady">
+                        {{
+                            staged.length
+                                ? 'Complete ' + requiredFields + ' to include the current reference.'
+                                : 'Fill in ' + requiredFields + ' to enable Create (1), or add rows from CSV.'
+                        }}
+                    </ng-container>
+                    <ng-template #countReady>
+                        <ng-container *ngIf="!staged.length; else batchReady">
+                            Create (1) saves this reference directly. Use Add reference to queue it.
+                        </ng-container>
+                        <ng-template #batchReady>
+                            {{ createCount }} {{ createCount === 1 ? 'reference' : 'references' }} ready to create.
+                        </ng-template>
+                    </ng-template>
+                </p>
+            </ng-template>
+            <div class="footer-actions">
+                <button mat-stroked-button type="button" [disabled]="saving" (click)="back()">Cancel</button>
+                <button
+                    mat-flat-button
+                    color="primary"
+                    type="button"
+                    class="create"
+                    [disabled]="saving || draftIncomplete || !createCount"
+                    (click)="create()"
+                >
+                    Create ({{ createCount }})
+                </button>
+            </div>
+        </footer>
+    </div>
+</div>

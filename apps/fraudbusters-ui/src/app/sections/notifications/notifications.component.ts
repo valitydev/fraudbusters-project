@@ -1,31 +1,35 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { hasActiveFragments } from 'src/app/shared/utils/has-active-fragments';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter, map, startWith } from 'rxjs/operators';
 
-import { LAYOUT_GAP_S } from '../../tokens';
+interface NotificationsTab {
+    path: string;
+    name: string;
+    createUrl: string;
+    createLabel: string;
+}
 
+/** Notifications shell: title, the active tab's create action and the tab bar. */
 @Component({
     templateUrl: 'notifications.component.html',
+    styleUrls: ['notifications.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NotificationsComponent {
-    links = [
-        {
-            path: 'periodical',
-            name: 'Periodical',
-            otherActiveUrlFragments: [],
-        },
-        {
-            path: 'channels',
-            name: 'Channels',
-            otherActiveUrlFragments: [],
-        },
+    readonly links: NotificationsTab[] = [
+        { path: 'periodical', name: 'Periodical', createUrl: '/notification/new', createLabel: 'Add notification' },
+        { path: 'channels', name: 'Channels', createUrl: '/channel/new', createLabel: 'Add channel' },
     ];
 
-    constructor(private router: Router, @Inject(LAYOUT_GAP_S) public layoutGapS: string) {}
+    readonly activeTab = toSignal(
+        this.router.events.pipe(
+            filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+            map(({ urlAfterRedirects }) => urlAfterRedirects),
+            startWith(this.router.url),
+            map((url) => this.links.find((link) => url.split(/[?#]/, 1)[0].endsWith('/' + link.path)))
+        )
+    );
 
-    hasActiveFragments(fragments: string[]): boolean {
-        const ulrFragments = this.router.url.split('/');
-        return hasActiveFragments(fragments, ulrFragments);
-    }
+    constructor(private router: Router) {}
 }

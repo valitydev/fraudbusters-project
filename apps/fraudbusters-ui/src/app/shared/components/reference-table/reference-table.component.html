@@ -1,0 +1,101 @@
+<div class="fb-catalog-scroll" tabindex="0" role="region" [attr.aria-label]="label + ' table'">
+    <table class="fb-catalog-table" [class.with-metadata]="showGlobal || showAuthor" [attr.aria-label]="label">
+        <colgroup>
+            <col />
+            <col />
+            <col />
+            <col *ngIf="showGlobal" class="global-column" />
+            <col class="fb-catalog-date-column" />
+            <col *ngIf="showAuthor" class="author-column" />
+            <col class="actions-column" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th scope="col">{{ target }} ID</th>
+                <th scope="col">Party ID</th>
+                <th scope="col">{{ scope }} ID</th>
+                <th *ngIf="showGlobal" scope="col">Global</th>
+                <th scope="col">Last update</th>
+                <th *ngIf="showAuthor" scope="col">Modified by</th>
+                <th scope="col" class="fb-catalog-action-cell">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let row of rows">
+                <th scope="row">
+                    <div *ngIf="row.targetId as id; else missing" class="reference-id">
+                        <a
+                            class="fb-catalog-link fb-catalog-mono"
+                            [routerLink]="[targetRoute, id]"
+                            [fragment]="targetFragment"
+                            [queryParams]="{ returnUrl: returnUrl }"
+                            ><code>{{ id }}</code></a
+                        >
+                        <ng-container
+                            *ngTemplateOutlet="copy; context: { id: id, label: target + ' ID' }"
+                        ></ng-container>
+                    </div>
+                </th>
+                <td>
+                    <div *ngIf="row.partyId as id; else missing" class="reference-id">
+                        <span class="fb-catalog-mono">{{ id }}</span>
+                        <ng-container *ngTemplateOutlet="copy; context: { id: id, label: 'Party ID' }"></ng-container>
+                    </div>
+                </td>
+                <td>
+                    <div *ngIf="row.scopeId as id; else missing" class="reference-id">
+                        <span class="fb-catalog-mono">{{ id }}</span>
+                        <ng-container
+                            *ngTemplateOutlet="copy; context: { id: id, label: scope + ' ID' }"
+                        ></ng-container>
+                    </div>
+                </td>
+                <td *ngIf="showGlobal">{{ row.isGlobal ? 'Yes' : '—' }}</td>
+                <td class="fb-catalog-time">
+                    {{ (row.lastUpdateDate | date : 'yyyy-MM-dd HH:mm:ss' : 'UTC') || '—' }}
+                </td>
+                <td *ngIf="showAuthor">{{ row.modifiedByUser || '—' }}</td>
+                <td class="fb-catalog-action-cell">
+                    <button
+                        mat-icon-button
+                        type="button"
+                        [matMenuTriggerFor]="menu"
+                        [attr.aria-label]="'More actions for ' + (row.id || row.targetId)"
+                    >
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu">
+                        <a
+                            *ngIf="row.targetId"
+                            mat-menu-item
+                            [routerLink]="[targetRoute, row.targetId]"
+                            [fragment]="targetFragment"
+                            [queryParams]="{ returnUrl: returnUrl }"
+                        >
+                            <mat-icon>open_in_new</mat-icon>Go to {{ target.toLowerCase() }}
+                        </a>
+                        <button *ngIf="row.id" mat-menu-item type="button" (click)="copyId(row.id, 'Reference ID')">
+                            <mat-icon>content_copy</mat-icon>Copy reference ID
+                        </button>
+                        <button mat-menu-item type="button" class="fb-menu-danger" (click)="remove.emit(row.source)">
+                            <mat-icon>delete_outline</mat-icon>Remove reference
+                        </button>
+                    </mat-menu>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<ng-template #missing>—</ng-template>
+<ng-template #copy let-id="id" let-label="label">
+    <button
+        class="copy-id"
+        type="button"
+        [attr.aria-label]="'Copy ' + label"
+        [title]="'Copy ' + label"
+        (click)="copyId(id, label)"
+    >
+        <mat-icon>content_copy</mat-icon>
+    </button>
+</ng-template>

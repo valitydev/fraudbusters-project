@@ -1,0 +1,17 @@
+<button mat-stroked-button class="fb-catalog-action-edit" type="button" (click)="editItem.emit(id)">Edit</button>
+<button
+    mat-icon-button
+    class="fb-catalog-action-icon"
+    type="button"
+    [matMenuTriggerFor]="menu"
+    [attr.aria-label]="'More actions for ' + id"
+>
+    <mat-icon>more_vert</mat-icon>
+</button>
+<mat-menu #menu="matMenu">
+    <button mat-menu-item type="button" (click)="copyId()"><mat-icon>content_copy</mat-icon>Copy ID</button>
+    <button mat-menu-item type="button" (click)="copyItem.emit(id)"><mat-icon>file_copy</mat-icon>Duplicate</button>
+    <button mat-menu-item type="button" class="fb-menu-danger" (click)="deleteItem.emit(id)">
+        <mat-icon>delete_outline</mat-icon>Remove
+    </button>
+</mat-menu>

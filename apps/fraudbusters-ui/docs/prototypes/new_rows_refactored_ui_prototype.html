@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New rows — Fraud Monitoring</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+          },
+          colors: {
+            canvas: '#F6F7FB',
+            surface: '#FFFFFF',
+            borderSubtle: '#E5E7EB',
+            borderStrong: '#D1D5DB',
+            ink: '#1E2438',
+            muted: '#6E768E',
+            brand: {
+              DEFAULT: '#5E35B1',
+              hover: '#4D2C91',
+              soft: '#F3EFFE',
+              border: '#D7C9F8',
+            },
+          },
+          borderRadius: {
+            card: '10px',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body {
+      background-color: #F6F7FB;
+      color: #1E2438;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* 4-column aligned form grid matching desktop spec */
+    .add-row-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    @media (min-width: 768px) {
+      .add-row-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .add-row-grid {
+        grid-template-columns: 1.1fr 1fr 1fr 1.3fr;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D8DCE8;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #B8C0D4;
+    }
+  </style>
+</head>
+<body class="min-h-screen py-7 px-4 sm:px-6">
+
+  <!-- Main Workspace Container (max-width: 1180px, centered, no sidebar) -->
+  <main class="max-w-[1180px] mx-auto w-full space-y-5">
+
+    <!-- 1. Page Header -->
+    <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div class="flex items-start sm:items-center gap-3.5">
+        <button
+          type="button"
+          onclick="handleBack()"
+          class="w-9 h-9 rounded-lg bg-surface border border-borderSubtle hover:border-borderStrong hover:bg-slate-50 flex items-center justify-center text-ink transition shadow-2xs shrink-0 mt-0.5 sm:mt-0"
+          title="Back to Lists"
+          aria-label="Back to Lists"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        </button>
+
+        <div>
+          <h1 class="text-[22px] font-semibold tracking-tight text-ink leading-tight">New rows</h1>
+          <p class="text-xs text-muted mt-0.5">Add entries to Black, White, Grey, or Candidates lists individually or via CSV.</p>
+        </div>
+      </div>
+
+      <!-- Target List Selector Pills -->
+      <div class="flex flex-wrap items-center gap-2 self-start lg:self-auto bg-surface border border-borderSubtle rounded-[10px] px-3 py-2 shadow-2xs">
+        <span class="text-xs font-medium text-muted mr-1">Target list:</span>
+        <div class="inline-flex flex-wrap items-center gap-1.5" role="radiogroup" aria-label="Target list">
+          <button
+            type="button"
+            data-target="Black"
+            onclick="selectTargetList('Black')"
+            class="target-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition"
+          >
+            <span class="w-2 h-2 rounded-full bg-slate-900"></span>
+            Black
+          </button>
+
+          <button
+            type="button"
+            data-target="White"
+            onclick="selectTargetList('White')"
+            class="target-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition"
+          >
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            White
+          </button>
+
+          <button
+            type="button"
+            data-target="Grey"
+            onclick="selectTargetList('Grey')"
+            class="target-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition"
+          >
+            <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+            Grey
+          </button>
+
+          <button
+            type="button"
+            data-target="Candidates"
+            onclick="selectTargetList('Candidates')"
+            class="target-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition"
+          >
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            Candidates
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 2. Card 1: Add row -->
+    <section class="bg-surface border border-borderSubtle rounded-[10px] p-6 shadow-2xs">
+      <!-- Card Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 mb-5">
+        <div>
+          <h2 class="text-sm font-semibold text-ink">Add row</h2>
+        </div>
+
+        <div class="flex items-center gap-3 self-start sm:self-auto">
+          <span class="text-[11.5px] text-muted hidden md:inline">
+            Press <kbd class="px-1.5 py-0.5 font-mono text-[10.5px] bg-canvas border border-borderSubtle rounded text-ink">Enter</kbd> to add a row
+          </span>
+
+          <button
+            id="importCsvToggleBtn"
+            type="button"
+            onclick="toggleCsvDrawer()"
+            aria-expanded="false"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-borderSubtle hover:border-brand-border hover:text-brand text-xs font-medium text-ink transition"
+          >
+            <svg class="w-3.5 h-3.5 text-brand" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            <span id="importCsvBtnLabel">Import CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4-Column Aligned Form Grid -->
+      <div class="add-row-grid items-start">
+        <!-- Column 1: List name * -->
+        <div>
+          <label for="listNameSelect" class="block text-xs font-semibold text-ink mb-1.5">
+            List name <span class="text-rose-500">*</span>
+          </label>
+          <div class="relative">
+            <select
+              id="listNameSelect"
+              onchange="handleListNameChange()"
+              class="w-full font-mono text-xs font-medium text-ink bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 rounded-lg px-3 py-2.5 outline-none transition cursor-pointer appearance-none pr-8"
+            >
+              <option value="CARD_TOKEN">CARD_TOKEN</option>
+              <option value="EMAIL">EMAIL</option>
+              <option value="IP">IP</option>
+              <option value="BIN">BIN</option>
+              <option value="DEVICE_ID">DEVICE_ID</option>
+              <option value="PHONE">PHONE</option>
+            </select>
+            <svg class="w-3.5 h-3.5 text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+          <p class="text-[11.5px] text-muted mt-1.5">Entity list type.</p>
+        </div>
+
+        <!-- Column 2: Party ID * -->
+        <div>
+          <label for="partyIdInput" class="block text-xs font-semibold text-ink mb-1.5">
+            Party ID <span class="text-rose-500">*</span>
+          </label>
+          <input
+            id="partyIdInput"
+            type="text"
+            placeholder="e.g. party-wb-id"
+            autocomplete="off"
+            spellcheck="false"
+            class="w-full font-mono text-xs px-3 py-2.5 rounded-lg bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 text-ink placeholder:text-[#9AA2B8] outline-none transition"
+          />
+          <p class="text-[11.5px] text-muted mt-1.5">Merchant identifier.</p>
+        </div>
+
+        <!-- Column 3: Shop ID (optional) -->
+        <div>
+          <label for="shopIdInput" class="block text-xs font-semibold text-ink mb-1.5">
+            Shop ID <span class="text-muted font-normal">(optional)</span>
+          </label>
+          <input
+            id="shopIdInput"
+            type="text"
+            placeholder="e.g. shop-wb-id"
+            autocomplete="off"
+            spellcheck="false"
+            class="w-full font-mono text-xs px-3 py-2.5 rounded-lg bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 text-ink placeholder:text-[#9AA2B8] outline-none transition"
+          />
+          <p class="text-[11.5px] text-muted mt-1.5">Leave empty for party-wide scope.</p>
+        </div>
+
+        <!-- Column 4: Value * -->
+        <div>
+          <label for="valueInput" class="block text-xs font-semibold text-ink mb-1.5">
+            Value <span class="text-rose-500">*</span>
+          </label>
+          <input
+            id="valueInput"
+            type="text"
+            placeholder="e.g. wb_test_token_133"
+            autocomplete="off"
+            spellcheck="false"
+            class="w-full font-mono text-xs px-3 py-2.5 rounded-lg bg-canvas focus:bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 text-ink placeholder:text-[#9AA2B8] outline-none transition"
+          />
+          <p class="text-[11.5px] text-muted mt-1.5">Exact value to match.</p>
+        </div>
+      </div>
+
+      <!-- Right-Aligned Action Row (aligned strictly with the right edge of Value *) -->
+      <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div id="inlineAlertSlot" class="min-h-[20px] flex items-center">
+          <!-- Duplicate or validation warnings appear here -->
+        </div>
+
+        <div class="flex items-center justify-end">
+          <button
+            id="addRowBtn"
+            type="button"
+            disabled
+            onclick="addCurrentRowToStage()"
+            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-soft hover:bg-[#E7DDFB] text-brand disabled:bg-canvas disabled:text-[#9AA2B8] disabled:border-borderSubtle disabled:cursor-not-allowed border border-brand-border/80 text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-brand/20"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Add row
+          </button>
+        </div>
+      </div>
+
+      <!-- Collapsible Bulk Import from CSV Drawer -->
+      <div id="csvImportDrawer" class="hidden mt-5 pt-5 border-t border-borderSubtle">
+        <div class="rounded-[10px] bg-[#FAFBFD] border border-borderSubtle p-4 sm:p-5">
+          <!-- Drawer Top Row -->
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <h3 class="text-xs font-semibold text-ink">Bulk import from CSV</h3>
+              <p class="text-[11.5px] text-muted mt-0.5">
+                Use <code class="font-mono text-ink">list_name,party_id,shop_id,value</code> as columns. Rows will be added to <span id="csvTargetListLabel" class="font-semibold text-ink">Black</span>.
+              </p>
+            </div>
+            <button
+              type="button"
+              onclick="toggleCsvDrawer(false)"
+              class="p-1 rounded-lg text-muted hover:text-ink hover:bg-surface transition"
+              title="Close CSV drawer"
+              aria-label="Close CSV drawer"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Two Cleanly Aligned Columns -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
+            <!-- Left Column: Choose file + Download sample + Paste textarea -->
+            <div class="flex flex-col">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                <div class="flex items-center gap-2.5">
+                  <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-borderStrong hover:border-brand hover:text-brand text-xs font-semibold text-ink cursor-pointer transition shadow-2xs">
+                    <svg class="w-3.5 h-3.5 text-brand" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Choose CSV file
+                    <input id="csvFileInput" type="file" accept=".csv,text/csv" class="hidden" onchange="handleCsvFileSelect(event)" />
+                  </label>
+                  <span id="selectedFileName" class="text-[11px] text-muted truncate max-w-[150px]"></span>
+                </div>
+
+                <button
+                  type="button"
+                  onclick="loadAndDownloadSampleCsv()"
+                  class="text-xs font-medium text-brand hover:text-brand-hover hover:underline transition"
+                >
+                  Download sample CSV
+                </button>
+              </div>
+
+              <label for="csvPasteTextarea" class="block text-xs font-medium text-ink mb-1.5">Or paste CSV rows</label>
+              <textarea
+                id="csvPasteTextarea"
+                rows="4"
+                placeholder="list_name,party_id,shop_id,value&#10;CARD_TOKEN,party-wb-id,shop-wb-id,wb_test_token_133&#10;EMAIL,party-columbus-id,,fraud.ring@example.com"
+                oninput="parseCsvContent()"
+                class="w-full flex-1 font-mono text-xs p-3 rounded-lg bg-surface border border-borderSubtle focus:border-brand focus:ring-2 focus:ring-brand/15 text-ink placeholder:text-[#9AA2B8] outline-none transition resize-none"
+              ></textarea>
+            </div>
+
+            <!-- Right Column: Aligned Preview Panel + Clear / Add N to queue -->
+            <div class="flex flex-col">
+              <!-- Spacer row matching Choose CSV file toolbar height so Preview aligns with Or paste CSV rows -->
+              <div class="hidden lg:flex items-center justify-between h-[30px] mb-2.5">
+                <span class="text-[11px] text-muted">Supported types: <code class="font-mono text-ink">CARD_TOKEN</code>, <code class="font-mono text-ink">EMAIL</code>, <code class="font-mono text-ink">IP</code>, <code class="font-mono text-ink">BIN</code></span>
+              </div>
+
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-xs font-medium text-ink">Preview</span>
+                <span id="csvParsedStatusBadge" class="text-[11px] font-medium text-muted tabular-nums">0 valid rows</span>
+              </div>
+
+              <div id="csvPreviewBox" class="flex-1 min-h-[106px] max-h-[140px] overflow-y-auto rounded-lg bg-surface border border-borderSubtle p-3 text-xs">
+                <p class="text-muted text-xs py-5 text-center">Choose a file or paste CSV rows to preview them.</p>
+              </div>
+
+              <div class="mt-3 flex items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onclick="clearCsvDrawer()"
+                  class="px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink hover:bg-surface transition"
+                >
+                  Clear
+                </button>
+                <button
+                  id="addCsvToQueueBtn"
+                  type="button"
+                  disabled
+                  onclick="appendParsedCsvToStage()"
+                  class="px-3.5 py-1.5 rounded-lg bg-brand hover:bg-brand-hover disabled:bg-borderSubtle disabled:text-[#94A3B8] disabled:cursor-not-allowed text-white text-xs font-semibold transition tabular-nums"
+                >
+                  Add 0 to queue
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Card 2: Staged rows -->
+    <section class="bg-surface border border-borderSubtle rounded-[10px] shadow-2xs overflow-hidden">
+      <!-- Card Header -->
+      <div class="px-6 py-3.5 border-b border-borderSubtle flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-ink">Staged rows</h2>
+          <span id="stagedCountBadge" class="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-canvas border border-borderSubtle text-muted tabular-nums">0</span>
+        </div>
+
+        <button
+          id="clearAllBtn"
+          type="button"
+          onclick="clearAllStagedRows()"
+          class="hidden text-xs font-medium text-muted hover:text-rose-600 transition"
+        >
+          Clear all
+        </button>
+      </div>
+
+      <!-- Compact Clean Empty State -->
+      <div id="emptyQueueState" class="py-9 px-6 text-center">
+        <div class="w-9 h-9 rounded-lg bg-canvas border border-borderSubtle flex items-center justify-center mx-auto mb-2.5 text-muted">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" />
+          </svg>
+        </div>
+        <p class="text-xs font-semibold text-ink">No rows queued yet</p>
+        <p class="text-xs text-muted mt-1">
+          Fill in the fields above and click <span class="font-semibold text-brand">+ Add row</span>, or import rows via CSV.
+        </p>
+      </div>
+
+      <!-- Staged Rows Table -->
+      <div id="stagedTableWrapper" class="hidden overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-borderSubtle bg-[#FAFBFD] text-[11px] font-semibold uppercase tracking-wider text-muted">
+              <th class="py-2.5 pl-6 pr-3 w-[15%]">Target</th>
+              <th class="py-2.5 px-3 w-[16%]">List name</th>
+              <th class="py-2.5 px-3 w-[20%]">Party ID</th>
+              <th class="py-2.5 px-3 w-[18%]">Shop ID</th>
+              <th class="py-2.5 px-3 w-[25%]">Value</th>
+              <th class="py-2.5 pl-2 pr-6 text-right w-[6%]"></th>
+            </tr>
+          </thead>
+          <tbody id="stagedTableBody" class="divide-y divide-borderSubtle text-xs">
+            <!-- Dynamically rendered rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Card Footer -->
+      <div class="px-6 py-4 bg-[#FAFBFD]/60 border-t border-borderSubtle flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div id="footerStateHelper" class="text-xs text-muted flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0"></span>
+          <span>Enter List name, Party ID, and Value, or import rows from CSV.</span>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5">
+          <button
+            type="button"
+            onclick="handleCancelReset()"
+            class="px-4 py-2 rounded-lg bg-surface border border-borderStrong hover:bg-canvas text-ink text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-brand/20"
+          >
+            Cancel
+          </button>
+
+          <button
+            id="createBtn"
+            type="button"
+            disabled
+            onclick="submitNewRows()"
+            class="px-5 py-2 rounded-lg bg-brand hover:bg-brand-hover disabled:bg-borderSubtle disabled:text-[#94A3B8] disabled:cursor-not-allowed text-white text-xs font-semibold shadow-2xs transition focus:outline-none focus:ring-2 focus:ring-brand/40 tabular-nums"
+          >
+            Create
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Created Summary Confirmation Card (Appears on submit) -->
+    <div id="createdConfirmationCard" class="hidden bg-surface border border-emerald-200 rounded-[10px] p-5 shadow-2xs">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-borderSubtle">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <div>
+            <h3 id="createdSummaryTitle" class="text-sm font-semibold text-ink">Rows created</h3>
+            <p class="text-xs text-muted">Records have been committed and are immediately active in rule evaluation.</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onclick="document.getElementById('createdConfirmationCard').classList.add('hidden')"
+          class="text-xs font-medium text-muted hover:text-ink self-start sm:self-auto"
+        >
+          Dismiss
+        </button>
+      </div>
+
+      <div id="createdSummaryGrid" class="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs">
+        <!-- Summary pills -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    // =========================================================================
+    // APPLICATION STATE & CONSTANTS
+    // =========================================================================
+    const VALID_LIST_NAMES = new Set(['CARD_TOKEN', 'EMAIL', 'IP', 'BIN', 'DEVICE_ID', 'PHONE']);
+
+    const VALUE_PLACEHOLDERS = {
+      CARD_TOKEN: 'e.g. wb_test_token_133',
+      EMAIL: 'e.g. user@example.com',
+      IP: 'e.g. 192.168.1.10',
+      BIN: 'e.g. 427638',
+      DEVICE_ID: 'e.g. dev_fp_883910bc4e',
+      PHONE: 'e.g. +79991234567',
+    };
+
+    const TARGET_DOT_COLORS = {
+      Black: 'bg-slate-900',
+      White: 'bg-emerald-500',
+      Grey: 'bg-slate-400',
+      Candidates: 'bg-amber-500',
+    };
+
+    let selectedTargetList = 'Black';
+    let stagedRows = [];
+    let parsedCsvRows = [];
+    let uidCounter = 1;
+
+    // DOM References
+    const listNameSelect = document.getElementById('listNameSelect');
+    const partyIdInput = document.getElementById('partyIdInput');
+    const shopIdInput = document.getElementById('shopIdInput');
+    const valueInput = document.getElementById('valueInput');
+    const addRowBtn = document.getElementById('addRowBtn');
+    const inlineAlertSlot = document.getElementById('inlineAlertSlot');
+
+    const csvImportDrawer = document.getElementById('csvImportDrawer');
+    const importCsvToggleBtn = document.getElementById('importCsvToggleBtn');
+    const csvPasteTextarea = document.getElementById('csvPasteTextarea');
+    const csvPreviewBox = document.getElementById('csvPreviewBox');
+    const csvParsedStatusBadge = document.getElementById('csvParsedStatusBadge');
+    const addCsvToQueueBtn = document.getElementById('addCsvToQueueBtn');
+
+    const stagedCountBadge = document.getElementById('stagedCountBadge');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const emptyQueueState = document.getElementById('emptyQueueState');
+    const stagedTableWrapper = document.getElementById('stagedTableWrapper');
+    const stagedTableBody = document.getElementById('stagedTableBody');
+    const footerStateHelper = document.getElementById('footerStateHelper');
+    const createBtn = document.getElementById('createBtn');
+
+    // =========================================================================
+    // TARGET LIST PILL SELECTION
+    // =========================================================================
+    function selectTargetList(target) {
+      selectedTargetList = target;
+      document.getElementById('csvTargetListLabel').textContent = target;
+
+      document.querySelectorAll('.target-pill').forEach((btn) => {
+        const isSelected = btn.dataset.target === target;
+        const dot = btn.querySelector('span');
+        btn.className = isSelected
+          ? 'target-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition bg-brand-soft text-brand border-brand-border'
+          : 'target-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition bg-surface text-muted hover:text-ink border-transparent hover:bg-canvas';
+        if (dot) btn.prepend(dot);
+      });
+
+      clearInlineAlert();
+      updateFormAndFooterState();
+    }
+
+    // =========================================================================
+    // FORM INPUTS, DYNAMIC PLACEHOLDER & VALIDATION
+    // =========================================================================
+    function handleListNameChange() {
+      const selected = listNameSelect.value;
+      valueInput.placeholder = VALUE_PLACEHOLDERS[selected] || 'Enter exact value';
+      clearInlineAlert();
+      updateFormAndFooterState();
+    }
+
+    function isDirectFormValid() {
+      const listName = listNameSelect.value.trim();
+      const partyId = partyIdInput.value.trim();
+      const val = valueInput.value.trim();
+      return Boolean(listName && partyId && val);
+    }
+
+    function isDuplicateRow(target, listName, partyId, shopId, value) {
+      const normShop = (shopId || '').trim();
+      return stagedRows.some(
+        (r) =>
+          r.target === target &&
+          r.listName === listName &&
+          r.partyId === partyId &&
+          (r.shopId || '') === normShop &&
+          r.value === value
+      );
+    }
+
+    function showInlineWarning(msg, tone = 'warning') {
+      const styles =
+        tone === 'error'
+          ? 'bg-rose-50 border-rose-200 text-rose-700'
+          : 'bg-amber-50 border-amber-200 text-amber-800';
+      const dotColor = tone === 'error' ? 'bg-rose-500' : 'bg-amber-500';
+
+      inlineAlertSlot.innerHTML = `
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium ${styles}">
+          <span class="w-1.5 h-1.5 rounded-full shrink-0 ${dotColor}"></span>
+          <span>${escapeHtml(msg)}</span>
+        </div>
+      `;
+    }
+
+    function clearInlineAlert() {
+      inlineAlertSlot.innerHTML = '';
+    }
+
+    function updateFormAndFooterState() {
+      const directReady = isDirectFormValid();
+      addRowBtn.disabled = !directReady;
+
+      const queueCount = stagedRows.length;
+
+      if (queueCount > 0) {
+        createBtn.disabled = false;
+        createBtn.textContent = `Create (${queueCount})`;
+        footerStateHelper.innerHTML = `
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+          <span class="text-ink font-medium">${queueCount} ${queueCount === 1 ? 'row' : 'rows'} queued for creation.${
+            directReady ? ' (Click + Add row to include current inputs)' : ''
+          }</span>
+        `;
+      } else if (directReady) {
+        createBtn.disabled = false;
+        createBtn.textContent = 'Create (1)';
+        footerStateHelper.innerHTML = `
+          <span class="w-1.5 h-1.5 rounded-full bg-brand shrink-0"></span>
+          <span class="text-ink font-medium">Ready to create 1 row directly from inputs.</span>
+        `;
+      } else {
+        createBtn.disabled = true;
+        createBtn.textContent = 'Create';
+        footerStateHelper.innerHTML = `
+          <span class="w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0"></span>
+          <span>Enter List name, Party ID, and Value, or import rows from CSV.</span>
+        `;
+      }
+    }
+
+    // =========================================================================
+    // STAGED QUEUE OPERATIONS
+    // =========================================================================
+    function addCurrentRowToStage() {
+      const listName = listNameSelect.value.trim();
+      const partyId = partyIdInput.value.trim();
+      const shopId = shopIdInput.value.trim();
+      const value = valueInput.value.trim();
+
+      if (!listName || !partyId || !value) {
+        showInlineWarning('Please fill in List name, Party ID, and Value.', 'error');
+        return;
+      }
+
+      if (isDuplicateRow(selectedTargetList, listName, partyId, shopId, value)) {
+        showInlineWarning(
+          `Duplicate entry: (${selectedTargetList}, ${listName}, ${partyId}, ${shopId || 'All shops'}, ${value}) is already in Staged rows.`,
+          'warning'
+        );
+        return;
+      }
+
+      stagedRows.push({
+        uid: uidCounter++,
+        target: selectedTargetList,
+        listName,
+        partyId,
+        shopId,
+        value,
+      });
+
+      // Reset Value input (keep Party ID & Shop ID or clear Value for fast sequential entry)
+      valueInput.value = '';
+      clearInlineAlert();
+      renderStagedRowsTable();
+      valueInput.focus();
+    }
+
+    function removeStagedRow(uid) {
+      stagedRows = stagedRows.filter((r) => r.uid !== uid);
+      clearInlineAlert();
+      renderStagedRowsTable();
+    }
+
+    function clearAllStagedRows() {
+      stagedRows = [];
+      clearInlineAlert();
+      renderStagedRowsTable();
+      showToast('Cleared all staged rows', 'info');
+    }
+
+    function renderStagedRowsTable() {
+      const count = stagedRows.length;
+      stagedCountBadge.textContent = count;
+
+      if (count > 0) {
+        stagedCountBadge.className = 'px-2 py-0.5 text-[11px] font-semibold rounded-full bg-brand-soft text-brand border border-brand-border/70 tabular-nums';
+        clearAllBtn.classList.remove('hidden');
+        emptyQueueState.classList.add('hidden');
+        stagedTableWrapper.classList.remove('hidden');
+      } else {
+        stagedCountBadge.className = 'px-2 py-0.5 text-[11px] font-semibold rounded-full bg-canvas border border-borderSubtle text-muted tabular-nums';
+        clearAllBtn.classList.add('hidden');
+        emptyQueueState.classList.remove('hidden');
+        stagedTableWrapper.classList.add('hidden');
+      }
+
+      stagedTableBody.innerHTML = stagedRows
+        .map((row) => {
+          const dotClass = TARGET_DOT_COLORS[row.target] || 'bg-slate-400';
+          return `
+            <tr class="hover:bg-[#FAFBFD] transition">
+              <!-- TARGET -->
+              <td class="py-3 pl-6 pr-3 align-middle whitespace-nowrap">
+                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-ink">
+                  <span class="w-2 h-2 rounded-full ${dotClass}"></span>
+                  ${escapeHtml(row.target)}
+                </span>
+              </td>
+
+              <!-- LIST NAME -->
+              <td class="py-3 px-3 align-middle whitespace-nowrap">
+                <span class="inline-flex items-center font-mono text-[11px] font-semibold px-2.5 py-0.5 rounded-md bg-brand-soft text-brand border border-brand-border/70">
+                  ${escapeHtml(row.listName)}
+                </span>
+              </td>
+
+              <!-- PARTY ID -->
+              <td class="py-3 px-3 align-middle font-mono text-xs text-ink whitespace-nowrap">
+                ${escapeHtml(row.partyId)}
+              </td>
+
+              <!-- SHOP ID -->
+              <td class="py-3 px-3 align-middle whitespace-nowrap">
+                ${
+                  row.shopId
+                    ? `<span class="font-mono text-xs text-ink">${escapeHtml(row.shopId)}</span>`
+                    : `<span class="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-md bg-canvas border border-borderSubtle text-muted">All shops</span>`
+                }
+              </td>
+
+              <!-- VALUE -->
+              <td class="py-3 px-3 align-middle">
+                <code class="font-mono text-xs font-medium text-ink bg-canvas border border-borderSubtle rounded-md px-2.5 py-1 inline-block max-w-[260px] truncate">
+                  ${escapeHtml(row.value)}
+                </code>
+              </td>
+
+              <!-- DELETE -->
+              <td class="py-3 pl-2 pr-6 align-middle text-right whitespace-nowrap">
+                <button
+                  type="button"
+                  onclick="removeStagedRow(${row.uid})"
+                  class="p-1.5 rounded-lg text-muted hover:text-rose-600 hover:bg-rose-50 transition"
+                  title="Remove row"
+                  aria-label="Remove row"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          `;
+        })
+        .join('');
+
+      updateFormAndFooterState();
+    }
+
+    // =========================================================================
+    // BULK CSV IMPORT DRAWER
+    // =========================================================================
+    function toggleCsvDrawer(forceOpen) {
+      const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : csvImportDrawer.classList.contains('hidden');
+      csvImportDrawer.classList.toggle('hidden', !shouldOpen);
+      importCsvToggleBtn.setAttribute('aria-expanded', String(shouldOpen));
+
+      if (shouldOpen) {
+        importCsvToggleBtn.classList.add('bg-brand-soft', 'text-brand', 'border-brand-border');
+        importCsvToggleBtn.classList.remove('bg-surface', 'text-ink', 'border-borderSubtle');
+        csvPasteTextarea.focus();
+      } else {
+        importCsvToggleBtn.classList.remove('bg-brand-soft', 'text-brand', 'border-brand-border');
+        importCsvToggleBtn.classList.add('bg-surface', 'text-ink', 'border-borderSubtle');
+      }
+    }
+
+    function loadAndDownloadSampleCsv() {
+      const sampleCsv = [
+        'list_name,party_id,shop_id,value',
+        'CARD_TOKEN,party-wb-id,shop-wb-id,wb_test_token_133',
+        'EMAIL,party-columbus-id,,fraud.ring99@example.com',
+        'IP,party-aggr-id,shop-aggr-id,185.220.101.44',
+        'BIN,party-wb-id,shop-wb-mobile,427638',
+      ].join('\n');
+
+      // Populate textarea & preview immediately so user sees instant results
+      document.getElementById('selectedFileName').textContent = 'sample-list-rows.csv';
+      csvPasteTextarea.value = sampleCsv;
+      parseCsvContent();
+
+      // Trigger real .csv download
+      try {
+        const blob = new Blob([sampleCsv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'sample-list-rows.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        // Fallback if sandbox restricts download
+      }
+
+      showToast('Loaded & downloaded sample-list-rows.csv (4 rows)', 'info');
+    }
+
+    function handleCsvFileSelect(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      document.getElementById('selectedFileName').textContent = file.name;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        csvPasteTextarea.value = String(e.target.result || '');
+        parseCsvContent();
+      };
+      reader.readAsText(file);
+    }
+
+    function parseCsvContent() {
+      const raw = csvPasteTextarea.value.trim();
+      parsedCsvRows = [];
+
+      if (!raw) {
+        csvParsedStatusBadge.textContent = '0 valid rows';
+        csvParsedStatusBadge.className = 'text-[11px] font-medium text-muted tabular-nums';
+        addCsvToQueueBtn.disabled = true;
+        addCsvToQueueBtn.textContent = 'Add 0 to queue';
+        csvPreviewBox.innerHTML = '<p class="text-muted text-xs py-5 text-center">Choose a file or paste CSV rows to preview them.</p>';
+        return;
+      }
+
+      const lines = raw
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .filter(Boolean);
+
+      const previewItems = [];
+
+      lines.forEach((line, idx) => {
+        const cols = line.split(/[,;]/).map((c) => c.trim().replace(/^["']|["']$/g, ''));
+
+        // Skip header row if present
+        if (
+          idx === 0 &&
+          cols[0]?.toLowerCase() === 'list_name' &&
+          cols[1]?.toLowerCase() === 'party_id'
+        ) {
+          return;
+        }
+
+        const listName = (cols[0] || '').toUpperCase();
+        const partyId = cols[1] || '';
+        const shopId = cols[2] || '';
+        const value = cols[3] || '';
+
+        const validList = VALID_LIST_NAMES.has(listName);
+        const valid = Boolean(validList && partyId && value);
+
+        let errorReason = '';
+        if (!validList) errorReason = 'Unknown list_name';
+        else if (!partyId) errorReason = 'Missing party_id';
+        else if (!value) errorReason = 'Missing value';
+
+        previewItems.push({ listName, partyId, shopId, value, valid, errorReason });
+        if (valid) {
+          parsedCsvRows.push({ listName, partyId, shopId, value });
+        }
+      });
+
+      const validCount = parsedCsvRows.length;
+      csvParsedStatusBadge.textContent = `${validCount} valid ${validCount === 1 ? 'row' : 'rows'}`;
+      csvParsedStatusBadge.className =
+        validCount > 0
+          ? 'text-[11px] font-semibold text-emerald-700 tabular-nums'
+          : 'text-[11px] font-semibold text-rose-600 tabular-nums';
+
+      addCsvToQueueBtn.disabled = validCount === 0;
+      addCsvToQueueBtn.textContent = `Add ${validCount} to queue`;
+
+      if (previewItems.length === 0) {
+        csvPreviewBox.innerHTML = '<p class="text-muted text-xs py-5 text-center">No data rows found below header.</p>';
+        return;
+      }
+
+      csvPreviewBox.innerHTML = `<div class="space-y-1.5">
+        ${previewItems
+          .map(
+            (item) => `
+            <div class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md border ${
+              item.valid ? 'bg-canvas border-borderSubtle' : 'bg-rose-50/70 border-rose-200'
+            }">
+              <div class="font-mono text-[11px] truncate text-ink">
+                <span class="font-semibold text-brand">${escapeHtml(item.listName || '—')}</span>
+                <span class="text-muted mx-1">•</span>
+                <span>${escapeHtml(item.partyId || '—')}</span>
+                ${item.shopId ? `<span class="text-muted">/${escapeHtml(item.shopId)}</span>` : ''}
+                <span class="text-muted mx-1">→</span>
+                <span class="font-medium">${escapeHtml(item.value || '—')}</span>
+              </div>
+              <span class="shrink-0 text-[10.5px] font-semibold ${item.valid ? 'text-emerald-600' : 'text-rose-600'}">
+                ${item.valid ? 'Valid' : escapeHtml(item.errorReason)}
+              </span>
+            </div>
+          `
+          )
+          .join('')}
+      </div>`;
+    }
+
+    function clearCsvDrawer() {
+      document.getElementById('csvFileInput').value = '';
+      document.getElementById('selectedFileName').textContent = '';
+      csvPasteTextarea.value = '';
+      parseCsvContent();
+    }
+
+    function appendParsedCsvToStage() {
+      if (parsedCsvRows.length === 0) return;
+
+      let added = 0;
+      let skippedDuplicates = 0;
+
+      parsedCsvRows.forEach((r) => {
+        if (isDuplicateRow(selectedTargetList, r.listName, r.partyId, r.shopId, r.value)) {
+          skippedDuplicates++;
+          return;
+        }
+        stagedRows.push({
+          uid: uidCounter++,
+          target: selectedTargetList,
+          listName: r.listName,
+          partyId: r.partyId,
+          shopId: r.shopId,
+          value: r.value,
+        });
+        added++;
+      });
+
+      renderStagedRowsTable();
+      clearCsvDrawer();
+      toggleCsvDrawer(false);
+
+      if (skippedDuplicates > 0) {
+        showInlineWarning(
+          `Imported ${added} rows; skipped ${skippedDuplicates} duplicate ${skippedDuplicates === 1 ? 'entry' : 'entries'} already in queue.`,
+          'warning'
+        );
+      } else {
+        clearInlineAlert();
+      }
+
+      if (added > 0) {
+        showToast(`Added ${added} ${added === 1 ? 'row' : 'rows'} to ${selectedTargetList} queue`, 'success');
+      }
+    }
+
+    // =========================================================================
+    // SUBMIT & CANCEL ACTIONS
+    // =========================================================================
+    function submitNewRows() {
+      let batch = [...stagedRows];
+
+      // Support direct creation of 1 row from inputs when queue is empty
+      if (batch.length === 0 && isDirectFormValid()) {
+        batch.push({
+          uid: uidCounter++,
+          target: selectedTargetList,
+          listName: listNameSelect.value.trim(),
+          partyId: partyIdInput.value.trim(),
+          shopId: shopIdInput.value.trim(),
+          value: valueInput.value.trim(),
+        });
+      }
+
+      if (batch.length === 0) return;
+
+      // Render created summary banner
+      const card = document.getElementById('createdConfirmationCard');
+      const title = document.getElementById('createdSummaryTitle');
+      const grid = document.getElementById('createdSummaryGrid');
+
+      title.textContent = `Successfully created ${batch.length} ${batch.length === 1 ? 'row' : 'rows'}`;
+      grid.innerHTML = batch
+        .map((item) => {
+          const dotClass = TARGET_DOT_COLORS[item.target] || 'bg-slate-400';
+          return `
+            <div class="p-3 rounded-lg bg-canvas border border-borderSubtle flex flex-col gap-1">
+              <div class="flex items-center justify-between gap-2">
+                <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-ink">
+                  <span class="w-2 h-2 rounded-full ${dotClass}"></span>
+                  ${escapeHtml(item.target)}
+                </span>
+                <span class="font-mono text-[10.5px] font-semibold text-brand">${escapeHtml(item.listName)}</span>
+              </div>
+              <code class="font-mono text-xs font-semibold text-ink truncate">${escapeHtml(item.value)}</code>
+              <div class="font-mono text-[11px] text-muted truncate">
+                ${escapeHtml(item.partyId)} • ${item.shopId ? escapeHtml(item.shopId) : 'All shops'}
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+
+      card.classList.remove('hidden');
+
+      // Reset form & queue
+      stagedRows = [];
+      partyIdInput.value = '';
+      shopIdInput.value = '';
+      valueInput.value = '';
+      clearInlineAlert();
+      renderStagedRowsTable();
+
+      showToast(`Created ${batch.length} ${batch.length === 1 ? 'row' : 'rows'}`, 'success');
+    }
+
+    function handleCancelReset() {
+      const hadContent =
+        stagedRows.length > 0 ||
+        partyIdInput.value.trim() ||
+        shopIdInput.value.trim() ||
+        valueInput.value.trim();
+
+      stagedRows = [];
+      partyIdInput.value = '';
+      shopIdInput.value = '';
+      valueInput.value = '';
+      clearInlineAlert();
+      clearCsvDrawer();
+      toggleCsvDrawer(false);
+      renderStagedRowsTable();
+
+      showToast(hadContent ? 'Cleared form and staged rows' : 'Returned to Lists', 'info');
+    }
+
+    function handleBack() {
+      showToast('Returned to Lists', 'info');
+    }
+
+    // =========================================================================
+    // EVENT LISTENERS & HELPERS
+    // =========================================================================
+    [partyIdInput, shopIdInput, valueInput].forEach((input) => {
+      input.addEventListener('input', () => {
+        clearInlineAlert();
+        updateFormAndFooterState();
+      });
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addCurrentRowToStage();
+        }
+      });
+    });
+
+    listNameSelect.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addCurrentRowToStage();
+      }
+    });
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+
+      const styles = {
+        success: 'bg-ink text-white border-slate-700',
+        error: 'bg-rose-600 text-white border-rose-700',
+        info: 'bg-surface text-ink border-borderStrong',
+      };
+
+      const dotColors = {
+        success: 'bg-emerald-400',
+        error: 'bg-white',
+        info: 'bg-brand',
+      };
+
+      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 rounded-xl border shadow-lg text-xs font-medium transition-all duration-200 transform translate-y-2 opacity-0 ${styles[type] || styles.info}`;
+      toast.innerHTML = `
+        <span class="w-2 h-2 rounded-full shrink-0 ${dotColors[type] || dotColors.info}"></span>
+        <span>${escapeHtml(message)}</span>
+      `;
+
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-2', 'opacity-0');
+        setTimeout(() => toast.remove(), 200);
+      }, 2800);
+    }
+
+    // Initialize default state
+    selectTargetList('Black');
+    handleListNameChange();
+    renderStagedRowsTable();
+  </script>
+</body>
+</html>

@@ -1,25 +1,7 @@
-tr.mat-row.cdk-row.ng-star-inserted {
-    height: auto;
+.template-id-column {
+    width: 25%;
 }
 
-td.mat-cell.cdk-cell.cdk-column-template.mat-column-template.ng-star-inserted,
-td.mat-mdc-cell.cdk-cell.cdk-column-template.mat-column-template.ng-star-inserted,
-td.mat-mdc-cell.cdk-cell.cdk-column-template.mat-column-template.ng-star-inserted {
-    width: 100%;
-}
-
-th.mat-header-cell,
-th.mat-mdc-header-cell,
-th.mat-mdc-header-cell,
-td.mat-cell,
-td.mat-mdc-cell,
-td.mat-mdc-cell,
-td.mat-footer-cell,
-td.mat-mdc-footer-cell,
-td.mat-mdc-footer-cell {
-    padding: 10px 10px 10px 10px;
-}
-
-.fb-table {
-    margin: 20px 0 20px 0;
+th code {
+    overflow-wrap: anywhere;
 }

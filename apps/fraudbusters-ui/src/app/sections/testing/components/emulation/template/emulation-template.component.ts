@@ -1,7 +1,6 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 import { PaymentEmulateFilter } from './model/payment-emulate-filter';
-import { LAYOUT_GAP_M } from '../../../../../tokens';
 import { EmulationTemplateService } from '../../../services/emulation/emulation-template.service';
 
 @Component({
@@ -10,22 +9,12 @@ import { EmulationTemplateService } from '../../../services/emulation/emulation-
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmulationTemplateComponent {
-    templates$ = this.emulationTemplateService.templates$;
+    readonly view$ = this.emulationTemplateService.view$;
+    readonly filter: PaymentEmulateFilter = { partyId: '', shopId: '' };
 
-    filter: PaymentEmulateFilter;
-
-    constructor(
-        private emulationTemplateService: EmulationTemplateService,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
-    ) {
-        this.initFilter();
-    }
-
-    initFilter(): void {
-        this.filter = { partyId: '', shopId: '' };
-    }
+    constructor(private emulationTemplateService: EmulationTemplateService) {}
 
     emulate(): void {
-        this.emulationTemplateService.emulateNext(this.filter);
+        this.emulationTemplateService.emulateNext({ ...this.filter });
     }
 }

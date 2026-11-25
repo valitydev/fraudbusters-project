@@ -1,0 +1,286 @@
+<form
+    class="template-workspace"
+    [formGroup]="form"
+    (keydown.control.enter)="validateFromKeyboard($event, busy)"
+    (keydown.meta.enter)="validateFromKeyboard($event, busy)"
+>
+    <section class="panel template-config" *ngIf="isEditableName; else metadata">
+        <h2 class="fb-section-title">Template configuration</h2>
+        <div class="config-fields">
+            <label class="template-id">
+                <span>Template ID <span class="required" aria-hidden="true">*</span></span>
+                <input
+                    class="fb-form-control fb-control-mono"
+                    #idInput
+                    required
+                    formControlName="id"
+                    autocomplete="off"
+                    placeholder="e.g. high-risk-bin-decline"
+                />
+                <small>Template ID cannot be changed after creation.</small>
+            </label>
+            <div class="preset-options">
+                <span>Starter preset</span>
+                <div class="preset-buttons">
+                    <button
+                        *ngFor="let preset of presets"
+                        mat-stroked-button
+                        type="button"
+                        [attr.aria-pressed]="form.controls.template.value === preset.code"
+                        (click)="form.controls.template.setValue(preset.code)"
+                    >
+                        {{ preset.label }}
+                    </button>
+                </div>
+                <small *ngIf="hasCustomRules">Choosing a preset replaces the editor contents.</small>
+            </div>
+        </div>
+    </section>
+    <ng-template #metadata>
+        <dl class="panel template-metadata">
+            <div>
+                <dt>Template ID</dt>
+                <dd>
+                    <button
+                        mat-stroked-button
+                        type="button"
+                        aria-label="Copy template ID"
+                        (click)="copy(form.controls.id.value, 'Template ID')"
+                    >
+                        <code>{{ form.controls.id.value }}</code
+                        ><mat-icon>content_copy</mat-icon>
+                    </button>
+                </dd>
+            </div>
+            <div *ngIf="template?.lastUpdateDate">
+                <dt>Last updated</dt>
+                <dd>{{ template?.lastUpdateDate | date : 'd MMM yyyy, HH:mm' : 'UTC' }} UTC</dd>
+            </div>
+            <div *ngIf="template?.modifiedByUser">
+                <dt>Modified by</dt>
+                <dd>{{ template?.modifiedByUser }}</dd>
+            </div>
+        </dl>
+    </ng-template>
+
+    <div class="template-columns" [class.snippets-open]="snippetsOpen">
+        <section class="panel editor-panel">
+            <header class="editor-toolbar">
+                <h2 class="fb-section-title">Rule expression</h2>
+                <div class="editor-buttons">
+                    <button
+                        mat-button
+                        type="button"
+                        [disabled]="!form.controls.template.value?.trim()"
+                        (click)="formatRules()"
+                    >
+                        <mat-icon>sort</mat-icon> Format
+                    </button>
+                    <button
+                        mat-button
+                        type="button"
+                        [disabled]="!form.controls.template.value"
+                        (click)="copy(form.controls.template.value, 'Code')"
+                    >
+                        <mat-icon>content_copy</mat-icon> Copy code
+                    </button>
+                </div>
+            </header>
+            <fb-fraudo-editor
+                #editor
+                class="fill-panel"
+                required
+                formControlName="template"
+                label="Rules"
+                [validationMessage]="checkedRule === form.controls.template.value ? validationMessage : ''"
+                [fixedHeight]="true"
+                [showLineNumbers]="true"
+                [dialect]="payout ? 'payout' : 'payment'"
+            ></fb-fraudo-editor>
+            <footer class="editor-footer">
+                <div class="template-result" role="status">
+                    <ng-container
+                        *ngIf="checkedRule === form.controls.template.value && validationMessage; else shortcut"
+                    >
+                        {{ validationMessage }}
+                    </ng-container>
+                    <ng-template #shortcut><kbd>Ctrl / ⌘ + Enter</kbd> to validate</ng-template>
+                </div>
+                <div class="editor-buttons">
+                    <button
+                        mat-stroked-button
+                        type="button"
+                        [disabled]="!form.controls.template.value?.trim() || busy"
+                        (click)="validate.emit()"
+                    >
+                        Validate
+                    </button>
+                    <button
+                        mat-stroked-button
+                        class="fb-primary-action"
+                        type="button"
+                        [disabled]="!form.getRawValue().id?.trim() || !form.controls.template.value?.trim() || busy"
+                        (click)="save.emit()"
+                    >
+                        {{ isEditableName ? 'Create' : 'Save' }}
+                    </button>
+                </div>
+            </footer>
+            <mat-progress-bar *ngIf="busy" mode="indeterminate"></mat-progress-bar>
+        </section>
+
+        <button
+            #snippetsToggle
+            class="panel snippets-toggle"
+            type="button"
+            aria-controls="template-syntax-panel"
+            [attr.aria-expanded]="snippetsOpen"
+            (click)="snippetsOpen = !snippetsOpen"
+        >
+            <mat-icon aria-hidden="true">{{ snippetsOpen ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+            <span>Syntax &amp; snippets</span>
+        </button>
+
+        <aside
+            id="template-syntax-panel"
+            class="panel syntax-panel"
+            aria-labelledby="template-syntax-title"
+            [class.is-open]="snippetsOpen"
+            [attr.inert]="snippetsOpen ? null : ''"
+            [attr.aria-hidden]="!snippetsOpen"
+            (keydown.escape)="snippetsOpen = false; snippetsToggle.focus()"
+        >
+            <h2 class="fb-section-title" id="template-syntax-title">Syntax &amp; snippets</h2>
+            <p>Click a snippet to insert it at the cursor.</p>
+            <label class="snippet-search">
+                <mat-icon aria-hidden="true">search</mat-icon>
+                <input
+                    #snippetSearch
+                    class="fb-filter-control"
+                    type="search"
+                    placeholder="Search snippets"
+                    aria-label="Search snippets"
+                    aria-controls="template-snippet-results"
+                    autocomplete="off"
+                    spellcheck="false"
+                    [value]="snippetQuery"
+                    (input)="snippetQuery = snippetSearch.value"
+                    (keydown.escape)="clearSnippetSearch($event)"
+                />
+            </label>
+            <p *ngIf="snippetQuery.trim()" class="search-summary" aria-live="polite">
+                {{
+                    snippetResultCount
+                        ? snippetResultCount + (snippetResultCount === 1 ? ' snippet found' : ' snippets found')
+                        : 'No snippets match "' + snippetQuery.trim() + '"'
+                }}
+            </p>
+            <div *ngIf="snippetQuery.trim()" id="template-snippet-results">
+                <section *ngFor="let group of snippetResults" class="search-group">
+                    <h3>{{ group.title }}</h3>
+                    <div class="snippet-list">
+                        <button
+                            *ngFor="let snippet of group.items"
+                            class="snippet"
+                            type="button"
+                            (click)="editor.insert(snippet.insert)"
+                        >
+                            <code>{{ snippet.label }}</code>
+                            <small>{{ snippet.description }}</small>
+                        </button>
+                    </div>
+                </section>
+            </div>
+            <ng-container *ngIf="!snippetQuery.trim()">
+                <details *ngFor="let section of referenceSections">
+                    <summary>{{ section.title }}</summary>
+                    <p *ngIf="section.hint">{{ section.hint }}</p>
+                    <div class="snippet-list">
+                        <button
+                            *ngFor="let snippet of section.snippets"
+                            class="snippet"
+                            type="button"
+                            (click)="editor.insert(snippet.code)"
+                        >
+                            <code>{{ snippet.code }}</code>
+                            <small>{{ snippet.description }}</small>
+                        </button>
+                    </div>
+                </details>
+                <details>
+                    <summary>Transaction fields</summary>
+                    <p>
+                        Insert a quoted field name into a function argument. Field availability depends on the function.
+                    </p>
+                    <div class="snippet-chips">
+                        <button
+                            *ngFor="let field of fields"
+                            class="snippet"
+                            type="button"
+                            (click)="editor.insert('&quot;' + field + '&quot;')"
+                        >
+                            <code>{{ field }}</code>
+                        </button>
+                    </div>
+                    <p *ngIf="!payout">Payment history flags</p>
+                    <div *ngIf="!payout" class="snippet-chips">
+                        <button
+                            *ngFor="let field of historyFlags"
+                            class="snippet"
+                            type="button"
+                            (click)="editor.insert('&quot;' + field + '&quot;')"
+                        >
+                            <code>{{ field }}</code>
+                        </button>
+                    </div>
+                    <p><code>masked_pan</code> is available for matching the current operation.</p>
+                </details>
+                <details>
+                    <summary>Outcomes &amp; error fallback</summary>
+                    <p>Insert an outcome after <code>-&gt;</code>.</p>
+                    <div class="snippet-chips">
+                        <button
+                            *ngFor="let outcome of outcomes"
+                            class="snippet outcome"
+                            [attr.data-outcome]="outcome.code"
+                            [title]="outcome.description"
+                            type="button"
+                            (click)="editor.insert(outcome.code)"
+                        >
+                            <code>{{ outcome.code }}</code>
+                        </button>
+                    </div>
+                    <p>Supported after <code>catch:</code></p>
+                    <div class="snippet-chips">
+                        <button
+                            *ngFor="let outcome of catchOutcomes"
+                            class="snippet"
+                            type="button"
+                            (click)="editor.insert(outcome)"
+                        >
+                            <code>{{ outcome }}</code>
+                        </button>
+                    </div>
+                </details>
+                <details open>
+                    <summary>Complete rule examples</summary>
+                    <div class="example" *ngFor="let example of examples">
+                        <div class="example-title">
+                            <strong>{{ example.label }}</strong>
+                            <button mat-button type="button" (click)="editor.insert(example.code)">
+                                Insert example
+                            </button>
+                        </div>
+                        <code class="fb-fraudo-code"
+                            ><span
+                                *ngFor="let token of example.code | fraudoTokens"
+                                [class]="'fb-code-' + token.kind"
+                                >{{ token.text }}</span
+                            ></code
+                        >
+                    </div>
+                </details>
+            </ng-container>
+        </aside>
+    </div>
+</form>

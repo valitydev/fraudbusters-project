@@ -1,0 +1,145 @@
+.records-page {
+    display: grid;
+    // Wide tables scroll inside their panel instead of stretching the page.
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+}
+
+.records-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.heading {
+    min-width: 0;
+
+    p {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+}
+
+.source {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--fb-text, #252335);
+    font-weight: 600;
+
+    mat-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+    }
+}
+
+.issues {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 10px 14px;
+    border: 1px solid var(--fb-line, #f3dfbf);
+    border-radius: 10px;
+    background: var(--fb-warning-bg, #fdf3e4);
+    color: var(--fb-warning, #7a4400);
+    font-size: 13px;
+
+    mat-icon {
+        flex: 0 0 18px;
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
+    }
+}
+
+.records-table {
+    min-width: 880px;
+}
+
+.check-column {
+    width: 52px;
+}
+
+.type-column {
+    width: 110px;
+}
+
+.check {
+    text-align: center;
+}
+
+tbody tr {
+    cursor: pointer;
+
+    &.selected {
+        background: var(--fb-selected, #eee9fc);
+    }
+
+    &.invalid {
+        cursor: default;
+
+        td:not(.check),
+        th {
+            color: var(--fb-muted, #625f74);
+        }
+    }
+}
+
+.list-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
+
+.issue {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+
+    mat-icon {
+        width: 14px;
+        height: 14px;
+        font-size: 14px;
+    }
+}
+
+.selection-bar {
+    position: sticky;
+    bottom: 12px;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px 10px 16px;
+    border: 1px solid var(--fb-line, #e2e1eb);
+    border-radius: 12px;
+    background: var(--fb-surface, #fff);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+}
+
+.selection-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 14px;
+
+    span {
+        color: var(--fb-muted, #625f74);
+        font-size: 13px;
+    }
+}
+
+.selection-actions {
+    display: flex;
+    gap: 8px;
+}

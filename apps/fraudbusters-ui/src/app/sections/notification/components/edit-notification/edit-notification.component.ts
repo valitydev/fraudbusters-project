@@ -1,32 +1,37 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { map, shareReplay, switchMap } from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { BehaviorSubject, combineLatest, of } from 'rxjs';
+import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 
-import { LAYOUT_GAP_L, LAYOUT_GAP_M } from '../../../../tokens';
+import { Notification } from '../../../../api/fb-management/swagger-codegen/model/notification';
 import { NotificationService } from '../../services/notification.service';
+
+interface LoadState {
+    loading: boolean;
+    failed: boolean;
+    notification?: Notification;
+}
 
 @Component({
     templateUrl: './edit-notification.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditNotificationComponent {
-    notification$ = this.route.params.pipe(
-        map((params) => params.id),
-        switchMap((id) => {
-            return this.notificationService.getNotificationById(id);
-        }),
-        shareReplay(1)
+    readonly reload$ = new BehaviorSubject<void>(undefined);
+
+    state$ = combineLatest([this.route.params.pipe(map((params) => params.id as string)), this.reload$]).pipe(
+        switchMap(([id]) =>
+            this.notificationService.getNotificationById(id).pipe(
+                map((notification): LoadState => ({ loading: false, failed: false, notification })),
+                catchError(() => of<LoadState>({ loading: false, failed: true })),
+                startWith<LoadState>({ loading: true, failed: false })
+            )
+        )
     );
 
-    constructor(
-        private route: ActivatedRoute,
-        private router: Router,
-        private notificationService: NotificationService,
-        @Inject(LAYOUT_GAP_L) public layoutGapL: string,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
-    ) {}
+    constructor(private route: ActivatedRoute, private notificationService: NotificationService) {}
 
-    back() {
-        this.router.navigate([`../notifications/periodical`]);
+    reload() {
+        this.reload$.next();
     }
 }

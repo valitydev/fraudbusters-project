@@ -6,8 +6,8 @@
 
     body {
         margin: 0;
-        font-family: 'Roboto', 'Helvetica Neue', sans-serif;
-        background: #f6f7fb;
-        color: #655b76;
+        font-family: var(--fb-font-sans);
+        background: var(--fb-canvas, #f6f7fb);
+        color: var(--fb-muted, #655b76);
     }
 }

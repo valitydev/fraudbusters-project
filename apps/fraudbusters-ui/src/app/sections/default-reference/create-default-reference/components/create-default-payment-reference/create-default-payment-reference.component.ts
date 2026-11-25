@@ -1,31 +1,26 @@
-import { Component, Inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component } from '@angular/core';
 
-import { LAYOUT_GAP_M } from '../../../../../tokens';
-import { CreateDefaultPaymentReferenceService } from '../../services/create-default-payment-reference.service';
+import { PaymentDefaultReferencesService } from '../../../../../api/payments/default-references';
+import { PaymentTemplatesService } from '../../../../../api/payments/templates';
+import {
+    ReferenceFormConfig,
+    toPaymentReference,
+} from '../../../../../shared/components/reference-form/reference-draft';
 
 @Component({
-    templateUrl: 'create-default-payment-reference.component.html',
-    providers: [CreateDefaultPaymentReferenceService],
+    template: '<fb-reference-form [config]="config"></fb-reference-form>',
 })
 export class CreateDefaultPaymentReferenceComponent {
-    form = this.createDefaultPaymentReferenceService.form;
-    inProgress$ = this.createDefaultPaymentReferenceService.inProgress$;
+    readonly config: ReferenceFormConfig = {
+        title: 'New default references',
+        scope: 'shop',
+        backUrl: '/templates/default-references',
+        loadTargetNames: (prefix) => this.templates.getTemplatesName(prefix),
+        saveRow: (row) => this.references.save(toPaymentReference(row)),
+    };
 
     constructor(
-        private createDefaultPaymentReferenceService: CreateDefaultPaymentReferenceService,
-        private route: ActivatedRoute,
-        private router: Router,
-        @Inject(LAYOUT_GAP_M) public layoutGapM: string
-    ) {
-        this.createDefaultPaymentReferenceService.created$.subscribe(() => {
-            void this.router.navigateByUrl(
-                this.route.snapshot.queryParamMap.get('returnUrl') || '/templates/default-references'
-            );
-        });
-    }
-
-    createReference() {
-        this.createDefaultPaymentReferenceService.create();
-    }
+        private readonly references: PaymentDefaultReferencesService,
+        private readonly templates: PaymentTemplatesService
+    ) {}
 }

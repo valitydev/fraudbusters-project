@@ -20,7 +20,9 @@ export class RemoveChannelsService {
             combineLatest([
                 of(channel),
                 this.dialog
-                    .open(ConfirmActionDialogComponent, { data: { title: `Remove reference ${channel.name}?` } })
+                    .open(ConfirmActionDialogComponent, {
+                        data: { confirmLabel: 'Remove', destructive: true, title: `Remove channel ${channel.name}?` },
+                    })
                     .afterClosed()
                     .pipe(filter((r) => r === 'confirm')),
             ])

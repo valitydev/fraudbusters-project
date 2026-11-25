@@ -1,0 +1,101 @@
+.records {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+}
+
+.table-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+    color: var(--fb-muted, #625f74);
+    font-size: 13px;
+
+    strong {
+        color: var(--fb-text, #252335);
+        font-size: 14px;
+    }
+}
+
+.sort-control {
+    color: var(--fb-muted, #625f74);
+    font-size: 13px;
+
+    select {
+        height: 34px;
+        padding: 0 8px;
+        border: 1px solid var(--fb-line, #e2e1eb);
+        border-radius: 8px;
+        background: var(--fb-canvas, #f7f8fb);
+        color: var(--fb-text, #252335);
+        font: inherit;
+
+        &:focus-visible {
+            outline: 2px solid var(--fb-accent, #6741b7);
+            outline-offset: -1px;
+        }
+    }
+}
+
+.selection-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px 10px 16px;
+    border: 1px solid color-mix(in srgb, var(--fb-accent, #6741b7) 30%, var(--fb-line, #e2e1eb));
+    border-radius: 12px;
+    background: var(--fb-selected, #eee9fc);
+}
+
+.selection-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    color: var(--fb-text, #252335);
+    font-size: 14px;
+
+    span {
+        color: var(--fb-muted, #625f74);
+        font-size: 13px;
+    }
+}
+
+.selection-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.table-footer {
+    justify-content: space-between;
+}
+
+.empty {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    padding: 40px 20px;
+    border-top: 1px solid var(--fb-line, #e0e3ed);
+    color: var(--fb-muted, #625f74);
+    text-align: center;
+
+    mat-icon {
+        width: 32px;
+        height: 32px;
+        margin-bottom: 4px;
+        font-size: 32px;
+    }
+
+    strong {
+        color: var(--fb-text, #252335);
+    }
+
+    p {
+        margin: 0;
+        font-size: 13px;
+    }
+}
