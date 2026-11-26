@@ -1,9 +1,9 @@
-<ng-container *ngIf="state$ | async as state">
-    <fb-create-notification
-        [editing]="true"
-        [loading]="state.loading"
-        [loadFailed]="state.failed"
-        [notification]="state.notification"
-        (retry)="reload()"
-    ></fb-create-notification>
-</ng-container>
+@if (state$ | async; as state) {
+<fb-create-notification
+    [editing]="true"
+    [loading]="state.loading"
+    [loadFailed]="state.failed"
+    [notification]="state.notification"
+    (retry)="reload()"
+></fb-create-notification>
+}

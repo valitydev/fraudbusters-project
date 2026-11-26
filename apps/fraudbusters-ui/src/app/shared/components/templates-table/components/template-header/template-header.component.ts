@@ -6,6 +6,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
     selector: 'tr[fb-template-header]',
     templateUrl: 'template-header.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class TemplateHeaderComponent {
     @Input() showAuthor = false;

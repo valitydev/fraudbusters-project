@@ -16,6 +16,7 @@ export interface ConfirmActionDialogData {
     templateUrl: 'confirm-action-dialog.component.html',
     styleUrls: ['confirm-action-dialog.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class ConfirmActionDialogComponent {
     constructor(

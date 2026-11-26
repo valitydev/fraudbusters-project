@@ -61,11 +61,11 @@ $fb-brand-hues: (
         A700: white,
     ),
 );
-$fb-brand-palette: mat.define-palette($fb-brand-hues, 500);
+$fb-brand-palette: mat.m2-define-palette($fb-brand-hues, 500);
 
 html:not(.fb-dark) {
     @include mat.all-component-colors(
-        mat.define-light-theme(
+        mat.m2-define-light-theme(
             (
                 color: (
                     primary: $fb-brand-palette,
@@ -77,7 +77,7 @@ html:not(.fb-dark) {
 }
 
 html {
-    @include mat.all-component-typographies(mat.define-typography-config($font-family: tokens.$font-sans));
+    @include mat.all-component-typographies(mat.m2-define-typography-config($font-family: tokens.$font-sans));
 }
 
 @include fb-overrides();
@@ -118,7 +118,7 @@ html {
 
 // Dialogs: rounded surface, matching the 12px cards and tables.
 .mat-mdc-dialog-container {
-    --mdc-dialog-container-shape: var(--fb-radius-panel);
+    --mat-dialog-container-shape: var(--fb-radius-panel);
 }
 
 // Selects drawn as fields keep their padding on the host; the trigger's click area
@@ -229,20 +229,20 @@ div.mat-mdc-menu-panel {
 
 html.fb-dark {
     @include mat.all-component-colors(
-        mat.define-dark-theme(
+        mat.m2-define-dark-theme(
             (
                 color: (
                     // The same brand violet as the light theme (lighter hue for dark surfaces), never amber.
-                    primary: mat.define-palette($fb-brand-hues, 300),
-                    accent: mat.define-palette($fb-brand-hues, 300),
+                    primary: mat.m2-define-palette($fb-brand-hues, 300),
+                    accent: mat.m2-define-palette($fb-brand-hues, 300),
                 ),
             )
         )
     );
 
     & {
-        --mdc-elevated-card-container-color: transparent;
-        --mdc-outlined-card-container-color: transparent;
+        --mat-card-elevated-container-color: transparent;
+        --mat-card-outlined-container-color: transparent;
         --mat-expansion-container-background-color: transparent;
         --mat-table-background-color: transparent;
         --mat-paginator-container-background-color: transparent;
@@ -254,7 +254,7 @@ html.fb-dark {
         --mat-datepicker-calendar-container-background-color: var(--fb-surface);
         --mat-bottom-sheet-container-background-color: var(--fb-surface);
         --mat-sidenav-container-background-color: var(--fb-surface);
-        --mdc-dialog-container-color: var(--fb-surface);
+        --mat-dialog-container-color: var(--fb-surface);
     }
 
     body .mat-mdc-card,
@@ -389,5 +389,29 @@ pre {
     > div {
         flex: 1 1 270px;
         min-width: 0;
+    }
+}
+
+// Loaders appear only when an operation takes noticeable time: a quick one finishes, and the
+// loader is removed, before the delay ends, so the page does not flicker.
+.mat-mdc-progress-bar[mode='indeterminate'],
+.fb-delayed-loader {
+    animation: fb-loader-reveal 150ms ease-out var(--fb-loader-delay, 300ms) both;
+}
+
+@keyframes fb-loader-reveal {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mat-mdc-progress-bar[mode='indeterminate'],
+    .fb-delayed-loader {
+        animation-duration: 1ms;
     }
 }

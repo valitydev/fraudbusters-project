@@ -16,6 +16,7 @@ const COUNT_QUERY = { size: 1, searchValue: '', sortFieldValue: '', sortOrder: S
 @Component({
     templateUrl: 'templates.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class TemplatesComponent {
     links = [

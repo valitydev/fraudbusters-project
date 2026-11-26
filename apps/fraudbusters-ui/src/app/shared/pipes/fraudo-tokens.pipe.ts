@@ -84,6 +84,7 @@ export function tokenizeFraudo(source: string): FraudoToken[] {
 
 @Pipe({
     name: 'fraudoTokens',
+    standalone: false,
 })
 export class FraudoTokensPipe implements PipeTransform {
     transform(rule: string): FraudoToken[] {

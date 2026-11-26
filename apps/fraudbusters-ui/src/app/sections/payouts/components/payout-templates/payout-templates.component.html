@@ -1,5 +1,5 @@
+@if (catalog.view$ | async; as view) {
 <fb-catalog-panel
-    *ngIf="catalog.view$ | async as view"
     label="Payout templates"
     searchLabel="Search templates by ID or rule"
     itemName="templates"
@@ -14,12 +14,14 @@
     (more)="catalog.more()"
     (retry)="catalog.refresh()"
 >
+    @if (view.rows.length) {
     <fb-payment-templates-list
         label="Payout templates"
-        *ngIf="view.rows.length"
         [templates]="view.rows"
         (editItem)="editTemplate($event)"
         (copyItem)="copyTemplate($event)"
         (deleteItem)="removeTemplate($event)"
     ></fb-payment-templates-list>
+    }
 </fb-catalog-panel>
+}

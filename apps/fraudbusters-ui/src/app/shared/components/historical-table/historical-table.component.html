@@ -1,0 +1,164 @@
+<div class="fb-catalog-scroll" tabindex="0" role="region" [attr.aria-label]="kind.title + ' table'">
+    <table class="fb-catalog-table" [attr.aria-label]="kind.title">
+        <colgroup>
+            @if (selectable) {
+            <col class="check-column" />
+            }
+            <col class="id-column" />
+            @for (column of kind.columns; track column) {
+            <col [ngClass]="column + '-column'" />
+            }
+            <col class="time-column" />
+            <col class="chevron-column" />
+        </colgroup>
+        <thead>
+            <tr>
+                @if (selectable) {
+                <th scope="col" class="check">
+                    <mat-checkbox
+                        color="primary"
+                        aria-label="Select all loaded records"
+                        [checked]="allSelected"
+                        [indeterminate]="someSelected"
+                        [disabled]="!rows.length"
+                        (change)="toggleAll.emit($event.checked)"
+                    ></mat-checkbox>
+                </th>
+                }
+                <th scope="col">ID</th>
+                @for (column of kind.columns; track column) {
+                <th scope="col" [class.numeric]="column === 'amount'">
+                    {{ label(column) }}
+                </th>
+                }
+                <th scope="col">Event time</th>
+                <th scope="col"><span class="cdk-visually-hidden">Details</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (row of rows; track trackRow($index, row)) {
+            <tr
+                class="record"
+                [class.open]="expanded.has(row.key)"
+                [class.selected]="selected?.has(row.key)"
+                (click)="expand(row, $event)"
+            >
+                @if (selectable) {
+                <td class="check">
+                    <mat-checkbox
+                        color="primary"
+                        [attr.aria-label]="'Select ' + row.id"
+                        [checked]="selected?.has(row.key)"
+                        (change)="rowToggle.emit(row)"
+                    ></mat-checkbox>
+                </td>
+                }
+                <th scope="row">
+                    <span class="id-cell fb-catalog-row-label">
+                        <span class="fb-catalog-mono">{{ row.id || '—' }}</span>
+                        @if (row.id) {
+                        <button
+                            class="copy"
+                            type="button"
+                            title="Copy ID"
+                            [attr.aria-label]="'Copy ID ' + row.id"
+                            (click)="copy(row.id, 'ID')"
+                        >
+                            <mat-icon>content_copy</mat-icon>
+                        </button>
+                        }
+                    </span>
+                </th>
+                @for (column of kind.columns; track column) {
+                <td [class.numeric]="column === 'amount'">
+                    @switch (column) { @case ('status') { @if (row.status) {
+                    <span class="fb-pill fb-pill-status" [ngClass]="pill(row.status)">{{ row.status }}</span>
+                    } @else {
+                    <span class="missing">—</span>
+                    } } @case ('amount') { @if (amount(row)) {
+                    <span class="amount"
+                        >{{ amount(row) }} <span class="currency">{{ row.currency }}</span></span
+                    >
+                    } @else {
+                    <span class="missing">—</span>
+                    } } @case ('party') { @if (row.partyId) {
+                    <span class="fb-catalog-mono">{{ row.partyId }}</span>
+                    } @else {
+                    <span class="missing">—</span>
+                    } } @case ('scope') { @if (row.scopeId) {
+                    <span class="fb-catalog-mono">{{ row.scopeId }}</span>
+                    } @else {
+                    <span class="missing">—</span>
+                    } } @case ('email') { @if (row.email) {
+                    <span class="fb-catalog-mono">{{ row.email }}</span>
+                    } @else {
+                    <span class="missing">—</span>
+                    } } @case ('user') { @if (row.userId) {
+                    <span class="fb-catalog-mono muted">{{ row.userId }}</span>
+                    } @else {
+                    <span class="missing">—</span>
+                    } } @case ('method') { @if (row.method) {
+                    <span class="chip fb-catalog-mono">{{ row.method }}</span>
+                    } @else {
+                    <span class="missing">—</span>
+                    } } @case ('category') { @if (row.category) {
+                    <span class="fb-pill">{{ row.category }}</span>
+                    } @else {
+                    <span class="missing">—</span>
+                    } } @case ('code') { @if (row.code) {
+                    <span class="chip fb-catalog-mono">{{ row.code }}</span>
+                    } @else {
+                    <span class="missing">—</span>
+                    } } @case ('fraudType') { @if (row.fraudType) {
+                    <span class="fb-pill fb-pill-danger">{{ row.fraudType }}</span>
+                    } @else {
+                    <span class="missing">—</span>
+                    } } @case ('template') { @if (row.template && kind.templateLink) {
+                    <a class="fb-catalog-link fb-catalog-mono" [routerLink]="kind.templateLink(row.template)">{{
+                        row.template
+                    }}</a>
+                    } @else { @if (row.template) {
+                    <span class="fb-catalog-mono">{{ row.template }}</span>
+                    } @else {
+                    <span class="missing">—</span>
+                    } } } @case ('rule') { @if (row.rule) {
+                    <span class="chip fb-catalog-mono">{{ row.rule }}</span>
+                    } @else {
+                    <span class="missing">—</span>
+                    } } @default { — } }
+                </td>
+                }
+                <td class="fb-catalog-time">{{ (row.eventTime | date : 'yyyy-MM-dd HH:mm:ss') || '—' }}</td>
+                <td class="chevron">
+                    <button
+                        type="button"
+                        class="expand"
+                        [attr.aria-expanded]="expanded.has(row.key)"
+                        [attr.aria-label]="(expanded.has(row.key) ? 'Hide details of ' : 'Show details of ') + row.id"
+                        (click)="expand(row)"
+                    >
+                        <mat-icon>expand_more</mat-icon>
+                    </button>
+                </td>
+            </tr>
+            @if (expanded.has(row.key)) {
+            <tr class="fb-catalog-detail-row">
+                <td [attr.colspan]="columnCount">
+                    @if (row.details.length) {
+                    <dl class="fb-catalog-details">
+                        @for (item of row.details; track item) {
+                        <div class="detail">
+                            <dt>{{ item.label }}</dt>
+                            <dd [class.fb-catalog-mono]="item.mono">{{ item.value }}</dd>
+                        </div>
+                        }
+                    </dl>
+                    } @else {
+                    <p class="fb-catalog-no-details">No more details for this record.</p>
+                    }
+                </td>
+            </tr>
+            } }
+        </tbody>
+    </table>
+</div>

@@ -1,5 +1,5 @@
+@if (view$ | async; as view) {
 <fb-catalog-panel
-    *ngIf="view$ | async as view"
     label="Channels"
     searchLabel="Search channels by name"
     itemName="channels"
@@ -7,7 +7,8 @@
     [count]="view.rows.length"
     [busy]="view.busy"
 >
-    <div *ngIf="view.rows.length" class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Channels table">
+    @if (view.rows.length) {
+    <div class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Channels table">
         <table class="fb-catalog-table" aria-label="Channels">
             <thead>
                 <tr>
@@ -19,17 +20,22 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let channel of view.rows">
+                @for (channel of view.rows; track channel) {
+                <tr>
                     <th scope="row" class="name">{{ channel.name || '—' }}</th>
                     <td>
-                        <span *ngIf="channel.type; else missing" class="fb-pill fb-pill-status fb-pill-info">{{
-                            channel.type
-                        }}</span>
+                        @if (channel.type) {
+                        <span class="fb-pill fb-pill-status fb-pill-info">{{ channel.type }}</span>
+                        } @else {
+                        <span class="missing">—</span>
+                        }
                     </td>
                     <td>
-                        <span *ngIf="channel.destination; else missing" class="fb-catalog-mono">{{
-                            channel.destination
-                        }}</span>
+                        @if (channel.destination) {
+                        <span class="fb-catalog-mono">{{ channel.destination }}</span>
+                        } @else {
+                        <span class="missing">—</span>
+                        }
                     </td>
                     <td class="fb-catalog-time">{{ (channel.createdAt | date : 'yyyy-MM-dd HH:mm:ss') || '—' }}</td>
                     <td class="fb-catalog-action-cell">
@@ -51,22 +57,19 @@
                         </mat-menu>
                     </td>
                 </tr>
+                }
             </tbody>
         </table>
     </div>
-    <footer *ngIf="view.rows.length" class="table-footer">
+    } @if (view.rows.length) {
+    <footer class="table-footer">
         <span>Showing {{ view.rows.length }} {{ view.rows.length === 1 ? 'channel' : 'channels' }}</span>
-        <button
-            *ngIf="view.hasMore"
-            class="load-more"
-            mat-button
-            type="button"
-            [disabled]="view.busy"
-            (click)="fetchMore()"
-        >
+        @if (view.hasMore) {
+        <button class="load-more" mat-button type="button" [disabled]="view.busy" (click)="fetchMore()">
             Show more
         </button>
+        }
     </footer>
+    }
 </fb-catalog-panel>
-
-<ng-template #missing><span class="missing">—</span></ng-template>
+}

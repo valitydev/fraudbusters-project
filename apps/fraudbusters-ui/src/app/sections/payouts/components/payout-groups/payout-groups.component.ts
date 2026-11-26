@@ -14,6 +14,7 @@ import { PayoutsFeedbackService } from '../../services/payouts-feedback.service'
 @Component({
     templateUrl: 'payout-groups.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class PayoutGroupsComponent {
     readonly sortOptions = CATALOG_SORT_OPTIONS;

@@ -4,6 +4,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
     selector: 'fb-actions',
     templateUrl: 'actions.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class ActionsComponent {
     @Input()

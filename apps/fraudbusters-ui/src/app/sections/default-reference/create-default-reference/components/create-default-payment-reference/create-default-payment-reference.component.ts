@@ -9,6 +9,7 @@ import {
 
 @Component({
     template: '<fb-reference-form [config]="config"></fb-reference-form>',
+    standalone: false,
 })
 export class CreateDefaultPaymentReferenceComponent {
     readonly config: ReferenceFormConfig = {

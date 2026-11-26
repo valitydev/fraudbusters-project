@@ -4,8 +4,8 @@
             <h1 class="fb-page-title">Groups</h1>
             <p class="fb-page-subtitle">Set the order of payment rule templates and manage their bindings.</p>
         </div>
+        @if (activeTab; as tab) {
         <a
-            *ngIf="activeTab as tab"
             mat-stroked-button
             class="fb-primary-action"
             [routerLink]="tab.createUrl"
@@ -14,11 +14,12 @@
             <mat-icon>add</mat-icon>
             {{ tab.createLabel }}
         </a>
+        }
     </header>
     <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="fb-template-catalog-tabs" aria-label="Group sections">
+        @for (link of links; track link) {
         <a
             mat-tab-link
-            *ngFor="let link of links"
             [routerLink]="link.path"
             routerLinkActive
             #rla="routerLinkActive"
@@ -26,13 +27,12 @@
         >
             <span class="fb-template-tab-label">
                 {{ link.name }}
-                <ng-container *ngIf="counts$ | async as counts">
-                    <span *ngIf="counts[link.path] !== null" class="fb-template-tab-count">{{
-                        counts[link.path]
-                    }}</span>
-                </ng-container>
+                @if (counts$ | async; as counts) { @if (counts[link.path] !== null) {
+                <span class="fb-template-tab-count">{{ counts[link.path] }}</span>
+                } }
             </span>
         </a>
+        }
     </nav>
     <mat-tab-nav-panel #tabPanel>
         <router-outlet></router-outlet>

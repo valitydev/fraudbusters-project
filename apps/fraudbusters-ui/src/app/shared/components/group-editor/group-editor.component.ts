@@ -36,7 +36,6 @@ export interface GroupEditorConfig {
 
 @Component({
     selector: 'fb-group-editor',
-    standalone: true,
     imports: [
         CommonModule,
         ReactiveFormsModule,

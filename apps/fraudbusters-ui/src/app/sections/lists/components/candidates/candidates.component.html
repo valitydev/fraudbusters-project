@@ -1,108 +1,109 @@
-<ng-container *ngIf="view$ | async as view">
-    <p class="candidates-hint">
-        <mat-icon aria-hidden="true">info_outline</mat-icon>
-        <span>
-            Candidate records are flagged automatically by chargeback and velocity checks. Open a batch to review its
-            records and add confirmed ones to the <strong>Black</strong>, <strong>White</strong> or
-            <strong>Grey</strong> list.
-        </span>
-    </p>
-    <fb-catalog-panel
-        label="Candidate batches"
-        searchLabel="Search batches"
-        itemName="batches"
-        [summaryInFooter]="true"
-        [count]="view.rows.length"
-        [visible]="view.rows.length"
-        [busy]="view.busy"
-        [failed]="view.failed"
-        [sort]="(sort$ | async) ?? ''"
-        [sortOptions]="sortOptions"
-        (sortChange)="setSort($any($event))"
-        (retry)="reload()"
-    >
-        <div
-            *ngIf="view.rows.length"
-            class="fb-catalog-scroll"
-            tabindex="0"
-            role="region"
-            aria-label="Candidate batches table"
-        >
-            <table class="fb-catalog-table" aria-label="Candidate batches">
-                <colgroup>
-                    <col class="source-column" />
-                    <col class="id-column" />
-                    <col class="size-column" />
-                    <col />
-                    <col class="fb-catalog-date-column" />
-                    <col class="actions-column" />
-                </colgroup>
-                <thead>
-                    <tr>
-                        <th scope="col">Source</th>
-                        <th scope="col">Batch ID</th>
-                        <th scope="col" class="numeric">Size</th>
-                        <th scope="col">Fields</th>
-                        <th scope="col">Created at</th>
-                        <th scope="col"><span class="cdk-visually-hidden">Actions</span></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let batch of view.rows">
-                        <th scope="row">
-                            <span class="source">
-                                <mat-icon aria-hidden="true">inventory_2</mat-icon>{{ batch.source }}
-                            </span>
-                        </th>
-                        <td>
-                            <span class="batch-id">
-                                <span class="batch-name fb-catalog-mono" [attr.title]="batch.id || null">{{
-                                    batch.id || '—'
-                                }}</span>
-                                <button
-                                    *ngIf="batch.id"
-                                    class="copy-id"
-                                    type="button"
-                                    title="Copy batch ID"
-                                    [attr.aria-label]="'Copy batch ID ' + batch.id"
-                                    (click)="copyId(batch.id)"
-                                >
-                                    <mat-icon>content_copy</mat-icon>
-                                </button>
-                            </span>
-                        </td>
-                        <td class="numeric">{{ batch.size }}</td>
-                        <td>
-                            <span class="fields">
-                                <span *ngFor="let field of batch.fields" class="fb-pill field fb-catalog-mono">{{
-                                    field
-                                }}</span>
-                                <span *ngIf="!batch.fields.length" class="missing">No fields</span>
-                            </span>
-                        </td>
-                        <td class="fb-catalog-time">
-                            {{ (batch.createdAt | date : 'yyyy-MM-dd HH:mm:ss' : 'UTC') || '—' }}
-                        </td>
-                        <td class="fb-catalog-action-cell">
-                            <a
-                                *ngIf="batch.id && batch.size > 0"
-                                mat-stroked-button
-                                class="fb-primary-action"
-                                [routerLink]="['/candidates', batch.id]"
-                                [queryParams]="{ returnUrl: returnUrl }"
+@if (view$ | async; as view) {
+<p class="candidates-hint">
+    <mat-icon aria-hidden="true">info_outline</mat-icon>
+    <span>
+        Candidate records are flagged automatically by chargeback and velocity checks. Open a batch to review its
+        records and add confirmed ones to the <strong>Black</strong>, <strong>White</strong> or
+        <strong>Grey</strong> list.
+    </span>
+</p>
+<fb-catalog-panel
+    label="Candidate batches"
+    searchLabel="Search batches"
+    itemName="batches"
+    [summaryInFooter]="true"
+    [count]="view.rows.length"
+    [visible]="view.rows.length"
+    [busy]="view.busy"
+    [failed]="view.failed"
+    [sort]="(sort$ | async) ?? ''"
+    [sortOptions]="sortOptions"
+    (sortChange)="setSort($any($event))"
+    (retry)="reload()"
+>
+    @if (view.rows.length) {
+    <div class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Candidate batches table">
+        <table class="fb-catalog-table" aria-label="Candidate batches">
+            <colgroup>
+                <col class="source-column" />
+                <col class="id-column" />
+                <col class="size-column" />
+                <col />
+                <col class="fb-catalog-date-column" />
+                <col class="actions-column" />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th scope="col">Source</th>
+                    <th scope="col">Batch ID</th>
+                    <th scope="col" class="numeric">Size</th>
+                    <th scope="col">Fields</th>
+                    <th scope="col">Created at</th>
+                    <th scope="col"><span class="cdk-visually-hidden">Actions</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (batch of view.rows; track batch) {
+                <tr>
+                    <th scope="row">
+                        <span class="source">
+                            <mat-icon aria-hidden="true">inventory_2</mat-icon>{{ batch.source }}
+                        </span>
+                    </th>
+                    <td>
+                        <span class="batch-id">
+                            <span class="batch-name fb-catalog-mono" [attr.title]="batch.id || null">{{
+                                batch.id || '—'
+                            }}</span>
+                            @if (batch.id) {
+                            <button
+                                class="copy-id"
+                                type="button"
+                                title="Copy batch ID"
+                                [attr.aria-label]="'Copy batch ID ' + batch.id"
+                                (click)="copyId(batch.id)"
                             >
-                                View and approve
-                            </a>
-                            <span *ngIf="batch.size === 0" class="missing" title="Batch has no records to review">
-                                Empty
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <p *ngIf="view.truncated" class="truncated">
-            Showing the latest {{ view.rows.length }} batches. Search by batch ID or source to find older ones.
-        </p>
-    </fb-catalog-panel>
-</ng-container>
+                                <mat-icon>content_copy</mat-icon>
+                            </button>
+                            }
+                        </span>
+                    </td>
+                    <td class="numeric">{{ batch.size }}</td>
+                    <td>
+                        <span class="fields">
+                            @for (field of batch.fields; track field) {
+                            <span class="fb-pill field fb-catalog-mono">{{ field }}</span>
+                            } @if (!batch.fields.length) {
+                            <span class="missing">No fields</span>
+                            }
+                        </span>
+                    </td>
+                    <td class="fb-catalog-time">
+                        {{ (batch.createdAt | date : 'yyyy-MM-dd HH:mm:ss' : 'UTC') || '—' }}
+                    </td>
+                    <td class="fb-catalog-action-cell">
+                        @if (batch.id && batch.size > 0) {
+                        <a
+                            mat-stroked-button
+                            class="fb-primary-action"
+                            [routerLink]="['/candidates', batch.id]"
+                            [queryParams]="{ returnUrl: returnUrl }"
+                        >
+                            View and approve
+                        </a>
+                        } @if (batch.size === 0) {
+                        <span class="missing" title="Batch has no records to review"> Empty </span>
+                        }
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    } @if (view.truncated) {
+    <p class="truncated">
+        Showing the latest {{ view.rows.length }} batches. Search by batch ID or source to find older ones.
+    </p>
+    }
+</fb-catalog-panel>
+}

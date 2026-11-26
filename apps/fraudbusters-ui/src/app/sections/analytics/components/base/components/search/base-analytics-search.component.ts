@@ -19,9 +19,12 @@ import { BaseAnalyticsService } from '../../services/base-analytics.service';
     selector: 'fb-base-analytics-search',
     templateUrl: 'base-analytics-search.component.html',
     styleUrls: ['./base-analytics-search.component.scss'],
+    standalone: false,
 })
 export class BaseAnalyticsSearchComponent implements OnInit {
     @Input() breakdownFiltered = false;
+    /** Analytics are loading: a bar runs along the bottom edge of the filters, as on the catalog panels. */
+    @Input() busy = false;
     @Output() readonly filtersReset = new EventEmitter<void>();
 
     readonly periods = ANALYTICS_PERIODS;

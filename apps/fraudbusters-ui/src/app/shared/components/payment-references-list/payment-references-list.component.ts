@@ -7,6 +7,7 @@ import { ReferenceRow } from '../reference-table/reference-table.component';
     selector: 'fb-payment-references-list',
     templateUrl: 'payment-references-list.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class PaymentReferencesListComponent {
     rows: ReferenceRow<PaymentReference>[] = [];

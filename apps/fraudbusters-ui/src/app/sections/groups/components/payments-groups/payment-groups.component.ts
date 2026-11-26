@@ -3,11 +3,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, combineLatest } from 'rxjs';
-import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 
 import { GroupListRow, groupListRow } from '../../../../shared/components/groups-table/group-list-row';
 import { GroupTabCounts } from '../../../../shared/components/groups-table/group-tab-counts';
 import { CATALOG_SORT_OPTIONS, CatalogSort, compareCatalogRows } from '../../../../shared/utils/catalog';
+import { catalogSearchQuery } from '../../../../shared/utils/catalog-collection';
 import { FetchGroupsService } from '../../services/fetch-groups.service';
 import { RemoveGroupService } from '../../services/remove-group.service';
 
@@ -15,6 +16,7 @@ import { RemoveGroupService } from '../../services/remove-group.service';
     templateUrl: './payment-groups.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [FetchGroupsService, RemoveGroupService],
+    standalone: false,
 })
 export class PaymentGroupsComponent {
     readonly sortOptions = CATALOG_SORT_OPTIONS.map((option) => ({
@@ -47,12 +49,8 @@ export class PaymentGroupsComponent {
         private tabCounts: GroupTabCounts
     ) {
         const destroyRef = inject(DestroyRef);
-        route.queryParamMap
-            .pipe(
-                map((params) => (params.get('searchQuery') ?? '').trim()),
-                distinctUntilChanged(),
-                takeUntilDestroyed(destroyRef)
-            )
+        catalogSearchQuery(route)
+            .pipe(takeUntilDestroyed(destroyRef))
             .subscribe((query) => {
                 this.searchValue = query;
                 this.fetchGroupsService.search({ searchValue: query });

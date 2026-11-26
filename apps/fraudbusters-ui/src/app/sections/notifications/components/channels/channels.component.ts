@@ -2,9 +2,9 @@ import { ChangeDetectionStrategy, Component, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import { Channel } from '../../../../api/fb-management/swagger-codegen/model/channel';
+import { catalogSearchQuery } from '../../../../shared/utils/catalog-collection';
 import { FetchChannelsService } from '../../services/fetch-channels.service';
 import { RemoveChannelsService } from '../../services/remove-channels.service';
 
@@ -14,6 +14,7 @@ import { RemoveChannelsService } from '../../services/remove-channels.service';
     styleUrls: ['../notifications-table.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [FetchChannelsService, RemoveChannelsService],
+    standalone: false,
 })
 export class ChannelsComponent {
     readonly view$ = combineLatest({
@@ -31,12 +32,8 @@ export class ChannelsComponent {
         private removeChannelsService: RemoveChannelsService,
         destroyRef: DestroyRef
     ) {
-        route.queryParamMap
-            .pipe(
-                map((params) => (params.get('searchQuery') ?? '').trim()),
-                distinctUntilChanged(),
-                takeUntilDestroyed(destroyRef)
-            )
+        catalogSearchQuery(route)
+            .pipe(takeUntilDestroyed(destroyRef))
             .subscribe((query) => {
                 this.searchValue = query;
                 this.fetchChannelsService.search({ searchValue: query });

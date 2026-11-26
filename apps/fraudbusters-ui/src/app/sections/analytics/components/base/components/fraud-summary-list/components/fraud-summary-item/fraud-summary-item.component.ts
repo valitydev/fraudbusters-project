@@ -9,6 +9,7 @@ import { statusPillClass } from '../../../../../../../../shared/utils/status-ton
     templateUrl: 'fraud-summary-item.component.html',
     styleUrls: ['fraud-summary-item.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class FraudSummaryItemComponent {
     @Input()

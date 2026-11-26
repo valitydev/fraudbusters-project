@@ -22,19 +22,15 @@
         </div>
     </header>
 
-    <div *ngIf="loading" class="reference-card state" role="status">Loading channel…</div>
-    <div *ngIf="loadFailed" class="reference-card state" role="alert">
+    @if (loading) {
+    <div class="reference-card state fb-delayed-loader" role="status">Loading channel…</div>
+    } @if (loadFailed) {
+    <div class="reference-card state" role="alert">
         Could not load the channel.
         <button mat-stroked-button type="button" (click)="retry.emit()">Retry</button>
     </div>
-
-    <form
-        *ngIf="!loading && !loadFailed"
-        class="reference-card"
-        [formGroup]="form"
-        [attr.aria-busy]="saving"
-        (ngSubmit)="saveChannel()"
-    >
+    } @if (!loading && !loadFailed) {
+    <form class="reference-card" [formGroup]="form" [attr.aria-busy]="saving" (ngSubmit)="saveChannel()">
         <section class="reference-entry" aria-labelledby="channel-details-title">
             <div class="entry-header">
                 <h2 class="fb-section-title" id="channel-details-title">Channel details</h2>
@@ -43,7 +39,9 @@
             <div class="fields">
                 <div class="field">
                     <label for="channel-name"
-                        >Name <span *ngIf="!editing" class="required" aria-hidden="true">*</span></label
+                        >Name @if (!editing) {
+                        <span class="required" aria-hidden="true">*</span>
+                        }</label
                     >
                     <input
                         class="fb-form-control fb-control-mono"
@@ -71,7 +69,9 @@
                         aria-describedby="channel-type-hint"
                         required
                     >
-                        <mat-option *ngFor="let type of channelTypes" [value]="type">{{ type }}</mat-option>
+                        @for (type of channelTypes; track type) {
+                        <mat-option [value]="type">{{ type }}</mat-option>
+                        }
                     </mat-select>
                     <p id="channel-type-hint">How reports are delivered.</p>
                 </div>
@@ -93,21 +93,23 @@
                 </div>
             </div>
         </section>
-
-        <mat-progress-bar *ngIf="saving" mode="indeterminate" aria-label="Saving channel"></mat-progress-bar>
+        @if (saving) {
+        <mat-progress-bar mode="indeterminate" aria-label="Saving channel"></mat-progress-bar>
+        }
         <footer class="page-footer">
-            <p *ngIf="error; else status" class="error" role="alert">{{ error }}</p>
-            <ng-template #status>
-                <p aria-live="polite">
-                    {{
-                        form.invalid
-                            ? 'Fill in all required fields to enable ' + (editing ? 'Save' : 'Create') + '.'
-                            : editing
-                            ? 'Changes are ready to save.'
-                            : 'The channel is ready to create.'
-                    }}
-                </p>
-            </ng-template>
+            @if (error) {
+            <p class="error" role="alert">{{ error }}</p>
+            } @else {
+            <p aria-live="polite">
+                {{
+                    form.invalid
+                        ? 'Fill in all required fields to enable ' + (editing ? 'Save' : 'Create') + '.'
+                        : editing
+                        ? 'Changes are ready to save.'
+                        : 'The channel is ready to create.'
+                }}
+            </p>
+            }
             <div class="footer-actions">
                 <button mat-stroked-button type="button" [disabled]="saving" (click)="back()">Cancel</button>
                 <button
@@ -122,4 +124,5 @@
             </div>
         </footer>
     </form>
+    }
 </div>

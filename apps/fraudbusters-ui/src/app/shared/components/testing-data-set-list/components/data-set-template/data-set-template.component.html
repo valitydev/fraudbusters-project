@@ -39,9 +39,7 @@
             Test
         </button>
     </footer>
-    <mat-progress-bar
-        *ngIf="inProgress$ | async"
-        mode="indeterminate"
-        aria-label="Running test or validation"
-    ></mat-progress-bar>
+    @if (inProgress$ | async) {
+    <mat-progress-bar mode="indeterminate" aria-label="Running test or validation"></mat-progress-bar>
+    }
 </form>

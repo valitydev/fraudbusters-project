@@ -2,13 +2,14 @@
     <code>{{ group.groupId }}</code>
 </th>
 <td>
-    <div class="group-preview" *ngIf="group.priorityTemplates?.length; else empty">
+    @if (group.priorityTemplates?.length) {
+    <div class="group-preview">
         <code>{{ group.priorityTemplates[0].id }}</code>
-        <span *ngIf="group.priorityTemplates.length > 1" class="fb-pill more-templates">
-            +{{ group.priorityTemplates.length - 1 }} more
-        </span>
+        @if (group.priorityTemplates.length > 1) {
+        <span class="fb-pill more-templates"> +{{ group.priorityTemplates.length - 1 }} more </span>
+        }
     </div>
-    <ng-template #empty>—</ng-template>
+    } @else { — }
 </td>
 <td class="fb-catalog-time">
     {{ (group.lastUpdate | date : 'yyyy-MM-dd HH:mm:ss' : 'UTC') || '—' }}

@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import { startWith } from 'rxjs/operators';
 
 import { PaymentReference } from '../../../../api/fb-management/swagger-codegen/model/paymentReference';
 import { OperationType } from '../../../../shared/constants/operation-type';
 import { SortOrder } from '../../../../shared/constants/sort-order';
+import { catalogSearchQuery } from '../../../../shared/utils/catalog-collection';
 import { FetchReferencesService } from '../../services/fetch-references.service';
 import { RemoveReferenceService } from '../../services/remove-reference.service';
 
@@ -13,6 +14,7 @@ import { RemoveReferenceService } from '../../services/remove-reference.service'
     templateUrl: 'payment-references.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [FetchReferencesService, RemoveReferenceService],
+    standalone: false,
 })
 export class PaymentReferencesComponent {
     references$ = this.fetchReferencesService.fetchResultChanges$.pipe(
@@ -38,12 +40,8 @@ export class PaymentReferencesComponent {
         private removeReferenceService: RemoveReferenceService
     ) {
         const destroyRef = inject(DestroyRef);
-        route.queryParamMap
-            .pipe(
-                map((params) => (params.get('searchQuery') ?? '').trim()),
-                distinctUntilChanged(),
-                takeUntilDestroyed(destroyRef)
-            )
+        catalogSearchQuery(route)
+            .pipe(takeUntilDestroyed(destroyRef))
             .subscribe((query) => {
                 this.searchValue = query;
                 this.search();

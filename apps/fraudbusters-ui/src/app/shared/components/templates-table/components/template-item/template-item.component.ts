@@ -9,6 +9,7 @@ import { Template } from '../../../../../api/fb-management/swagger-codegen/model
     templateUrl: 'template-item.component.html',
     styleUrls: ['template-item.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class TemplateItemComponent {
     @Input()

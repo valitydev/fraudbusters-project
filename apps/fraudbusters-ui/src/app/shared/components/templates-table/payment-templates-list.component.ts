@@ -1,14 +1,14 @@
-import { Clipboard } from '@angular/cdk/clipboard';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { Template } from '../../../api/fb-management/swagger-codegen/model/template';
+import { CopyToClipboardService } from '../../services/copy-to-clipboard.service';
 
 @Component({
     selector: 'fb-payment-templates-list',
     templateUrl: 'payment-templates-list.component.html',
     styleUrls: ['payment-templates-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class PaymentTemplatesListComponent {
     @Input() label = 'Payment templates';
@@ -26,7 +26,7 @@ export class PaymentTemplatesListComponent {
 
     expandedId?: string;
 
-    constructor(private clipboard: Clipboard, private snackBar: MatSnackBar) {}
+    constructor(private copier: CopyToClipboardService) {}
 
     @Input()
     set templates(templates: Template[]) {
@@ -38,8 +38,7 @@ export class PaymentTemplatesListComponent {
     }
 
     copyRule(source: string): void {
-        const copied = this.clipboard.copy(source);
-        this.snackBar.open(copied ? 'Rule copied' : 'Could not copy rule', 'OK', { duration: 2500 });
+        this.copier.copy(source, 'Rule');
     }
 
     byId(_index: number, template: Template): string {

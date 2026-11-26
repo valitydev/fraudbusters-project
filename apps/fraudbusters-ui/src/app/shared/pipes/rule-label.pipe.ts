@@ -19,6 +19,7 @@ export function ruleLabel(checkedRule: string | null | undefined): string {
 
 @Pipe({
     name: 'unnamedRuleIndex',
+    standalone: false,
 })
 export class UnnamedRuleIndexPipe implements PipeTransform {
     transform(checkedRule: string | null | undefined): string | null {
@@ -28,6 +29,7 @@ export class UnnamedRuleIndexPipe implements PipeTransform {
 
 @Pipe({
     name: 'ruleLabel',
+    standalone: false,
 })
 export class RuleLabelPipe implements PipeTransform {
     transform(checkedRule: string | null | undefined): string {

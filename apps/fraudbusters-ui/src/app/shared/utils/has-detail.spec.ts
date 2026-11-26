@@ -1,4 +1,4 @@
-import { hasDetail } from './has-detail.pipe';
+import { hasDetail } from './has-detail';
 
 describe('hasDetail', () => {
     it('hides empty, blank and placeholder values', () => {

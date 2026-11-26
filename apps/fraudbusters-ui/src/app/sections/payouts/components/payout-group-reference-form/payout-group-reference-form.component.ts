@@ -10,6 +10,7 @@ import { PayoutsFeedbackService } from '../../services/payouts-feedback.service'
 /** Binds payout template groups to a party or wallet; without a party the group applies to every payout. */
 @Component({
     template: '<fb-reference-form [config]="config"></fb-reference-form>',
+    standalone: false,
 })
 export class PayoutGroupReferenceFormComponent {
     readonly config: ReferenceFormConfig = {

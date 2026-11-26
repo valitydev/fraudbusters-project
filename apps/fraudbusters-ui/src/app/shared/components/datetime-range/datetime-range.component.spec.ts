@@ -72,4 +72,18 @@ describe('DateTimeRangeComponent', () => {
         component.setTime('minutes', 99);
         expect(component.value('minutes')).toBe(59);
     });
+    it('closes on a click outside without swallowing it, but not on its own fields', () => {
+        const { component } = create();
+        const triggers = document.createElement('div');
+        const field = document.createElement('button');
+        triggers.appendChild(field);
+        const menuItem = document.createElement('a');
+
+        component.toggle('from');
+        component.outsideClick({ target: field } as unknown as MouseEvent, triggers);
+        expect(component.open).toBeTrue();
+
+        component.outsideClick({ target: menuItem } as unknown as MouseEvent, triggers);
+        expect(component.open).toBeFalse();
+    });
 });

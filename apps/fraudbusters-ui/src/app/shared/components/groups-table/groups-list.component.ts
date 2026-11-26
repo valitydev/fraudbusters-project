@@ -7,6 +7,7 @@ import { GroupListRow } from './group-list-row';
     templateUrl: 'groups-list.component.html',
     styleUrls: ['groups-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class GroupsListComponent {
     @Input() label = 'Payment groups';

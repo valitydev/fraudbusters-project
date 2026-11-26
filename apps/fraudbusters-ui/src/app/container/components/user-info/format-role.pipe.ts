@@ -2,6 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
     name: 'formatRole',
+    standalone: false,
 })
 export class FormatRolePipe implements PipeTransform {
     transform(role: string): string {

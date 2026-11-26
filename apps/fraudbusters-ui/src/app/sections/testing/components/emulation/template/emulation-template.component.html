@@ -1,4 +1,5 @@
-<section *ngIf="view$ | async as view" class="fb-catalog-panel" aria-label="Emulation" [attr.aria-busy]="view.busy">
+@if (view$ | async; as view) {
+<section class="fb-catalog-panel" aria-label="Emulation" [attr.aria-busy]="view.busy">
     <form class="table-toolbar" (ngSubmit)="emulate()">
         <div class="table-filters fb-filter-fields">
             <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
@@ -12,14 +13,10 @@
         </div>
         <button mat-stroked-button type="submit" class="fb-primary-action" [disabled]="view.busy">Emulate</button>
     </form>
-    <mat-progress-bar *ngIf="view.busy" mode="indeterminate" aria-label="Running emulation"></mat-progress-bar>
-    <div
-        *ngIf="view.templates?.length"
-        class="fb-catalog-scroll"
-        tabindex="0"
-        role="region"
-        aria-label="Emulation results"
-    >
+    @if (view.busy) {
+    <mat-progress-bar mode="indeterminate" aria-label="Running emulation"></mat-progress-bar>
+    } @if (view.templates?.length) {
+    <div class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Emulation results">
         <table class="fb-catalog-table" aria-label="Matched templates">
             <colgroup>
                 <col class="template-id-column" />
@@ -32,21 +29,30 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let template of view.templates">
+                @for (template of view.templates; track template) {
+                <tr>
                     <th scope="row" class="fb-catalog-row-label">
                         <code>{{ template.id }}</code>
                     </th>
                     <td class="fb-template-rules-code">
-                        <code *ngFor="let rule of template.template | templateToRules"
-                            ><span *ngFor="let token of rule | fraudoTokens" [class]="'fb-code-' + token.kind">{{
-                                token.text
-                            }}</span></code
+                        @for (rule of template.template | templateToRules; track rule) {
+                        <code
+                            >@for (token of rule | fraudoTokens; track $index) {<span
+                                [class]="'fb-code-' + token.kind"
+                                >{{ token.text }}</span
+                            >}</code
                         >
+                        }
                     </td>
                 </tr>
+                }
             </tbody>
         </table>
     </div>
-    <p *ngIf="view.failed" class="table-state" role="alert">Could not run emulation.</p>
-    <p *ngIf="view.templates?.length === 0" class="table-state">No matching templates found.</p>
+    } @if (view.failed) {
+    <p class="table-state" role="alert">Could not run emulation.</p>
+    } @if (view.templates?.length === 0) {
+    <p class="table-state">No matching templates found.</p>
+    }
 </section>
+}

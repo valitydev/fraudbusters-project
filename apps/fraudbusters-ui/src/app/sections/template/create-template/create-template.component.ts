@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     templateUrl: './create-template.component.html',
     styleUrls: ['./create-template.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class CreateTemplateComponent {
     constructor(private router: Router, private route: ActivatedRoute) {}

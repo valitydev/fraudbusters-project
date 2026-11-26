@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
 const ROUTES: Routes = [
     {
@@ -94,7 +94,10 @@ const ROUTES: Routes = [
 ];
 
 @NgModule({
-    imports: [RouterModule.forRoot(ROUTES, { paramsInheritanceStrategy: 'always' })],
+    // Sections load in the background after start, so the first click on a menu item navigates at once.
+    imports: [
+        RouterModule.forRoot(ROUTES, { paramsInheritanceStrategy: 'always', preloadingStrategy: PreloadAllModules }),
+    ],
     exports: [RouterModule],
 })
 export class SectionsRoutingModule {}

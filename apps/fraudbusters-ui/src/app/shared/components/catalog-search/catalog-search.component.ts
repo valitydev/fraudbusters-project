@@ -1,4 +1,3 @@
-import { NgIf } from '@angular/common';
 import { Component, DestroyRef, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -7,8 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime } from 'rxjs/operators';
 
 @Component({
-    standalone: true,
-    imports: [NgIf, MatIconModule, ReactiveFormsModule],
+    imports: [MatIconModule, ReactiveFormsModule],
     selector: 'fb-catalog-search',
     templateUrl: 'catalog-search.component.html',
     styleUrls: ['catalog-search.component.scss'],

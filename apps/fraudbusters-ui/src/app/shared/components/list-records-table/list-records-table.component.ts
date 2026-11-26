@@ -1,28 +1,17 @@
-import { Clipboard } from '@angular/cdk/clipboard';
-import { DatePipe, NgClass, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { listNamePill, ListRecordRow, ListRecordWindow, windowStatus } from './list-record-row';
+import { CopyToClipboardService } from '../../services/copy-to-clipboard.service';
 
 /** Black/white/grey list records; grey lists add the match limit and its time window. */
 @Component({
     selector: 'fb-list-records-table',
-    standalone: true,
-    imports: [
-        DatePipe,
-        NgClass,
-        NgFor,
-        NgIf,
-        NgTemplateOutlet,
-        MatButtonModule,
-        MatIconModule,
-        MatMenuModule,
-        MatSnackBarModule,
-    ],
+    imports: [DatePipe, NgClass, MatButtonModule, MatIconModule, MatMenuModule, MatSnackBarModule],
     templateUrl: 'list-records-table.component.html',
     styleUrls: ['list-records-table.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,7 +26,7 @@ export class ListRecordsTableComponent<T> {
 
     @Output() readonly remove = new EventEmitter<T>();
 
-    constructor(private clipboard: Clipboard, private snackBar: MatSnackBar) {}
+    constructor(private copier: CopyToClipboardService) {}
 
     namePill(name?: string): string {
         return listNamePill(name);
@@ -55,7 +44,6 @@ export class ListRecordsTableComponent<T> {
     }
 
     copy(value: string, label: string): void {
-        const copied = this.clipboard.copy(value);
-        this.snackBar.open(copied ? label + ' copied' : 'Could not copy ' + label, 'OK', { duration: 2500 });
+        this.copier.copy(value, label);
     }
 }

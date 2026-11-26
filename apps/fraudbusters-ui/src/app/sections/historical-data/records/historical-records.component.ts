@@ -1,4 +1,4 @@
-import { DatePipe, LowerCasePipe, NgFor, NgIf } from '@angular/common';
+import { DatePipe, LowerCasePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
     AfterViewInit,
@@ -31,8 +31,6 @@ import {
     HistoricalKind,
     HistoricalPage,
 } from './historical-kinds';
-import { HistoricalRow } from './historical-row';
-import { HistoricalTableComponent } from './historical-table.component';
 import { Chargeback } from '../../../api/fb-management/swagger-codegen/model/chargeback';
 import { Payment } from '../../../api/fb-management/swagger-codegen/model/payment';
 import { DataSetService } from '../../../api/payments/data-set';
@@ -45,6 +43,8 @@ import {
     ConfirmActionDialogComponent,
     ConfirmActionDialogModule,
 } from '../../../shared/components/confirm-action-dialog';
+import { HistoricalRow } from '../../../shared/components/historical-table/historical-row';
+import { HistoricalTableComponent } from '../../../shared/components/historical-table/historical-table.component';
 import { SortOrder } from '../../../shared/constants/sort-order';
 
 interface LoadRequest {
@@ -55,11 +55,8 @@ interface LoadRequest {
 
 /** One historical tab: filters, the records table with paging, selection actions and CSV export. */
 @Component({
-    standalone: true,
     imports: [
         LowerCasePipe,
-        NgFor,
-        NgIf,
         RouterLink,
         MatButtonModule,
         MatDialogModule,

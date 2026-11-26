@@ -2,10 +2,19 @@
 
 .filter-card {
     @include primitives.panel;
+    position: relative;
     display: grid;
     gap: 16px;
     min-width: 0;
     padding: 16px 20px;
+}
+
+// Flush with the bottom edge inside the border, clipped to the panel corners.
+.filter-progress {
+    position: absolute;
+    inset: auto 0 0;
+    overflow: hidden;
+    border-radius: 0 0 calc(var(--fb-radius-panel) - 1px) calc(var(--fb-radius-panel) - 1px);
 }
 
 .period-row {
@@ -58,8 +67,8 @@
 }
 
 .filter-card button {
-    --mdc-outlined-button-container-shape: var(--fb-radius-control);
-    --mdc-outlined-button-outline-color: var(--fb-line);
+    --mat-button-outlined-container-shape: var(--fb-radius-control);
+    --mat-button-outlined-outline-color: var(--fb-line);
     height: var(--fb-filter-height);
     padding-inline: 12px;
     letter-spacing: normal;

@@ -7,6 +7,7 @@ import { PayoutsFeedbackService } from '../../services/payouts-feedback.service'
 
 @Component({
     template: '<fb-reference-form [config]="config"></fb-reference-form>',
+    standalone: false,
 })
 export class PayoutReferenceFormComponent {
     readonly config: ReferenceFormConfig = {

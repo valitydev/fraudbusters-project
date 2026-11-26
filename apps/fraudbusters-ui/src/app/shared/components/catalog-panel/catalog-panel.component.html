@@ -5,49 +5,56 @@
             <fb-catalog-search [label]="searchLabel" [queryParam]="searchParam"></fb-catalog-search>
         </div>
         <div class="table-controls">
-            <ng-container *ngIf="!summaryInFooter" [ngTemplateOutlet]="summary"></ng-container>
-            <label *ngIf="count > 1 && sortOptions.length" class="sort-control">
+            @if (!summaryInFooter) {
+            <ng-container [ngTemplateOutlet]="summary"></ng-container>
+            } @if (count > 1 && sortOptions.length) {
+            <label class="sort-control">
                 Sort by
                 <span class="catalog-select">
                     <mat-select [value]="sort" (valueChange)="sortChange.emit($event)" aria-label="Sort by">
-                        <mat-option *ngFor="let option of sortOptions" [value]="option.value">
+                        @for (option of sortOptions; track option) {
+                        <mat-option [value]="option.value">
                             {{ option.label }}
                         </mat-option>
+                        }
                     </mat-select>
                 </span>
             </label>
+            }
         </div>
     </div>
     <ng-content></ng-content>
-    <footer *ngIf="summaryInFooter && visible && !failed" class="table-footer">
+    @if (summaryInFooter && visible && !failed) {
+    <footer class="table-footer">
         <ng-container *ngTemplateOutlet="summary"></ng-container>
         <ng-container *ngTemplateOutlet="loadMore"></ng-container>
     </footer>
-    <ng-container *ngIf="!summaryInFooter" [ngTemplateOutlet]="loadMore"></ng-container>
-    <mat-progress-bar *ngIf="busy" mode="indeterminate" [attr.aria-label]="'Loading ' + itemName"></mat-progress-bar>
-    <div *ngIf="failed" class="table-state" role="alert">
+    } @if (!summaryInFooter) {
+    <ng-container [ngTemplateOutlet]="loadMore"></ng-container>
+    } @if (busy) {
+    <mat-progress-bar mode="indeterminate" [attr.aria-label]="'Loading ' + itemName"></mat-progress-bar>
+    } @if (failed) {
+    <div class="table-state" role="alert">
         Could not load {{ itemName }}.
         <button mat-button type="button" (click)="retry.emit()">Retry</button>
     </div>
-    <p *ngIf="!busy && !failed && !count" class="table-state">No {{ itemName }} found</p>
+    } @if (!busy && !failed && !count) {
+    <p class="table-state">No {{ itemName }} found</p>
+    }
 </section>
 
 <ng-template #summary>
-    <span *ngIf="!paginated && (!busy || summaryInFooter) && !failed" aria-live="polite">
-        Showing {{ visible }}<ng-container *ngIf="continuationAvailable === undefined"> of {{ count }}</ng-container>
+    @if (!paginated && (!busy || summaryInFooter) && !failed) {
+    <span aria-live="polite">
+        Showing {{ visible }}@if (continuationAvailable === undefined) { of {{ count }}
+        }
         {{ (continuationAvailable === undefined ? count : visible) === 1 ? singularItemName ?? itemName : itemName }}
-        <ng-container *ngIf="(total ?? null) !== null && total !== count">({{ total }} total)</ng-container>
+        @if ((total ?? null) !== null && total !== count) { ({{ total }} total) }
     </span>
+    }
 </ng-template>
 <ng-template #loadMore>
-    <button
-        *ngIf="!paginated && (continuationAvailable ?? visible < count) && !failed"
-        class="load-more"
-        mat-button
-        type="button"
-        [disabled]="busy"
-        (click)="more.emit()"
-    >
-        Show more
-    </button>
+    @if (!paginated && (continuationAvailable ?? visible < count) && !failed) {
+    <button class="load-more" mat-button type="button" [disabled]="busy" (click)="more.emit()">Show more</button>
+    }
 </ng-template>

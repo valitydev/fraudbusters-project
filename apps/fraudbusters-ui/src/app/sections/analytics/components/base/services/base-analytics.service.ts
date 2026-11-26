@@ -35,6 +35,8 @@ export class BaseAnalyticsService {
     private readonly parameters$ = new ReplaySubject<SearchBaseAnalyticsParams>(1);
 
     private lastParameters?: SearchBaseAnalyticsParams;
+    /** Shown, dimmed, while the next selection loads, so the page does not collapse. */
+    private lastData?: AnalyticsData;
 
     constructor(private analyticsService: AnalyticsService) {
         this.state$ = this.parameters$.pipe(
@@ -65,21 +67,20 @@ export class BaseAnalyticsService {
                             result.previousAttempted > 0
                                 ? (result.attempted - result.previousAttempted) / result.previousAttempted
                                 : null;
-                        return {
-                            data: {
-                                ...result,
-                                chart,
-                                attemptedChange,
-                                ratio,
-                                currency: params.currency,
-                                parameters: params,
-                                summaries,
-                                declineCount,
-                                topDeclines,
-                            },
+                        this.lastData = {
+                            ...result,
+                            chart,
+                            attemptedChange,
+                            ratio,
+                            currency: params.currency,
+                            parameters: params,
+                            summaries,
+                            declineCount,
+                            topDeclines,
                         };
+                        return { data: this.lastData };
                     }),
-                    startWith({ loading: true } as const),
+                    startWith<AnalyticsState>({ loading: true, data: this.lastData }),
                     catchError(() => of({ error: true } as const))
                 )
             ),

@@ -13,6 +13,7 @@ import { PayoutsFeedbackService } from '../../services/payouts-feedback.service'
 @Component({
     templateUrl: 'payout-template-form.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class PayoutTemplateFormComponent implements OnInit {
     inProgress$ = new BehaviorSubject<boolean>(false);

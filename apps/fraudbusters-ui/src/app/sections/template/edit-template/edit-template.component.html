@@ -14,9 +14,7 @@
             <p class="fb-page-subtitle">Update and validate the rules in this payment template.</p>
         </div>
     </header>
-    <fb-create-template
-        *ngIf="template$ | async as template"
-        [template]="template"
-        [isEditableName]="false"
-    ></fb-create-template>
+    @if (template$ | async; as template) {
+    <fb-create-template [template]="template" [isEditableName]="false"></fb-create-template>
+    }
 </div>

@@ -12,22 +12,24 @@
         <div class="heading">
             <h1 class="fb-page-title">Batch records</h1>
             <p class="fb-page-subtitle">
-                <span *ngIf="source()" class="source"
-                    ><mat-icon aria-hidden="true">inventory_2</mat-icon>{{ source() }}</span
-                >
+                @if (source()) {
+                <span class="source"><mat-icon aria-hidden="true">inventory_2</mat-icon>{{ source() }}</span>
+                }
                 <span class="mono">{{ batchId }}</span>
-                <span *ngIf="!busy() && !failed()"
-                    >· {{ rows().length }} {{ rows().length === 1 ? 'record' : 'records' }}</span
-                >
+                @if (!busy() && !failed()) {
+                <span>· {{ rows().length }} {{ rows().length === 1 ? 'record' : 'records' }}</span>
+                }
             </p>
         </div>
     </header>
 
-    <p *ngIf="issues()" class="issues" role="status">
+    @if (issues()) {
+    <p class="issues" role="status">
         <mat-icon aria-hidden="true">warning_amber</mat-icon>
         {{ issues() }} {{ issues() === 1 ? 'record has' : 'records have' }} no value or list and cannot be added. Fix
         the source data and load the batch again.
     </p>
+    }
 
     <fb-catalog-panel
         label="Batch records"
@@ -46,9 +48,11 @@
             <span class="catalog-select">
                 <mat-select [value]="listType()" (valueChange)="setListType($event)" aria-label="List type">
                     <mat-option value="">All types</mat-option>
-                    <mat-option *ngFor="let item of listTypes" [value]="item">
+                    @for (item of listTypes; track item) {
+                    <mat-option [value]="item">
                         {{ labels[item] }}
                     </mat-option>
+                    }
                 </mat-select>
             </span>
         </label>
@@ -57,20 +61,17 @@
             <span class="catalog-select">
                 <mat-select [value]="listName()" (valueChange)="listName.set($event)" aria-label="List name">
                     <mat-option value="">All lists</mat-option>
-                    <mat-option *ngFor="let item of listNames()" [value]="item">
+                    @for (item of listNames(); track item) {
+                    <mat-option [value]="item">
                         {{ item }}
                     </mat-option>
+                    }
                 </mat-select>
             </span>
         </label>
 
-        <div
-            *ngIf="visible().length"
-            class="fb-catalog-scroll"
-            tabindex="0"
-            role="region"
-            aria-label="Batch records table"
-        >
+        @if (visible().length) {
+        <div class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Batch records table">
             <table class="fb-catalog-table records-table" aria-label="Batch records">
                 <colgroup>
                     <col class="check-column" />
@@ -100,12 +101,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr
-                        *ngFor="let row of visible()"
-                        [class.selected]="selected().has(row.id)"
-                        [class.invalid]="row.issue"
-                        (click)="toggle(row)"
-                    >
+                    @for (row of visible(); track row) {
+                    <tr [class.selected]="selected().has(row.id)" [class.invalid]="row.issue" (click)="toggle(row)">
                         <td class="check" (click)="$event.stopPropagation()">
                             <mat-checkbox
                                 color="primary"
@@ -123,32 +120,45 @@
                             </span>
                         </td>
                         <td>
-                            <span
-                                *ngIf="row.listName; else missing"
-                                class="fb-pill fb-catalog-mono list-name"
-                                [ngClass]="namePill(row.listName)"
-                                >{{ row.listName }}</span
-                            >
+                            @if (row.listName) {
+                            <span class="fb-pill fb-catalog-mono list-name" [ngClass]="namePill(row.listName)">{{
+                                row.listName
+                            }}</span>
+                            } @else {
+                            <span class="missing">—</span>
+                            }
                         </td>
                         <td>
-                            <span *ngIf="row.partyId; else missing" class="fb-catalog-mono">{{ row.partyId }}</span>
+                            @if (row.partyId) {
+                            <span class="fb-catalog-mono">{{ row.partyId }}</span>
+                            } @else {
+                            <span class="missing">—</span>
+                            }
                         </td>
                         <td>
-                            <span *ngIf="row.shopId; else missing" class="fb-catalog-mono">{{ row.shopId }}</span>
+                            @if (row.shopId) {
+                            <span class="fb-catalog-mono">{{ row.shopId }}</span>
+                            } @else {
+                            <span class="missing">—</span>
+                            }
                         </td>
                         <th scope="row">
-                            <code *ngIf="row.value" class="value-chip">{{ row.value }}</code>
-                            <span *ngIf="row.issue" class="fb-pill fb-pill-status fb-pill-warning">{{
-                                row.issue
-                            }}</span>
+                            @if (row.value) {
+                            <code class="value-chip">{{ row.value }}</code>
+                            } @if (row.issue) {
+                            <span class="fb-pill fb-pill-status fb-pill-warning">{{ row.issue }}</span>
+                            }
                         </th>
                     </tr>
+                    }
                 </tbody>
             </table>
         </div>
+        }
     </fb-catalog-panel>
 
-    <footer *ngIf="selectedRows().length" class="selection-bar" role="region" aria-label="Selected records">
+    @if (selectedRows().length) {
+    <footer class="selection-bar" role="region" aria-label="Selected records">
         <div class="selection-summary" aria-live="polite">
             <strong>{{ selectedRows().length }} selected</strong>
             <span>{{ breakdown() }}</span>
@@ -161,6 +171,5 @@
             </button>
         </div>
     </footer>
+    }
 </div>
-
-<ng-template #missing><span class="missing">—</span></ng-template>
