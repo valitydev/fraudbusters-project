@@ -24,6 +24,7 @@ import { PayoutTemplatesComponent } from './components/payout-templates/payout-t
 import { PayoutSectionComponent } from './payout-section.component';
 import { PayoutsRoutingModule } from './payouts-routing.module';
 import { PayoutsFeedbackService } from './services/payouts-feedback.service';
+import { CatalogMetadataContentComponent } from '../../shared/components/catalog-panel/catalog-metadata-content.component';
 import { CatalogPanelComponent } from '../../shared/components/catalog-panel/catalog-panel.component';
 import { GroupsListModule } from '../../shared/components/groups-table';
 import { ListRecordsTableComponent } from '../../shared/components/list-records-table/list-records-table.component';
@@ -33,8 +34,10 @@ import { TemplateEditorComponent } from '../../shared/components/template-editor
 import { PaymentTemplatesListModule } from '../../shared/components/templates-table';
 
 /** Payout configuration laid out as the payment sections of the same name. */
+
 @NgModule({
     imports: [
+        CatalogMetadataContentComponent,
         CatalogPanelComponent,
         GroupsListModule,
         ListRecordsTableComponent,

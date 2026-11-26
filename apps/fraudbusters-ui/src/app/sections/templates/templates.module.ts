@@ -15,6 +15,7 @@ import { PaymentDefaultReferencesService } from '../../api/payments/default-refe
 import { PaymentEmulateService } from '../../api/payments/emulate';
 import { PaymentGroupsReferencesService } from '../../api/payments/groups-references';
 import { PaymentReferencesService } from '../../api/payments/references';
+import { CatalogMetadataContentComponent } from '../../shared/components/catalog-panel/catalog-metadata-content.component';
 import { CatalogPanelComponent } from '../../shared/components/catalog-panel/catalog-panel.component';
 import { ConfirmActionDialogModule } from '../../shared/components/confirm-action-dialog';
 import { PaymentReferencesListModule } from '../../shared/components/payment-references-list';
@@ -27,6 +28,7 @@ import { PaymentTemplatesListModule } from '../../shared/components/templates-ta
 
 @NgModule({
     imports: [
+        CatalogMetadataContentComponent,
         CatalogPanelComponent,
         TemplatesRoutingModule,
         MatTabsModule,

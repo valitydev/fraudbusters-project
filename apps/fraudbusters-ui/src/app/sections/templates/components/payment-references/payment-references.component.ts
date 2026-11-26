@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { startWith } from 'rxjs/operators';
 
 import { PaymentReference } from '../../../../api/fb-management/swagger-codegen/model/paymentReference';
+import { CatalogMetadataService } from '../../../../shared/components/catalog-panel/catalog-metadata.service';
 import { OperationType } from '../../../../shared/constants/operation-type';
 import { SortOrder } from '../../../../shared/constants/sort-order';
 import { catalogSearchQuery } from '../../../../shared/utils/catalog-collection';
@@ -37,7 +38,8 @@ export class PaymentReferencesComponent {
     constructor(
         route: ActivatedRoute,
         private fetchReferencesService: FetchReferencesService,
-        private removeReferenceService: RemoveReferenceService
+        private removeReferenceService: RemoveReferenceService,
+        private metadata: CatalogMetadataService
     ) {
         const destroyRef = inject(DestroyRef);
         catalogSearchQuery(route)
@@ -48,6 +50,7 @@ export class PaymentReferencesComponent {
             });
         this.removeReferenceService.removed$.pipe(takeUntilDestroyed(destroyRef)).subscribe(() => {
             this.search();
+            this.metadata.refresh();
         });
     }
 

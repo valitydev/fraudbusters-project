@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 
-import { formatAmount, HistoricalRow } from './historical-row';
+import { formatMinorAmount, HistoricalRow } from './historical-row';
 import { HistoricalColumn, HistoricalTableKind } from './historical-table-kind';
 import { CopyToClipboardService } from '../../services/copy-to-clipboard.service';
 import { statusPillClass } from '../../utils/status-tone';
@@ -86,7 +86,7 @@ export class HistoricalTableComponent implements OnChanges {
     }
 
     amount(row: HistoricalRow): string {
-        return formatAmount(row.amount);
+        return formatMinorAmount(row.amount, row.currency);
     }
 
     expand(row: HistoricalRow, event?: Event): void {

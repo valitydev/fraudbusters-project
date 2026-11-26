@@ -14,11 +14,11 @@
             mat-stroked-button
             class="export-button"
             type="button"
-            [disabled]="!view.state?.data"
+            [disabled]="!view.state?.data || exporting()"
             (click)="exportReport(view.state?.data)"
         >
             <mat-icon>file_download</mat-icon>
-            Export report
+            Export Excel
         </button>
     </header>
     <fb-base-analytics-search

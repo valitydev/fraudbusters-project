@@ -5,8 +5,8 @@ import { map, switchMap } from 'rxjs/operators';
 
 import { PayoutsService } from '../../../../api/payouts';
 import { ConfigService } from '../../../../config';
+import { CatalogMetadataService } from '../../../../shared/components/catalog-panel/catalog-metadata.service';
 import { GroupListRow, groupListRow } from '../../../../shared/components/groups-table/group-list-row';
-import { GroupTabCounts } from '../../../../shared/components/groups-table/group-tab-counts';
 import { CATALOG_SORT_OPTIONS, compareCatalogRows } from '../../../../shared/utils/catalog';
 import { CatalogCollection } from '../../../../shared/utils/catalog-collection';
 import { PayoutsFeedbackService } from '../../services/payouts-feedback.service';
@@ -26,7 +26,7 @@ export class PayoutGroupsComponent {
         private router: Router,
         route: ActivatedRoute,
         config: ConfigService,
-        private tabCounts: GroupTabCounts
+        private metadata: CatalogMetadataService
     ) {
         this.catalog = new CatalogCollection<GroupListRow>(
             route,
@@ -53,7 +53,7 @@ export class PayoutGroupsComponent {
             .subscribe({
                 next: () => {
                     this.catalog.refresh();
-                    this.tabCounts.refresh();
+                    this.metadata.refresh();
                 },
                 error: (error: HttpErrorResponse) => this.feedback.failed(error),
             });

@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, defer, of } from 'rxjs';
+import { catchError, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 
 import { AuditService } from './audit.service';
 import { Filter } from './model/filter';
@@ -19,41 +20,66 @@ import { statusPillClass } from '../../shared/utils/status-tone';
 export class AuditComponent {
     filter: Filter;
 
-    readonly view$ = combineLatest({
-        logs: this.auditService.logs$.pipe(map((logs) => logs ?? [])),
-        busy: this.auditService.inProgress$,
-        hasMore: this.auditService.isLoadMore$,
-        sort: this.auditService.sort$,
-    });
-
-    commandsTypes$ = this.auditService.commandsTypes$;
-    objectsTypes$ = this.auditService.objectsTypes$;
-
+    readonly view$ = defer(() =>
+        combineLatest({
+            logs: this.auditService.logs$.pipe(
+                map((logs) => logs ?? []),
+                startWith([])
+            ),
+            busy: this.auditService.inProgress$,
+            hasMore: this.auditService.isLoadMore$,
+            sort: this.auditService.sort$,
+            options: this.filterOptions$,
+        })
+    ).pipe(map((view) => ({ ...view, busy: view.busy || view.options === undefined })));
     readonly sortOrder = SortOrder;
+
+    private readonly loadFilterOptions$ = new BehaviorSubject<void>(undefined);
+    private readonly filterOptions$ = this.loadFilterOptions$.pipe(
+        switchMap(() =>
+            combineLatest({
+                commands: this.auditService.commandsTypes$,
+                objects: this.auditService.objectsTypes$,
+            }).pipe(
+                startWith(undefined),
+                catchError(() => of(null))
+            )
+        ),
+        shareReplay({ bufferSize: 1, refCount: true })
+    );
 
     constructor(
         private auditService: AuditService,
-        private searchFieldService: SearchFieldService,
-        private route: ActivatedRoute
+        searchFieldService: SearchFieldService,
+        route: ActivatedRoute,
+        changeDetector: ChangeDetectorRef
     ) {
-        combineLatest([this.commandsTypes$, this.objectsTypes$, this.route.queryParams]).subscribe((params) => {
-            // Query params come from shared links: fall back to defaults instead of failing on bad values.
-            this.filter = {
-                user: !params[2].userId ? '' : params[2].userId,
-                commandTypes: parseList(params[2].commandTypes, params[0]),
-                objectTypes: parseList(params[2].objectTypes, params[1]),
-                from: parseDate(params[2].dateFrom) ?? this.searchFieldService.todayFromTime(),
-                to: parseDate(params[2].dateTo) ?? new Date(),
-            };
-            this.auditService.mergeQueryParam({
-                dateTo: this.filter.to,
-                dateFrom: this.filter.from,
-                userId: this.filter.user,
-                commandTypes: this.filter.commandTypes ? JSON.stringify(this.filter.commandTypes) : null,
-                objectTypes: this.filter.objectTypes ? JSON.stringify(this.filter.objectTypes) : null,
+        const defaultFrom = searchFieldService.todayFromTime();
+        const defaultTo = new Date();
+        combineLatest([route.queryParams, this.filterOptions$])
+            .pipe(takeUntilDestroyed())
+            .subscribe(([params, options]) => {
+                // Query params come from shared links: fall back to defaults instead of failing on bad values.
+                this.filter = {
+                    user: params.userId || '',
+                    commandTypes: parseList(params.commandTypes, options?.commands ?? []),
+                    objectTypes: parseList(params.objectTypes, options?.objects ?? []),
+                    from: parseDate(params.dateFrom) ?? defaultFrom,
+                    to: parseDate(params.dateTo) ?? defaultTo,
+                };
+                changeDetector.markForCheck();
+                if (!options) {
+                    return;
+                }
+                this.auditService.mergeQueryParam({
+                    dateTo: this.filter.to,
+                    dateFrom: this.filter.from,
+                    userId: this.filter.user,
+                    commandTypes: this.filter.commandTypes ? JSON.stringify(this.filter.commandTypes) : null,
+                    objectTypes: this.filter.objectTypes ? JSON.stringify(this.filter.objectTypes) : null,
+                });
+                this.auditService.searchFilter$.next(this.filter);
             });
-            this.auditService.searchFilter$.next(this.filter);
-        });
     }
 
     /** Total matching changes reported with the last page. */
@@ -71,6 +97,10 @@ export class AuditComponent {
 
     refresh(): void {
         this.auditService.loadMoreAction$.next(false);
+    }
+
+    retryFilterOptions(): void {
+        this.loadFilterOptions$.next();
     }
 
     selectionCommand(): void {

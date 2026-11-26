@@ -15,12 +15,14 @@ import { GreyListModule } from './components/grey-list';
 import { WhiteListModule } from './components/white-list';
 import { ListsRoutingModule } from './lists-routing.module';
 import { ListsComponent } from './lists.component';
+import { CatalogMetadataContentComponent } from '../../shared/components/catalog-panel/catalog-metadata-content.component';
 import { ConfirmActionDialogModule } from '../../shared/components/confirm-action-dialog';
 import { SharedPipesModule } from '../../shared/pipes';
 
 @NgModule({
     declarations: [ListsComponent],
     imports: [
+        CatalogMetadataContentComponent,
         ListsRoutingModule,
         RouterModule,
         TemplatesRoutingModule,

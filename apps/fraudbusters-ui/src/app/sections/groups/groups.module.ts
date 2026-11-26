@@ -16,6 +16,7 @@ import { GroupsReferenceService } from './services/groups-reference/groups-refer
 import { DataSetService } from '../../api/payments/data-set';
 import { PaymentGroupsService } from '../../api/payments/groups';
 import { PaymentGroupsReferencesService } from '../../api/payments/groups-references';
+import { CatalogMetadataContentComponent } from '../../shared/components/catalog-panel/catalog-metadata-content.component';
 import { CatalogPanelComponent } from '../../shared/components/catalog-panel/catalog-panel.component';
 import { ConfirmActionDialogModule } from '../../shared/components/confirm-action-dialog';
 import { GroupReferencesListModule } from './components/group-references/components/group-references-list';
@@ -26,6 +27,7 @@ import { SearchFieldService } from '../../shared/services/utils/search-field.ser
 @NgModule({
     declarations: [GroupsComponent, PaymentGroupsComponent, GroupReferencesComponent],
     imports: [
+        CatalogMetadataContentComponent,
         CatalogPanelComponent,
         ConfirmActionDialogModule,
         MatButtonModule,

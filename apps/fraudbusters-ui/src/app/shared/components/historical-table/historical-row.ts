@@ -28,6 +28,7 @@ export interface HistoricalRow<T = unknown> {
     scopeId?: string;
     email?: string;
     userId?: string;
+    /** Amount in the minor units supplied by the API. */
     amount?: number;
     currency?: string;
     /** Payment system and BIN, e.g. "VISA · 424242". */
@@ -65,12 +66,25 @@ export function maskedCard(bin?: string, lastDigits?: string): string {
     return [first, '••••', last].filter(Boolean).join(' ');
 }
 
-export function formatAmount(amount?: number, currency?: string): string {
+export function formatMinorAmount(amount?: number, currency?: string): string {
     if (amount === null || amount === undefined) {
         return '';
     }
-    const formatted = amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    return currency ? `${formatted} ${currency}` : formatted;
+    const code = currency?.trim();
+    const digits =
+        code && /^[a-z]{3}$/i.test(code)
+            ? new Intl.NumberFormat('en-US', { style: 'currency', currency: code }).resolvedOptions()
+                  .maximumFractionDigits
+            : 2;
+    return (amount / 10 ** digits).toLocaleString('en-US', {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits,
+    });
+}
+
+export function formatAmount(amount?: number, currency?: string): string {
+    const formatted = formatMinorAmount(amount, currency);
+    return formatted && currency ? `${formatted} ${currency}` : formatted;
 }
 
 /**

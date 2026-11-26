@@ -10,7 +10,7 @@ export class PayoutPageFetcher<R, P> extends PartialFetcher<R, P> {
     inProgress$ = this.doAction$.pipe(distinctUntilChanged(), shareReplay(1));
 
     constructor(private fetchPage: (params: P, lastId?: string) => Observable<FetchResult<R>>) {
-        super();
+        super(0);
     }
 
     protected fetch(params: P, lastId?: string): Observable<FetchResult<R>> {

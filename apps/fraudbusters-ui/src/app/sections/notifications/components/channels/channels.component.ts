@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { combineLatest } from 'rxjs';
+import { combineLatest, startWith } from 'rxjs';
 
 import { Channel } from '../../../../api/fb-management/swagger-codegen/model/channel';
 import { catalogSearchQuery } from '../../../../shared/utils/catalog-collection';
@@ -18,7 +18,7 @@ import { RemoveChannelsService } from '../../services/remove-channels.service';
 })
 export class ChannelsComponent {
     readonly view$ = combineLatest({
-        rows: this.fetchChannelsService.searchResult$,
+        rows: this.fetchChannelsService.searchResult$.pipe(startWith([])),
         busy: this.fetchChannelsService.inProgress$,
         hasMore: this.fetchChannelsService.hasMore$,
     });

@@ -23,7 +23,7 @@ export class FetchWbListService extends PartialFetcher<WbListRecord, FetchRowsPa
     private pageSize = this.configService.pageSize;
 
     constructor(private paymentListsService: PaymentListsService, private configService: ConfigService) {
-        super();
+        super(0);
     }
 
     protected fetch(

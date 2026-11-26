@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { combineLatest } from 'rxjs';
+import { combineLatest, startWith } from 'rxjs';
 
 import { Notification } from '../../../../api/fb-management/swagger-codegen/model/notification';
 import { catalogSearchQuery } from '../../../../shared/utils/catalog-collection';
@@ -19,7 +19,7 @@ import { FetchNotificationsService } from '../../services/fetch-notifications.se
 })
 export class PeriodicalNotificationComponent {
     readonly view$ = combineLatest({
-        rows: this.fetchNotificationsService.searchResult$,
+        rows: this.fetchNotificationsService.searchResult$.pipe(startWith([])),
         busy: this.fetchNotificationsService.inProgress$,
         hasMore: this.fetchNotificationsService.hasMore$,
     });

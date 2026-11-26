@@ -6,6 +6,7 @@ import { map, switchMap } from 'rxjs/operators';
 import { PayoutReference } from '../../../../api/fb-management/swagger-codegen/model/payoutReference';
 import { PayoutsService } from '../../../../api/payouts';
 import { ConfigService } from '../../../../config';
+import { CatalogMetadataService } from '../../../../shared/components/catalog-panel/catalog-metadata.service';
 import { ReferenceRow } from '../../../../shared/components/reference-table/reference-table.component';
 import {
     CATALOG_SORT_OPTIONS,
@@ -30,7 +31,8 @@ export class PayoutReferencesComponent {
         private payoutsService: PayoutsService,
         private feedback: PayoutsFeedbackService,
         route: ActivatedRoute,
-        config: ConfigService
+        config: ConfigService,
+        private metadata: CatalogMetadataService
     ) {
         this.catalog = new CatalogCollection<ReferenceRow<PayoutReference>>(
             route,
@@ -64,7 +66,10 @@ export class PayoutReferencesComponent {
             .confirm(`Remove the reference of ${describePayoutScope(reference)} to ${reference.templateId}?`)
             .pipe(switchMap(() => this.payoutsService.removeReference(reference)))
             .subscribe({
-                next: () => this.catalog.refresh(),
+                next: () => {
+                    this.catalog.refresh();
+                    this.metadata.refresh();
+                },
                 error: (error: HttpErrorResponse) => this.feedback.failed(error),
             });
     }

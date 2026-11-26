@@ -1,14 +1,15 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, DestroyRef, EventEmitter, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { catchError, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
+import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 
 import { ListType } from '../../../../api/fb-management/swagger-codegen/model/listType';
 import { PayoutListRow } from '../../../../api/fb-management/swagger-codegen/model/payoutListRow';
 import { PayoutsService } from '../../../../api/payouts';
+import { CatalogMetadataService } from '../../../../shared/components/catalog-panel/catalog-metadata.service';
 import { ListRecordRow, payoutListRow } from '../../../../shared/components/list-records-table/list-record-row';
 import { SortOrder } from '../../../../shared/constants/sort-order';
 import { catalogSearchQuery } from '../../../../shared/utils/catalog-collection';
@@ -39,23 +40,17 @@ export class PayoutListsComponent {
     readonly failed$ = new BehaviorSubject(false);
     readonly page$: Observable<{ rows: ListRecordRow<PayoutListRow>[]; count: number }>;
     readonly inProgress$: Observable<boolean>;
-    @Output() readonly removed = new EventEmitter<void>();
 
-    private readonly reloadNames = new BehaviorSubject<void>(undefined);
     private readonly fetcher: PayoutPageFetcher<PayoutListRow, ListFilter>;
 
     constructor(
         private route: ActivatedRoute,
         private payoutsService: PayoutsService,
         private feedback: PayoutsFeedbackService,
-        private destroyRef: DestroyRef
+        private destroyRef: DestroyRef,
+        private metadata: CatalogMetadataService
     ) {
-        this.listNames$ = this.reloadNames.pipe(
-            switchMap(() =>
-                this.payoutsService.getCurrentListNames(this.listType).pipe(catchError(() => of([] as string[])))
-            ),
-            shareReplay({ bufferSize: 1, refCount: true })
-        );
+        this.listNames$ = this.metadata.listNames(this.listType);
         this.fetcher = new PayoutPageFetcher<PayoutListRow, ListFilter>((filter, lastId) => {
             this.failed$.next(false);
             return this.payoutsService
@@ -102,9 +97,8 @@ export class PayoutListsComponent {
             )
             .subscribe({
                 next: () => {
-                    this.reloadNames.next();
                     this.fetcher.refresh();
-                    this.removed.emit();
+                    this.metadata.refresh();
                 },
                 error: (error: HttpErrorResponse) => this.feedback.failed(error),
             });

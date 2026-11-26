@@ -4,14 +4,13 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NavigationEnd, Router } from '@angular/router';
-import { BehaviorSubject, combineLatest, merge, Observable, of } from 'rxjs';
-import { catchError, filter, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
+import { filter, map, startWith, switchMap } from 'rxjs/operators';
 
 import { PaymentListsService } from '../../api/payments/lists';
+import { CatalogMetadataService } from '../../shared/components/catalog-panel/catalog-metadata.service';
 import { ConfirmActionDialogComponent } from '../../shared/components/confirm-action-dialog';
 import { ListsEventsService } from '../../shared/components/wb-list/services/lists-events.service';
 import { ListType } from '../../shared/constants/list-type';
-import { SortOrder } from '../../shared/constants/sort-order';
 
 interface ListTab {
     path: string;
@@ -19,13 +18,11 @@ interface ListTab {
     listType?: ListType;
 }
 
-const BATCH_PAGE = 100;
-
 @Component({
     templateUrl: 'lists.component.html',
     styleUrls: ['lists.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [ListsEventsService],
+    providers: [ListsEventsService, CatalogMetadataService],
     standalone: false,
 })
 export class ListsComponent implements OnInit {
@@ -45,11 +42,8 @@ export class ListsComponent implements OnInit {
         )
     );
 
-    /** Record count per tab; candidates show loaded batches ("100+" when there are more). */
-    counts$: Observable<Record<string, string>>;
+    readonly metadata$ = this.metadata.load('payments', 'lists');
     cleaning = false;
-
-    private readonly reloadCounts$ = new BehaviorSubject<void>(undefined);
 
     constructor(
         private router: Router,
@@ -58,41 +52,12 @@ export class ListsComponent implements OnInit {
         private dialog: MatDialog,
         private snackBar: MatSnackBar,
         private destroyRef: DestroyRef,
-        private cdr: ChangeDetectorRef
+        private cdr: ChangeDetectorRef,
+        private metadata: CatalogMetadataService
     ) {}
 
     ngOnInit(): void {
-        const count = (listType: ListType) =>
-            // The backend counts only the list names it is given, so ask for every name of the type.
-            this.listService.getNames(listType).pipe(
-                switchMap((listNames) =>
-                    listNames.length
-                        ? this.listService
-                              .findListRows({ listType, listNames, size: 1, sortOrder: SortOrder.Desc })
-                              .pipe(map(({ count: total }) => String(total ?? 0)))
-                        : of('0')
-                ),
-                catchError(() => of(''))
-            );
-        const batches = this.listService.findCandidatesBatch({ size: BATCH_PAGE, sortOrder: SortOrder.Desc }).pipe(
-            map(({ result, lastId }) =>
-                result.length >= BATCH_PAGE && lastId ? `${result.length}+` : String(result.length)
-            ),
-            catchError(() => of(''))
-        );
-        this.counts$ = merge(this.reloadCounts$, this.listsEvents.changed$).pipe(
-            switchMap(() =>
-                combineLatest([count(ListType.Black), count(ListType.White), count(ListType.Grey), batches])
-            ),
-            map(([black, white, grey, candidates]) => ({ black, white, grey, candidates })),
-            shareReplay({ bufferSize: 1, refCount: true })
-        );
-        this.router.events
-            .pipe(
-                filter((event) => event instanceof NavigationEnd),
-                takeUntilDestroyed(this.destroyRef)
-            )
-            .subscribe(() => this.reloadCounts$.next());
+        this.listsEvents.changed$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.metadata.refresh());
     }
 
     get returnUrl(): string {

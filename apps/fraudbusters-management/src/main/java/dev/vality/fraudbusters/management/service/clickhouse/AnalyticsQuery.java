@@ -113,17 +113,18 @@ public class AnalyticsQuery {
             """
                         SELECT
                             %2$s,
-                            low * 100 / all AS low,
-                            normal * 100 / all AS high,
-                            fatal * 100 / all AS fatal
+                            trusted_count * 100 / total_count AS trusted,
+                            low_count * 100 / total_count AS low,
+                            (total_count - trusted_count - low_count - fatal_count) * 100 / total_count AS high,
+                            fatal_count * 100 / total_count AS fatal
                         FROM
                         (
                             SELECT
                                 %1$s,
-                                countIf(resultStatus = 'ACCEPT') AS low,
-                                countIf(resultStatus = 'THREE_DS') AS normal,
-                                countIf(resultStatus = 'DECLINE') AS fatal,
-                                count() as all
+                                countIf(resultStatus = 'TRUST') AS trusted_count,
+                                countIf(resultStatus IN ('ACCEPT', 'ACCEPT_AND_NOTIFY', 'NOTIFY')) AS low_count,
+                                countIf(resultStatus IN ('DECLINE', 'DECLINE_AND_NOTIFY')) AS fatal_count,
+                                count() AS total_count
                             FROM fraud.events_unique
                             WHERE
                                 timestamp >= toDate(:from)

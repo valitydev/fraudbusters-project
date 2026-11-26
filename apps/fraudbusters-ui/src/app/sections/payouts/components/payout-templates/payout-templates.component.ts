@@ -6,6 +6,7 @@ import { switchMap } from 'rxjs/operators';
 import { Template } from '../../../../api/fb-management/swagger-codegen/model/template';
 import { PayoutsService } from '../../../../api/payouts';
 import { ConfigService } from '../../../../config';
+import { CatalogMetadataService } from '../../../../shared/components/catalog-panel/catalog-metadata.service';
 import { createTemplateCatalog } from '../../../../shared/components/templates-table/template-catalog';
 import { CATALOG_SORT_OPTIONS, loadCatalog } from '../../../../shared/utils/catalog';
 import { CatalogCollection } from '../../../../shared/utils/catalog-collection';
@@ -25,7 +26,8 @@ export class PayoutTemplatesComponent {
         private feedback: PayoutsFeedbackService,
         private router: Router,
         route: ActivatedRoute,
-        config: ConfigService
+        config: ConfigService,
+        private metadata: CatalogMetadataService
     ) {
         this.catalog = createTemplateCatalog(route, config.pageSize, () =>
             loadCatalog((lastId) => this.payoutsService.findTemplates({ lastId, size: config.pageSize }))
@@ -45,7 +47,10 @@ export class PayoutTemplatesComponent {
             .confirm(`Remove template ${id}?`)
             .pipe(switchMap(() => this.payoutsService.removeTemplate(id)))
             .subscribe({
-                next: () => this.catalog.refresh(),
+                next: () => {
+                    this.catalog.refresh();
+                    this.metadata.refresh();
+                },
                 error: (error: HttpErrorResponse) => this.feedback.failed(error),
             });
     }

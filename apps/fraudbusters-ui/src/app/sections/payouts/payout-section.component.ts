@@ -1,14 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
-import { catchError, filter, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
+import { filter, map, startWith } from 'rxjs/operators';
 
-import { PayoutListsComponent } from './components/payout-lists/payout-lists.component';
-import { PayoutTemplatesComponent } from './components/payout-templates/payout-templates.component';
 import { ListType } from '../../api/fb-management/swagger-codegen/model/listType';
-import { PayoutsService } from '../../api/payouts';
-import { GroupTabCounts } from '../../shared/components/groups-table/group-tab-counts';
-import { SortOrder } from '../../shared/constants/sort-order';
+import { CatalogMetadataService, CatalogSection } from '../../shared/components/catalog-panel/catalog-metadata.service';
 
 export interface PayoutSectionLink {
     path: string;
@@ -22,7 +18,7 @@ export interface PayoutSectionLink {
 @Component({
     templateUrl: 'payout-section.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [GroupTabCounts],
+    providers: [CatalogMetadataService],
     standalone: false,
 })
 export class PayoutSectionComponent {
@@ -47,64 +43,7 @@ export class PayoutSectionComponent {
         })
     );
 
-    templateCatalog?: PayoutTemplatesComponent['catalog'];
-    readonly groupCounts$ = this.groupTabs.load(
-        () => this.payouts.findGroups(),
-        () => this.payouts.findGroupReferences({ size: 1, sortOrder: SortOrder.Asc })
-    );
+    readonly metadata$ = this.metadata.load('payouts', this.route.snapshot.data.catalogSection as CatalogSection);
 
-    /** Templates and references totals, loaded with the page and again after each navigation. */
-    readonly templateCounts$: Observable<Record<string, number | null>> = this.router.events.pipe(
-        filter((event) => event instanceof NavigationEnd),
-        startWith(null),
-        switchMap(() =>
-            combineLatest({
-                templates: this.count(this.payouts.findTemplates({ size: 1 })),
-                references: this.count(this.payouts.findReferences({ size: 1 })),
-            })
-        ),
-        shareReplay({ bufferSize: 1, refCount: true })
-    );
-
-    readonly listCounts$: Observable<Record<string, string>>;
-    private readonly listChanges = new BehaviorSubject<Observable<void> | null>(null);
-
-    constructor(
-        private route: ActivatedRoute,
-        private router: Router,
-        private payouts: PayoutsService,
-        private groupTabs: GroupTabCounts
-    ) {
-        const listTabs = (this.route.snapshot.data.links as PayoutSectionLink[]).filter((link) => link.listType);
-        this.listCounts$ = this.listChanges.pipe(
-            switchMap((changes) => changes ?? of()),
-            startWith(undefined),
-            switchMap(() =>
-                listTabs.length
-                    ? combineLatest(
-                          listTabs.map(({ path, listType }) =>
-                              this.payouts.findListRows({ listType, size: 1 }).pipe(
-                                  map(({ count, result }): [string, string] => [path, String(count ?? result.length)]),
-                                  catchError(() => of<[string, string]>([path, '']))
-                              )
-                          )
-                      ).pipe(map((entries) => Object.fromEntries<string>(entries)))
-                    : of({})
-            ),
-            shareReplay({ bufferSize: 1, refCount: true })
-        );
-    }
-
-    setActiveList(component: unknown): void {
-        this.listChanges.next(component instanceof PayoutListsComponent ? component.removed : null);
-        this.templateCatalog = component instanceof PayoutTemplatesComponent ? component.catalog : undefined;
-    }
-
-    private count(request: Observable<{ count?: number }>): Observable<number | null> {
-        return request.pipe(
-            map(({ count }) => count ?? null),
-            // A failed count only hides the badge; the tab reports its own errors.
-            catchError(() => of(null))
-        );
-    }
+    constructor(private route: ActivatedRoute, private router: Router, private metadata: CatalogMetadataService) {}
 }
