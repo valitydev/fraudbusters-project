@@ -62,7 +62,7 @@ paths:
     $ref: ./paths/catalog/getPaymentTemplatesMetadata.yaml
   /payments/catalog/groups/metadata:
     $ref: ./paths/catalog/getPaymentGroupsMetadata.yaml
-  /payments/catalog/lists/records:
+  /payments/catalog/lists/filter-records:
     $ref: ./paths/catalog/filterPaymentCatalogLists.yaml
   /payments/catalog/lists/metadata:
     $ref: ./paths/catalog/getPaymentListsMetadata.yaml
