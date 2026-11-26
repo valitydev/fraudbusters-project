@@ -1,0 +1,14 @@
+type: object
+required:
+  - counts
+properties:
+  counts:
+    type: object
+    required:
+      - templates
+      - references
+    properties:
+      templates:
+        $ref: './CatalogCount.yaml'
+      references:
+        $ref: './CatalogCount.yaml'

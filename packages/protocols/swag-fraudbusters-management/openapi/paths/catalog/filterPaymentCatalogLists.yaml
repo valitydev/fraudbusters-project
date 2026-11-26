@@ -1,0 +1,32 @@
+get:
+  summary: Filter records for a payment list tab
+  description: Omitting listNames selects all records of the requested list type.
+  operationId: filterPaymentCatalogLists
+  tags:
+    - catalog-metadata
+  parameters:
+    - $ref: '../../components/parameters/listType.yaml'
+    - $ref: '../../components/parameters/listNames.yaml'
+    - $ref: '../../components/parameters/searchValue.yaml'
+    - $ref: '../../components/parameters/lastId.yaml'
+    - $ref: '../../components/parameters/sortOrder.yaml'
+    - $ref: '../../components/parameters/sortBy.yaml'
+    - $ref: '../../components/parameters/sortFieldValue.yaml'
+    - name: size
+      in: query
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        default: 50
+  responses:
+    '200':
+      description: Payment list records
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/responses/WbListRecordsResponse.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden
