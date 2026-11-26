@@ -53,7 +53,26 @@ tags:
   - name: payout-lists
     x-displayName: Payout lists
 
+  - name: catalog-metadata
+    x-displayName: Catalog metadata
+
 paths:
+  # Catalog metadata
+  /payments/catalog/templates/metadata:
+    $ref: ./paths/catalog/getPaymentTemplatesMetadata.yaml
+  /payments/catalog/groups/metadata:
+    $ref: ./paths/catalog/getPaymentGroupsMetadata.yaml
+  /payments/catalog/lists/records:
+    $ref: ./paths/catalog/filterPaymentCatalogLists.yaml
+  /payments/catalog/lists/metadata:
+    $ref: ./paths/catalog/getPaymentListsMetadata.yaml
+  /payouts/catalog/templates/metadata:
+    $ref: ./paths/catalog/getPayoutTemplatesMetadata.yaml
+  /payouts/catalog/groups/metadata:
+    $ref: ./paths/catalog/getPayoutGroupsMetadata.yaml
+  /payouts/catalog/lists/metadata:
+    $ref: ./paths/catalog/getPayoutListsMetadata.yaml
+
   # Audit
   /audit/commandTypes:
     $ref: ./paths/audit/getCommandTypes.yaml
