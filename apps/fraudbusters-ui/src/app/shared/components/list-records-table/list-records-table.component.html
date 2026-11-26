@@ -5,12 +5,14 @@
             <col class="id-column" />
             <col class="id-column" />
             <col class="value-column" />
-            <ng-container *ngIf="grey">
-                <col class="count-column" />
-                <col class="window-column" />
-            </ng-container>
+            @if (grey) {
+            <col class="count-column" />
+            <col class="window-column" />
+            }
             <col class="fb-catalog-date-column" />
-            <col *ngIf="showAuthor" class="author-column" />
+            @if (showAuthor) {
+            <col class="author-column" />
+            }
             <col class="actions-column" />
         </colgroup>
         <thead>
@@ -19,33 +21,46 @@
                 <th scope="col">Party ID</th>
                 <th scope="col">{{ scope }} ID</th>
                 <th scope="col">Value</th>
-                <ng-container *ngIf="grey">
-                    <th scope="col" class="numeric">Count</th>
-                    <th scope="col">Window</th>
-                </ng-container>
+                @if (grey) {
+                <th scope="col" class="numeric">Count</th>
+                <th scope="col">Window</th>
+                }
                 <th scope="col">Inserted at</th>
-                <th *ngIf="showAuthor" scope="col">Created by</th>
+                @if (showAuthor) {
+                <th scope="col">Created by</th>
+                }
                 <th scope="col" class="fb-catalog-action-cell">Actions</th>
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let row of rows">
+            @for (row of rows; track row) {
+            <tr>
                 <td>
-                    <span
-                        *ngIf="row.listName; else missing"
-                        class="fb-pill fb-catalog-mono list-name"
-                        [ngClass]="namePill(row.listName)"
-                        >{{ row.listName }}</span
-                    >
+                    @if (row.listName) {
+                    <span class="fb-pill fb-catalog-mono list-name" [ngClass]="namePill(row.listName)">{{
+                        row.listName
+                    }}</span>
+                    } @else {
+                    <span class="missing">—</span>
+                    }
                 </td>
                 <td>
-                    <span *ngIf="row.partyId; else missing" class="fb-catalog-mono">{{ row.partyId }}</span>
+                    @if (row.partyId) {
+                    <span class="fb-catalog-mono">{{ row.partyId }}</span>
+                    } @else {
+                    <span class="missing">—</span>
+                    }
                 </td>
                 <td>
-                    <span *ngIf="row.scopeId; else missing" class="fb-catalog-mono">{{ row.scopeId }}</span>
+                    @if (row.scopeId) {
+                    <span class="fb-catalog-mono">{{ row.scopeId }}</span>
+                    } @else {
+                    <span class="missing">—</span>
+                    }
                 </td>
                 <th scope="row">
-                    <div *ngIf="row.value; else missing" class="value-cell">
+                    @if (row.value) {
+                    <div class="value-cell">
                         <code class="value-chip" [attr.title]="row.value">{{ row.value }}</code>
                         <button
                             class="copy-value"
@@ -57,26 +72,28 @@
                             <mat-icon>content_copy</mat-icon>
                         </button>
                     </div>
+                    } @else {
+                    <span class="missing">—</span>
+                    }
                 </th>
-                <ng-container *ngIf="grey">
-                    <td class="numeric">{{ row.window?.count ?? '—' }}</td>
-                    <td>
-                        <div class="window">
-                            <span
-                                *ngIf="status(row.window) as state"
-                                class="fb-pill fb-pill-status"
-                                [ngClass]="state.pill"
-                                >{{ state.label }}</span
-                            >
-                            <span class="window-range fb-catalog-time">
-                                {{ (row.window?.start | date : 'yyyy-MM-dd HH:mm' : 'UTC') || 'Now' }} →
-                                {{ (row.window?.end | date : 'yyyy-MM-dd HH:mm' : 'UTC') || 'No end' }}
-                            </span>
-                        </div>
-                    </td>
-                </ng-container>
+                @if (grey) {
+                <td class="numeric">{{ row.window?.count ?? '—' }}</td>
+                <td>
+                    <div class="window">
+                        @if (status(row.window); as state) {
+                        <span class="fb-pill fb-pill-status" [ngClass]="state.pill">{{ state.label }}</span>
+                        }
+                        <span class="window-range fb-catalog-time">
+                            {{ (row.window?.start | date : 'yyyy-MM-dd HH:mm' : 'UTC') || 'Now' }} →
+                            {{ (row.window?.end | date : 'yyyy-MM-dd HH:mm' : 'UTC') || 'No end' }}
+                        </span>
+                    </div>
+                </td>
+                }
                 <td class="fb-catalog-time">{{ (row.insertTime | date : 'yyyy-MM-dd HH:mm:ss' : 'UTC') || '—' }}</td>
-                <td *ngIf="showAuthor">{{ row.createdByUser || '—' }}</td>
+                @if (showAuthor) {
+                <td>{{ row.createdByUser || '—' }}</td>
+                }
                 <td class="fb-catalog-action-cell">
                     <button
                         mat-icon-button
@@ -87,20 +104,22 @@
                         <mat-icon>more_vert</mat-icon>
                     </button>
                     <mat-menu #menu="matMenu">
-                        <button *ngIf="row.value" mat-menu-item type="button" (click)="copy(row.value, 'Value')">
+                        @if (row.value) {
+                        <button mat-menu-item type="button" (click)="copy(row.value, 'Value')">
                             <mat-icon>content_copy</mat-icon>Copy value
                         </button>
-                        <button *ngIf="row.id" mat-menu-item type="button" (click)="copy(row.id, 'Record ID')">
+                        } @if (row.id) {
+                        <button mat-menu-item type="button" (click)="copy(row.id, 'Record ID')">
                             <mat-icon>tag</mat-icon>Copy record ID
                         </button>
+                        }
                         <button mat-menu-item type="button" class="fb-menu-danger" (click)="remove.emit(row.source)">
                             <mat-icon>delete_outline</mat-icon>Remove record
                         </button>
                     </mat-menu>
                 </td>
             </tr>
+            }
         </tbody>
     </table>
 </div>
-
-<ng-template #missing><span class="missing">—</span></ng-template>

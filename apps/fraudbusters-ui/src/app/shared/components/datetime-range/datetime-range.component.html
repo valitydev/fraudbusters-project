@@ -15,25 +15,25 @@
             <mat-icon aria-hidden="true">calendar_today</mat-icon>
         </button>
     </div>
-    <ng-container *ngIf="!single">
-        <mat-icon class="arrow" aria-hidden="true">arrow_forward</mat-icon>
-        <div class="trigger-field">
-            <span class="trigger-label">{{ toLabel }}</span>
-            <button
-                type="button"
-                class="trigger fb-filter-control fb-control-mono"
-                [class.editing]="open && editing === 'to'"
-                [disabled]="disabled"
-                aria-haspopup="dialog"
-                [attr.aria-expanded]="open && editing === 'to'"
-                [attr.aria-label]="toLabel + ': ' + (toText || 'not set')"
-                (click)="toggle('to')"
-            >
-                <span class="trigger-value">{{ toText || 'Select' }}</span>
-                <mat-icon aria-hidden="true">calendar_today</mat-icon>
-            </button>
-        </div>
-    </ng-container>
+    @if (!single) {
+    <mat-icon class="arrow" aria-hidden="true">arrow_forward</mat-icon>
+    <div class="trigger-field">
+        <span class="trigger-label">{{ toLabel }}</span>
+        <button
+            type="button"
+            class="trigger fb-filter-control fb-control-mono"
+            [class.editing]="open && editing === 'to'"
+            [disabled]="disabled"
+            aria-haspopup="dialog"
+            [attr.aria-expanded]="open && editing === 'to'"
+            [attr.aria-label]="toLabel + ': ' + (toText || 'not set')"
+            (click)="toggle('to')"
+        >
+            <span class="trigger-value">{{ toText || 'Select' }}</span>
+            <mat-icon aria-hidden="true">calendar_today</mat-icon>
+        </button>
+    </div>
+    }
 </div>
 
 <ng-template
@@ -41,10 +41,8 @@
     [cdkConnectedOverlayOrigin]="origin"
     [cdkConnectedOverlayOpen]="open"
     [cdkConnectedOverlayPositions]="positions"
-    [cdkConnectedOverlayHasBackdrop]="true"
-    cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
     [cdkConnectedOverlayPush]="true"
-    (backdropClick)="cancel()"
+    (overlayOutsideClick)="outsideClick($event, origin.elementRef.nativeElement)"
     (detach)="cancel()"
     (overlayKeydown)="$event.key === 'Escape' && cancel()"
 >
@@ -57,12 +55,12 @@
         <header class="popover-header">
             <span class="editing-label">
                 <span class="dot" aria-hidden="true"></span>
-                <ng-container *ngIf="single; else boundaryLabel">{{ fromLabel }}</ng-container>
-                <ng-template #boundaryLabel
-                    >Editing <strong>{{ editing === 'from' ? fromLabel : toLabel }}</strong> boundary</ng-template
-                >
+                @if (single) {
+                {{ fromLabel }}
+                } @else { Editing <strong>{{ editing === 'from' ? fromLabel : toLabel }}</strong> boundary }
             </span>
-            <div *ngIf="!single" class="segmented" role="group" aria-label="Boundary">
+            @if (!single) {
+            <div class="segmented" role="group" aria-label="Boundary">
                 <button type="button" [attr.aria-pressed]="editing === 'from'" (click)="edit('from')">
                     {{ fromLabel }}
                 </button>
@@ -70,6 +68,7 @@
                     {{ toLabel }}
                 </button>
             </div>
+            }
         </header>
 
         <div class="popover-body">
@@ -84,9 +83,9 @@
                         [value]="viewMonth"
                         (valueChange)="setView($event, viewYear)"
                     >
-                        <mat-option *ngFor="let name of months; let index = index" [value]="index">{{
-                            name
-                        }}</mat-option>
+                        @for (name of months; track name; let index = $index) {
+                        <mat-option [value]="index">{{ name }}</mat-option>
+                        }
                     </mat-select>
                     <mat-select
                         class="nav-select year"
@@ -94,17 +93,22 @@
                         [value]="viewYear"
                         (valueChange)="setView(viewMonth, $event)"
                     >
-                        <mat-option *ngFor="let item of years" [value]="item">{{ item }}</mat-option>
+                        @for (item of years; track item) {
+                        <mat-option [value]="item">{{ item }}</mat-option>
+                        }
                     </mat-select>
                     <button type="button" class="nav" aria-label="Next month" (click)="shiftMonth(1)">
                         <mat-icon>chevron_right</mat-icon>
                     </button>
                 </div>
                 <div class="weekdays" aria-hidden="true">
-                    <span *ngFor="let weekday of weekdays">{{ weekday }}</span>
+                    @for (weekday of weekdays; track weekday) {
+                    <span>{{ weekday }}</span>
+                    }
                 </div>
                 <div class="days" role="grid">
-                    <div *ngFor="let cell of cells; trackBy: trackCell" class="day-cell" [ngClass]="band(cell)">
+                    @for (cell of cells; track trackCell($index, cell)) {
+                    <div class="day-cell" [ngClass]="band(cell)">
                         <button
                             type="button"
                             class="day"
@@ -120,24 +124,29 @@
                             {{ cell.day }}
                         </button>
                     </div>
+                    }
                 </div>
                 <div class="legend">
                     <span
                         ><span class="swatch endpoint" aria-hidden="true"></span
                         >{{ single ? 'Selected' : 'Start / End' }}</span
                     >
-                    <span *ngIf="!single"><span class="swatch range" aria-hidden="true"></span>In range</span>
+                    @if (!single) {
+                    <span><span class="swatch range" aria-hidden="true"></span>In range</span>
+                    }
                     <span class="today-legend"><span class="swatch today" aria-hidden="true"></span>Today</span>
                 </div>
             </div>
 
-            <div *ngIf="withTime" class="time">
+            @if (withTime) {
+            <div class="time">
                 <div class="time-header">
                     <strong>Time ({{ zone }})</strong>
                     <span class="date-pill">{{ activeDate }}</span>
                 </div>
                 <div class="time-grid">
-                    <div *ngFor="let item of timeParts" class="time-part">
+                    @for (item of timeParts; track item) {
+                    <div class="time-part">
                         <span class="time-label">{{ item.label }}</span>
                         <div class="stepper">
                             <button
@@ -165,17 +174,13 @@
                             </button>
                         </div>
                     </div>
+                    }
                 </div>
                 <div class="drums">
-                    <div
-                        *ngFor="let item of timeParts"
-                        #drum
-                        class="drum"
-                        [attr.aria-label]="item.label"
-                        role="listbox"
-                    >
+                    @for (item of timeParts; track item) {
+                    <div #drum class="drum" [attr.aria-label]="item.label" role="listbox">
+                        @for (option of item.values; track option) {
                         <button
-                            *ngFor="let option of item.values"
                             type="button"
                             role="option"
                             [class.selected]="option === value(item.part)"
@@ -184,35 +189,40 @@
                         >
                             {{ pad(option) }}
                         </button>
+                        }
                     </div>
+                    }
                 </div>
                 <span class="time-label presets-label">Quick time presets</span>
                 <div class="quick-times">
-                    <button
-                        *ngFor="let quick of quickTimes"
-                        type="button"
-                        class="quick"
-                        (click)="setTimeOfDay(quick.time)"
-                    >
+                    @for (quick of quickTimes; track quick) {
+                    <button type="button" class="quick" (click)="setTimeOfDay(quick.time)">
                         <span class="mono"
                             >{{ pad(quick.time[0]) }}:{{ pad(quick.time[1]) }}:{{ pad(quick.time[2]) }}</span
                         >
                         <span>{{ quick.label }}</span>
                     </button>
+                    }
                     <button type="button" class="quick now" (click)="setNow()">
                         <span class="mono">Now</span>
                         <span class="mono">{{ nowLabel }}</span>
                     </button>
                 </div>
             </div>
+            }
         </div>
 
-        <p *ngIf="feedback" class="feedback" role="status">{{ feedback }}</p>
+        @if (feedback) {
+        <p class="feedback" role="status">{{ feedback }}</p>
+        }
 
         <footer class="popover-footer">
             <div class="footer-info">
-                <button *ngIf="!single" type="button" class="link" (click)="reset()">Reset to {{ resetLabel }}</button>
-                <span *ngIf="!single" class="window-pill">{{ draftWindowText }} selected</span>
+                @if (!single) {
+                <button type="button" class="link" (click)="reset()">Reset to {{ resetLabel }}</button>
+                } @if (!single) {
+                <span class="window-pill">{{ draftWindowText }} selected</span>
+                }
             </div>
             <div class="footer-actions">
                 <button type="button" class="secondary" (click)="cancel()">Cancel</button>

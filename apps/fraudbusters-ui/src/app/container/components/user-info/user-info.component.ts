@@ -5,6 +5,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
     templateUrl: 'user-info.component.html',
     styleUrls: ['user-info.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class UserInfoComponent {
     @Input() username: string;

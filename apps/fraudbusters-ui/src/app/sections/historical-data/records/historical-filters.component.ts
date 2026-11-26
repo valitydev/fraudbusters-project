@@ -1,4 +1,3 @@
-import { NgFor, NgIf } from '@angular/common';
 import { Component, DestroyRef, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -81,8 +80,7 @@ function validDate(value: string): Date | null {
  */
 @Component({
     selector: 'fb-historical-filters',
-    standalone: true,
-    imports: [NgFor, NgIf, ReactiveFormsModule, MatIconModule, MatSelectModule, DateTimeRangeComponent],
+    imports: [ReactiveFormsModule, MatIconModule, MatSelectModule, DateTimeRangeComponent],
     templateUrl: 'historical-filters.component.html',
     styleUrls: ['historical-filters.component.scss'],
 })

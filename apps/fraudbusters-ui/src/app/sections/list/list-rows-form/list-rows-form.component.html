@@ -18,8 +18,8 @@
         </div>
         <div class="target-switch" role="radiogroup" aria-label="Target list">
             <span class="target-label">Target list</span>
+            @for (type of listTypes; track type) {
             <button
-                *ngFor="let type of listTypes"
                 type="button"
                 role="radio"
                 class="target-option"
@@ -29,6 +29,7 @@
             >
                 <span class="list-dot" [ngClass]="'list-dot-' + type" aria-hidden="true"></span>{{ labels[type] }}
             </button>
+            }
         </div>
     </header>
 
@@ -45,9 +46,9 @@
                         <label id="row-list-name-label" for="row-list-name"
                             >List name <span class="required" aria-hidden="true">*</span></label
                         >
+                        @if (!isNamed) {
                         <mat-select
                             class="fb-form-control fb-control-mono"
-                            *ngIf="!isNamed"
                             #listNameSelect
                             id="row-list-name"
                             aria-labelledby="row-list-name-label"
@@ -55,23 +56,29 @@
                             placeholder="Choose a list"
                             required
                         >
-                            <mat-option *ngFor="let name of listNames$ | async" [value]="name">{{ name }}</mat-option>
+                            @for (name of listNames$ | async; track name) {
+                            <mat-option [value]="name">{{ name }}</mat-option>
+                            }
                         </mat-select>
+                        } @if (isNamed) {
                         <input
                             class="fb-form-control fb-control-mono"
-                            *ngIf="isNamed"
                             #listNameInput
                             id="row-list-name"
                             formControlName="listName"
                             required
                             placeholder="e.g. example-list"
                         />
+                        }
                         <p>Entity type the value belongs to.</p>
                     </div>
                     <div class="field">
                         <label for="row-party"
-                            >Party ID <span *ngIf="payout" class="optional">(optional)</span
-                            ><span *ngIf="!payout" class="required" aria-hidden="true">*</span></label
+                            >Party ID @if (payout) {
+                            <span class="optional">(optional)</span>
+                            }@if (!payout) {
+                            <span class="required" aria-hidden="true">*</span>
+                            }</label
                         >
                         <input
                             class="fb-form-control fb-control-mono"
@@ -111,7 +118,8 @@
                     </div>
                 </div>
 
-                <div *ngIf="isGrey" class="fields grey-fields">
+                @if (isGrey) {
+                <div class="fields grey-fields">
                     <div class="field">
                         <label for="row-count">Count <span class="required" aria-hidden="true">*</span></label>
                         <input
@@ -138,21 +146,21 @@
                             (rangeChange)="setWindow($event)"
                         ></fb-datetime-range>
                         <p>
-                            The limit counts matches between start and end; after the end the row expires.
-                            <button
-                                *ngIf="payout && form.getRawValue().start"
-                                type="button"
-                                class="inline-link"
-                                (click)="form.patchValue({ start: '' })"
-                            >
+                            The limit counts matches between start and end; after the end the row expires. @if (payout
+                            && form.getRawValue().start) {
+                            <button type="button" class="inline-link" (click)="form.patchValue({ start: '' })">
                                 Start immediately
                             </button>
+                            }
                         </p>
                     </div>
                 </div>
+                }
 
                 <div class="entry-actions">
-                    <p *ngIf="notice" class="notice" role="status">{{ notice }}</p>
+                    @if (notice) {
+                    <p class="notice" role="status">{{ notice }}</p>
+                    }
                     <button
                         mat-stroked-button
                         type="button"
@@ -172,8 +180,8 @@
             </form>
 
             <div id="rows-import">
+                @if (csvOpen) {
                 <fb-csv-panel
-                    *ngIf="csvOpen"
                     [description]="
                         'Upload files with List name, ' +
                         (payout ? 'optional ' : '') +
@@ -196,9 +204,10 @@
                     <ng-template let-row>
                         <code>{{ row.value }}</code> · {{ row.listName }} · {{ row.partyId || 'All payouts' }} ·
                         {{ row.scopeId || (row.partyId ? 'Whole party' : '—') }}
-                        <ng-container *ngIf="row.count"> · {{ row.count }} per window</ng-container>
+                        @if (row.count) { · {{ row.count }} per window }
                     </ng-template>
                 </fb-csv-panel>
+                }
             </div>
         </div>
 
@@ -206,97 +215,94 @@
             <header class="staged-header">
                 <h2 id="staged-rows-title">Staged rows</h2>
                 <span class="count" aria-live="polite">{{ staged.length }}</span>
-                <button
-                    *ngIf="staged.length"
-                    mat-button
-                    type="button"
-                    class="clear"
-                    [disabled]="saving"
-                    (click)="clearQueue()"
-                >
+                @if (staged.length) {
+                <button mat-button type="button" class="clear" [disabled]="saving" (click)="clearQueue()">
                     Clear all
                 </button>
+                }
             </header>
-            <div *ngIf="!staged.length; else queue" class="empty" [class.empty-compact]="csvOpen">
-                <span *ngIf="!csvOpen" class="empty-icon"><mat-icon>list</mat-icon></span>
+            @if (!staged.length) {
+            <div class="empty" [class.empty-compact]="csvOpen">
+                @if (!csvOpen) {
+                <span class="empty-icon"><mat-icon>list</mat-icon></span>
+                }
                 <strong>No rows queued yet</strong>
-                <p *ngIf="!csvOpen">
-                    Fill in the fields above and use <strong>Add row</strong>, or import rows from CSV.
-                </p>
+                @if (!csvOpen) {
+                <p>Fill in the fields above and use <strong>Add row</strong>, or import rows from CSV.</p>
+                }
             </div>
-            <ng-template #queue>
-                <div class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Staged rows table">
-                    <table class="fb-catalog-table" aria-labelledby="staged-rows-title">
-                        <thead>
-                            <tr>
-                                <th scope="col">Target</th>
-                                <th scope="col">List name</th>
-                                <th scope="col">Party ID</th>
-                                <th scope="col">{{ scopeLabel }}</th>
-                                <th scope="col">Value</th>
-                                <th scope="col">Limit</th>
-                                <th scope="col" class="row-actions">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let row of staged; let i = index">
-                                <td>
-                                    <span class="target-cell"
-                                        ><span class="list-dot" [ngClass]="'list-dot-' + row.listType"></span
-                                        >{{ labels[row.listType] }}</span
-                                    >
-                                </td>
-                                <td class="fb-catalog-mono">{{ row.listName }}</td>
-                                <td [class.fb-catalog-mono]="row.partyId">{{ row.partyId || 'All payouts' }}</td>
-                                <td [class.fb-catalog-mono]="row.scopeId">
-                                    {{ row.scopeId || (row.partyId ? 'Whole party' : '—') }}
-                                </td>
-                                <td>
-                                    <code>{{ row.value }}</code>
-                                </td>
-                                <td class="fb-catalog-time limit-range">
-                                    <ng-container *ngIf="row.count; else noLimit">
-                                        {{ row.count }} · {{ row.start | date : 'yyyy-MM-dd HH:mm' }} →
-                                        {{ row.end | date : 'yyyy-MM-dd HH:mm' }}
-                                    </ng-container>
-                                    <ng-template #noLimit>—</ng-template>
-                                </td>
-                                <td>
-                                    <button
-                                        mat-icon-button
-                                        type="button"
-                                        [disabled]="saving"
-                                        [attr.aria-label]="'Remove staged row ' + (i + 1)"
-                                        (click)="removeRow(i)"
-                                    >
-                                        <mat-icon>delete_outline</mat-icon>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </ng-template>
+            } @else {
+            <div class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Staged rows table">
+                <table class="fb-catalog-table" aria-labelledby="staged-rows-title">
+                    <thead>
+                        <tr>
+                            <th scope="col">Target</th>
+                            <th scope="col">List name</th>
+                            <th scope="col">Party ID</th>
+                            <th scope="col">{{ scopeLabel }}</th>
+                            <th scope="col">Value</th>
+                            <th scope="col">Limit</th>
+                            <th scope="col" class="row-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (row of staged; track row; let i = $index) {
+                        <tr>
+                            <td>
+                                <span class="target-cell"
+                                    ><span class="list-dot" [ngClass]="'list-dot-' + row.listType"></span
+                                    >{{ labels[row.listType] }}</span
+                                >
+                            </td>
+                            <td class="fb-catalog-mono">{{ row.listName }}</td>
+                            <td [class.fb-catalog-mono]="row.partyId">{{ row.partyId || 'All payouts' }}</td>
+                            <td [class.fb-catalog-mono]="row.scopeId">
+                                {{ row.scopeId || (row.partyId ? 'Whole party' : '—') }}
+                            </td>
+                            <td>
+                                <code>{{ row.value }}</code>
+                            </td>
+                            <td class="fb-catalog-time limit-range">
+                                @if (row.count) {
+                                {{ row.count }} · {{ row.start | date : 'yyyy-MM-dd HH:mm' }} →
+                                {{ row.end | date : 'yyyy-MM-dd HH:mm' }}
+                                } @else { — }
+                            </td>
+                            <td>
+                                <button
+                                    mat-icon-button
+                                    type="button"
+                                    [disabled]="saving"
+                                    [attr.aria-label]="'Remove staged row ' + (i + 1)"
+                                    (click)="removeRow(i)"
+                                >
+                                    <mat-icon>delete_outline</mat-icon>
+                                </button>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            }
         </section>
 
-        <mat-progress-bar *ngIf="saving" mode="indeterminate" aria-label="Creating rows"></mat-progress-bar>
+        @if (saving) {
+        <mat-progress-bar mode="indeterminate" aria-label="Creating rows"></mat-progress-bar>
+        }
         <footer class="page-footer">
-            <p *ngIf="error; else ready" class="error" role="alert">{{ error }}</p>
-            <ng-template #ready>
-                <p aria-live="polite">
-                    <ng-container *ngIf="draftStarted && !draftRow; else countReady">{{ $any(draft) }}</ng-container>
-                    <ng-template #countReady>
-                        <ng-container *ngIf="!createCount">
-                            Enter List name{{ payout ? '' : ', Party ID' }} and Value{{
-                                isGrey ? (payout ? ', Count and End time' : ', Count and the window') : ''
-                            }}, or import rows from CSV.
-                        </ng-container>
-                        <ng-container *ngIf="createCount">
-                            {{ createCount }} {{ createCount === 1 ? 'row' : 'rows' }} ready to create.
-                        </ng-container>
-                    </ng-template>
-                </p>
-            </ng-template>
+            @if (error) {
+            <p class="error" role="alert">{{ error }}</p>
+            } @else {
+            <p aria-live="polite">
+                @if (draftStarted && !draftRow) {
+                {{ $any(draft) }}
+                } @else { @if (!createCount) { Enter List name{{ payout ? '' : ', Party ID' }} and Value{{
+                    isGrey ? (payout ? ', Count and End time' : ', Count and the window') : ''
+                }}, or import rows from CSV. } @if (createCount) { {{ createCount }}
+                {{ createCount === 1 ? 'row' : 'rows' }} ready to create. } }
+            </p>
+            }
             <div class="footer-actions">
                 <button mat-stroked-button type="button" [disabled]="saving" (click)="back()">Cancel</button>
                 <button

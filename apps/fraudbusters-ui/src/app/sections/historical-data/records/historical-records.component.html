@@ -3,16 +3,19 @@
         <mat-icon>download</mat-icon>
         Export CSV
     </button>
-    <a *ngIf="kind.key === 'fraud-payments'" mat-stroked-button class="fb-primary-action" routerLink="/load/fraud">
+    @if (kind.key === 'fraud-payments') {
+    <a mat-stroked-button class="fb-primary-action" routerLink="/load/fraud">
         <mat-icon>add</mat-icon>
         Load fraud
     </a>
+    }
 </ng-template>
 
 <div class="records">
     <fb-historical-filters [kind]="kind" (filtersChange)="search($event)"></fb-historical-filters>
 
-    <div *ngIf="kind.selection && selected.size" class="selection-bar" role="region" aria-label="Selected records">
+    @if (kind.selection && selected.size) {
+    <div class="selection-bar" role="region" aria-label="Selected records">
         <div class="selection-summary" aria-live="polite">
             <strong>{{ selected.size }} selected</strong>
             <span>{{ selectionHint }}</span>
@@ -29,65 +32,59 @@
             </button>
         </div>
     </div>
+    }
 
     <section class="fb-catalog-panel" [attr.aria-label]="kind.title" [attr.aria-busy]="busy">
         <div class="table-toolbar">
             <div class="table-meta" aria-live="polite">
                 <strong>{{ kind.title }}</strong>
-                <span *ngIf="searched && !failed">
-                    · Showing {{ rows.length }} {{ rows.length === 1 ? 'record' : 'records'
-                    }}<ng-container *ngIf="continuationId"> · more available</ng-container>
+                @if (searched && !failed) {
+                <span>
+                    · Showing {{ rows.length }} {{ rows.length === 1 ? 'record' : 'records' }}@if (continuationId) { ·
+                    more available }
                 </span>
+                }
             </div>
             <label class="sort-control">
                 Sort by
                 <span class="catalog-select">
                     <mat-select [value]="sortOrder" (valueChange)="setSort($event)" aria-label="Sort by">
-                        <mat-option *ngFor="let option of sortOptions" [value]="option.value">{{
-                            option.label
-                        }}</mat-option>
+                        @for (option of sortOptions; track option) {
+                        <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                        }
                     </mat-select>
                 </span>
             </label>
         </div>
 
+        @if (rows.length) {
         <fb-historical-table
-            *ngIf="rows.length"
             [kind]="kind"
             [rows]="rows"
             [selected]="kind.selection ? selected : null"
-            (toggle)="toggle($event)"
+            (rowToggle)="toggle($event)"
             (toggleAll)="toggleAll($event)"
         ></fb-historical-table>
-
-        <footer *ngIf="rows.length" class="table-footer">
+        } @if (rows.length) {
+        <footer class="table-footer">
             <span>Times in your time zone · open a row for its details</span>
-            <button
-                *ngIf="continuationId"
-                class="load-more"
-                mat-button
-                type="button"
-                [disabled]="busy"
-                (click)="more()"
-            >
-                Show more
-            </button>
+            @if (continuationId) {
+            <button class="load-more" mat-button type="button" [disabled]="busy" (click)="more()">Show more</button>
+            }
         </footer>
-
-        <mat-progress-bar
-            *ngIf="busy"
-            mode="indeterminate"
-            [attr.aria-label]="'Loading ' + kind.title"
-        ></mat-progress-bar>
-
-        <div *ngIf="failed" class="table-state" role="alert">
+        } @if (busy) {
+        <mat-progress-bar mode="indeterminate" [attr.aria-label]="'Loading ' + kind.title"></mat-progress-bar>
+        } @if (failed) {
+        <div class="table-state" role="alert">
             Could not load {{ kind.title | lowercase }}.
             <button mat-button type="button" (click)="rows.length ? more() : reload()">Retry</button>
         </div>
-        <div *ngIf="searched && !busy && !failed && !rows.length" class="empty">
+        } @if (searched && !busy && !failed && !rows.length) {
+        <div class="empty">
             <mat-icon aria-hidden="true">manage_search</mat-icon>
             <strong>No records match your filters</strong>
             <p>Widen the time range or clear some filters.</p>
         </div>
+        }
     </section>
 </div>

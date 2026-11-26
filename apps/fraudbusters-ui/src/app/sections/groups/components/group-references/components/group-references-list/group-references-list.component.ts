@@ -7,6 +7,7 @@ import { ReferenceRow } from '../../../../../../shared/components/reference-tabl
     selector: 'fb-group-references-list',
     templateUrl: 'group-references-list.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class GroupReferencesListComponent {
     rows: ReferenceRow<GroupReference>[] = [];

@@ -9,7 +9,6 @@ import {
 import { PayoutsFeedbackService } from '../../services/payouts-feedback.service';
 
 @Component({
-    standalone: true,
     imports: [GroupEditorComponent],
     template: '<fb-group-editor [config]="config" (saved)="onSaved($event)"></fb-group-editor>',
 })

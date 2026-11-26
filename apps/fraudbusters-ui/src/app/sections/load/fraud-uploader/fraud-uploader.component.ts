@@ -17,6 +17,7 @@ const PREVIEW_ROWS = 50;
     templateUrl: './fraud-uploader.component.html',
     styleUrls: ['./fraud-uploader.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class FraudUploaderComponent {
     readonly columns = FRAUD_REPORT_COLUMNS.join(', ');

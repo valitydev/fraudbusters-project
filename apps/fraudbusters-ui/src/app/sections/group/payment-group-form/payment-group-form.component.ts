@@ -8,6 +8,7 @@ import { GroupEditorConfig } from '../../../shared/components/group-editor/group
 
 @Component({
     template: '<fb-group-editor [config]="config" (saved)="onSaved($event)"></fb-group-editor>',
+    standalone: false,
 })
 export class PaymentGroupFormComponent {
     readonly config: GroupEditorConfig = {

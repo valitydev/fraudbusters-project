@@ -1,4 +1,5 @@
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ChangeDetectorRef, SimpleChange } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormBuilder } from '@angular/forms';
@@ -16,10 +17,12 @@ describe('CreateNotificationComponent contract', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
+            imports: [],
             providers: [
                 NotificationsService,
                 { provide: ConfigService, useValue: { fbManagementEndpoint: '/api', pageSize: 20 } },
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
             ],
         });
         http = TestBed.inject(HttpTestingController);

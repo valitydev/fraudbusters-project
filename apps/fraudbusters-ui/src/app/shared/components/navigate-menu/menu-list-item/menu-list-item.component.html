@@ -1,28 +1,24 @@
-<ng-container *ngIf="display()">
-    <ng-container *ngIf="hasChildren(); else link">
-        <button type="button" class="menu-item menu-section" (click)="toggle()" [attr.aria-expanded]="expanded">
-            <mat-icon aria-hidden="true">{{ item.iconName }}</mat-icon>
-            <span>{{ item.displayName }}</span>
-            <mat-icon aria-hidden="true" class="menu-expand">{{ expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
-        </button>
-        <div *ngIf="expanded" class="menu-children">
-            <fb-menu-list-item
-                *ngFor="let child of item.children"
-                [item]="child"
-                [depth]="depth + 1"
-            ></fb-menu-list-item>
-        </div>
-    </ng-container>
-    <ng-template #link>
-        <a
-            class="menu-item"
-            [class.menu-child]="depth > 0"
-            [class.active]="active"
-            [routerLink]="'/' + item.route"
-            [attr.aria-current]="active ? 'page' : null"
-        >
-            <mat-icon aria-hidden="true">{{ item.iconName }}</mat-icon>
-            <span>{{ item.displayName }}</span>
-        </a>
-    </ng-template>
-</ng-container>
+@if (display()) { @if (hasChildren()) {
+<button type="button" class="menu-item menu-section" (click)="toggle()" [attr.aria-expanded]="expanded">
+    <mat-icon aria-hidden="true">{{ item.iconName }}</mat-icon>
+    <span>{{ item.displayName }}</span>
+    <mat-icon aria-hidden="true" class="menu-expand">{{ expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+</button>
+@if (expanded) {
+<div class="menu-children">
+    @for (child of item.children; track child) {
+    <fb-menu-list-item [item]="child" [depth]="depth + 1"></fb-menu-list-item>
+    }
+</div>
+} } @else {
+<a
+    class="menu-item"
+    [class.menu-child]="depth > 0"
+    [class.active]="active"
+    [routerLink]="'/' + item.route"
+    [attr.aria-current]="active ? 'page' : null"
+>
+    <mat-icon aria-hidden="true">{{ item.iconName }}</mat-icon>
+    <span>{{ item.displayName }}</span>
+</a>
+} }

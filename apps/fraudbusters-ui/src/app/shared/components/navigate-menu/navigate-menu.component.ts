@@ -8,6 +8,7 @@ import { NavItem } from '../../model/nav-item';
     templateUrl: './navigate-menu.component.html',
     styleUrls: ['./navigate-menu.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class NavigateMenuComponent {
     navItems: NavItem[] = MenuModel.navItems;

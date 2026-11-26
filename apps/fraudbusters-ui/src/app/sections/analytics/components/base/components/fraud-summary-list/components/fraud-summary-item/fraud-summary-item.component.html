@@ -8,16 +8,16 @@
         </span>
     </div>
     <div role="cell">
-        <ng-container *ngIf="ruleIndex as index; else namedRule">
-            Rule #{{ index }} <span class="meta-tag unnamed">unnamed</span>
-        </ng-container>
-        <ng-template #namedRule>
-            <span [class.muted]="!summary.checkedRule">{{ summary.checkedRule || '—' }}</span>
-        </ng-template>
+        @if (ruleIndex; as index) { Rule #{{ index }} <span class="meta-tag unnamed">unnamed</span>
+        } @else {
+        <span [class.muted]="!summary.checkedRule">{{ summary.checkedRule || '—' }}</span>
+        }
     </div>
     <div role="cell">
         {{ (metricValue(summary.summary.sum) | number : '1.0-2') ?? '—' }}
-        <span *ngIf="metricValue(summary.summary.sum) !== null" class="currency">{{ currency }}</span>
+        @if (metricValue(summary.summary.sum) !== null) {
+        <span class="currency">{{ currency }}</span>
+        }
     </div>
     <div role="cell">{{ (metricValue(summary.summary.count) | number) ?? '—' }}</div>
     <div role="cell">{{ (metricValue(summary.summary.ratio) | percent : '1.1-1') ?? '—' }}</div>

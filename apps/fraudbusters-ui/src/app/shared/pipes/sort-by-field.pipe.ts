@@ -1,6 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({ name: 'sort' })
+@Pipe({
+    name: 'sort',
+    standalone: false,
+})
 export class ArraySortPipe implements PipeTransform {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     transform(array: any, field: string): any[] {

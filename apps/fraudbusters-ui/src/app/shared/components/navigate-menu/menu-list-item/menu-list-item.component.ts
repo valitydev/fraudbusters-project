@@ -19,6 +19,7 @@ import { NavItem } from '../../../model/nav-item';
     templateUrl: './menu-list-item.component.html',
     styleUrls: ['./menu-list-item.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class MenuListItemComponent implements OnInit {
     @Input() item: NavItem;

@@ -5,8 +5,10 @@
         <div class="account-caption">Access roles</div>
     </div>
 </div>
-<ng-container *ngIf="roles | filterRoles as visibleRoles">
-    <ul *ngIf="visibleRoles.length" class="account-roles" aria-label="Access roles">
-        <li *ngFor="let role of visibleRoles">{{ role | formatRole }}</li>
-    </ul>
-</ng-container>
+@if (roles | filterRoles; as visibleRoles) { @if (visibleRoles.length) {
+<ul class="account-roles" aria-label="Access roles">
+    @for (role of visibleRoles; track role) {
+    <li>{{ role | formatRole }}</li>
+    }
+</ul>
+} }

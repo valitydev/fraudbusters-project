@@ -37,9 +37,10 @@ const FREQUENCIES: Option[] = [
 @Component({
     selector: 'fb-create-notification',
     templateUrl: './create-notification.component.html',
-    styleUrls: ['../reference-form/reference-form.component.scss', './create-notification.component.scss'],
+    styleUrls: ['../form-page/form-page.scss', './create-notification.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [NotificationService],
+    standalone: false,
 })
 export class CreateNotificationComponent implements OnChanges {
     @Input() notification?: Notification;

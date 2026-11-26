@@ -4,6 +4,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
@@ -29,6 +30,7 @@ import { DateTimeRangeComponent } from '../../shared/components/datetime-range/d
         CommonModule,
         MatButtonModule,
         MatIconModule,
+        MatProgressBarModule,
         ConfirmActionDialogModule,
         SharedPipesModule,
         MatSnackBarModule,

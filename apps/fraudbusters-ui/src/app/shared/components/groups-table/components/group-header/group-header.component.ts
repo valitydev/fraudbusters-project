@@ -6,5 +6,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     selector: 'tr[fb-group-header]',
     templateUrl: 'group-header.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class GroupHeaderComponent {}

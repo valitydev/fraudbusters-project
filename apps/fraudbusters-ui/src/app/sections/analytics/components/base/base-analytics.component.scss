@@ -7,6 +7,73 @@
     container-type: inline-size;
 }
 
+// Data and its skeleton; the loading bar runs along the bottom edge of the filters.
+.analytics-body {
+    position: relative;
+    display: grid;
+    gap: 20px;
+    min-width: 0;
+
+    > * {
+        transition: opacity 120ms ease;
+    }
+
+    // Dim only once the reload is noticeable; restore at once when it ends.
+    &.refreshing > * {
+        opacity: 0.55;
+        pointer-events: none;
+        transition-delay: var(--fb-loader-delay, 300ms);
+    }
+}
+
+.analytics-skeleton {
+    display: grid;
+    gap: 20px;
+}
+
+.skeleton-line,
+.skeleton-card {
+    animation: skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+.skeleton-line {
+    display: block;
+    grid-column: 1 / -1;
+    height: 12px;
+    border-radius: 6px;
+    background: var(--fb-line);
+
+    &.label {
+        width: 45%;
+    }
+
+    &.value {
+        width: 30%;
+        height: 28px;
+    }
+
+    &.note {
+        width: 65%;
+    }
+}
+
+.skeleton-card {
+    min-height: 330px;
+}
+
+@keyframes skeleton-pulse {
+    50% {
+        opacity: 0.45;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skeleton-line,
+    .skeleton-card {
+        animation: none;
+    }
+}
+
 .analytics-header,
 .title-wrap,
 .breakdown-header,
@@ -57,8 +124,8 @@
 }
 
 .export-button {
-    --mdc-outlined-button-outline-color: var(--fb-line-strong);
-    --mdc-outlined-button-container-shape: 8px;
+    --mat-button-outlined-outline-color: var(--fb-line-strong);
+    --mat-button-outlined-container-shape: 8px;
     letter-spacing: normal;
 
     mat-icon {

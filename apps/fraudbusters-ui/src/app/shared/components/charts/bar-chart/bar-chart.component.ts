@@ -10,6 +10,7 @@ import { DEFAULT_CONFIG } from './default-config';
     selector: 'fb-bar-chart',
     templateUrl: 'bar-chart.component.html',
     styleUrls: ['bar-chart.component.scss'],
+    standalone: false,
 })
 export class BarChartComponent implements OnChanges {
     @Input()

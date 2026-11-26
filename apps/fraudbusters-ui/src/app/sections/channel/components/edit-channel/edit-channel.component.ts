@@ -15,6 +15,7 @@ interface LoadState {
 @Component({
     templateUrl: './edit-channel.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class EditChannelComponent {
     readonly reload$ = new BehaviorSubject<void>(undefined);

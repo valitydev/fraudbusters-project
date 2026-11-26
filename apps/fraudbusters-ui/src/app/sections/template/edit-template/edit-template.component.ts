@@ -8,6 +8,7 @@ import { TemplatesService } from '../services/templates/templates.service';
     templateUrl: './edit-template.component.html',
     styleUrls: ['./edit-template.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class EditTemplateComponent {
     operationType$ = this.route.fragment;

@@ -1,5 +1,6 @@
-import { HistoricalColumn, HistoricalKind } from './historical-kinds';
-import { formatAmount, HistoricalRow } from './historical-row';
+import { HistoricalKind } from './historical-kinds';
+import { formatAmount, HistoricalRow } from '../../../shared/components/historical-table/historical-row';
+import { HistoricalColumn } from '../../../shared/components/historical-table/historical-table-kind';
 
 function cell(value: unknown): string {
     const text = value === undefined || value === null ? '' : String(value);

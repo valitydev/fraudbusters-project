@@ -4,6 +4,8 @@
     </a>
 </div>
 <div class="nav-list">
-    <fb-menu-list-item *ngFor="let item of navItems" [item]="item"></fb-menu-list-item>
+    @for (item of navItems; track item) {
+    <fb-menu-list-item [item]="item"></fb-menu-list-item>
+    }
 </div>
 <ng-content select="[menu-footer]"></ng-content>

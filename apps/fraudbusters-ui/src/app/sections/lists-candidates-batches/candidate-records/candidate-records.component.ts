@@ -1,4 +1,4 @@
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -10,7 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router } from '@angular/router';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { filter, switchMap } from 'rxjs/operators';
 
 import {
     CANDIDATE_LIST_LABELS,
@@ -27,6 +27,7 @@ import {
 } from '../../../shared/components/confirm-action-dialog';
 import { listNamePill } from '../../../shared/components/list-records-table/list-record-row';
 import { SortOrder } from '../../../shared/constants/sort-order';
+import { catalogSearchQuery } from '../../../shared/utils/catalog-collection';
 
 /** Candidates have no paging total; one batch is loaded up to this size. */
 export const CANDIDATE_RECORDS_LIMIT = 1000;
@@ -36,11 +37,8 @@ export const CANDIDATE_RECORDS_LIMIT = 1000;
  * each record is proposed for. Records without a value cannot be picked.
  */
 @Component({
-    standalone: true,
     imports: [
         NgClass,
-        NgFor,
-        NgIf,
         MatButtonModule,
         MatCheckboxModule,
         MatDialogModule,
@@ -53,7 +51,6 @@ export const CANDIDATE_RECORDS_LIMIT = 1000;
     ],
     templateUrl: './candidate-records.component.html',
     styleUrls: [
-        '../../lists/lists.component.scss',
         '../../../shared/components/list-records-table/list-records-table.component.scss',
         './candidate-records.component.scss',
     ],
@@ -124,11 +121,8 @@ export class CandidateRecordsComponent {
         private destroyRef: DestroyRef
     ) {
         this.batchId = route.snapshot.paramMap.get('id') ?? '';
-        route.queryParamMap
-            .pipe(
-                map((params) => params.get('searchQuery') ?? ''),
-                takeUntilDestroyed(destroyRef)
-            )
+        catalogSearchQuery(route)
+            .pipe(takeUntilDestroyed(destroyRef))
             .subscribe((query) => this.search.set(query));
         this.load();
     }

@@ -14,6 +14,7 @@ import { GroupListRow } from '../../group-list-row';
         '.more-templates { flex-shrink: 0; font-size: var(--fb-table-value-font-size); }',
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class GroupItemComponent {
     @Input()

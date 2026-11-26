@@ -1,11 +1,12 @@
-import { Clipboard } from '@angular/cdk/clipboard';
-import { DatePipe, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
+
+import { CopyToClipboardService } from '../../services/copy-to-clipboard.service';
 
 export interface ReferenceRow<T> {
     id?: string;
@@ -20,18 +21,7 @@ export interface ReferenceRow<T> {
 
 @Component({
     selector: 'fb-reference-table',
-    standalone: true,
-    imports: [
-        DatePipe,
-        NgFor,
-        NgIf,
-        NgTemplateOutlet,
-        MatButtonModule,
-        MatIconModule,
-        MatMenuModule,
-        MatSnackBarModule,
-        RouterLink,
-    ],
+    imports: [DatePipe, NgTemplateOutlet, MatButtonModule, MatIconModule, MatMenuModule, MatSnackBarModule, RouterLink],
     templateUrl: 'reference-table.component.html',
     styleUrls: ['reference-table.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,14 +38,13 @@ export class ReferenceTableComponent<T> {
 
     @Output() readonly remove = new EventEmitter<T>();
 
-    constructor(private router: Router, private clipboard: Clipboard, private snackBar: MatSnackBar) {}
+    constructor(private router: Router, private copier: CopyToClipboardService) {}
 
     get returnUrl(): string {
         return this.router.url;
     }
 
     copyId(id: string, label: string): void {
-        const copied = this.clipboard.copy(id);
-        this.snackBar.open(copied ? label + ' copied' : 'Could not copy ' + label, 'OK', { duration: 2500 });
+        this.copier.copy(id, label);
     }
 }

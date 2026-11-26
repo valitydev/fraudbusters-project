@@ -1,5 +1,4 @@
-import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, DOCUMENT } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Papa } from 'ngx-papaparse';
 
@@ -10,6 +9,7 @@ import { FraudResultSummary } from '../../../../api/fb-management/swagger-codege
     templateUrl: 'base-analytics.component.html',
     styleUrls: ['./base-analytics.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class BaseAnalyticsComponent {
     readonly state$ = this.analytics.state$;

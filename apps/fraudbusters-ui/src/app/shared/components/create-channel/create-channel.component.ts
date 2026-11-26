@@ -21,12 +21,10 @@ import { ChannelType } from '../../../api/fb-management/swagger-codegen/model/ch
 @Component({
     selector: 'fb-create-channel',
     templateUrl: './create-channel.component.html',
-    styleUrls: [
-        '../reference-form/reference-form.component.scss',
-        '../create-notification/create-notification.component.scss',
-    ],
+    styleUrls: ['../form-page/form-page.scss', '../create-notification/create-notification.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [ChannelService],
+    standalone: false,
 })
 export class CreateChannelComponent implements OnChanges {
     @Input() channel?: Channel;

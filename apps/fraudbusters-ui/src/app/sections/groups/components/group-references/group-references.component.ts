@@ -2,12 +2,13 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
-import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import { startWith } from 'rxjs/operators';
 
 import { GroupReference } from '../../../../api/fb-management/swagger-codegen/model/groupReference';
 import { GroupTabCounts } from '../../../../shared/components/groups-table/group-tab-counts';
 import { OperationType } from '../../../../shared/constants/operation-type';
 import { SortOrder } from '../../../../shared/constants/sort-order';
+import { catalogSearchQuery } from '../../../../shared/utils/catalog-collection';
 import { FetchReferencesService } from '../../services/fetch-references/fetch-references.service';
 import { RemoveReferenceService } from '../../services/remove-reference/remove-reference.service';
 
@@ -15,6 +16,7 @@ import { RemoveReferenceService } from '../../services/remove-reference/remove-r
     templateUrl: 'group-references.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [FetchReferencesService, RemoveReferenceService],
+    standalone: false,
 })
 export class GroupReferencesComponent {
     references$ = this.fetchReferencesService.fetchResultChanges$.pipe(
@@ -36,12 +38,8 @@ export class GroupReferencesComponent {
         private tabCounts: GroupTabCounts
     ) {
         const destroyRef = inject(DestroyRef);
-        route.queryParamMap
-            .pipe(
-                map((params) => (params.get('searchQuery') ?? '').trim()),
-                distinctUntilChanged(),
-                takeUntilDestroyed(destroyRef)
-            )
+        catalogSearchQuery(route)
+            .pipe(takeUntilDestroyed(destroyRef))
             .subscribe((query) => {
                 this.searchValue = query;
                 this.search();

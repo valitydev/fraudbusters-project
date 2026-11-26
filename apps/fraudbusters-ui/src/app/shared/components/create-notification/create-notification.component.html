@@ -22,19 +22,15 @@
         </div>
     </header>
 
-    <div *ngIf="loading" class="reference-card state" role="status">Loading notification…</div>
-    <div *ngIf="loadFailed" class="reference-card state" role="alert">
+    @if (loading) {
+    <div class="reference-card state fb-delayed-loader" role="status">Loading notification…</div>
+    } @if (loadFailed) {
+    <div class="reference-card state" role="alert">
         Could not load the notification.
         <button mat-stroked-button type="button" (click)="retry.emit()">Retry</button>
     </div>
-
-    <form
-        *ngIf="!loading && !loadFailed"
-        class="reference-card"
-        [formGroup]="form"
-        [attr.aria-busy]="saving"
-        (ngSubmit)="saveNotification()"
-    >
+    } @if (!loading && !loadFailed) {
+    <form class="reference-card" [formGroup]="form" [attr.aria-busy]="saving" (ngSubmit)="saveNotification()">
         <section class="reference-entry" aria-labelledby="notification-report-title">
             <div class="entry-header">
                 <h2 class="fb-section-title" id="notification-report-title">Report</h2>
@@ -68,9 +64,9 @@
                         aria-describedby="notification-template-hint"
                         required
                     >
-                        <mat-option *ngFor="let template of notificationsTemplates$ | async" [value]="template.id">{{
-                            template.name
-                        }}</mat-option>
+                        @for (template of notificationsTemplates$ | async; track template) {
+                        <mat-option [value]="template.id">{{ template.name }}</mat-option>
+                        }
                     </mat-select>
                     <p id="notification-template-hint">Report the notification is built from.</p>
                 </div>
@@ -90,7 +86,6 @@
                 </div>
             </div>
         </section>
-
         <section class="reference-entry" aria-labelledby="notification-delivery-title">
             <div class="entry-header">
                 <h2 class="fb-section-title" id="notification-delivery-title">Delivery</h2>
@@ -110,9 +105,9 @@
                         aria-describedby="notification-channel-hint"
                         required
                     >
-                        <mat-option *ngFor="let channel of notificationsChannels$ | async" [value]="channel.name">{{
-                            channel.name
-                        }}</mat-option>
+                        @for (channel of notificationsChannels$ | async; track channel) {
+                        <mat-option [value]="channel.name">{{ channel.name }}</mat-option>
+                        }
                     </mat-select>
                     <p id="notification-channel-hint">Channel that receives the report.</p>
                 </div>
@@ -129,9 +124,9 @@
                         aria-describedby="notification-period-hint"
                         required
                     >
-                        <mat-option *ngFor="let option of periods" [value]="option.value">{{
-                            option.label
-                        }}</mat-option>
+                        @for (option of periods; track option) {
+                        <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                        }
                     </mat-select>
                     <p id="notification-period-hint">Time range each report covers.</p>
                 </div>
@@ -148,29 +143,31 @@
                         aria-describedby="notification-frequency-hint"
                         required
                     >
-                        <mat-option *ngFor="let option of frequencies" [value]="option.value">{{
-                            option.label
-                        }}</mat-option>
+                        @for (option of frequencies; track option) {
+                        <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                        }
                     </mat-select>
                     <p id="notification-frequency-hint">How often the report is sent.</p>
                 </div>
             </div>
         </section>
-
-        <mat-progress-bar *ngIf="saving" mode="indeterminate" aria-label="Saving notification"></mat-progress-bar>
+        @if (saving) {
+        <mat-progress-bar mode="indeterminate" aria-label="Saving notification"></mat-progress-bar>
+        }
         <footer class="page-footer">
-            <p *ngIf="error; else status" class="error" role="alert">{{ error }}</p>
-            <ng-template #status>
-                <p aria-live="polite">
-                    {{
-                        form.invalid
-                            ? 'Fill in all required fields to enable ' + (editing ? 'Save' : 'Create') + '.'
-                            : editing
-                            ? 'Changes are ready to save.'
-                            : 'The notification is ready to create.'
-                    }}
-                </p>
-            </ng-template>
+            @if (error) {
+            <p class="error" role="alert">{{ error }}</p>
+            } @else {
+            <p aria-live="polite">
+                {{
+                    form.invalid
+                        ? 'Fill in all required fields to enable ' + (editing ? 'Save' : 'Create') + '.'
+                        : editing
+                        ? 'Changes are ready to save.'
+                        : 'The notification is ready to create.'
+                }}
+            </p>
+            }
             <div class="footer-actions">
                 <button mat-stroked-button type="button" [disabled]="saving" (click)="back()">Cancel</button>
                 <button
@@ -185,4 +182,5 @@
             </div>
         </footer>
     </form>
+    }
 </div>

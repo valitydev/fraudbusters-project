@@ -1,5 +1,5 @@
+@if (catalog.view$ | async; as view) {
 <fb-catalog-panel
-    *ngIf="catalog.view$ | async as view"
     label="Payout template references"
     searchLabel="Find template, party or wallet"
     itemName="references"
@@ -14,8 +14,8 @@
     (more)="catalog.more()"
     (retry)="catalog.refresh()"
 >
+    @if (view.rows.length) {
     <fb-reference-table
-        *ngIf="view.rows.length"
         label="Payout template references"
         target="Template"
         targetRoute="/payouts/template"
@@ -25,4 +25,6 @@
         [showGlobal]="true"
         (remove)="removeReference($event)"
     ></fb-reference-table>
+    }
 </fb-catalog-panel>
+}

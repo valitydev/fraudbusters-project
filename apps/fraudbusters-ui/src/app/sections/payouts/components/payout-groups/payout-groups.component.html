@@ -1,5 +1,5 @@
+@if (catalog.view$ | async; as view) {
 <fb-catalog-panel
-    *ngIf="catalog.view$ | async as view"
     label="Payout groups"
     searchLabel="Search group or template ID"
     itemName="groups"
@@ -15,12 +15,14 @@
     (more)="catalog.more()"
     (retry)="catalog.refresh()"
 >
+    @if (view.rows.length) {
     <fb-groups-list
         label="Payout groups"
-        *ngIf="view.rows.length"
         [groups]="view.rows"
         (editItem)="editGroup($event)"
         (deleteItem)="removeGroup($event)"
         (duplicateItem)="duplicateGroup($event)"
     ></fb-groups-list>
+    }
 </fb-catalog-panel>
+}

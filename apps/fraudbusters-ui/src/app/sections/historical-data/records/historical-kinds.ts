@@ -2,6 +2,10 @@ import { DatePipe } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { Payment } from '../../../api/fb-management/swagger-codegen/model/payment';
+import { Withdrawal } from '../../../api/fb-management/swagger-codegen/model/withdrawal';
+import { HistoricalDataService } from '../../../api/payments/historical-data';
+import { PayoutsService } from '../../../api/payouts';
 import {
     chargebackRow,
     fraudPaymentRow,
@@ -11,11 +15,8 @@ import {
     payoutInspectResultRow,
     payoutRow,
     refundRow,
-} from './historical-row';
-import { Payment } from '../../../api/fb-management/swagger-codegen/model/payment';
-import { Withdrawal } from '../../../api/fb-management/swagger-codegen/model/withdrawal';
-import { HistoricalDataService } from '../../../api/payments/historical-data';
-import { PayoutsService } from '../../../api/payouts';
+} from '../../../shared/components/historical-table/historical-row';
+import { HistoricalTableKind } from '../../../shared/components/historical-table/historical-table-kind';
 import { DateFormat } from '../../../shared/constants/date-format';
 import { SortOrder } from '../../../shared/constants/sort-order';
 import { SearchHistoricalParams } from '../search-historical-params';
@@ -28,20 +29,6 @@ export type HistoricalKindKey =
     | 'fraud-payments'
     | 'payouts'
     | 'payout-inspect-results';
-
-export type HistoricalColumn =
-    | 'status'
-    | 'amount'
-    | 'party'
-    | 'scope'
-    | 'email'
-    | 'user'
-    | 'method'
-    | 'category'
-    | 'code'
-    | 'fraudType'
-    | 'template'
-    | 'rule';
 
 /** Filters under "Additional filters"; ID, Email, Party and Shop / Wallet are always shown. */
 export type AdditionalFilter =
@@ -87,20 +74,13 @@ export interface HistoricalApis {
 }
 
 /** What a historical tab shows and how it asks the backend for it. */
-export interface HistoricalKind {
+export interface HistoricalKind extends HistoricalTableKind {
     key: HistoricalKindKey;
-    title: string;
-    operation: 'payment' | 'payout';
-    columns: HistoricalColumn[];
-    /** Rule engine results call the status "Result status". */
-    statusLabel: string;
     statuses: string[];
     additional: AdditionalFilter[];
     filterHint: string;
     /** Rows can be picked for a data set (payments) or sent to list candidates (chargebacks). */
     selection?: 'data-set' | 'candidates';
-    /** The template column links to this editor. */
-    templateLink?: (id: string) => string[];
     fetch(apis: HistoricalApis, query: HistoricalQuery): Observable<HistoricalPage>;
 }
 

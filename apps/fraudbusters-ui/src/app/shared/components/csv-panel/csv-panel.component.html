@@ -28,18 +28,28 @@
         </div>
         <div class="csv-column">
             <h4 class="column-title">
-                Preview <span *ngIf="rows.length">· {{ rows.length }} ready</span>
+                Preview @if (rows.length) {
+                <span>· {{ rows.length }} ready</span>
+                }
             </h4>
             <div class="preview">
-                <p *ngIf="reading" role="status">Reading CSV files…</p>
-                <p *ngIf="!reading && !rows.length && !issues.length">Imported rows will appear here.</p>
-                <ul *ngIf="rows.length">
-                    <li *ngFor="let row of rows | slice : 0 : 12">
+                @if (reading) {
+                <p role="status">Reading CSV files…</p>
+                } @if (!reading && !rows.length && !issues.length) {
+                <p>Imported rows will appear here.</p>
+                } @if (rows.length) {
+                <ul>
+                    @for (row of rows | slice : 0 : 12; track row) {
+                    <li>
                         <ng-container *ngTemplateOutlet="rowTemplate; context: { $implicit: row }"></ng-container>
                     </li>
+                    }
                 </ul>
-                <p *ngIf="rows.length > 12">And {{ rows.length - 12 }} more</p>
-                <p *ngFor="let issue of issues" role="status">{{ issue }}</p>
+                } @if (rows.length > 12) {
+                <p>And {{ rows.length - 12 }} more</p>
+                } @for (issue of issues; track issue) {
+                <p role="status">{{ issue }}</p>
+                }
             </div>
         </div>
     </div>

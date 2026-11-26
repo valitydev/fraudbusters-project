@@ -1,4 +1,4 @@
-import { NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -8,16 +8,7 @@ import { CatalogSearchComponent } from '../catalog-search/catalog-search.compone
 
 @Component({
     selector: 'fb-catalog-panel',
-    standalone: true,
-    imports: [
-        NgFor,
-        NgIf,
-        NgTemplateOutlet,
-        MatButtonModule,
-        MatProgressBarModule,
-        MatSelectModule,
-        CatalogSearchComponent,
-    ],
+    imports: [NgTemplateOutlet, MatButtonModule, MatProgressBarModule, MatSelectModule, CatalogSearchComponent],
     templateUrl: 'catalog-panel.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

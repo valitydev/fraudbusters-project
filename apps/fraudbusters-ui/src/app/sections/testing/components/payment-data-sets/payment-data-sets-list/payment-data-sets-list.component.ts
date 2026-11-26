@@ -7,6 +7,7 @@ import { DataSet } from '../../../../../api/fb-management/swagger-codegen/model/
     styleUrls: ['payment-data-sets-list.component.scss'],
     templateUrl: 'payment-data-sets-list.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class PaymentDataSetsListComponent {
     @Input()

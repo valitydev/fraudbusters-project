@@ -21,9 +21,9 @@ export interface PayoutSectionLink {
 /** A payout section with its own tabs, laid out like the payment section of the same name. */
 @Component({
     templateUrl: 'payout-section.component.html',
-    styleUrls: ['../lists/lists.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [GroupTabCounts],
+    standalone: false,
 })
 export class PayoutSectionComponent {
     readonly view$ = combineLatest([

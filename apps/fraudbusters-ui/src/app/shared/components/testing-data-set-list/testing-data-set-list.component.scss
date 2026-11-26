@@ -2,39 +2,3 @@
     justify-content: flex-start;
     gap: 8px;
 }
-
-table {
-    min-width: 930px;
-}
-
-.id-column {
-    width: 130px;
-}
-
-.status-column {
-    width: 124px;
-}
-
-.amount-column {
-    width: 100px;
-}
-
-.currency-column {
-    width: 85px;
-}
-
-.details-column {
-    width: 64px;
-}
-
-.truncate {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.fb-catalog-table .numeric {
-    text-align: end;
-    font-variant-numeric: tabular-nums;
-}

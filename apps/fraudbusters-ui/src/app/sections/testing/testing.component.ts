@@ -5,6 +5,7 @@ import { hasActiveFragments } from '../../shared/utils/has-active-fragments';
 
 @Component({
     templateUrl: 'testing.component.html',
+    standalone: false,
 })
 export class TestingComponent {
     links = [

@@ -1,4 +1,5 @@
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
 import { PayoutsService } from './payouts.service';
@@ -12,8 +13,13 @@ describe('PayoutsService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
-            providers: [PayoutsService, { provide: ConfigService, useValue: { fbManagementEndpoint: endpoint } }],
+            imports: [],
+            providers: [
+                PayoutsService,
+                { provide: ConfigService, useValue: { fbManagementEndpoint: endpoint } },
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ],
         });
         service = TestBed.inject(PayoutsService);
         http = TestBed.inject(HttpTestingController);

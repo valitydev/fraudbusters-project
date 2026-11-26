@@ -15,6 +15,7 @@ interface LoadState {
 @Component({
     templateUrl: './edit-notification.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class EditNotificationComponent {
     readonly reload$ = new BehaviorSubject<void>(undefined);

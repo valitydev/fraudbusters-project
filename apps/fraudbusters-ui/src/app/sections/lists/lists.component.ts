@@ -26,6 +26,7 @@ const BATCH_PAGE = 100;
     styleUrls: ['lists.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [ListsEventsService],
+    standalone: false,
 })
 export class ListsComponent implements OnInit {
     readonly links: ListTab[] = [

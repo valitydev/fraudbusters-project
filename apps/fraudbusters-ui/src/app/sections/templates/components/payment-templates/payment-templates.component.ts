@@ -13,6 +13,7 @@ import { RemovePaymentTemplateService } from '../../services/remove-payment-temp
     templateUrl: 'payment-templates.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [FetchPaymentTemplatesService, RemovePaymentTemplateService],
+    standalone: false,
 })
 export class PaymentTemplatesComponent {
     readonly sortOptions = CATALOG_SORT_OPTIONS;

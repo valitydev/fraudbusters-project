@@ -14,6 +14,7 @@ import { statusPillClass } from '../../shared/utils/status-tone';
     templateUrl: './audit.component.html',
     styleUrls: ['./audit.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class AuditComponent {
     filter: Filter;

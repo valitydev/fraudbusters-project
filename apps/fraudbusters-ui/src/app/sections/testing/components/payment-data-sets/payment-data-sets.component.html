@@ -1,5 +1,5 @@
+@if ({ dataSets: (dataSets$ | async) ?? [] }; as view) {
 <fb-catalog-panel
-    *ngIf="{ dataSets: (dataSets$ | async) ?? [] } as view"
     label="Data sets"
     searchLabel="Search data sets by name"
     searchParam="searchValue"
@@ -20,10 +20,12 @@
         [to]="range.to"
         (rangeChange)="setRange($event)"
     ></fb-datetime-range>
+    @if (view.dataSets.length) {
     <fb-payment-data-sets-list
-        *ngIf="view.dataSets.length"
         [dataSets]="view.dataSets"
         (goToDataSet)="goToDataSet($event)"
         (deleteItem)="removeDataSet($event)"
     ></fb-payment-data-sets-list>
+    }
 </fb-catalog-panel>
+}

@@ -14,9 +14,7 @@
             <p class="fb-page-subtitle">Use an existing payment template as a starting point.</p>
         </div>
     </header>
-    <fb-create-template
-        *ngIf="template$ | async as template"
-        [template]="template"
-        [isEditableName]="true"
-    ></fb-create-template>
+    @if (template$ | async; as template) {
+    <fb-create-template [template]="template" [isEditableName]="true"></fb-create-template>
+    }
 </div>

@@ -43,7 +43,6 @@ function localInput(date: Date): string {
  * each with its own target list, and created together.
  */
 @Component({
-    standalone: true,
     imports: [
         CommonModule,
         ReactiveFormsModule,
@@ -56,10 +55,7 @@ function localInput(date: Date): string {
         DateTimeRangeComponent,
     ],
     templateUrl: 'list-rows-form.component.html',
-    styleUrls: [
-        '../../../shared/components/reference-form/reference-form.component.scss',
-        'list-rows-form.component.scss',
-    ],
+    styleUrls: ['../../../shared/components/form-page/form-page.scss', 'list-rows-form.component.scss'],
 })
 export class ListRowsFormComponent {
     readonly payout = this.route.snapshot.data.payout === true;
