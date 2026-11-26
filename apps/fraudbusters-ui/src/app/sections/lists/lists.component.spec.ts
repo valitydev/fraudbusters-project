@@ -33,7 +33,9 @@ describe(ListsComponent.name, () => {
         const metadata = http.expectOne('/management/payments/catalog/lists/metadata');
         expect(content.hidden).toBeTrue();
 
-        const records = http.expectOne((request) => request.url === '/management/payments/catalog/lists/filter-records');
+        const records = http.expectOne(
+            (request) => request.url === '/management/payments/catalog/lists/filter-records'
+        );
         expect(records.request.params.get('listType')).toBe('black');
         expect(records.request.params.has('listNames')).toBeFalse();
         records.flush({ count: 1, result: [{ id: 'record', listName: 'example', value: 'example-record' }] });
