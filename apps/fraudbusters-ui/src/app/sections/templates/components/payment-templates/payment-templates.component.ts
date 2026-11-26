@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { ConfigService } from '../../../../config';
+import { CatalogMetadataService } from '../../../../shared/components/catalog-panel/catalog-metadata.service';
 import { createTemplateCatalog } from '../../../../shared/components/templates-table/template-catalog';
 import { CATALOG_SORT_OPTIONS } from '../../../../shared/utils/catalog';
 import { FetchPaymentTemplatesService } from '../../services/fetch-payment-templates.service';
@@ -25,11 +26,13 @@ export class PaymentTemplatesComponent {
         private config: ConfigService,
         private fetchTemplatesService: FetchPaymentTemplatesService,
         private removeTemplateService: RemovePaymentTemplateService,
-        snackBar: MatSnackBar
+        snackBar: MatSnackBar,
+        private metadata: CatalogMetadataService
     ) {
         this.removeTemplateService.removed$.pipe(takeUntilDestroyed(inject(DestroyRef))).subscribe((id) => {
             snackBar.open(`Template ${id} has been deleted`, 'OK', { duration: 1500 });
             this.catalog.refresh();
+            this.metadata.refresh();
         });
     }
 

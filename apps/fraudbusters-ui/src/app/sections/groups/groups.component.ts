@@ -1,16 +1,12 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { map } from 'rxjs/operators';
 
-import { PaymentGroupsService } from '../../api/payments/groups';
-import { PaymentGroupsReferencesService } from '../../api/payments/groups-references';
-import { GroupTabCounts } from '../../shared/components/groups-table/group-tab-counts';
-import { SortOrder } from '../../shared/constants/sort-order';
+import { CatalogMetadataService } from '../../shared/components/catalog-panel/catalog-metadata.service';
 import { hasActiveFragments } from '../../shared/utils/has-active-fragments';
 
 @Component({
     templateUrl: 'groups.component.html',
-    providers: [GroupTabCounts],
+    providers: [CatalogMetadataService],
     standalone: false,
 })
 export class GroupsComponent {
@@ -31,17 +27,9 @@ export class GroupsComponent {
         },
     ];
 
-    readonly counts$ = this.tabCounts.load(
-        () => this.groups.filter('').pipe(map(({ count, result }) => ({ count: count ?? result.length }))),
-        () => this.references.filter({ size: 1, sortOrder: SortOrder.Asc })
-    );
+    readonly metadata$ = this.metadata.load('payments', 'groups');
 
-    constructor(
-        private router: Router,
-        private tabCounts: GroupTabCounts,
-        private groups: PaymentGroupsService,
-        private references: PaymentGroupsReferencesService
-    ) {}
+    constructor(private router: Router, private metadata: CatalogMetadataService) {}
 
     get activeTab() {
         const path = this.router.url.split(/[?#]/, 1)[0];

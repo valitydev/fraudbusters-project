@@ -30,9 +30,12 @@ export class PaymentListsService {
     }
 
     findListRows(params: SearchListsParams): Observable<WbListRecordsResponse> {
-        return this.http.get<WbListRecordsResponse>(`${this.fbPaymentReferenceEndpoint}/filter`, {
-            params: filterParameters(params),
-        });
+        return this.http.get<WbListRecordsResponse>(
+            `${this.configService.fbManagementEndpoint}/payments/catalog/lists/filter-records`,
+            {
+                params: filterParameters(params),
+            }
+        );
     }
 
     getNames(listTypeSearch: ListType): Observable<string[]> {

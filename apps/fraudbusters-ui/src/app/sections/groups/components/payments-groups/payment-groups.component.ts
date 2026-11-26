@@ -5,8 +5,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
+import { CatalogMetadataService } from '../../../../shared/components/catalog-panel/catalog-metadata.service';
 import { GroupListRow, groupListRow } from '../../../../shared/components/groups-table/group-list-row';
-import { GroupTabCounts } from '../../../../shared/components/groups-table/group-tab-counts';
 import { CATALOG_SORT_OPTIONS, CatalogSort, compareCatalogRows } from '../../../../shared/utils/catalog';
 import { catalogSearchQuery } from '../../../../shared/utils/catalog-collection';
 import { FetchGroupsService } from '../../services/fetch-groups.service';
@@ -46,7 +46,7 @@ export class PaymentGroupsComponent {
         private fetchGroupsService: FetchGroupsService,
         private removeGroupService: RemoveGroupService,
         private snackBar: MatSnackBar,
-        private tabCounts: GroupTabCounts
+        private metadata: CatalogMetadataService
     ) {
         const destroyRef = inject(DestroyRef);
         catalogSearchQuery(route)
@@ -60,7 +60,7 @@ export class PaymentGroupsComponent {
                 duration: 1500,
             });
             this.fetchGroupsService.search({ searchValue: this.searchValue });
-            this.tabCounts.refresh();
+            this.metadata.refresh();
         });
     }
 

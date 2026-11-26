@@ -285,7 +285,7 @@
 
     // Overlays whose contents draw their own surface do not need a second frame.
     .cdk-overlay-pane:not(.mat-mdc-dialog-panel):not(
-            :has(.mat-mdc-menu-panel, .mat-mdc-select-panel, .mat-mdc-autocomplete-panel)
+            :has(.mat-mdc-menu-panel, .mat-mdc-select-panel, .mat-mdc-autocomplete-panel, .mat-mdc-snack-bar-container)
         ) {
         background-color: var(--fb-surface, white);
         border: 1px solid var(--fb-line, #e6ecf5);

@@ -1,3 +1,4 @@
+@let metadata = metadata$ | async;
 <div class="fb-page fb-page-catalog">
     <header class="fb-page-toolbar">
         <div>
@@ -27,18 +28,14 @@
         >
             <span class="fb-template-tab-label">
                 {{ link.name }}
-                @if (rla.isActive && link.path === 'templates' && templateCatalog) {
-                <!-- The open catalog shows its live total, so removals update it right away. -->
-                @if (templateCatalog.view$ | async; as catalog) { @if (!catalog.busy && !catalog.failed) {
-                <span class="fb-template-tab-count">{{ catalog.total }}</span>
-                } } } @else { @if (counts$ | async; as counts) { @if (counts[link.path] !== null) {
-                <span class="fb-template-tab-count">{{ counts[link.path] }}</span>
-                } } }
+                <span class="fb-template-tab-count">{{ metadata?.count(link.path) ?? 0 }}</span>
             </span>
         </a>
         }
     </nav>
     <mat-tab-nav-panel #tabPanel>
-        <router-outlet (activate)="setTemplateCatalog($event)" (deactivate)="setTemplateCatalog(null)"></router-outlet>
+        <fb-catalog-metadata-content [ready]="metadata?.showData ?? false">
+            <router-outlet></router-outlet>
+        </fb-catalog-metadata-content>
     </mat-tab-nav-panel>
 </div>

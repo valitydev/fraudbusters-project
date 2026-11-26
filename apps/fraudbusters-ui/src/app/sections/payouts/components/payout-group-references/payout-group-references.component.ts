@@ -6,7 +6,7 @@ import { map, switchMap } from 'rxjs/operators';
 import { PayoutGroupReference } from '../../../../api/fb-management/swagger-codegen/model/payoutGroupReference';
 import { PayoutsService } from '../../../../api/payouts';
 import { ConfigService } from '../../../../config';
-import { GroupTabCounts } from '../../../../shared/components/groups-table/group-tab-counts';
+import { CatalogMetadataService } from '../../../../shared/components/catalog-panel/catalog-metadata.service';
 import { ReferenceRow } from '../../../../shared/components/reference-table/reference-table.component';
 import {
     CATALOG_SORT_OPTIONS,
@@ -32,7 +32,7 @@ export class PayoutGroupReferencesComponent {
         private feedback: PayoutsFeedbackService,
         route: ActivatedRoute,
         config: ConfigService,
-        private tabCounts: GroupTabCounts
+        private metadata: CatalogMetadataService
     ) {
         this.catalog = new CatalogCollection<ReferenceRow<PayoutGroupReference>>(
             route,
@@ -68,7 +68,7 @@ export class PayoutGroupReferencesComponent {
             .subscribe({
                 next: () => {
                     this.catalog.refresh();
-                    this.tabCounts.refresh();
+                    this.metadata.refresh();
                 },
                 error: (error: HttpErrorResponse) => this.feedback.failed(error),
             });

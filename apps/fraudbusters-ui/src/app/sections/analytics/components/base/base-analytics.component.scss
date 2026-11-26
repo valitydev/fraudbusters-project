@@ -458,7 +458,7 @@ h2 {
     }
 }
 
-@container (max-width: 510px) {
+@container (max-width: 560px) {
     .breakdown-controls {
         grid-template-columns: minmax(0, 1fr);
         width: 100%;

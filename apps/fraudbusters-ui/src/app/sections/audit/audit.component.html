@@ -10,7 +10,7 @@
         </button>
     </header>
 
-    @if (filter) {
+    @if (view$ | async; as view) {
     <section class="filter-card" aria-label="Filters">
         <fb-datetime-range [from]="filter.from" [to]="filter.to" (rangeChange)="setRange($event)"></fb-datetime-range>
         <div class="field-grid">
@@ -25,9 +25,9 @@
                     (selectionChange)="selectionCommand()"
                 >
                     <mat-select-trigger>{{
-                        selectionLabel(filter.commandTypes, commandsTypes$ | async, 'All commands')
+                        selectionLabel(filter.commandTypes, view.options?.commands, 'All commands')
                     }}</mat-select-trigger>
-                    @for (name of commandsTypes$ | async; track name) {
+                    @for (name of view.options?.commands; track name) {
                     <mat-option [value]="name">{{ name | lowercase }}</mat-option>
                     }
                 </mat-select>
@@ -43,9 +43,9 @@
                     (selectionChange)="selectionObject()"
                 >
                     <mat-select-trigger>{{
-                        selectionLabel(filter.objectTypes, objectsTypes$ | async, 'All objects')
+                        selectionLabel(filter.objectTypes, view.options?.objects, 'All objects')
                     }}</mat-select-trigger>
-                    @for (name of objectsTypes$ | async; track name) {
+                    @for (name of view.options?.objects; track name) {
                     <mat-option [value]="name">{{ name | lowercase }}</mat-option>
                     }
                 </mat-select>
@@ -62,7 +62,6 @@
             </div>
         </div>
     </section>
-    } @if (view$ | async; as view) {
     <section class="fb-catalog-panel" aria-label="Audit log" [attr.aria-busy]="view.busy">
         <div class="table-toolbar">
             <div class="table-meta" aria-live="polite">
@@ -136,7 +135,12 @@
         </footer>
         } @if (view.busy) {
         <mat-progress-bar mode="indeterminate" aria-label="Loading audit log"></mat-progress-bar>
-        } @if (!view.busy && !view.logs.length) {
+        } @if (view.options === null) {
+        <div class="table-state" role="alert">
+            Could not load audit filters.
+            <button mat-button type="button" (click)="retryFilterOptions()">Retry</button>
+        </div>
+        } @else if (!view.busy && !view.logs.length) {
         <p class="table-state">No changes in this period</p>
         }
     </section>

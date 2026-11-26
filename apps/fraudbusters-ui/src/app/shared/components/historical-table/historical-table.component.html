@@ -71,7 +71,23 @@
                 </th>
                 @for (column of kind.columns; track column) {
                 <td [class.numeric]="column === 'amount'">
-                    @switch (column) { @case ('status') { @if (row.status) {
+                    @if (column === 'party' || column === 'scope') { @if (column === 'party' ? row.partyId :
+                    row.scopeId; as id) { @let columnLabel = label(column);
+                    <span class="id-cell compact-id">
+                        <span class="fb-catalog-mono id-preview" [title]="id">{{ id }}</span>
+                        <button
+                            class="copy"
+                            type="button"
+                            [title]="'Copy ' + columnLabel"
+                            [attr.aria-label]="'Copy ' + columnLabel + ' ' + id"
+                            (click)="copy(id, columnLabel)"
+                        >
+                            <mat-icon>content_copy</mat-icon>
+                        </button>
+                    </span>
+                    } @else {
+                    <span class="missing">—</span>
+                    } } @else { @switch (column) { @case ('status') { @if (row.status) {
                     <span class="fb-pill fb-pill-status" [ngClass]="pill(row.status)">{{ row.status }}</span>
                     } @else {
                     <span class="missing">—</span>
@@ -79,14 +95,6 @@
                     <span class="amount"
                         >{{ formattedAmount }} <span class="currency">{{ row.currency }}</span></span
                     >
-                    } @else {
-                    <span class="missing">—</span>
-                    } } @case ('party') { @if (row.partyId) {
-                    <span class="fb-catalog-mono">{{ row.partyId }}</span>
-                    } @else {
-                    <span class="missing">—</span>
-                    } } @case ('scope') { @if (row.scopeId) {
-                    <span class="fb-catalog-mono">{{ row.scopeId }}</span>
                     } @else {
                     <span class="missing">—</span>
                     } } @case ('email') { @if (row.email) {
@@ -125,7 +133,7 @@
                     <span class="chip fb-catalog-mono">{{ row.rule }}</span>
                     } @else {
                     <span class="missing">—</span>
-                    } } @default { — } }
+                    } } } }
                 </td>
                 }
                 <td class="fb-catalog-time">{{ (row.eventTime | date : 'yyyy-MM-dd HH:mm:ss') || '—' }}</td>

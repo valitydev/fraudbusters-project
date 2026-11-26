@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { startWith } from 'rxjs/operators';
 
 import { GroupReference } from '../../../../api/fb-management/swagger-codegen/model/groupReference';
-import { GroupTabCounts } from '../../../../shared/components/groups-table/group-tab-counts';
+import { CatalogMetadataService } from '../../../../shared/components/catalog-panel/catalog-metadata.service';
 import { OperationType } from '../../../../shared/constants/operation-type';
 import { SortOrder } from '../../../../shared/constants/sort-order';
 import { catalogSearchQuery } from '../../../../shared/utils/catalog-collection';
@@ -35,7 +35,7 @@ export class GroupReferencesComponent {
         private fetchReferencesService: FetchReferencesService,
         private removeReferenceService: RemoveReferenceService,
         private snackBar: MatSnackBar,
-        private tabCounts: GroupTabCounts
+        private metadata: CatalogMetadataService
     ) {
         const destroyRef = inject(DestroyRef);
         catalogSearchQuery(route)
@@ -49,7 +49,7 @@ export class GroupReferencesComponent {
                 duration: 1500,
             });
             this.search();
-            this.tabCounts.refresh();
+            this.metadata.refresh();
         });
     }
 

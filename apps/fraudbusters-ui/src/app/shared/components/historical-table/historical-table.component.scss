@@ -4,7 +4,7 @@ table.fb-catalog-table {
     table-layout: auto;
 
     th,
-    td {
+    .record > td {
         white-space: nowrap;
     }
 }
@@ -79,6 +79,16 @@ table.fb-catalog-table {
     min-width: 0;
 }
 
+.id-preview {
+    max-inline-size: 16ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.compact-id .copy {
+    flex: none;
+}
+
 .chip {
     display: inline-block;
     padding: 2px 7px;
@@ -118,12 +128,13 @@ table.fb-catalog-table {
 }
 
 @media (hover: hover) and (pointer: fine) {
-    .copy {
-        opacity: 0;
-    }
+    .id-cell:not(.compact-id) {
+        .copy {
+            opacity: 0;
+        }
 
-    .id-cell:hover .copy,
-    .id-cell:focus-within .copy {
-        opacity: 1;
+        &:is(:hover, :focus-within) .copy {
+            opacity: 1;
+        }
     }
 }

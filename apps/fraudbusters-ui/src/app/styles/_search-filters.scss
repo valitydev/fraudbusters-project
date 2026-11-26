@@ -201,12 +201,6 @@
         letter-spacing: normal;
     }
 
-    .mat-mdc-tab-link:first-child {
-        justify-content: flex-start;
-        min-width: 0;
-        padding-inline-start: 0;
-    }
-
     + mat-tab-nav-panel {
         padding-block-start: 12px;
     }

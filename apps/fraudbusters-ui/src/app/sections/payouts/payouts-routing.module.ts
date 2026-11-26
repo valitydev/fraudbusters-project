@@ -35,6 +35,7 @@ const listTab = (path: string, listType: ListType) => ({
                 data: {
                     roles: [Roles.FraudOfficer],
                     title: 'Templates',
+                    catalogSection: 'templates',
                     subtitle: 'Manage payout rules and bind templates to parties and wallets.',
                     links: [
                         {
@@ -64,6 +65,7 @@ const listTab = (path: string, listType: ListType) => ({
                 data: {
                     roles: [Roles.FraudOfficer],
                     title: 'Groups',
+                    catalogSection: 'groups',
                     subtitle: 'Set the order of payout rule templates and manage their bindings.',
                     links: [
                         { path: 'list', name: 'Groups', createUrl: '/payouts/group/new', createLabel: 'Create group' },
@@ -88,6 +90,7 @@ const listTab = (path: string, listType: ListType) => ({
                 data: {
                     roles: LIST_ROLES,
                     title: 'Lists',
+                    catalogSection: 'lists',
                     subtitle: 'Block, allow and limit entities in payouts.',
                     links: [
                         {

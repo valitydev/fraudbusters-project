@@ -1,51 +1,53 @@
 import { DestroyRef } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
-import { BehaviorSubject, NEVER, Observable, of } from 'rxjs';
+import { NEVER, of, Subject } from 'rxjs';
 
 import { FetchWbListService } from './services/fetch-wb-list.service';
+import { ListsEventsService } from './services/lists-events.service';
 import { RemoveWbListComponentService } from './services/remove-wb-list.service';
 import { WbListComponent } from './wb-list.component';
-import { PaymentListsService } from '../../../api/payments/lists';
 import { ListType } from '../../constants/list-type';
+import { CatalogMetadataService } from '../catalog-panel/catalog-metadata.service';
 
-describe('WbListComponent', () => {
-    const create = (names: Observable<string[] | null>) => {
-        // The fetcher reports "loading" until its first response, like PartialFetcher.
-        const fetcherBusy = new BehaviorSubject(true);
-        const search = jasmine.createSpy('search').and.callFake(() => fetcherBusy.next(false));
-        const fetcher = {
-            inProgress$: fetcherBusy,
-            fetchResultChanges$: NEVER,
-            search,
-        } as unknown as FetchWbListService;
-        const lists = { getNames: () => names } as unknown as PaymentListsService;
+describe(WbListComponent.name, () => {
+    const create = () => {
+        const search = jasmine.createSpy('search');
+        const fetcher = { inProgress$: NEVER, fetchResultChanges$: NEVER, search } as unknown as FetchWbListService;
+        const names = new Subject<string[]>();
+        const metadata = { listNames: () => names } as unknown as CatalogMetadataService;
         const route = { queryParamMap: of(convertToParamMap({})) } as unknown as ActivatedRoute;
         const remover = { removed$: NEVER } as unknown as RemoveWbListComponentService;
         const destroyRef = { onDestroy: () => () => undefined } as unknown as DestroyRef;
-        const component = new WbListComponent(route, fetcher, remover, lists, {} as MatSnackBar, destroyRef);
+        const component = new WbListComponent(
+            route,
+            fetcher,
+            remover,
+            {} as MatSnackBar,
+            destroyRef,
+            new ListsEventsService(),
+            metadata
+        );
         component.listType = ListType.Black;
-        const busy: boolean[] = [];
-        component.inProgress$.subscribe((value) => busy.push(value));
         component.ngOnInit();
-        component.listNames$.subscribe();
-        return { busy, search };
+        return { component, names, search };
     };
 
-    it('stops loading when the list type has no lists, without asking the backend', () => {
-        const { busy, search } = create(of([]));
-        expect(search).not.toHaveBeenCalled();
-        expect(busy[busy.length - 1]).toBeFalse();
+    it('starts an unfiltered list request before the names arrive', () => {
+        const { component, names, search } = create();
+        expect(search).toHaveBeenCalledOnceWith(jasmine.objectContaining({ listType: ListType.Black }));
+        expect(search.calls.mostRecent().args[0].listNames).toBeUndefined();
+
+        const options = jasmine.createSpy('options');
+        component.listNames$.subscribe(options);
+        names.next(['EMAIL', 'CARD']);
+        expect(options).toHaveBeenCalledOnceWith(['EMAIL', 'CARD']);
+        expect(search).toHaveBeenCalledTimes(1);
     });
 
-    it('treats a names response without the list as empty', () => {
-        const { busy, search } = create(of(null));
-        expect(search).not.toHaveBeenCalled();
-        expect(busy[busy.length - 1]).toBeFalse();
-    });
-
-    it('searches the lists of the type when there are some', () => {
-        const { search } = create(of(['EMAIL', 'CARD']));
-        expect(search).toHaveBeenCalledWith(jasmine.objectContaining({ listNames: ['EMAIL', 'CARD'] }));
+    it('sends the selected list name as a filter', () => {
+        const { component, search } = create();
+        component.setListName('EMAIL');
+        expect(search.calls.mostRecent().args[0].listNames).toEqual(['EMAIL']);
     });
 });
