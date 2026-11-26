@@ -15,6 +15,7 @@ import { ProfileService } from './services/profile/profile.service';
     styleUrls: ['container.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [ProfileService],
+    standalone: false,
 })
 export class ContainerComponent {
     readonly narrow$ = inject(BreakpointObserver)

@@ -20,10 +20,12 @@
             </p>
         </div>
     </header>
-    <mat-progress-bar *ngIf="loading" mode="indeterminate" aria-label="Loading template"></mat-progress-bar>
-    <p *ngIf="loadFailed" role="alert">Could not load template.</p>
+    @if (loading) {
+    <mat-progress-bar mode="indeterminate" aria-label="Loading template"></mat-progress-bar>
+    } @if (loadFailed) {
+    <p role="alert">Could not load template.</p>
+    } @if (!loading && !loadFailed) {
     <fb-template-editor
-        *ngIf="!loading && !loadFailed"
         [payout]="true"
         [form]="form"
         [template]="template"
@@ -34,4 +36,5 @@
         (validate)="validateTemplate()"
         (save)="saveTemplate()"
     ></fb-template-editor>
+    }
 </div>

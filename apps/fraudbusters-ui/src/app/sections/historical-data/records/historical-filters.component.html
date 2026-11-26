@@ -3,8 +3,8 @@
         <div class="period">
             <span class="field-label" id="historical-period-label">Time range</span>
             <div class="presets" role="group" aria-labelledby="historical-period-label">
+                @for (period of periods; track period) {
                 <button
-                    *ngFor="let period of periods"
                     type="button"
                     class="preset"
                     [attr.aria-pressed]="isPeriod(period.duration)"
@@ -12,6 +12,7 @@
                 >
                     {{ period.label }}
                 </button>
+                }
                 <button
                     type="button"
                     class="preset"
@@ -29,10 +30,12 @@
             [to]="toDate"
             (rangeChange)="setRange($event)"
         ></fb-datetime-range>
-        <span *ngIf="windowText" class="window-chip" aria-live="polite">
+        @if (windowText) {
+        <span class="window-chip" aria-live="polite">
             <span class="dot" aria-hidden="true"></span>
             Window: <strong>{{ windowText }}</strong> selected
         </span>
+        }
     </div>
 
     <div class="field-grid">
@@ -87,18 +90,21 @@
             (click)="toggleAdditional()"
         >
             <mat-icon aria-hidden="true">{{ additionalOpen ? 'expand_less' : 'expand_more' }}</mat-icon>
-            Additional filters
-            <span *ngIf="additionalCount" class="more-count" aria-label="filled">{{ additionalCount }}</span>
+            Additional filters @if (additionalCount) {
+            <span class="more-count" aria-label="filled">{{ additionalCount }}</span>
+            }
         </button>
         <span class="hint">{{ kind.filterHint }}</span>
     </div>
-    <div *ngIf="additionalOpen" class="field-grid" [id]="drawerId">
-        <div *ngFor="let name of kind.additional" class="field">
+    @if (additionalOpen) {
+    <div class="field-grid" [id]="drawerId">
+        @for (name of kind.additional; track name) {
+        <div class="field">
             <label class="field-label" [id]="'historical-label-' + name" [attr.for]="'historical-' + name">{{
                 name === 'status' ? kind.statusLabel : labels[name].label
             }}</label>
+            @if (name === 'status') {
             <mat-select
-                *ngIf="name === 'status'; else textField"
                 class="select-box fb-filter-control fb-control-mono"
                 [id]="'historical-' + name"
                 [aria-labelledby]="'historical-label-' + name"
@@ -106,17 +112,21 @@
                 placeholder="All statuses"
             >
                 <mat-option value="">All statuses</mat-option>
-                <mat-option *ngFor="let status of kind.statuses" [value]="status">{{ status }}</mat-option>
+                @for (status of kind.statuses; track status) {
+                <mat-option [value]="status">{{ status }}</mat-option>
+                }
             </mat-select>
-            <ng-template #textField>
-                <input
-                    class="fb-filter-control fb-control-mono"
-                    [id]="'historical-' + name"
-                    [formControlName]="name"
-                    autocomplete="off"
-                    [placeholder]="labels[name].placeholder"
-                />
-            </ng-template>
+            } @else {
+            <input
+                class="fb-filter-control fb-control-mono"
+                [id]="'historical-' + name"
+                [formControlName]="name"
+                autocomplete="off"
+                [placeholder]="labels[name].placeholder"
+            />
+            }
         </div>
+        }
     </div>
+    }
 </section>

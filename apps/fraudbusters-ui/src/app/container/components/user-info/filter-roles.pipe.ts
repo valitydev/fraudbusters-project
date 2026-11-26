@@ -15,6 +15,7 @@ export const APP_ROLES: readonly string[] = [
 
 @Pipe({
     name: 'filterRoles',
+    standalone: false,
 })
 export class FilterRolesPipe implements PipeTransform {
     transform(roles: string[] | null | undefined): string[] {

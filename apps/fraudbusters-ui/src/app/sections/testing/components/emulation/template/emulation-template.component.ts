@@ -7,6 +7,7 @@ import { EmulationTemplateService } from '../../../services/emulation/emulation-
     templateUrl: './emulation-template.component.html',
     styleUrls: ['./emulation-template.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class EmulationTemplateComponent {
     readonly view$ = this.emulationTemplateService.view$;

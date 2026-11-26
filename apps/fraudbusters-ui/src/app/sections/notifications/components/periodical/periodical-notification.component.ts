@@ -2,9 +2,9 @@ import { ChangeDetectionStrategy, Component, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import { Notification } from '../../../../api/fb-management/swagger-codegen/model/notification';
+import { catalogSearchQuery } from '../../../../shared/utils/catalog-collection';
 import { statusPillClass } from '../../../../shared/utils/status-tone';
 import { ArchiveNotificationService } from '../../services/archive-notification.service';
 import { FetchNotificationsService } from '../../services/fetch-notifications.service';
@@ -15,6 +15,7 @@ import { FetchNotificationsService } from '../../services/fetch-notifications.se
     styleUrls: ['../notifications-table.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [FetchNotificationsService, ArchiveNotificationService],
+    standalone: false,
 })
 export class PeriodicalNotificationComponent {
     readonly view$ = combineLatest({
@@ -32,12 +33,8 @@ export class PeriodicalNotificationComponent {
         private archiveNotificationService: ArchiveNotificationService,
         destroyRef: DestroyRef
     ) {
-        route.queryParamMap
-            .pipe(
-                map((params) => (params.get('searchQuery') ?? '').trim()),
-                distinctUntilChanged(),
-                takeUntilDestroyed(destroyRef)
-            )
+        catalogSearchQuery(route)
+            .pipe(takeUntilDestroyed(destroyRef))
             .subscribe((query) => {
                 this.searchValue = query;
                 this.fetchNotificationsService.search({ searchValue: query });

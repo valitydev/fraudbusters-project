@@ -1,24 +1,33 @@
 <div #editorViewport class="editor-viewport" [class.fixed-height]="fixedHeight" [class.numbered]="showLineNumbers">
-    <div *ngIf="showLineNumbers" #gutter class="line-numbers" aria-hidden="true">
+    @if (showLineNumbers) {
+    <div #gutter class="line-numbers" aria-hidden="true">
+        @for (line of folded ? foldedLineNumbers : lineNumbers; track line) {
         <div
-            *ngFor="let line of folded ? foldedLineNumbers : lineNumbers"
             [class.current]="!folded && line === cursorLine"
             [class.error-number]="!folded && errorLines.includes(line)"
         >
             {{ line }}
         </div>
+        }
     </div>
+    }
     <div class="fb-fraudo-editor fb-fraudo-code" [class.disabled]="disabled" [hidden]="folded">
-        <div *ngIf="errorLines.length" class="diagnostics" aria-hidden="true">
-            <div *ngFor="let line of errorLines" class="error-line" [style.--source-line]="line - 1"></div>
+        @if (errorLines.length) {
+        <div class="diagnostics" aria-hidden="true">
+            @for (line of errorLines; track line) {
+            <div class="error-line" [style.--source-line]="line - 1"></div>
+            }
         </div>
-        <pre #highlight class="highlight" aria-hidden="true"><code><span
-            *ngFor="let token of tokens; let index = index"
+        }
+        <pre
+            #highlight
+            class="highlight"
+            aria-hidden="true"
+        ><code>@for (token of tokens; track $index; let index = $index) {<span
             [class]="'fb-code-' + token.kind"
             [class.fb-code-problem]="token.problem"
             [class.fb-code-pair]="activePair.includes(index)"
-        >{{ token.text }}</span>
-</code></pre>
+        >{{ token.text }}</span>}{{ '\n' }}</code></pre>
         <textarea
             #textarea
             [cdkTextareaAutosize]="autoGrow && !fixedHeight"
@@ -39,8 +48,8 @@
             (blur)="onTouched(); activePair = []"
         ></textarea>
     </div>
+    @if (folded) {
     <pre
-        *ngIf="folded"
         #foldPreview
         class="folded-preview fb-fraudo-code"
         tabindex="0"
@@ -48,29 +57,29 @@
         (scroll)="syncGutter(foldPreview)"
         (click)="editPreview($event)"
         (keydown.enter)="editPreviewFromKeyboard($event)"
-    ><code><ng-container *ngFor="let part of previewParts"><ng-container *ngIf="part.fold as fold; else sourcePart"><button
+    ><code>@for (part of previewParts; track $index) {@if (part.fold; as fold) {<button
         type="button"
         class="fold-marker"
         title="Expand these arguments for editing"
         [attr.aria-label]="'Expand and edit ' + fold.hiddenCount + ' hidden arguments'"
         (click)="openFold($event, fold)"
-    >{{ part.text }}</button></ng-container><ng-template #sourcePart><span [attr.data-source-start]="part.from"><span
-        *ngFor="let token of part.text | fraudoTokens"
+    >{{ part.text }}</button>} @else {<span [attr.data-source-start]="part.from">@for (token of part.text | fraudoTokens; track $index) {<span
         [class]="'fb-code-' + token.kind"
-    >{{ token.text }}</span></span></ng-template></ng-container></code></pre>
+    >{{ token.text }}</span>}</span>}}</code></pre>
+    }
 </div>
-<div *ngIf="showLineNumbers || folds.length || problemMessage" class="cursor-position">
-    <span *ngIf="showLineNumbers && !folded">Ln {{ cursorLine }}, Col {{ cursorColumn }}</span>
-    <span *ngIf="problemMessage" class="problem-message">{{ problemMessage }}</span>
-    <span *ngIf="folded">Long arguments folded</span>
-    <button
-        *ngIf="folds.length"
-        mat-button
-        type="button"
-        class="fold-toggle"
-        [attr.aria-expanded]="!folded"
-        (click)="toggleArguments()"
-    >
+@if (showLineNumbers || folds.length || problemMessage) {
+<div class="cursor-position">
+    @if (showLineNumbers && !folded) {
+    <span>Ln {{ cursorLine }}, Col {{ cursorColumn }}</span>
+    } @if (problemMessage) {
+    <span class="problem-message">{{ problemMessage }}</span>
+    } @if (folded) {
+    <span>Long arguments folded</span>
+    } @if (folds.length) {
+    <button mat-button type="button" class="fold-toggle" [attr.aria-expanded]="!folded" (click)="toggleArguments()">
         {{ folded ? 'Expand to edit' : 'Fold long arguments' }}
     </button>
+    }
 </div>
+}

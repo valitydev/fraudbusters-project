@@ -1,9 +1,9 @@
-<ng-container *ngIf="state$ | async as state">
-    <fb-create-channel
-        [editing]="true"
-        [loading]="state.loading"
-        [loadFailed]="state.failed"
-        [channel]="state.channel"
-        (retry)="reload()"
-    ></fb-create-channel>
-</ng-container>
+@if (state$ | async; as state) {
+<fb-create-channel
+    [editing]="true"
+    [loading]="state.loading"
+    [loadFailed]="state.failed"
+    [channel]="state.channel"
+    (retry)="reload()"
+></fb-create-channel>
+}

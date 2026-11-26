@@ -10,7 +10,8 @@
         </button>
     </header>
 
-    <section *ngIf="filter" class="filter-card" aria-label="Filters">
+    @if (filter) {
+    <section class="filter-card" aria-label="Filters">
         <fb-datetime-range [from]="filter.from" [to]="filter.to" (rangeChange)="setRange($event)"></fb-datetime-range>
         <div class="field-grid">
             <div class="field">
@@ -26,9 +27,9 @@
                     <mat-select-trigger>{{
                         selectionLabel(filter.commandTypes, commandsTypes$ | async, 'All commands')
                     }}</mat-select-trigger>
-                    <mat-option *ngFor="let name of commandsTypes$ | async" [value]="name">{{
-                        name | lowercase
-                    }}</mat-option>
+                    @for (name of commandsTypes$ | async; track name) {
+                    <mat-option [value]="name">{{ name | lowercase }}</mat-option>
+                    }
                 </mat-select>
             </div>
             <div class="field">
@@ -44,9 +45,9 @@
                     <mat-select-trigger>{{
                         selectionLabel(filter.objectTypes, objectsTypes$ | async, 'All objects')
                     }}</mat-select-trigger>
-                    <mat-option *ngFor="let name of objectsTypes$ | async" [value]="name">{{
-                        name | lowercase
-                    }}</mat-option>
+                    @for (name of objectsTypes$ | async; track name) {
+                    <mat-option [value]="name">{{ name | lowercase }}</mat-option>
+                    }
                 </mat-select>
             </div>
             <div class="field">
@@ -61,12 +62,14 @@
             </div>
         </div>
     </section>
-
-    <section *ngIf="view$ | async as view" class="fb-catalog-panel" aria-label="Audit log" [attr.aria-busy]="view.busy">
+    } @if (view$ | async; as view) {
+    <section class="fb-catalog-panel" aria-label="Audit log" [attr.aria-busy]="view.busy">
         <div class="table-toolbar">
             <div class="table-meta" aria-live="polite">
                 <strong>Changes</strong>
-                <span *ngIf="view.logs.length">· Showing {{ view.logs.length }} of {{ total }}</span>
+                @if (view.logs.length) {
+                <span>· Showing {{ view.logs.length }} of {{ total }}</span>
+                }
             </div>
             <div class="table-controls">
                 <label class="sort-control">
@@ -80,7 +83,8 @@
                 </label>
             </div>
         </div>
-        <div *ngIf="view.logs.length" class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Audit table">
+        @if (view.logs.length) {
+        <div class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Audit table">
             <table class="fb-catalog-table" aria-label="Audit log">
                 <thead>
                     <tr>
@@ -92,37 +96,49 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let log of view.logs">
+                    @for (log of view.logs; track log) {
+                    <tr>
                         <td class="fb-catalog-time">{{ log.insertTime | date : 'yyyy-MM-dd HH:mm:ss' }}</td>
                         <th scope="row" class="initiator">{{ log.initiator || '—' }}</th>
                         <td>
-                            <span *ngIf="log.objectType; else missing" class="fb-pill fb-pill-status">{{
-                                log.objectType | lowercase
-                            }}</span>
+                            @if (log.objectType) {
+                            <span class="fb-pill fb-pill-status">{{ log.objectType | lowercase }}</span>
+                            } @else {
+                            <span class="missing">—</span>
+                            }
                         </td>
                         <td>
-                            <span
-                                *ngIf="log.commandType; else missing"
-                                class="fb-pill fb-pill-status"
-                                [ngClass]="pill(log.commandType)"
-                                >{{ log.commandType | lowercase }}</span
-                            >
+                            @if (log.commandType) {
+                            <span class="fb-pill fb-pill-status" [ngClass]="pill(log.commandType)">{{
+                                log.commandType | lowercase
+                            }}</span>
+                            } @else {
+                            <span class="missing">—</span>
+                            }
                         </td>
                         <td class="object">
-                            <span *ngIf="log.object; else missing" class="fb-catalog-mono">{{ log.object }}</span>
+                            @if (log.object) {
+                            <span class="fb-catalog-mono">{{ log.object }}</span>
+                            } @else {
+                            <span class="missing">—</span>
+                            }
                         </td>
                     </tr>
+                    }
                 </tbody>
             </table>
         </div>
-        <footer *ngIf="view.logs.length && view.hasMore" class="table-footer">
+        } @if (view.logs.length && view.hasMore) {
+        <footer class="table-footer">
             <button class="load-more" mat-button type="button" [disabled]="view.busy" (click)="loadMore()">
                 Show more
             </button>
         </footer>
-        <mat-progress-bar *ngIf="view.busy" mode="indeterminate" aria-label="Loading audit log"></mat-progress-bar>
-        <p *ngIf="!view.busy && !view.logs.length" class="table-state">No changes in this period</p>
+        } @if (view.busy) {
+        <mat-progress-bar mode="indeterminate" aria-label="Loading audit log"></mat-progress-bar>
+        } @if (!view.busy && !view.logs.length) {
+        <p class="table-state">No changes in this period</p>
+        }
     </section>
+    }
 </div>
-
-<ng-template #missing><span class="missing">—</span></ng-template>

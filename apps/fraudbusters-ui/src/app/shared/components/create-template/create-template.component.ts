@@ -11,6 +11,7 @@ import { ErrorHandlerService } from '../../services/utils/error-handler.service'
     templateUrl: './create-template.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [TemplateService],
+    standalone: false,
 })
 export class CreateTemplateComponent implements OnInit {
     @Input() template: Template;

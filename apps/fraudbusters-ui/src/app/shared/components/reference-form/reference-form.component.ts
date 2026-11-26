@@ -34,7 +34,6 @@ import {
 
 @Component({
     selector: 'fb-reference-form',
-    standalone: true,
     imports: [
         CommonModule,
         ReactiveFormsModule,
@@ -45,7 +44,7 @@ import {
         ReferenceCsvComponent,
     ],
     templateUrl: 'reference-form.component.html',
-    styleUrls: ['reference-form.component.scss'],
+    styleUrls: ['../form-page/form-page.scss'],
 })
 export class ReferenceFormComponent {
     @Input({ required: true }) config: ReferenceFormConfig;

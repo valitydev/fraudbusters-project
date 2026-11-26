@@ -4,13 +4,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { catchError, distinctUntilChanged, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
+import { catchError, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 
 import { ListType } from '../../../../api/fb-management/swagger-codegen/model/listType';
 import { PayoutListRow } from '../../../../api/fb-management/swagger-codegen/model/payoutListRow';
 import { PayoutsService } from '../../../../api/payouts';
 import { ListRecordRow, payoutListRow } from '../../../../shared/components/list-records-table/list-record-row';
 import { SortOrder } from '../../../../shared/constants/sort-order';
+import { catalogSearchQuery } from '../../../../shared/utils/catalog-collection';
 import { PAYOUT_PAGE_SIZE, PayoutPageFetcher } from '../../services/payout-page-fetcher';
 import { PayoutsFeedbackService } from '../../services/payouts-feedback.service';
 
@@ -23,6 +24,7 @@ interface ListFilter {
 @Component({
     templateUrl: 'payout-lists.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class PayoutListsComponent {
     readonly listType = this.route.snapshot.data.listType as ListType;
@@ -71,10 +73,7 @@ export class PayoutListsComponent {
         );
         this.inProgress$ = this.fetcher.inProgress$;
 
-        const query$ = this.route.queryParamMap.pipe(
-            map((params) => (params.get('searchQuery') ?? '').trim()),
-            distinctUntilChanged()
-        );
+        const query$ = catalogSearchQuery(this.route);
         combineLatest([this.listNames.valueChanges.pipe(startWith(this.listNames.value)), query$, this.sort])
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe(([listNames, searchValue, sortOrder]) =>

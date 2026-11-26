@@ -9,9 +9,9 @@
         </div>
     </header>
     <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="fb-template-catalog-tabs" [attr.aria-label]="title + ' tabs'">
+        @for (link of links; track link) {
         <a
             mat-tab-link
-            *ngFor="let link of links"
             [routerLink]="link.path"
             queryParamsHandling="preserve"
             routerLinkActive
@@ -23,6 +23,7 @@
                 {{ link.name }}
             </span>
         </a>
+        }
     </nav>
     <mat-tab-nav-panel #tabPanel>
         <router-outlet></router-outlet>

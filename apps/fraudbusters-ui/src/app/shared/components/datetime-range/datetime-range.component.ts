@@ -1,5 +1,5 @@
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -60,8 +60,7 @@ const HOUR = 3_600_000;
  */
 @Component({
     selector: 'fb-datetime-range',
-    standalone: true,
-    imports: [NgClass, NgFor, NgIf, OverlayModule, MatIconModule, MatSelectModule],
+    imports: [NgClass, OverlayModule, MatIconModule, MatSelectModule],
     templateUrl: 'datetime-range.component.html',
     styleUrls: ['datetime-range.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -281,6 +280,16 @@ export class DateTimeRangeComponent {
     cancel(): void {
         this.open = false;
         this.cdr.markForCheck();
+    }
+
+    /**
+     * No backdrop: a click outside closes the picker and still reaches its target (a menu
+     * item, another field). The From/To fields toggle the picker themselves.
+     */
+    outsideClick(event: MouseEvent, triggers: HTMLElement): void {
+        if (!triggers.contains(event.target as Node)) {
+            this.cancel();
+        }
     }
 
     pad(value: number): string {

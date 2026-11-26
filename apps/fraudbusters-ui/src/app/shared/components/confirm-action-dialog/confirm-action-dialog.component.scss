@@ -35,11 +35,11 @@
 }
 
 .fb-dialog-cancel {
-    --mdc-outlined-button-outline-color: var(--fb-filter-outline);
-    --mdc-outlined-button-label-text-color: var(--fb-text, #252335);
+    --mat-button-outlined-outline-color: var(--fb-filter-outline);
+    --mat-button-outlined-label-text-color: var(--fb-text, #252335);
 }
 
 .fb-dialog-danger {
-    --mdc-filled-button-container-color: #b4283b;
-    --mdc-filled-button-label-text-color: #fff;
+    --mat-button-filled-container-color: #b4283b;
+    --mat-button-filled-label-text-color: #fff;
 }

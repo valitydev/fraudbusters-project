@@ -16,16 +16,16 @@ $fb-table-tint: var(--fb-raised, #faf9fd);
 $fb-table-control-line: var(--fb-line, #dcdae5);
 
 @mixin fb-table-button-label($size) {
-    --mdc-outlined-button-label-text-size: #{$size};
-    --mdc-outlined-button-label-text-tracking: normal;
-    --mdc-text-button-label-text-size: #{$size};
-    --mdc-text-button-label-text-tracking: normal;
+    --mat-button-outlined-label-text-size: #{$size};
+    --mat-button-outlined-label-text-tracking: normal;
+    --mat-button-text-label-text-size: #{$size};
+    --mat-button-text-label-text-tracking: normal;
 }
 
 // Outlined page-level action (Create …, Add …).
 @mixin fb-outlined-color($color, $outline: $color) {
-    --mdc-outlined-button-label-text-color: #{$color};
-    --mdc-outlined-button-outline-color: #{$outline};
+    --mat-button-outlined-label-text-color: #{$color};
+    --mat-button-outlined-outline-color: #{$outline};
     color: $color;
 }
 
@@ -225,7 +225,7 @@ $fb-table-control-line: var(--fb-line, #dcdae5);
 }
 
 .fb-catalog-table .mat-mdc-icon-button {
-    --mdc-icon-button-state-layer-size: var(--fb-row-control-height);
+    --mat-icon-button-state-layer-size: var(--fb-row-control-height);
     display: inline-grid;
     place-items: center;
     flex: 0 0 var(--fb-row-control-height);
@@ -576,18 +576,65 @@ $fb-table-control-line: var(--fb-line, #dcdae5);
         font: 400 13px / 20px var(--fb-font-sans);
         letter-spacing: normal;
 
-        &.mdc-list-item--selected {
+        // Single choice: the chosen option is tinted. Multiple choice shows a check mark only.
+        &.mdc-list-item--selected:not(.mat-mdc-option-multiple) {
             background: var(--fb-selected, #f1ecfc);
-        }
 
-        &.mdc-list-item--selected:not(.mat-mdc-option-multiple) .mdc-list-item__primary-text {
-            color: var(--fb-accent, #6338f5);
+            .mdc-list-item__primary-text {
+                color: var(--fb-accent, #6338f5);
+            }
         }
     }
 
     .mat-pseudo-checkbox-minimal.mat-pseudo-checkbox-checked::after {
         color: var(--fb-accent, #6338f5);
     }
+}
+
+// Expanded row of a catalog table: label/value pairs in a bordered grid on the raised row.
+// Stronger than the nowrap table cells: detail values wrap inside their grid column.
+table.fb-catalog-table .fb-catalog-detail-row > td {
+    padding: 0 var(--fb-table-edge-padding) 16px;
+    white-space: normal;
+    background: var(--fb-raised, #f7f8fb);
+}
+
+.fb-catalog-details {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px 24px;
+    margin: 0;
+    padding: 14px 16px;
+    border: 1px solid var(--fb-line, #e2e1eb);
+    border-radius: 10px;
+    background: var(--fb-surface, #fff);
+
+    dt {
+        margin-bottom: 2px;
+        color: var(--fb-muted, #625f74);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    dd {
+        min-width: 0;
+        margin: 0;
+        font-size: 13px;
+        overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 900px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.fb-catalog-no-details {
+    margin: 0;
+    padding: 12px 16px;
+    color: var(--fb-muted, #625f74);
+    font-size: 13px;
 }
 
 .fb-catalog-scroll {
@@ -630,7 +677,7 @@ $fb-table-control-line: var(--fb-line, #dcdae5);
     }
 
     .mat-mdc-checkbox {
-        --mdc-checkbox-state-layer-size: var(--fb-row-control-height);
+        --mat-checkbox-state-layer-size: var(--fb-row-control-height);
     }
 
     thead th:has(> mat-checkbox) {

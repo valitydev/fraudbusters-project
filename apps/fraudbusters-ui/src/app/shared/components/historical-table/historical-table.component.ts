@@ -1,14 +1,14 @@
-import { Clipboard } from '@angular/cdk/clipboard';
-import { DatePipe, NgClass, NgFor, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 
-import { HistoricalColumn, HistoricalKind } from './historical-kinds';
 import { formatAmount, HistoricalRow } from './historical-row';
-import { statusPillClass } from '../../../shared/utils/status-tone';
+import { HistoricalColumn, HistoricalTableKind } from './historical-table-kind';
+import { CopyToClipboardService } from '../../services/copy-to-clipboard.service';
+import { statusPillClass } from '../../utils/status-tone';
 
 const COLUMN_LABELS: Record<HistoricalColumn, string> = {
     status: 'Status',
@@ -28,36 +28,23 @@ const COLUMN_LABELS: Record<HistoricalColumn, string> = {
 /** Historical records of one tab; a row opens its details, and may be selected for a bulk action. */
 @Component({
     selector: 'fb-historical-table',
-    standalone: true,
-    imports: [
-        DatePipe,
-        NgClass,
-        NgFor,
-        NgIf,
-        NgSwitch,
-        NgSwitchCase,
-        NgSwitchDefault,
-        RouterLink,
-        MatCheckboxModule,
-        MatIconModule,
-        MatSnackBarModule,
-    ],
+    imports: [DatePipe, NgClass, RouterLink, MatCheckboxModule, MatIconModule, MatSnackBarModule],
     templateUrl: 'historical-table.component.html',
     styleUrls: ['historical-table.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HistoricalTableComponent implements OnChanges {
-    @Input({ required: true }) kind: HistoricalKind;
+    @Input({ required: true }) kind: HistoricalTableKind;
     @Input() rows: readonly HistoricalRow[] = [];
     /** Keys of the selected rows; no checkboxes without a bulk action. */
     @Input() selected: ReadonlySet<string> | null = null;
 
-    @Output() readonly toggle = new EventEmitter<HistoricalRow>();
+    @Output() readonly rowToggle = new EventEmitter<HistoricalRow>();
     @Output() readonly toggleAll = new EventEmitter<boolean>();
 
     expanded = new Set<string>();
 
-    constructor(private clipboard: Clipboard, private snackBar: MatSnackBar) {}
+    constructor(private copier: CopyToClipboardService) {}
 
     get selectable(): boolean {
         return this.selected !== null;
@@ -114,8 +101,7 @@ export class HistoricalTableComponent implements OnChanges {
     }
 
     copy(value: string, what: string): void {
-        const copied = this.clipboard.copy(value);
-        this.snackBar.open(copied ? `${what} copied` : `Could not copy ${what}`, 'OK', { duration: 2500 });
+        this.copier.copy(value, what);
     }
 
     trackRow(_: number, row: HistoricalRow): string {

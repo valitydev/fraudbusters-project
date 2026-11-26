@@ -4,9 +4,13 @@
             <col />
             <col />
             <col />
-            <col *ngIf="showGlobal" class="global-column" />
+            @if (showGlobal) {
+            <col class="global-column" />
+            }
             <col class="fb-catalog-date-column" />
-            <col *ngIf="showAuthor" class="author-column" />
+            @if (showAuthor) {
+            <col class="author-column" />
+            }
             <col class="actions-column" />
         </colgroup>
         <thead>
@@ -14,16 +18,22 @@
                 <th scope="col">{{ target }} ID</th>
                 <th scope="col">Party ID</th>
                 <th scope="col">{{ scope }} ID</th>
-                <th *ngIf="showGlobal" scope="col">Global</th>
+                @if (showGlobal) {
+                <th scope="col">Global</th>
+                }
                 <th scope="col">Last update</th>
-                <th *ngIf="showAuthor" scope="col">Modified by</th>
+                @if (showAuthor) {
+                <th scope="col">Modified by</th>
+                }
                 <th scope="col" class="fb-catalog-action-cell">Actions</th>
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let row of rows">
+            @for (row of rows; track row) {
+            <tr>
                 <th scope="row">
-                    <div *ngIf="row.targetId as id; else missing" class="reference-id">
+                    @if (row.targetId; as id) {
+                    <div class="reference-id">
                         <a
                             class="fb-catalog-link fb-catalog-mono"
                             [routerLink]="[targetRoute, id]"
@@ -35,26 +45,35 @@
                             *ngTemplateOutlet="copy; context: { id: id, label: target + ' ID' }"
                         ></ng-container>
                     </div>
+                    } @else { — }
                 </th>
                 <td>
-                    <div *ngIf="row.partyId as id; else missing" class="reference-id">
+                    @if (row.partyId; as id) {
+                    <div class="reference-id">
                         <span class="fb-catalog-mono">{{ id }}</span>
                         <ng-container *ngTemplateOutlet="copy; context: { id: id, label: 'Party ID' }"></ng-container>
                     </div>
+                    } @else { — }
                 </td>
                 <td>
-                    <div *ngIf="row.scopeId as id; else missing" class="reference-id">
+                    @if (row.scopeId; as id) {
+                    <div class="reference-id">
                         <span class="fb-catalog-mono">{{ id }}</span>
                         <ng-container
                             *ngTemplateOutlet="copy; context: { id: id, label: scope + ' ID' }"
                         ></ng-container>
                     </div>
+                    } @else { — }
                 </td>
-                <td *ngIf="showGlobal">{{ row.isGlobal ? 'Yes' : '—' }}</td>
+                @if (showGlobal) {
+                <td>{{ row.isGlobal ? 'Yes' : '—' }}</td>
+                }
                 <td class="fb-catalog-time">
                     {{ (row.lastUpdateDate | date : 'yyyy-MM-dd HH:mm:ss' : 'UTC') || '—' }}
                 </td>
-                <td *ngIf="showAuthor">{{ row.modifiedByUser || '—' }}</td>
+                @if (showAuthor) {
+                <td>{{ row.modifiedByUser || '—' }}</td>
+                }
                 <td class="fb-catalog-action-cell">
                     <button
                         mat-icon-button
@@ -65,8 +84,8 @@
                         <mat-icon>more_vert</mat-icon>
                     </button>
                     <mat-menu #menu="matMenu">
+                        @if (row.targetId) {
                         <a
-                            *ngIf="row.targetId"
                             mat-menu-item
                             [routerLink]="[targetRoute, row.targetId]"
                             [fragment]="targetFragment"
@@ -74,20 +93,22 @@
                         >
                             <mat-icon>open_in_new</mat-icon>Go to {{ target.toLowerCase() }}
                         </a>
-                        <button *ngIf="row.id" mat-menu-item type="button" (click)="copyId(row.id, 'Reference ID')">
+                        } @if (row.id) {
+                        <button mat-menu-item type="button" (click)="copyId(row.id, 'Reference ID')">
                             <mat-icon>content_copy</mat-icon>Copy reference ID
                         </button>
+                        }
                         <button mat-menu-item type="button" class="fb-menu-danger" (click)="remove.emit(row.source)">
                             <mat-icon>delete_outline</mat-icon>Remove reference
                         </button>
                     </mat-menu>
                 </td>
             </tr>
+            }
         </tbody>
     </table>
 </div>
 
-<ng-template #missing>—</ng-template>
 <ng-template #copy let-id="id" let-label="label">
     <button
         class="copy-id"

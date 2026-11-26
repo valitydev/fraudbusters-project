@@ -5,5 +5,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     templateUrl: 'fraud-summary-header.component.html',
     styleUrls: ['fraud-summary-header.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class FraudSummaryHeaderComponent {}

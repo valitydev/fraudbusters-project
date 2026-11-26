@@ -22,6 +22,7 @@ import { TestingDataSetService } from '../../services/data-set/testing-data-set.
     styleUrls: ['data-set-template.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [TestingDataSetService],
+    standalone: false,
 })
 export class DataSetTemplateComponent implements OnInit {
     @Input() dataSet: CheckedDataSet;

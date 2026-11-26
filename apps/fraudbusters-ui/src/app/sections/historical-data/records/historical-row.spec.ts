@@ -7,7 +7,7 @@ import {
     maskedCard,
     payoutRow,
     statusTone,
-} from './historical-row';
+} from '../../../shared/components/historical-table/historical-row';
 
 describe('historical rows', () => {
     it('drops the template and rule when no rule was checked', () => {

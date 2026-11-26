@@ -21,6 +21,7 @@ import { PayoutsFeedbackService } from '../../services/payouts-feedback.service'
 @Component({
     templateUrl: 'payout-group-references.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class PayoutGroupReferencesComponent {
     readonly sortOptions = CATALOG_SORT_OPTIONS;

@@ -7,6 +7,7 @@ import { FraudResultSummary } from '../../../../../../api/fb-management/swagger-
     templateUrl: 'fraud-summary-list.component.html',
     styleUrls: ['./fraud-summary-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class FraudSummaryListComponent {
     @Input()

@@ -8,6 +8,7 @@ import { TemplatesService } from '../services/templates/templates.service';
     templateUrl: './copy-template.component.html',
     styleUrls: ['./copy-template.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class CopyTemplateComponent {
     template$ = this.route.params.pipe(

@@ -1,5 +1,5 @@
+@if (catalog.view$ | async; as view) {
 <fb-catalog-panel
-    *ngIf="catalog.view$ | async as view"
     label="Payout group references"
     searchLabel="Find group, party or wallet"
     itemName="references"
@@ -14,8 +14,8 @@
     (more)="catalog.more()"
     (retry)="catalog.refresh()"
 >
+    @if (view.rows.length) {
     <fb-reference-table
-        *ngIf="view.rows.length"
         label="Payout group references"
         target="Group"
         targetRoute="/payouts/group"
@@ -24,4 +24,6 @@
         [showAuthor]="true"
         (remove)="removeReference($event)"
     ></fb-reference-table>
+    }
 </fb-catalog-panel>
+}

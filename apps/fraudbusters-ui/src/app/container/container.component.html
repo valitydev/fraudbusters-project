@@ -17,7 +17,9 @@
                     <span class="profile-avatar" aria-hidden="true">{{ userInitial }}</span>
                     <span class="profile-text">
                         <span class="profile-name">{{ getUsername() }}</span>
-                        <span *ngIf="roleSummary" class="profile-roles">{{ roleSummary }}</span>
+                        @if (roleSummary) {
+                        <span class="profile-roles">{{ roleSummary }}</span>
+                        }
                     </span>
                     <mat-icon aria-hidden="true">unfold_more</mat-icon>
                 </button>
@@ -40,12 +42,14 @@
     </mat-menu>
 
     <mat-sidenav-content role="main" class="content">
-        <header *ngIf="narrow$ | async" class="mobile-header">
+        @if (narrow$ | async) {
+        <header class="mobile-header">
             <button mat-icon-button type="button" aria-label="Open navigation" (click)="sidenav.toggle()">
                 <mat-icon>menu</mat-icon>
             </button>
             <span>Fraudbusters</span>
         </header>
+        }
         <div class="workspace"><ng-content></ng-content></div>
     </mat-sidenav-content>
 </mat-sidenav-container>

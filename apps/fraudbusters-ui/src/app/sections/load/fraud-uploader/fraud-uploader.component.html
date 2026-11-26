@@ -31,8 +31,8 @@
             </div>
 
             <input #fileInput hidden type="file" accept=".csv,text/csv" (change)="choose(fileInput)" />
+            @if (!file) {
             <div
-                *ngIf="!file; else chosen"
                 class="dropzone"
                 [class.dragging]="dragging"
                 (dragover)="dragOver($event)"
@@ -44,79 +44,87 @@
                 <span>or</span>
                 <button mat-stroked-button type="button" (click)="fileInput.click()">Browse for file</button>
             </div>
-
-            <ng-template #chosen>
-                <div class="file-chip">
-                    <span class="file-icon"><mat-icon>description</mat-icon></span>
-                    <div class="file-info">
-                        <strong>{{ file.name }}</strong>
-                        <span *ngIf="!fileIssue"
-                            >{{ rows.length }} {{ rows.length === 1 ? 'row' : 'rows' }} parsed ·
-                            {{ rows.length - invalidRows.length }} valid</span
-                        >
-                        <span *ngIf="fileIssue" class="issue">{{ fileIssue }}</span>
-                    </div>
-                    <button mat-button type="button" [disabled]="uploading" (click)="removeFile()">Remove file</button>
+            } @else {
+            <div class="file-chip">
+                <span class="file-icon"><mat-icon>description</mat-icon></span>
+                <div class="file-info">
+                    <strong>{{ file.name }}</strong>
+                    @if (!fileIssue) {
+                    <span
+                        >{{ rows.length }} {{ rows.length === 1 ? 'row' : 'rows' }} parsed ·
+                        {{ rows.length - invalidRows.length }} valid</span
+                    >
+                    } @if (fileIssue) {
+                    <span class="issue">{{ fileIssue }}</span>
+                    }
                 </div>
-
-                <div *ngIf="rows.length" class="preview">
-                    <div class="preview-header">
-                        <span>Parsed records</span>
-                        <span
-                            class="fb-pill fb-pill-status"
-                            [class.fb-pill-success]="!invalidRows.length"
-                            [class.fb-pill-warning]="invalidRows.length"
-                            >{{
-                                invalidRows.length
-                                    ? invalidRows.length + ' to fix'
-                                    : rows.length + ' valid ' + (rows.length === 1 ? 'record' : 'records')
-                            }}</span
-                        >
-                    </div>
-                    <div class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Parsed records">
-                        <table class="fb-catalog-table">
-                            <thead>
-                                <tr>
-                                    <th scope="col" class="line-column">Line</th>
-                                    <th scope="col">Payment ID</th>
-                                    <th scope="col">Fraud type</th>
-                                    <th scope="col">Comment</th>
-                                    <th scope="col">Event time</th>
-                                    <th scope="col">Check</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let row of rows.slice(0, previewLimit)" [class.invalid]="row.issue">
-                                    <td class="muted">{{ row.line }}</td>
-                                    <td class="fb-catalog-mono">{{ row.id || '—' }}</td>
-                                    <td class="fb-catalog-mono">{{ row.fraudType || '—' }}</td>
-                                    <td>{{ row.comment || '—' }}</td>
-                                    <td class="fb-catalog-time">{{ row.eventTime || 'Now' }}</td>
-                                    <td>
-                                        <span *ngIf="!row.issue" class="fb-pill fb-pill-status fb-pill-success"
-                                            >valid</span
-                                        >
-                                        <span *ngIf="row.issue" class="fb-pill fb-pill-status fb-pill-warning">{{
-                                            row.issue
-                                        }}</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <p *ngIf="rows.length > previewLimit" class="more">
-                        Showing the first {{ previewLimit }} of {{ rows.length }} rows; every row is checked.
-                    </p>
+                <button mat-button type="button" [disabled]="uploading" (click)="removeFile()">Remove file</button>
+            </div>
+            @if (rows.length) {
+            <div class="preview">
+                <div class="preview-header">
+                    <span>Parsed records</span>
+                    <span
+                        class="fb-pill fb-pill-status"
+                        [class.fb-pill-success]="!invalidRows.length"
+                        [class.fb-pill-warning]="invalidRows.length"
+                        >{{
+                            invalidRows.length
+                                ? invalidRows.length + ' to fix'
+                                : rows.length + ' valid ' + (rows.length === 1 ? 'record' : 'records')
+                        }}</span
+                    >
                 </div>
-            </ng-template>
+                <div class="fb-catalog-scroll" tabindex="0" role="region" aria-label="Parsed records">
+                    <table class="fb-catalog-table">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="line-column">Line</th>
+                                <th scope="col">Payment ID</th>
+                                <th scope="col">Fraud type</th>
+                                <th scope="col">Comment</th>
+                                <th scope="col">Event time</th>
+                                <th scope="col">Check</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (row of rows.slice(0, previewLimit); track row) {
+                            <tr [class.invalid]="row.issue">
+                                <td class="muted">{{ row.line }}</td>
+                                <td class="fb-catalog-mono">{{ row.id || '—' }}</td>
+                                <td class="fb-catalog-mono">{{ row.fraudType || '—' }}</td>
+                                <td>{{ row.comment || '—' }}</td>
+                                <td class="fb-catalog-time">{{ row.eventTime || 'Now' }}</td>
+                                <td>
+                                    @if (!row.issue) {
+                                    <span class="fb-pill fb-pill-status fb-pill-success">valid</span>
+                                    } @if (row.issue) {
+                                    <span class="fb-pill fb-pill-status fb-pill-warning">{{ row.issue }}</span>
+                                    }
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                @if (rows.length > previewLimit) {
+                <p class="more">
+                    Showing the first {{ previewLimit }} of {{ rows.length }} rows; every row is checked.
+                </p>
+                }
+            </div>
+            } }
         </div>
 
-        <mat-progress-bar *ngIf="uploading" mode="indeterminate" aria-label="Uploading"></mat-progress-bar>
+        @if (uploading) {
+        <mat-progress-bar mode="indeterminate" aria-label="Uploading"></mat-progress-bar>
+        }
         <footer class="card-footer">
-            <p *ngIf="error; else note" class="error" role="alert">{{ error }}</p>
-            <ng-template #note
-                ><p aria-live="polite">{{ footerNote }}</p></ng-template
-            >
+            @if (error) {
+            <p class="error" role="alert">{{ error }}</p>
+            } @else {
+            <p aria-live="polite">{{ footerNote }}</p>
+            }
             <div class="footer-actions">
                 <button mat-stroked-button type="button" [disabled]="uploading" (click)="back()">Cancel</button>
                 <button mat-flat-button color="primary" type="button" [disabled]="!canUpload" (click)="upload()">

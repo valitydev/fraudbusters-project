@@ -11,6 +11,7 @@ import { hasActiveFragments } from '../../shared/utils/has-active-fragments';
 @Component({
     templateUrl: 'groups.component.html',
     providers: [GroupTabCounts],
+    standalone: false,
 })
 export class GroupsComponent {
     links = [

@@ -1,11 +1,13 @@
-<div *ngIf="view$ | async as view" class="fb-page fb-page-catalog">
-    <header *ngIf="view.title" class="fb-page-toolbar">
+@if (view$ | async; as view) {
+<div class="fb-page fb-page-catalog">
+    @if (view.title) {
+    <header class="fb-page-toolbar">
         <div class="lists-heading">
             <h1 class="fb-page-title">{{ view.title }}</h1>
             <p class="fb-page-subtitle">{{ view.subtitle }}</p>
         </div>
+        @if (view.action?.createUrl) {
         <a
-            *ngIf="view.action?.createUrl"
             mat-stroked-button
             class="fb-primary-action"
             [routerLink]="view.action.createUrl"
@@ -13,7 +15,9 @@
         >
             <mat-icon>add</mat-icon>{{ view.action.createLabel }}
         </a>
+        }
     </header>
+    }
     <nav
         mat-tab-nav-bar
         [tabPanel]="tabPanel"
@@ -21,53 +25,32 @@
             view.title === 'Templates' || view.title === 'Lists' || view.title === 'Groups'
         "
     >
-        <a
-            mat-tab-link
-            *ngFor="let link of view.links"
-            [routerLink]="link.path"
-            routerLinkActive
-            #rla="routerLinkActive"
-            [active]="rla.isActive"
-        >
+        @for (link of view.links; track link) {
+        <a mat-tab-link [routerLink]="link.path" routerLinkActive #rla="routerLinkActive" [active]="rla.isActive">
             <span class="fb-template-tab-label">
-                <span
-                    *ngIf="link.listType"
-                    class="list-dot"
-                    [ngClass]="'list-dot-' + link.path"
-                    aria-hidden="true"
-                ></span>
+                @if (link.listType) {
+                <span class="list-dot" [ngClass]="'list-dot-' + link.path" aria-hidden="true"></span>
+                }
                 {{ link.name }}
-                <ng-container *ngIf="link.listType && (listCounts$ | async) as counts">
-                    <span *ngIf="counts[link.path]" class="fb-template-tab-count">{{ counts[link.path] }}</span>
-                </ng-container>
-                <ng-container *ngIf="view.title === 'Groups' && (groupCounts$ | async) as counts">
-                    <span *ngIf="counts[link.path] !== null" class="fb-template-tab-count">{{
-                        counts[link.path]
-                    }}</span>
-                </ng-container>
-                <ng-container *ngIf="view.title === 'Templates'">
-                    <ng-container
-                        *ngIf="rla.isActive && link.path === 'templates' && templateCatalog; else loadedTemplateCount"
-                    >
-                        <!-- The open catalog shows its live total, so removals update it right away. -->
-                        <ng-container *ngIf="templateCatalog.view$ | async as catalog">
-                            <span *ngIf="!catalog.busy && !catalog.failed" class="fb-template-tab-count">{{
-                                catalog.total
-                            }}</span>
-                        </ng-container>
-                    </ng-container>
-                    <ng-template #loadedTemplateCount>
-                        <ng-container *ngIf="templateCounts$ | async as counts">
-                            <span *ngIf="counts[link.path] !== null" class="fb-template-tab-count">{{
-                                counts[link.path]
-                            }}</span>
-                        </ng-container>
-                    </ng-template>
-                </ng-container>
+                @if (link.listType && (listCounts$ | async); as counts) { @if (counts[link.path]) {
+                <span class="fb-template-tab-count">{{ counts[link.path] }}</span>
+                } } @if (view.title === 'Groups' && (groupCounts$ | async); as counts) { @if (counts[link.path] !==
+                null) {
+                <span class="fb-template-tab-count">{{ counts[link.path] }}</span>
+                } } @if (view.title === 'Templates') { @if (rla.isActive && link.path === 'templates' &&
+                templateCatalog) {
+                <!-- The open catalog shows its live total, so removals update it right away. -->
+                @if (templateCatalog.view$ | async; as catalog) { @if (!catalog.busy && !catalog.failed) {
+                <span class="fb-template-tab-count">{{ catalog.total }}</span>
+                } } } @else { @if (templateCounts$ | async; as counts) { @if (counts[link.path] !== null) {
+                <span class="fb-template-tab-count">{{ counts[link.path] }}</span>
+                } } } }
             </span>
         </a>
+        }
     </nav>
     <mat-tab-nav-panel #tabPanel>
         <router-outlet (activate)="setActiveList($event)" (deactivate)="setActiveList(null)"></router-outlet>
     </mat-tab-nav-panel>
 </div>
+}

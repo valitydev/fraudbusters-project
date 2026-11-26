@@ -1,5 +1,7 @@
 <h2 mat-dialog-title class="fb-dialog-title">{{ data.title || 'Confirm this action' }}</h2>
-<mat-dialog-content *ngIf="data.message" class="fb-dialog-message">{{ data.message }}</mat-dialog-content>
+@if (data.message) {
+<mat-dialog-content class="fb-dialog-message">{{ data.message }}</mat-dialog-content>
+}
 <mat-dialog-actions align="end" class="fb-dialog-actions">
     <button mat-stroked-button type="button" class="fb-dialog-cancel" (click)="cancel()">Cancel</button>
     <button

@@ -1,9 +1,9 @@
 @mixin mat-button-override() {
     .mat-mdc-button-base {
-        --mdc-text-button-container-shape: var(--fb-radius-control);
-        --mdc-outlined-button-container-shape: var(--fb-radius-control);
-        --mdc-filled-button-container-shape: var(--fb-radius-control);
-        --mdc-protected-button-container-shape: var(--fb-radius-control);
+        --mat-button-text-container-shape: var(--fb-radius-control);
+        --mat-button-outlined-container-shape: var(--fb-radius-control);
+        --mat-button-filled-container-shape: var(--fb-radius-control);
+        --mat-button-protected-container-shape: var(--fb-radius-control);
     }
 
     .mat-button.mat-accent,

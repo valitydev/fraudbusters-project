@@ -15,6 +15,7 @@ interface NotificationsTab {
     templateUrl: 'notifications.component.html',
     styleUrls: ['notifications.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class NotificationsComponent {
     readonly links: NotificationsTab[] = [

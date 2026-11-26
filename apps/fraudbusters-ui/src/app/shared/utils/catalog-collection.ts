@@ -4,6 +4,14 @@ import { catchError, distinctUntilChanged, map, shareReplay, startWith, switchMa
 
 import { CatalogSort } from './catalog';
 
+/** The catalog search text from the URL (`?searchQuery=`, written by fb-catalog-search), trimmed. */
+export function catalogSearchQuery(route: ActivatedRoute): Observable<string> {
+    return route.queryParamMap.pipe(
+        map((params) => (params.get('searchQuery') ?? '').trim()),
+        distinctUntilChanged()
+    );
+}
+
 interface CatalogCollectionView<T> {
     rows: T[];
     total: number;
@@ -28,11 +36,7 @@ export class CatalogCollection<T> {
         matches?: (row: T, query: string) => boolean
     ) {
         this.visible$ = new BehaviorSubject(pageSize);
-        const query$ = route.queryParamMap.pipe(
-            map((params) => (params.get('searchQuery') ?? '').trim()),
-            distinctUntilChanged(),
-            tap(() => this.visible$.next(pageSize))
-        );
+        const query$ = catalogSearchQuery(route).pipe(tap(() => this.visible$.next(pageSize)));
         const data$ = combineLatest([matches ? of('') : query$, this.reload$]).pipe(
             switchMap(([query]) =>
                 load(query).pipe(

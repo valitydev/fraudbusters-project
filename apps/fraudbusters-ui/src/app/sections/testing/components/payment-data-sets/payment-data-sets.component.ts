@@ -13,6 +13,7 @@ import { RemoveDataSetsService } from '../../services/payment-data-sets/remove-d
 @Component({
     templateUrl: 'payment-data-sets.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class PaymentDataSetsComponent {
     readonly dataSets$ = this.fetchDataSetsService.searchResult$;

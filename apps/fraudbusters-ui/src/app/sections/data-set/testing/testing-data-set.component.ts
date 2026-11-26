@@ -12,6 +12,7 @@ import { TestingDataSetService } from '../../../shared/components/testing-data-s
     templateUrl: './testing-data-set.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [TestingDataSetService],
+    standalone: false,
 })
 export class TestingDataSetComponent {
     readonly dataSet$: Observable<CheckedDataSet>;

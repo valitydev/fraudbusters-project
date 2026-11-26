@@ -18,6 +18,7 @@ export interface HistoricalDataLink {
     styleUrls: ['historical-data.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [HistoricalActionsService],
+    standalone: false,
 })
 export class HistoricalDataComponent {
     readonly title: string;

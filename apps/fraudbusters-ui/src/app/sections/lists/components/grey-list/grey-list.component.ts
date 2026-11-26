@@ -5,6 +5,7 @@ import { ListType } from '../../../../shared/constants/list-type';
 @Component({
     templateUrl: './grey-list.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class GreyListComponent {
     listType = ListType.Grey;

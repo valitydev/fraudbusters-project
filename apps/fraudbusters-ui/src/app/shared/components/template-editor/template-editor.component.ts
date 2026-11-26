@@ -1,11 +1,10 @@
-import { Clipboard, ClipboardModule } from '@angular/cdk/clipboard';
+import { ClipboardModule } from '@angular/cdk/clipboard';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 import {
     PAYMENT_CATCH_OUTCOMES,
@@ -17,11 +16,11 @@ import { PAYOUT_EXAMPLES, PAYOUT_FIELDS, PAYOUT_PRESETS, PAYOUT_SECTIONS } from 
 import { searchSnippets, SnippetGroup } from './snippet-search';
 import { Template } from '../../../api/fb-management/swagger-codegen/model/template';
 import { SharedPipesModule } from '../../pipes';
+import { CopyToClipboardService } from '../../services/copy-to-clipboard.service';
 import { FraudoEditorComponent } from '../fraudo-editor/fraudo-editor.component';
 
 @Component({
     selector: 'fb-template-editor',
-    standalone: true,
     imports: [
         CommonModule,
         ClipboardModule,
@@ -78,7 +77,7 @@ export class TemplateEditorComponent {
 
     @ViewChild(FraudoEditorComponent) private editor?: FraudoEditorComponent;
 
-    constructor(private clipboard: Clipboard, private snackBar: MatSnackBar) {}
+    constructor(private copier: CopyToClipboardService) {}
 
     @ViewChild('idInput') set idInput(input: ElementRef<HTMLInputElement> | undefined) {
         input?.nativeElement.focus();
@@ -135,10 +134,7 @@ export class TemplateEditorComponent {
     }
 
     copy(value: string, label: string): void {
-        const copied = this.clipboard.copy(value);
-        this.snackBar.open(copied ? label + ' copied' : 'Could not copy ' + label.toLowerCase(), 'OK', {
-            duration: 2500,
-        });
+        this.copier.copy(value, label);
     }
 
     formatRules(): void {

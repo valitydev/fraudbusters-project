@@ -6,7 +6,6 @@ import { CsvPanelComponent, CsvParser } from '../csv-panel/csv-panel.component';
 
 @Component({
     selector: 'fb-reference-csv',
-    standalone: true,
     imports: [CsvPanelComponent],
     templateUrl: 'reference-csv.component.html',
 })

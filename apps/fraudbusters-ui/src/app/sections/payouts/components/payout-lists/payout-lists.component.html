@@ -1,5 +1,5 @@
+@if (page$ | async; as page) {
 <fb-catalog-panel
-    *ngIf="page$ | async as page"
     label="Payout list records"
     searchLabel="Search value, party or wallet"
     itemName="records"
@@ -18,16 +18,20 @@
         List names
         <span class="catalog-select">
             <mat-select [formControl]="listNames" placeholder="All lists" aria-label="List names" multiple>
-                <mat-option *ngFor="let name of listNames$ | async" [value]="name">{{ name }}</mat-option>
+                @for (name of listNames$ | async; track name) {
+                <mat-option [value]="name">{{ name }}</mat-option>
+                }
             </mat-select>
         </span>
     </label>
+    @if (page.rows.length && (failed$ | async) === false) {
     <fb-list-records-table
-        *ngIf="page.rows.length && (failed$ | async) === false"
         label="Payout list records"
         scope="Wallet"
         [rows]="page.rows"
         [grey]="isGrey"
         (remove)="removeRow($event)"
     ></fb-list-records-table>
+    }
 </fb-catalog-panel>
+}

@@ -8,13 +8,9 @@
         [placeholder]="label + '…'"
         [formControl]="query"
     />
-    <button
-        *ngIf="!query.value"
-        class="search-shortcut"
-        type="button"
-        aria-label="Focus search"
-        (click)="searchInput.focus()"
-    >
+    @if (!query.value) {
+    <button class="search-shortcut" type="button" aria-label="Focus search" (click)="searchInput.focus()">
         <kbd aria-hidden="true">/</kbd>
     </button>
+    }
 </div>

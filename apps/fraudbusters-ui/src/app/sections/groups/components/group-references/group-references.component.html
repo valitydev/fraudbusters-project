@@ -1,5 +1,5 @@
+@if (references$ | async; as page) {
 <fb-catalog-panel
-    *ngIf="references$ | async as page"
     label="Group references"
     searchLabel="Find group, party or shop"
     itemName="references"
@@ -12,9 +12,11 @@
     (sortChange)="setSort($any($event))"
     (more)="fetchMore(page.result[page.result.length - 1].groupId)"
 >
+    @if (page.result.length) {
     <fb-group-references-list
-        *ngIf="page.result.length"
         [references]="page.result"
         (deleteItem)="removeReference($event)"
     ></fb-group-references-list>
+    }
 </fb-catalog-panel>
+}

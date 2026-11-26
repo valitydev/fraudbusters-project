@@ -10,14 +10,15 @@
             <tr fb-group-header></tr>
         </thead>
         <tbody>
+            @for (group of groups; track byId($index, group)) {
             <tr
                 fb-group-item
-                *ngFor="let group of groups; trackBy: byId"
                 [group]="group"
                 (editItem)="editItem.emit($event)"
                 (deleteItem)="deleteItem.emit($event)"
                 (duplicateItem)="duplicateItem.emit($event)"
             ></tr>
+            }
         </tbody>
     </table>
 </div>

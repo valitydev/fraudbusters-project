@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, Input, OnInit, Optional
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, merge, Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, merge, Observable, of, Subject } from 'rxjs';
 import { catchError, distinctUntilChanged, filter, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 
 import { FetchWbListService } from './services/fetch-wb-list.service';
@@ -12,6 +12,7 @@ import { WbListRecord } from '../../../api/fb-management/swagger-codegen/model/w
 import { PaymentListsService } from '../../../api/payments/lists';
 import { ListType } from '../../constants/list-type';
 import { SortOrder } from '../../constants/sort-order';
+import { catalogSearchQuery } from '../../utils/catalog-collection';
 import { ListRecordRow, paymentListRow } from '../list-records-table/list-record-row';
 
 const LIST_LABELS: Record<string, string> = {
@@ -25,6 +26,7 @@ const LIST_LABELS: Record<string, string> = {
     selector: 'fb-wb-list',
     templateUrl: './wb-list.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class WbListComponent implements OnInit {
     @Input() listType: ListType;
@@ -36,7 +38,7 @@ export class WbListComponent implements OnInit {
 
     readonly page$: Observable<{ rows: ListRecordRow<WbListRecord>[]; count: number }>;
 
-    readonly inProgress$ = this.fetchWbListService.inProgress$;
+    readonly inProgress$: Observable<boolean>;
     listNames$: Observable<string[]>;
     sort = SortOrder.Desc;
     listName = '';
@@ -47,6 +49,11 @@ export class WbListComponent implements OnInit {
     private readonly reloadNames$ = new BehaviorSubject<void>(undefined);
     /** Emits when the list has no names at all, so there is nothing to ask the backend for. */
     private readonly cleared$ = new Subject<void>();
+    /**
+     * True while there is nothing to fetch. The fetcher reports "loading" until its first response,
+     * and a list without names never asks the backend, so its loader would otherwise never stop.
+     */
+    private readonly idle$ = new BehaviorSubject(false);
 
     constructor(
         private route: ActivatedRoute,
@@ -64,6 +71,10 @@ export class WbListComponent implements OnInit {
             ),
             this.cleared$.pipe(map(() => empty))
         ).pipe(startWith(empty));
+        this.inProgress$ = combineLatest([this.fetchWbListService.inProgress$, this.idle$]).pipe(
+            map(([busy, idle]) => busy && !idle),
+            distinctUntilChanged()
+        );
     }
 
     get label(): string {
@@ -80,15 +91,12 @@ export class WbListComponent implements OnInit {
             shareReplay({ bufferSize: 1, refCount: true })
         );
         this.listNames$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((names) => {
-            this.allNames = names;
+            // An empty response may come without the list at all.
+            this.allNames = names ?? [];
             this.search();
         });
-        this.route.queryParamMap
-            .pipe(
-                map((params) => (params.get('searchQuery') ?? '').trim()),
-                distinctUntilChanged(),
-                takeUntilDestroyed(this.destroyRef)
-            )
+        catalogSearchQuery(this.route)
+            .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe((query) => {
                 this.searchValue = query;
                 this.search();
@@ -132,10 +140,12 @@ export class WbListComponent implements OnInit {
         const listNames = this.listName ? [this.listName] : this.allNames;
         if (!listNames?.length) {
             if (listNames) {
+                this.idle$.next(true);
                 this.cleared$.next();
             }
             return;
         }
+        this.idle$.next(false);
         this.fetchWbListService.search({
             listType: this.listType,
             sortOrder: this.sort,

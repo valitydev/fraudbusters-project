@@ -5,6 +5,7 @@ import { ListType } from '../../../../shared/constants/list-type';
 @Component({
     templateUrl: './white-list.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false,
 })
 export class WhiteListComponent {
     listType = ListType.White;

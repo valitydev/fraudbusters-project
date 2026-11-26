@@ -1,17 +1,18 @@
-import { Clipboard } from '@angular/cdk/clipboard';
-import { AsyncPipe, DatePipe, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { catchError, distinctUntilChanged, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
+import { catchError, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 
 import { CandidateBatchRow, candidateBatchRow } from './candidate-batch';
 import { PaymentListsService } from '../../../../api/payments/lists';
 import { CatalogPanelComponent } from '../../../../shared/components/catalog-panel/catalog-panel.component';
 import { SortOrder } from '../../../../shared/constants/sort-order';
+import { CopyToClipboardService } from '../../../../shared/services/copy-to-clipboard.service';
+import { catalogSearchQuery } from '../../../../shared/utils/catalog-collection';
 
 /** The backend returns batches without a total; at most this many are shown. */
 export const CANDIDATE_BATCH_PAGE = 100;
@@ -25,12 +26,9 @@ interface BatchesView {
 
 /** Batches of list candidates found by chargeback or velocity checks, waiting for review. */
 @Component({
-    standalone: true,
     imports: [
         AsyncPipe,
         DatePipe,
-        NgFor,
-        NgIf,
         RouterLink,
         MatButtonModule,
         MatIconModule,
@@ -57,16 +55,9 @@ export class CandidatesComponent {
         private router: Router,
         route: ActivatedRoute,
         private listService: PaymentListsService,
-        private clipboard: Clipboard,
-        private snackBar: MatSnackBar
+        private copier: CopyToClipboardService
     ) {
-        const loaded$ = combineLatest([
-            route.queryParamMap.pipe(
-                map((params) => (params.get('searchQuery') ?? '').trim()),
-                distinctUntilChanged()
-            ),
-            this.reload$,
-        ]).pipe(
+        const loaded$ = combineLatest([catalogSearchQuery(route), this.reload$]).pipe(
             switchMap(([searchValue]) =>
                 this.listService
                     .findCandidatesBatch({
@@ -115,8 +106,7 @@ export class CandidatesComponent {
     }
 
     copyId(id: string): void {
-        const copied = this.clipboard.copy(id);
-        this.snackBar.open(copied ? 'Batch ID copied' : 'Could not copy batch ID', 'OK', { duration: 2500 });
+        this.copier.copy(id, 'Batch ID');
     }
 
     private time(date?: Date | string): number {

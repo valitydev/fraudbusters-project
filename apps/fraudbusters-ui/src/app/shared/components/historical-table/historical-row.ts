@@ -8,7 +8,7 @@ import { ProviderInfo } from '../../../api/fb-management/swagger-codegen/model/p
 import { Refund } from '../../../api/fb-management/swagger-codegen/model/refund';
 import { Withdrawal } from '../../../api/fb-management/swagger-codegen/model/withdrawal';
 import { WithdrawalInspectResult } from '../../../api/fb-management/swagger-codegen/model/withdrawalInspectResult';
-import { hasDetail } from '../../../shared/pipes/has-detail.pipe';
+import { hasDetail } from '../../utils/has-detail';
 
 export interface HistoricalDetail {
     label: string;
@@ -118,7 +118,7 @@ function providerDetails(provider?: ProviderInfo): (HistoricalDetail | null)[] {
     ];
 }
 
-function paymentDetails(payment: Payment): HistoricalDetail[] {
+export function paymentDetails(payment: Payment): HistoricalDetail[] {
     return details(
         payment.paymentId && payment.paymentId !== payment.id ? detail('Payment ID', payment.paymentId, true) : null,
         detail('Card token', payment.cardToken, true),

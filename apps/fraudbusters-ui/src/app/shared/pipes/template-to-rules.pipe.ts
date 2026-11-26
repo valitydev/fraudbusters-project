@@ -2,6 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
     name: 'templateToRules',
+    standalone: false,
 })
 export class TemplateToRulesPipe implements PipeTransform {
     transform(template: string): string[] {

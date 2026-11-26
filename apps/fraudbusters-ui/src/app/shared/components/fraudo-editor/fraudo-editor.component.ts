@@ -1,5 +1,4 @@
 import { TextFieldModule } from '@angular/cdk/text-field';
-import { DOCUMENT, NgFor, NgIf } from '@angular/common';
 import {
     AfterViewInit,
     ChangeDetectionStrategy,
@@ -11,6 +10,7 @@ import {
     Input,
     ViewChild,
     forwardRef,
+    DOCUMENT,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -33,8 +33,7 @@ import { FraudoToken, tokenizeFraudo } from '../../pipes/fraudo-tokens.pipe';
  */
 @Component({
     selector: 'fb-fraudo-editor',
-    standalone: true,
-    imports: [TextFieldModule, NgFor, NgIf, MatButtonModule, SharedPipesModule],
+    imports: [TextFieldModule, MatButtonModule, SharedPipesModule],
     templateUrl: './fraudo-editor.component.html',
     styleUrls: ['./fraudo-editor.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,

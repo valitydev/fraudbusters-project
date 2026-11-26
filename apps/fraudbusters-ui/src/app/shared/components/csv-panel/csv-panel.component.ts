@@ -1,4 +1,4 @@
-import { NgFor, NgIf, NgTemplateOutlet, SlicePipe } from '@angular/common';
+import { NgTemplateOutlet, SlicePipe } from '@angular/common';
 import {
     ChangeDetectorRef,
     Component,
@@ -29,8 +29,7 @@ export type CsvParser<T> = (text: string, label: string) => CsvParseResult<T>;
  */
 @Component({
     selector: 'fb-csv-panel',
-    standalone: true,
-    imports: [NgFor, NgIf, NgTemplateOutlet, SlicePipe, MatButtonModule, MatIconModule],
+    imports: [NgTemplateOutlet, SlicePipe, MatButtonModule, MatIconModule],
     templateUrl: 'csv-panel.component.html',
     styleUrls: ['csv-panel.component.scss'],
 })
