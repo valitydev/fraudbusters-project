@@ -9,6 +9,7 @@ import dev.vality.fraudbusters.management.domain.request.FilterRequest;
 import dev.vality.fraudbusters.management.domain.tables.pojos.WbListRecords;
 import dev.vality.fraudbusters.management.exception.NotFoundException;
 import dev.vality.fraudbusters.management.service.WbListCommandService;
+import dev.vality.fraudbusters.management.utils.PagingDataUtils;
 import dev.vality.fraudbusters.management.utils.PaymentCountInfoGenerator;
 import dev.vality.fraudbusters.management.utils.UserInfoService;
 import dev.vality.fraudbusters.management.utils.parser.CsvPaymentCountInfoParser;
@@ -38,12 +39,21 @@ public class PaymentsListsService {
     private final WbListRecordsModelToWbListRecordConverter wbListRecordsModelToWbListRecordConverter;
     private final ListRowValidator listRowValidator;
 
-    public WbListRecordsResponse filterLists(List<String> listNames, String listType,
-                                             FilterRequest filterRequest) {
+    public WbListRecordsResponse filterLists(String listType, List<String> listNames, String searchValue,
+                                              String lastId, String sortOrder, String sortBy,
+                                              String sortFieldValue, Integer size) {
+        var filterRequest = FilterRequest.builder()
+                .lastId(lastId)
+                .sortOrder(PagingDataUtils.getSortOrder(sortOrder))
+                .searchValue(searchValue)
+                .sortBy(sortBy)
+                .sortFieldValue(sortFieldValue)
+                .size(size)
+                .build();
         List<WbListRecords> wbListRecords =
                 wbListDao.filterListRecords(ListType.valueOf(listType), listNames, filterRequest);
         Integer count =
-                wbListDao.countFilterRecords(ListType.valueOf(listType), listNames, filterRequest.getSearchValue());
+                wbListDao.countFilterRecords(ListType.valueOf(listType), listNames, searchValue);
         return new WbListRecordsResponse()
                 .count(count)
                 .result(wbListRecords.stream()

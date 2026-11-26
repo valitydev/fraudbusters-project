@@ -90,12 +90,18 @@ class PaymentListCandidateResourceTest {
 
     @Test
     void servesPaymentCatalogRowsWithoutListNames() throws Exception {
-        when(paymentsListsService.filterLists(isNull(), eq("black"), any(FilterRequest.class)))
+        when(paymentsListsService.filterLists("black", null, null, null, null, null, null, 50))
                 .thenReturn(new WbListRecordsResponse().count(7).result(List.of()));
 
         mockMvc.perform(get("/payments/catalog/lists/filter-records").param("listType", "black"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.count", equalTo(7)));
+    }
+
+    @Test
+    void requiresListTypeForPaymentCatalogRows() throws Exception {
+        mockMvc.perform(get("/payments/catalog/lists/filter-records"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

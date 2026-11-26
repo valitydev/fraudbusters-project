@@ -1,4 +1,4 @@
-package dev.vality.fraudbusters.management.resource;
+package dev.vality.fraudbusters.management.service;
 
 import dev.vality.fraudbusters.management.dao.CatalogMetadataDao;
 import dev.vality.fraudbusters.management.dao.CatalogMetadataDao.ListNameCount;
@@ -11,19 +11,16 @@ import dev.vality.fraudbusters.management.dao.payout.reference.PayoutReferenceDa
 import dev.vality.fraudbusters.management.dao.payout.template.PayoutTemplateDao;
 import dev.vality.swag.fraudbusters.management.model.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RestController
+@Service
 @RequiredArgsConstructor
-public class CatalogMetadataResource {
+public class CatalogMetadataService {
 
     private final CatalogMetadataDao metadataDao;
     private final PaymentTemplateDao paymentTemplateDao;
@@ -34,8 +31,6 @@ public class CatalogMetadataResource {
     private final PayoutReferenceDao payoutReferenceDao;
     private final PayoutGroupReferenceDao payoutGroupReferenceDao;
 
-    @GetMapping(value = "/payments/catalog/templates/metadata", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('fraud-officer')")
     public PaymentTemplatesMetadata getPaymentTemplatesMetadata() {
         return new PaymentTemplatesMetadata(new PaymentTemplatesMetadataCounts()
                 .templates(paymentTemplateDao.countFilterModel(null))
@@ -43,32 +38,24 @@ public class CatalogMetadataResource {
                 .defaultReferences(defaultPaymentReferenceDao.countFilterModel(null)));
     }
 
-    @GetMapping(value = "/payouts/catalog/templates/metadata", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('fraud-officer')")
     public PayoutTemplatesMetadata getPayoutTemplatesMetadata() {
         return new PayoutTemplatesMetadata(new PayoutTemplatesMetadataCounts()
                 .templates(payoutTemplateDao.countFilterModel(null))
                 .references(payoutReferenceDao.countFilter(null, null)));
     }
 
-    @GetMapping(value = "/payments/catalog/groups/metadata", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('fraud-officer')")
     public GroupsMetadata getPaymentGroupsMetadata() {
         return new GroupsMetadata(new GroupsMetadataCounts()
                 .groups(metadataDao.countPaymentGroups())
                 .references(paymentGroupReferenceDao.countFilterReference(null)));
     }
 
-    @GetMapping(value = "/payouts/catalog/groups/metadata", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('fraud-officer')")
     public GroupsMetadata getPayoutGroupsMetadata() {
         return new GroupsMetadata(new GroupsMetadataCounts()
                 .groups(metadataDao.countPayoutGroups())
                 .references(payoutGroupReferenceDao.countFilter(null)));
     }
 
-    @GetMapping(value = "/payments/catalog/lists/metadata", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('fraud-monitoring', 'fraud-officer')")
     public PaymentListsMetadata getPaymentListsMetadata() {
         var metadata = listMetadata(metadataDao.countPaymentListRows());
         var counts = new PaymentListsMetadataCounts()
@@ -79,8 +66,6 @@ public class CatalogMetadataResource {
         return new PaymentListsMetadata(counts, metadata.listNames());
     }
 
-    @GetMapping(value = "/payouts/catalog/lists/metadata", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('fraud-monitoring', 'fraud-officer')")
     public PayoutListsMetadata getPayoutListsMetadata() {
         var metadata = listMetadata(metadataDao.countPayoutListRows());
         var counts = new PayoutListsMetadataCounts()
