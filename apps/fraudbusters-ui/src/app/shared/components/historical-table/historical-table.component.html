@@ -75,9 +75,9 @@
                     <span class="fb-pill fb-pill-status" [ngClass]="pill(row.status)">{{ row.status }}</span>
                     } @else {
                     <span class="missing">—</span>
-                    } } @case ('amount') { @if (amount(row)) {
+                    } } @case ('amount') { @if (amount(row); as formattedAmount) {
                     <span class="amount"
-                        >{{ amount(row) }} <span class="currency">{{ row.currency }}</span></span
+                        >{{ formattedAmount }} <span class="currency">{{ row.currency }}</span></span
                     >
                     } @else {
                     <span class="missing">—</span>

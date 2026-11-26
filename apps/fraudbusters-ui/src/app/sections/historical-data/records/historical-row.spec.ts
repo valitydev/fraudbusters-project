@@ -2,6 +2,7 @@ import { toHistoricalCsv } from './historical-csv';
 import { HISTORICAL_KINDS } from './historical-kinds';
 import {
     chargebackRow,
+    formatAmount,
     formatPaymentTool,
     inspectResultRow,
     maskedCard,
@@ -10,6 +11,20 @@ import {
 } from '../../../shared/components/historical-table/historical-row';
 
 describe('historical rows', () => {
+    it('formats disputed and inspected amounts in major units in the details and CSV', () => {
+        const amount = 12345;
+        const currency = 'RUB';
+        const expected = '123.45 RUB';
+        const chargeback = chargebackRow({ amount, currency }, 0);
+        const inspected = inspectResultRow({ payment: { amount, currency } }, 0);
+        const payout = payoutRow({ id: 'payout', amount, currency, eventTime: new Date(0), status: 'succeeded' }, 0);
+
+        expect(chargeback.details.find((item) => item.label === 'Disputed amount')?.value).toBe(expected);
+        expect(inspected.details.find((item) => item.label === 'Amount')?.value).toBe(expected);
+        expect(toHistoricalCsv(HISTORICAL_KINDS.chargebacks, [chargeback])).toContain(`"${expected}"`);
+        expect(toHistoricalCsv(HISTORICAL_KINDS.payouts, [payout])).toContain(`"${expected}"`);
+    });
+
     it('drops the template and rule when no rule was checked', () => {
         const row = inspectResultRow(
             {
@@ -62,6 +77,17 @@ describe('historical rows', () => {
         expect(statusTone('captured')).toBe('success');
         expect(statusTone('three_ds')).toBe('info');
         expect(statusTone('something-new')).toBe('neutral');
+    });
+});
+
+describe('formatAmount', () => {
+    it('uses the minor-unit precision of the currency', () => {
+        expect(formatAmount(12345, 'RUB')).toBe('123.45 RUB');
+        expect(formatAmount(12345, 'JPY')).toBe('12,345 JPY');
+        expect(formatAmount(12345, 'KWD')).toBe('12.345 KWD');
+        expect(formatAmount(1)).toBe('0.01');
+        expect(formatAmount(0, 'RUB')).toBe('0.00 RUB');
+        expect(formatAmount(undefined, 'RUB')).toBe('');
     });
 });
 
