@@ -1,9 +1,12 @@
 type: object
-required: [counts]
+required:
+  - counts
 properties:
   counts:
     type: object
-    required: [groups, references]
+    required:
+      - groups
+      - references
     properties:
       groups:
         $ref: './CatalogCount.yaml'

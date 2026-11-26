@@ -1,9 +1,13 @@
 type: object
-required: [counts]
+required:
+  - counts
 properties:
   counts:
     type: object
-    required: [templates, references, defaultReferences]
+    required:
+      - templates
+      - references
+      - defaultReferences
     properties:
       templates:
         $ref: './CatalogCount.yaml'

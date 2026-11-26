@@ -1,5 +1,8 @@
 type: object
-required: [black, white, grey]
+required:
+  - black
+  - white
+  - grey
 properties:
   black:
     type: array
