@@ -21,7 +21,7 @@ public interface WbListDao extends CdDao<WbListRecords> {
 
     List<WbListRecords> filterListRecords(ListType listType, List<String> listNames, FilterRequest filterRequest);
 
-    Integer countFilterRecords(@NonNull ListType listType, @NonNull List<String> listNames, String filterValue);
+    Integer countFilterRecords(@NonNull ListType listType, List<String> listNames, String filterValue);
 
     List<String> getCurrentListNames(ListType listType);
 

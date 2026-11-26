@@ -1,5 +1,6 @@
 package dev.vality.fraudbusters.management.resource.payment;
 
+import dev.vality.fraudbusters.management.config.FraudAuthorization;
 import dev.vality.damsel.wb_list.Command;
 import dev.vality.damsel.wb_list.ListType;
 import dev.vality.fraud_data_crawler.FraudDataCandidate;
@@ -54,7 +55,7 @@ public class PaymentsListsResource implements PaymentsListsApi {
     private final ListRowValidator listRowValidator;
 
     @Override
-    @PreAuthorize("hasAnyRole('fraud-monitoring', 'fraud-officer')")
+    @PreAuthorize(FraudAuthorization.FRAUD_MONITORING_OR_OFFICER)
     public ResponseEntity<Void> approveListCandidates(IdListRequest listRequest) {
         List<Long> ids = listRequest.getIds();
         log.info("approveFraudCandidates with ids: {}", Arrays.toString(ids.toArray()));
@@ -66,30 +67,18 @@ public class PaymentsListsResource implements PaymentsListsApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('fraud-monitoring', 'fraud-officer')")
+    @PreAuthorize(FraudAuthorization.FRAUD_MONITORING_OR_OFFICER)
     public ResponseEntity<WbListRecordsResponse> filterLists(List<String> listNames,
                                                              String listType, String lastId,
                                                              String sortOrder, String searchValue,
                                                              String sortBy, String sortFieldValue,
                                                              Integer size) {
-        var filterRequest = FilterRequest.builder()
-                .lastId(lastId)
-                .sortOrder(PagingDataUtils.getSortOrder(sortOrder))
-                .searchValue(searchValue)
-                .sortBy(sortBy)
-                .sortFieldValue(sortFieldValue)
-                .size(size)
-                .build();
-        String userName = userInfoService.getUserName();
-        log.info("filterList initiator: {} listType: {} listNames: {} filterRequest: {}",
-                userName, listType, listNames, filterRequest);
-        WbListRecordsResponse result = paymentsListsService.filterLists(listNames, listType, filterRequest);
-        return ResponseEntity.ok(result
-        );
+        return ResponseEntity.ok(paymentsListsService.filterLists(listType, listNames, searchValue,
+                lastId, sortOrder, sortBy, sortFieldValue, size));
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('fraud-monitoring', 'fraud-officer')")
+    @PreAuthorize(FraudAuthorization.FRAUD_MONITORING_OR_OFFICER)
     public ResponseEntity<ListResponse> getAvailableListNames() {
         var listResponse = new ListResponse();
         listResponse.setResult(parametersService.getAvailableListNames());
@@ -97,7 +86,7 @@ public class PaymentsListsResource implements PaymentsListsApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('fraud-monitoring', 'fraud-officer')")
+    @PreAuthorize(FraudAuthorization.FRAUD_MONITORING_OR_OFFICER)
     public ResponseEntity<ListResponse> insertRow(RowListRequest request) {
         log.info("insertRowsToList initiator: {} request {}", userInfoService.getUserName(), request);
         try {
@@ -116,7 +105,7 @@ public class PaymentsListsResource implements PaymentsListsApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('fraud-monitoring', 'fraud-officer')")
+    @PreAuthorize(FraudAuthorization.FRAUD_MONITORING_OR_OFFICER)
     public ResponseEntity<WbListCandidatesResponse> listCandidates(Long lastId,
                                                                    String sortOrder,
                                                                    String searchValue,
@@ -168,7 +157,7 @@ public class PaymentsListsResource implements PaymentsListsApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('fraud-monitoring', 'fraud-officer')")
+    @PreAuthorize(FraudAuthorization.FRAUD_MONITORING_OR_OFFICER)
     public ResponseEntity<ListResponse> getCurrentListNames(String listType) {
         var listResponse = new ListResponse();
         listResponse.setResult(paymentsListsService.getCurrentListNames(listType));
@@ -176,7 +165,7 @@ public class PaymentsListsResource implements PaymentsListsApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('fraud-monitoring', 'fraud-officer')")
+    @PreAuthorize(FraudAuthorization.FRAUD_MONITORING_OR_OFFICER)
     public ResponseEntity<Void> insertFromCsv(String listType, MultipartFile file) {
         String userName = userInfoService.getUserName();
         log.info("Insert from csv initiator: {} listType: {}", userName, listType);
@@ -185,7 +174,7 @@ public class PaymentsListsResource implements PaymentsListsApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('fraud-monitoring', 'fraud-officer')")
+    @PreAuthorize(FraudAuthorization.FRAUD_MONITORING_OR_OFFICER)
     public ResponseEntity<Void> deleteByCsv(String listType, MultipartFile file) {
         String userName = userInfoService.getUserName();
         log.info("Delete by csv initiator: {} listType: {}", userName, listType);
@@ -207,7 +196,7 @@ public class PaymentsListsResource implements PaymentsListsApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('fraud-monitoring', 'fraud-officer')")
+    @PreAuthorize(FraudAuthorization.FRAUD_MONITORING_OR_OFFICER)
     public ResponseEntity<IdResponse> removeRow(String id) {
         String idMessage = paymentsListsService.removeListRecord(id);
         return ResponseEntity.ok().body(
