@@ -1,14 +1,18 @@
 package dev.vality.fraudbusters.management.resource.payment;
 
 import dev.vality.fraudbusters.management.TestObjectFactory;
+import dev.vality.fraudbusters.management.dao.CatalogMetadataDao;
+import dev.vality.fraudbusters.management.dao.CatalogMetadataDao.ListNameCount;
 import dev.vality.fraudbusters.management.domain.WbListCandidateBatchModel;
 import dev.vality.fraudbusters.management.domain.request.FilterRequest;
 import dev.vality.fraudbusters.management.domain.response.FilterResponse;
 import dev.vality.fraudbusters.management.domain.tables.pojos.WbListCandidate;
 import dev.vality.fraudbusters.management.service.iface.WbListCandidateBatchService;
 import dev.vality.fraudbusters.management.service.iface.WbListCandidateService;
+import dev.vality.fraudbusters.management.service.payment.PaymentsListsService;
 import dev.vality.swag.fraudbusters.management.model.IdListRequest;
 import dev.vality.swag.fraudbusters.management.model.WbListCandidatesRequest;
+import dev.vality.swag.fraudbusters.management.model.WbListRecordsResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.security.autoconfigure.actuate.web.servlet.ManagementWebSecurityAutoConfiguration;
@@ -56,7 +60,43 @@ class PaymentListCandidateResourceTest {
     @MockitoBean
     private WbListCandidateBatchService wbListCandidateBatchService;
 
+    @MockitoBean
+    private CatalogMetadataDao catalogMetadataDao;
+
+    @MockitoBean
+    private PaymentsListsService paymentsListsService;
+
     private final JsonMapper objectMapper = JsonMapper.builder().build();
+
+    @Test
+    void servesPaymentAndPayoutListMetadata() throws Exception {
+        when(catalogMetadataDao.countPaymentListRows()).thenReturn(List.of(
+                new ListNameCount("black", "first", 2),
+                new ListNameCount("black", "second", 1)));
+        when(catalogMetadataDao.countCandidateBatches()).thenReturn(105);
+        when(catalogMetadataDao.countPayoutListRows()).thenReturn(List.of(new ListNameCount("naming", "example", 7)));
+
+        mockMvc.perform(get("/payments/catalog/lists/metadata"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.counts.black", equalTo(3)))
+                .andExpect(jsonPath("$.counts.white", equalTo(0)))
+                .andExpect(jsonPath("$.counts.candidateBatches", equalTo(105)))
+                .andExpect(jsonPath("$.listNames.black", equalTo(List.of("first", "second"))));
+        mockMvc.perform(get("/payouts/catalog/lists/metadata"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.counts.named", equalTo(7)))
+                .andExpect(jsonPath("$.listNames.named", equalTo(List.of("example"))));
+    }
+
+    @Test
+    void servesPaymentCatalogRowsWithoutListNames() throws Exception {
+        when(paymentsListsService.filterLists(isNull(), eq("black"), any(FilterRequest.class)))
+                .thenReturn(new WbListRecordsResponse().count(7).result(List.of()));
+
+        mockMvc.perform(get("/payments/catalog/lists/filter-records").param("listType", "black"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.count", equalTo(7)));
+    }
 
     @Test
     void approveListCandidates() throws Exception {

@@ -5,6 +5,8 @@ import dev.vality.fraudbusters.management.converter.ListRecordToRowConverterImpl
 import dev.vality.fraudbusters.management.converter.payment.PaymentCountInfoRequestToRowConverter;
 import dev.vality.fraudbusters.management.converter.payment.PaymentListRecordToRowConverter;
 import dev.vality.fraudbusters.management.converter.payment.WbListRecordsToCountInfoListRequestConverter;
+import dev.vality.fraudbusters.management.dao.CatalogMetadataDao;
+import dev.vality.fraudbusters.management.dao.CatalogMetadataDao.ListNameCount;
 import dev.vality.fraudbusters.management.domain.enums.ListType;
 import dev.vality.fraudbusters.management.domain.request.FilterRequest;
 import dev.vality.fraudbusters.management.domain.tables.pojos.WbListRecords;
@@ -23,6 +25,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static dev.vality.fraudbusters.management.TestObjectFactory.createWbListRecordsRecord;
@@ -31,7 +34,8 @@ import static dev.vality.fraudbusters.management.domain.tables.WbListRecords.WB_
 import static org.junit.jupiter.api.Assertions.*;
 
 @PostgresqlJooqITest
-@ContextConfiguration(classes = {WbListDaoImpl.class, WbListRecordsToCountInfoListRequestConverter.class,
+@ContextConfiguration(classes = {WbListDaoImpl.class, CatalogMetadataDao.class,
+        WbListRecordsToCountInfoListRequestConverter.class,
         PaymentListRecordToRowConverter.class, PaymentCountInfoRequestToRowConverter.class,
         ListRecordToRowConverterImpl.class, CountInfoApiUtils.class,
         PaymentCountInfoGenerator.class, JacksonAutoConfiguration.class, CountInfoUtils.class})
@@ -47,11 +51,37 @@ public class WbListDaoImplTest {
     DSLContext dslContext;
 
     @Autowired
+    CatalogMetadataDao metadataDao;
+
+    @Autowired
     WbListRecordsToCountInfoListRequestConverter wbListRecordsToListRecordWithRowConverter;
 
     @BeforeEach
     void setUp() {
         dslContext.deleteFrom(WB_LIST_RECORDS).execute();
+    }
+
+    @Test
+    void loadsAllListsOfOneTypeWithoutNamesAndCountsThemByName() {
+        WbListRecords first = createListRecord("first");
+        WbListRecords second = createListRecord("second");
+        second.setListName("other");
+        WbListRecords third = createListRecord("third");
+        third.setListType(ListType.white);
+        wbListDao.saveListRecord(first);
+        wbListDao.saveListRecord(second);
+        wbListDao.saveListRecord(third);
+
+        var filter = FilterRequest.builder().size(10).sortOrder(SortOrder.ASC).build();
+        assertEquals(2, wbListDao.filterListRecords(ListType.black, null, filter).size());
+        assertEquals(2, wbListDao.countFilterRecords(ListType.black, null, null));
+        assertEquals(0, wbListDao.countFilterRecords(ListType.black, List.of(), null));
+        assertEquals(1, wbListDao.countFilterRecords(ListType.black, List.of(LIST_NAME), null));
+        assertEquals(Set.of(
+                        new ListNameCount("black", LIST_NAME, 1),
+                        new ListNameCount("white", LIST_NAME, 1),
+                        new ListNameCount("black", "other", 1)),
+                Set.copyOf(metadataDao.countPaymentListRows()));
     }
 
     @Test

@@ -22,11 +22,15 @@ import dev.vality.fraudbusters.management.utils.UserInfoService;
 import dev.vality.fraudbusters.management.validator.ListRowValidator;
 import dev.vality.swag.fraudbusters.management.api.PaymentsListsApi;
 import dev.vality.swag.fraudbusters.management.model.*;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -80,12 +84,21 @@ public class PaymentsListsResource implements PaymentsListsApi {
                 .sortFieldValue(sortFieldValue)
                 .size(size)
                 .build();
-        String userName = userInfoService.getUserName();
-        log.info("filterList initiator: {} listType: {} listNames: {} filterRequest: {}",
-                userName, listType, listNames, filterRequest);
-        WbListRecordsResponse result = paymentsListsService.filterLists(listNames, listType, filterRequest);
-        return ResponseEntity.ok(result
-        );
+        return ResponseEntity.ok(paymentsListsService.filterLists(listNames, listType, filterRequest));
+    }
+
+    @GetMapping(value = "/payments/catalog/lists/filter-records", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('fraud-monitoring', 'fraud-officer')")
+    public ResponseEntity<WbListRecordsResponse> filterPaymentCatalogLists(
+            @RequestParam("listType") String listType,
+            @RequestParam(value = "listNames", required = false) List<String> listNames,
+            @RequestParam(value = "lastId", required = false) String lastId,
+            @RequestParam(value = "sortOrder", required = false) String sortOrder,
+            @RequestParam(value = "searchValue", required = false) String searchValue,
+            @RequestParam(value = "sortBy", required = false) String sortBy,
+            @RequestParam(value = "sortFieldValue", required = false) String sortFieldValue,
+            @RequestParam(value = "size", defaultValue = "50") @Min(0) Integer size) {
+        return filterLists(listNames, listType, lastId, sortOrder, searchValue, sortBy, sortFieldValue, size);
     }
 
     @Override
