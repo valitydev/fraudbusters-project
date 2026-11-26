@@ -1,0 +1,16 @@
+get:
+  summary: Get metadata for the payouts lists catalog
+  operationId: getPayoutListsMetadata
+  tags:
+    - catalog-metadata
+  responses:
+    '200':
+      description: Unfiltered totals for the catalog tabs
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/responses/catalog/PayoutListsMetadata.yaml'
+    '401':
+      description: Unauthorized
+    '403':
+      description: Forbidden

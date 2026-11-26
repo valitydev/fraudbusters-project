@@ -115,17 +115,10 @@ public class WbListDaoImpl extends AbstractDao implements WbListDao {
 
     @Override
     public List<WbListRecords> filterListRecords(@NonNull ListType listType,
-                                                 @NonNull List<String> listNames,
-                                                 FilterRequest filterRequest) {
-        SelectWhereStep<WbListRecordsRecord> from = getDslContext()
-                .selectFrom(WB_LIST_RECORDS);
-        Condition condition = WB_LIST_RECORDS.LIST_NAME.in(listNames).and(WB_LIST_RECORDS.LIST_TYPE.eq(listType));
-        SelectConditionStep<WbListRecordsRecord> whereQuery = StringUtils.hasLength(filterRequest.getSearchValue())
-                ? from.where(condition.and(
-                WB_LIST_RECORDS.VALUE.like(filterRequest.getSearchValue())
-                        .or(WB_LIST_RECORDS.PARTY_ID.like(filterRequest.getSearchValue())
-                                .or(WB_LIST_RECORDS.SHOP_ID.like(filterRequest.getSearchValue())))))
-                : from.where(condition);
+                                                List<String> listNames,
+                                                FilterRequest filterRequest) {
+        var whereQuery = getDslContext().selectFrom(WB_LIST_RECORDS)
+                .where(filterCondition(listType, listNames, filterRequest.getSearchValue()));
         Field field = StringUtils.hasLength(filterRequest.getSortBy())
                 ? WB_LIST_RECORDS.field(filterRequest.getSortBy())
                 : WB_LIST_RECORDS.INSERT_TIME;
@@ -142,18 +135,22 @@ public class WbListDaoImpl extends AbstractDao implements WbListDao {
     }
 
     @Override
-    public Integer countFilterRecords(@NonNull ListType listType, @NonNull List<String> listNames, String filterValue) {
-        SelectJoinStep<Record1<Integer>> from = getDslContext()
-                .selectCount()
-                .from(WB_LIST_RECORDS);
-        Condition condition = WB_LIST_RECORDS.LIST_NAME.in(listNames).and(WB_LIST_RECORDS.LIST_TYPE.eq(listType));
-        SelectConditionStep<Record1<Integer>> where = StringUtils.hasLength(filterValue)
-                ? from.where(condition.and(
-                WB_LIST_RECORDS.VALUE.like(filterValue)
-                        .or(WB_LIST_RECORDS.PARTY_ID.like(filterValue)
-                                .or(WB_LIST_RECORDS.SHOP_ID.like(filterValue)))))
-                : from.where(condition);
+    public Integer countFilterRecords(@NonNull ListType listType, List<String> listNames, String filterValue) {
+        var where = getDslContext().selectCount().from(WB_LIST_RECORDS)
+                .where(filterCondition(listType, listNames, filterValue));
         return fetchOne(where, Integer.class);
+    }
+
+    private Condition filterCondition(ListType listType, List<String> listNames, String filterValue) {
+        Condition condition = WB_LIST_RECORDS.LIST_TYPE.eq(listType);
+        if (listNames != null) {
+            condition = condition.and(WB_LIST_RECORDS.LIST_NAME.in(listNames));
+        }
+        return StringUtils.hasLength(filterValue)
+                ? condition.and(WB_LIST_RECORDS.VALUE.like(filterValue)
+                        .or(WB_LIST_RECORDS.PARTY_ID.like(filterValue))
+                        .or(WB_LIST_RECORDS.SHOP_ID.like(filterValue)))
+                : condition;
     }
 
     @Override

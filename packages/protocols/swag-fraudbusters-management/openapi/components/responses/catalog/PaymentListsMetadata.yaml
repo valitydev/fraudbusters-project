@@ -1,0 +1,23 @@
+type: object
+required:
+  - counts
+  - listNames
+properties:
+  counts:
+    type: object
+    required:
+      - black
+      - white
+      - grey
+      - candidateBatches
+    properties:
+      black:
+        $ref: './CatalogCount.yaml'
+      white:
+        $ref: './CatalogCount.yaml'
+      grey:
+        $ref: './CatalogCount.yaml'
+      candidateBatches:
+        $ref: './CatalogCount.yaml'
+  listNames:
+    $ref: './CatalogListNames.yaml'

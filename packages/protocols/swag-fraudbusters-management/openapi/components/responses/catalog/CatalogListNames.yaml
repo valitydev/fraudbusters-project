@@ -1,0 +1,22 @@
+type: object
+required:
+  - black
+  - white
+  - grey
+properties:
+  black:
+    type: array
+    items:
+      type: string
+  white:
+    type: array
+    items:
+      type: string
+  grey:
+    type: array
+    items:
+      type: string
+  named:
+    type: array
+    items:
+      type: string

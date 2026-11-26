@@ -1,6 +1,7 @@
 package dev.vality.fraudbusters.management.dao.group;
 
 import dev.vality.fraudbusters.management.config.PostgresqlJooqITest;
+import dev.vality.fraudbusters.management.dao.CatalogMetadataDao;
 import dev.vality.fraudbusters.management.dao.GroupDao;
 import dev.vality.fraudbusters.management.dao.payment.group.PaymentGroupDao;
 import dev.vality.fraudbusters.management.domain.GroupModel;
@@ -17,7 +18,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @PostgresqlJooqITest
-@ContextConfiguration(classes = {PaymentGroupDao.class, GroupRowToModelMapper.class})
+@ContextConfiguration(classes = {PaymentGroupDao.class, GroupRowToModelMapper.class, CatalogMetadataDao.class})
 public class PaymentGroupDaoTest {
 
     public static final String GROUP_1 = "group_1";
@@ -29,6 +30,9 @@ public class PaymentGroupDaoTest {
 
     @Autowired
     GroupDao groupDao;
+
+    @Autowired
+    CatalogMetadataDao metadataDao;
 
     @Test
     public void insert() {
@@ -48,6 +52,7 @@ public class PaymentGroupDaoTest {
 
         List<GroupModel> groupModels = groupDao.filterGroup(null);
         assertEquals(2, groupModels.size());
+        assertEquals(2, metadataDao.countPaymentGroups());
 
         groupModels = groupDao.filterGroup("group%");
         assertEquals(2, groupModels.size());
