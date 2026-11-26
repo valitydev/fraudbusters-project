@@ -1,5 +1,6 @@
 package dev.vality.fraudbusters.management.resource.payment;
 
+import dev.vality.fraudbusters.management.config.FraudAuthorization;
 import dev.vality.fraudbusters.management.service.CatalogMetadataService;
 import dev.vality.fraudbusters.management.service.payment.PaymentsListsService;
 import dev.vality.swag.fraudbusters.management.api.PaymentsApi;
@@ -22,25 +23,25 @@ public class PaymentCatalogResource implements PaymentsApi {
     private final PaymentsListsService paymentsListsService;
 
     @Override
-    @PreAuthorize("hasRole('fraud-officer')")
+    @PreAuthorize(FraudAuthorization.FRAUD_OFFICER_ONLY)
     public ResponseEntity<PaymentTemplatesMetadata> getPaymentTemplatesMetadata() {
         return ResponseEntity.ok(metadataService.getPaymentTemplatesMetadata());
     }
 
     @Override
-    @PreAuthorize("hasRole('fraud-officer')")
+    @PreAuthorize(FraudAuthorization.FRAUD_OFFICER_ONLY)
     public ResponseEntity<GroupsMetadata> getPaymentGroupsMetadata() {
         return ResponseEntity.ok(metadataService.getPaymentGroupsMetadata());
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('fraud-monitoring', 'fraud-officer')")
+    @PreAuthorize(FraudAuthorization.FRAUD_MONITORING_OR_OFFICER)
     public ResponseEntity<PaymentListsMetadata> getPaymentListsMetadata() {
         return ResponseEntity.ok(metadataService.getPaymentListsMetadata());
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('fraud-monitoring', 'fraud-officer')")
+    @PreAuthorize(FraudAuthorization.FRAUD_MONITORING_OR_OFFICER)
     public ResponseEntity<WbListRecordsResponse> filterPaymentCatalogLists(
             String listType, List<String> listNames, String searchValue, String lastId,
             String sortOrder, String sortBy, String sortFieldValue, Integer size) {

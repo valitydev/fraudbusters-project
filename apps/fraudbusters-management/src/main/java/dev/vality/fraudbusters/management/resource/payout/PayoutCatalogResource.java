@@ -1,5 +1,6 @@
 package dev.vality.fraudbusters.management.resource.payout;
 
+import dev.vality.fraudbusters.management.config.FraudAuthorization;
 import dev.vality.fraudbusters.management.service.CatalogMetadataService;
 import dev.vality.swag.fraudbusters.management.api.PayoutsApi;
 import dev.vality.swag.fraudbusters.management.model.GroupsMetadata;
@@ -17,19 +18,19 @@ public class PayoutCatalogResource implements PayoutsApi {
     private final CatalogMetadataService metadataService;
 
     @Override
-    @PreAuthorize("hasRole('fraud-officer')")
+    @PreAuthorize(FraudAuthorization.FRAUD_OFFICER_ONLY)
     public ResponseEntity<PayoutTemplatesMetadata> getPayoutTemplatesMetadata() {
         return ResponseEntity.ok(metadataService.getPayoutTemplatesMetadata());
     }
 
     @Override
-    @PreAuthorize("hasRole('fraud-officer')")
+    @PreAuthorize(FraudAuthorization.FRAUD_OFFICER_ONLY)
     public ResponseEntity<GroupsMetadata> getPayoutGroupsMetadata() {
         return ResponseEntity.ok(metadataService.getPayoutGroupsMetadata());
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('fraud-monitoring', 'fraud-officer')")
+    @PreAuthorize(FraudAuthorization.FRAUD_MONITORING_OR_OFFICER)
     public ResponseEntity<PayoutListsMetadata> getPayoutListsMetadata() {
         return ResponseEntity.ok(metadataService.getPayoutListsMetadata());
     }

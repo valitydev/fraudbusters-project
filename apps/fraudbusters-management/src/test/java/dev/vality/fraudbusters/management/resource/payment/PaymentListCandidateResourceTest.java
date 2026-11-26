@@ -4,6 +4,7 @@ import dev.vality.fraudbusters.management.TestObjectFactory;
 import dev.vality.fraudbusters.management.dao.CatalogMetadataDao;
 import dev.vality.fraudbusters.management.dao.CatalogMetadataDao.ListNameCount;
 import dev.vality.fraudbusters.management.domain.WbListCandidateBatchModel;
+import dev.vality.fraudbusters.management.domain.enums.ListType;
 import dev.vality.fraudbusters.management.domain.request.FilterRequest;
 import dev.vality.fraudbusters.management.domain.response.FilterResponse;
 import dev.vality.fraudbusters.management.domain.tables.pojos.WbListCandidate;
@@ -51,6 +52,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         OAuth2ResourceServerAutoConfiguration.class})
 class PaymentListCandidateResourceTest {
 
+    private static final String PAYMENT_CATALOG_FILTER_RECORDS = "/payments/catalog/lists/filter-records";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -70,37 +73,44 @@ class PaymentListCandidateResourceTest {
 
     @Test
     void servesPaymentAndPayoutListMetadata() throws Exception {
+        String firstListName = "first";
+        String secondListName = "second";
+        String namedListName = "example";
+        int candidateBatches = 105;
         when(catalogMetadataDao.countPaymentListRows()).thenReturn(List.of(
-                new ListNameCount("black", "first", 2),
-                new ListNameCount("black", "second", 1)));
-        when(catalogMetadataDao.countCandidateBatches()).thenReturn(105);
-        when(catalogMetadataDao.countPayoutListRows()).thenReturn(List.of(new ListNameCount("naming", "example", 7)));
+                new ListNameCount(ListType.black, firstListName, 2),
+                new ListNameCount(ListType.black, secondListName, 1)));
+        when(catalogMetadataDao.countCandidateBatches()).thenReturn(candidateBatches);
+        when(catalogMetadataDao.countPayoutListRows()).thenReturn(
+                List.of(new ListNameCount(ListType.naming, namedListName, 7)));
 
         mockMvc.perform(get("/payments/catalog/lists/metadata"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.counts.black", equalTo(3)))
                 .andExpect(jsonPath("$.counts.white", equalTo(0)))
-                .andExpect(jsonPath("$.counts.candidateBatches", equalTo(105)))
-                .andExpect(jsonPath("$.listNames.black", equalTo(List.of("first", "second"))));
+                .andExpect(jsonPath("$.counts.candidateBatches", equalTo(candidateBatches)))
+                .andExpect(jsonPath("$.listNames.black", equalTo(List.of(firstListName, secondListName))));
         mockMvc.perform(get("/payouts/catalog/lists/metadata"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.counts.named", equalTo(7)))
-                .andExpect(jsonPath("$.listNames.named", equalTo(List.of("example"))));
+                .andExpect(jsonPath("$.listNames.named", equalTo(List.of(namedListName))));
     }
 
     @Test
     void servesPaymentCatalogRowsWithoutListNames() throws Exception {
-        when(paymentsListsService.filterLists("black", null, null, null, null, null, null, 50))
-                .thenReturn(new WbListRecordsResponse().count(7).result(List.of()));
+        String listType = ListType.black.getLiteral();
+        int recordCount = 7;
+        when(paymentsListsService.filterLists(listType, null, null, null, null, null, null, 50))
+                .thenReturn(new WbListRecordsResponse().count(recordCount).result(List.of()));
 
-        mockMvc.perform(get("/payments/catalog/lists/filter-records").param("listType", "black"))
+        mockMvc.perform(get(PAYMENT_CATALOG_FILTER_RECORDS).param("listType", listType))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.count", equalTo(7)));
+                .andExpect(jsonPath("$.count", equalTo(recordCount)));
     }
 
     @Test
     void requiresListTypeForPaymentCatalogRows() throws Exception {
-        mockMvc.perform(get("/payments/catalog/lists/filter-records"))
+        mockMvc.perform(get(PAYMENT_CATALOG_FILTER_RECORDS))
                 .andExpect(status().isBadRequest());
     }
 

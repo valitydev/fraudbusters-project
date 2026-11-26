@@ -63,9 +63,10 @@ public class WbListDaoImplTest {
 
     @Test
     void loadsAllListsOfOneTypeWithoutNamesAndCountsThemByName() {
+        String otherListName = "other";
         WbListRecords first = createListRecord("first");
         WbListRecords second = createListRecord("second");
-        second.setListName("other");
+        second.setListName(otherListName);
         WbListRecords third = createListRecord("third");
         third.setListType(ListType.white);
         wbListDao.saveListRecord(first);
@@ -78,9 +79,9 @@ public class WbListDaoImplTest {
         assertEquals(0, wbListDao.countFilterRecords(ListType.black, List.of(), null));
         assertEquals(1, wbListDao.countFilterRecords(ListType.black, List.of(LIST_NAME), null));
         assertEquals(Set.of(
-                        new ListNameCount("black", LIST_NAME, 1),
-                        new ListNameCount("white", LIST_NAME, 1),
-                        new ListNameCount("black", "other", 1)),
+                        new ListNameCount(ListType.black, LIST_NAME, 1),
+                        new ListNameCount(ListType.white, LIST_NAME, 1),
+                        new ListNameCount(ListType.black, otherListName, 1)),
                 Set.copyOf(metadataDao.countPaymentListRows()));
     }
 

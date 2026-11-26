@@ -50,10 +50,9 @@ public class PaymentsListsService {
                 .sortFieldValue(sortFieldValue)
                 .size(size)
                 .build();
-        List<WbListRecords> wbListRecords =
-                wbListDao.filterListRecords(ListType.valueOf(listType), listNames, filterRequest);
-        Integer count =
-                wbListDao.countFilterRecords(ListType.valueOf(listType), listNames, searchValue);
+        ListType type = ListType.valueOf(listType);
+        List<WbListRecords> wbListRecords = wbListDao.filterListRecords(type, listNames, filterRequest);
+        Integer count = wbListDao.countFilterRecords(type, listNames, searchValue);
         return new WbListRecordsResponse()
                 .count(count)
                 .result(wbListRecords.stream()

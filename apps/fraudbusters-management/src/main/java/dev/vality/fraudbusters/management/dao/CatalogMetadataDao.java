@@ -1,5 +1,6 @@
 package dev.vality.fraudbusters.management.dao;
 
+import dev.vality.fraudbusters.management.domain.enums.ListType;
 import org.jooq.Field;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
@@ -41,13 +42,14 @@ public class CatalogMetadataDao extends AbstractDao {
         return fetchOne(getDslContext().select(DSL.countDistinct(groupId)).from(table), Integer.class);
     }
 
-    private List<ListNameCount> countByName(Table<?> table, Field<?> listType, Field<String> listName) {
+    private List<ListNameCount> countByName(Table<?> table, Field<ListType> listType, Field<String> listName) {
         var query = getDslContext().select(listType, listName, DSL.count()).from(table)
                 .groupBy(listType, listName)
                 .orderBy(listName);
-        return fetch(query, (rs, row) -> new ListNameCount(rs.getString(1), rs.getString(2), rs.getInt(3)));
+        return fetch(query, (rs, row) -> new ListNameCount(
+                ListType.lookupLiteral(rs.getString(1)), rs.getString(2), rs.getInt(3)));
     }
 
-    public record ListNameCount(String type, String name, int count) {
+    public record ListNameCount(ListType type, String name, int count) {
     }
 }

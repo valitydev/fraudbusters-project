@@ -9,12 +9,13 @@ import dev.vality.fraudbusters.management.dao.payment.template.PaymentTemplateDa
 import dev.vality.fraudbusters.management.dao.payout.group.PayoutGroupReferenceDao;
 import dev.vality.fraudbusters.management.dao.payout.reference.PayoutReferenceDao;
 import dev.vality.fraudbusters.management.dao.payout.template.PayoutTemplateDao;
+import dev.vality.fraudbusters.management.domain.enums.ListType;
 import dev.vality.swag.fraudbusters.management.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,9 +60,9 @@ public class CatalogMetadataService {
     public PaymentListsMetadata getPaymentListsMetadata() {
         var metadata = listMetadata(metadataDao.countPaymentListRows());
         var counts = new PaymentListsMetadataCounts()
-                .black(metadata.count("black"))
-                .white(metadata.count("white"))
-                .grey(metadata.count("grey"))
+                .black(metadata.count(ListType.black))
+                .white(metadata.count(ListType.white))
+                .grey(metadata.count(ListType.grey))
                 .candidateBatches(metadataDao.countCandidateBatches());
         return new PaymentListsMetadata(counts, metadata.listNames());
     }
@@ -69,16 +70,16 @@ public class CatalogMetadataService {
     public PayoutListsMetadata getPayoutListsMetadata() {
         var metadata = listMetadata(metadataDao.countPayoutListRows());
         var counts = new PayoutListsMetadataCounts()
-                .black(metadata.count("black"))
-                .white(metadata.count("white"))
-                .grey(metadata.count("grey"))
-                .named(metadata.count("naming"));
-        return new PayoutListsMetadata(counts, metadata.listNames().named(metadata.names("naming")));
+                .black(metadata.count(ListType.black))
+                .white(metadata.count(ListType.white))
+                .grey(metadata.count(ListType.grey))
+                .named(metadata.count(ListType.naming));
+        return new PayoutListsMetadata(counts, metadata.listNames().named(metadata.names(ListType.naming)));
     }
 
     private ListMetadata listMetadata(List<ListNameCount> rows) {
-        Map<String, Integer> counts = new HashMap<>();
-        Map<String, List<String>> names = new HashMap<>();
+        Map<ListType, Integer> counts = new EnumMap<>(ListType.class);
+        Map<ListType, List<String>> names = new EnumMap<>(ListType.class);
         for (ListNameCount row : rows) {
             counts.merge(row.type(), row.count(), Integer::sum);
             names.computeIfAbsent(row.type(), type -> new ArrayList<>()).add(row.name());
@@ -86,18 +87,18 @@ public class CatalogMetadataService {
         return new ListMetadata(counts, names);
     }
 
-    private record ListMetadata(Map<String, Integer> counts, Map<String, List<String>> namesByType) {
+    private record ListMetadata(Map<ListType, Integer> counts, Map<ListType, List<String>> namesByType) {
 
-        int count(String type) {
+        int count(ListType type) {
             return counts.getOrDefault(type, 0);
         }
 
-        List<String> names(String type) {
+        List<String> names(ListType type) {
             return namesByType.getOrDefault(type, List.of());
         }
 
         CatalogListNames listNames() {
-            return new CatalogListNames(names("black"), names("white"), names("grey"));
+            return new CatalogListNames(names(ListType.black), names(ListType.white), names(ListType.grey));
         }
     }
 }
