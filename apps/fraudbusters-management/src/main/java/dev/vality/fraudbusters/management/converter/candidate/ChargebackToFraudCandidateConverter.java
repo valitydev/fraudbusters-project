@@ -2,16 +2,27 @@ package dev.vality.fraudbusters.management.converter.candidate;
 
 import dev.vality.fraud_data_crawler.FraudDataCandidate;
 import dev.vality.fraud_data_crawler.ListType;
+import dev.vality.fraudbusters.management.constant.CandidateListName;
 import dev.vality.swag.fraudbusters.management.model.Chargeback;
 import dev.vality.swag.fraudbusters.management.model.MerchantInfo;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-public abstract class ChargebackToFraudCandidateConverter {
+@Component
+public class ChargebackToFraudCandidateConverter {
 
     private static final String CHARGEBACK_SOURCE = "Chargebacks";
 
-    public abstract FraudDataCandidate toCandidate(Chargeback chargeback, String batchId);
+    public FraudDataCandidate toCandidate(Chargeback chargeback, String batchId) {
+        if (chargeback.getCardToken() == null || chargeback.getCardToken().isBlank()) {
+            return null;
+        }
+        FraudDataCandidate candidate = prepareCandidate(batchId, chargeback.getMerchantInfo());
+        candidate.setValue(chargeback.getCardToken());
+        candidate.setType(CandidateListName.CARD_TOKEN);
+        return candidate;
+    }
 
     protected FraudDataCandidate prepareCandidate(String batchId, MerchantInfo merchantInfo) {
         FraudDataCandidate candidate = new FraudDataCandidate();

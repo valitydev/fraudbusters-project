@@ -31,7 +31,7 @@ public class WbListCommandService {
             var changeCommand = createChangeCommand(row, command, initiator);
             kafkaTemplate.send(topicCommand, uuid, changeCommand)
                     .get();
-            log.info("WbListCommandService sent command: {}", changeCommand);
+            log.info("WbListCommandService sent command: {}, id: {}", command, uuid);
         } catch (InterruptedException e) {
             log.error("InterruptedException e: ", e);
             Thread.currentThread().interrupt();

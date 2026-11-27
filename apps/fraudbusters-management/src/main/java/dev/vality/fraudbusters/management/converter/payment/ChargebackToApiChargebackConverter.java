@@ -41,6 +41,7 @@ public class ChargebackToApiChargebackConverter
                                 : null)
                 )
                 .paymentTool(paymentTool.getFieldValue().toString())
+                .cardToken(paymentTool.isSetBankCard() ? paymentTool.getBankCard().getToken() : null)
                 .provider(new ProviderInfo()
                         .providerId(chargeback.getProviderInfo().getProviderId())
                         .country(chargeback.getProviderInfo().getCountry())

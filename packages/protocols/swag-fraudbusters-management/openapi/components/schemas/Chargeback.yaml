@@ -11,6 +11,8 @@ properties:
     $ref: './MerchantInfo.yaml'
   paymentTool:
     type: string
+  cardToken:
+    type: string
   amount:
     type: integer
     format: int64

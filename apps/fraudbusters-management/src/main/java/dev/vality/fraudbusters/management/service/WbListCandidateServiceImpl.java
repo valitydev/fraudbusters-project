@@ -40,7 +40,7 @@ public class WbListCandidateServiceImpl implements WbListCandidateService {
             String key = candidates.get(0).getBatchId();
             for (FraudDataCandidate candidate : candidates) {
                 kafkaTemplate.send(topicCandidate, key, candidate).get();
-                log.info("WbListCandidateService send candidate: {}", candidate);
+                log.info("WbListCandidateService sent candidate of type: {}, batchId: {}", candidate.getType(), key);
             }
             return key;
         } catch (InterruptedException e) {

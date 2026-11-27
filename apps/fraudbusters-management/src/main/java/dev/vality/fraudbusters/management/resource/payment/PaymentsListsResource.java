@@ -120,7 +120,7 @@ public class PaymentsListsResource implements PaymentsListsApi {
                 .sortFieldValue(sortFieldValue)
                 .size(size)
                 .build();
-        log.info("listCandidates with filter: {}", filter);
+        log.info("listCandidates with size: {}", size);
         FilterResponse<WbListCandidate> filterResponse = wbListCandidateService.getList(filter);
         WbListCandidatesResponse result = new WbListCandidatesResponse()
                 .lastId(filterResponse.getNumericLastId())
@@ -128,7 +128,7 @@ public class PaymentsListsResource implements PaymentsListsApi {
                         ? filterResponse.getResult().get(0).getSource()
                         : UNKNOWN)
                 .result(candidateConverter.toWbListRecord(filterResponse.getResult()));
-        log.info("Success listCandidates with result: {}", result);
+        log.info("Success listCandidates with count: {}", result.getResult().size());
         return ResponseEntity.ok(result);
     }
 
@@ -185,7 +185,7 @@ public class PaymentsListsResource implements PaymentsListsApi {
     @Override
     public ResponseEntity<Void> insertListCandidates(WbListCandidatesRequest wbListCandidatesRequest) {
         String batchId = UUID.randomUUID().toString();
-        log.info("insertListCandidates with request: {}, batchId: {}", wbListCandidatesRequest, batchId);
+        log.info("insertListCandidates with batchId: {}", batchId);
         List<FraudDataCandidate> fraudDataCandidates =
                 chargebacksConverter.toCandidates(wbListCandidatesRequest.getRecords(), batchId);
         String key = wbListCandidateService.sendToCandidate(fraudDataCandidates);
