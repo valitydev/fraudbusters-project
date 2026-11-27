@@ -218,7 +218,7 @@ export function refundRow(refund: Refund, index: number): HistoricalRow<Refund> 
     };
 }
 
-export function chargebackRow(chargeback: Chargeback, index: number): HistoricalRow<Chargeback> {
+export function chargebackRow(chargeback: Chargeback & { cardToken?: string }, index: number): HistoricalRow<Chargeback> {
     return {
         key: `${chargeback.id}#${index}`,
         id: chargeback.id ?? '',
@@ -236,6 +236,7 @@ export function chargebackRow(chargeback: Chargeback, index: number): Historical
             detail('Payment ID', chargeback.paymentId, true),
             detail('Disputed amount', formatAmount(chargeback.amount, chargeback.currency)),
             detail('Payment tool', formatPaymentTool(chargeback.paymentTool)),
+            detail('Card token', chargeback.cardToken, true),
             ...clientDetails(chargeback.clientInfo),
             ...providerDetails(chargeback.provider),
             detail('Payer type', chargeback.payerType)

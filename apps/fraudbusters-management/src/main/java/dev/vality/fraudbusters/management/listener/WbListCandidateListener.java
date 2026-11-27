@@ -23,7 +23,8 @@ public class WbListCandidateListener {
             topics = "${kafka.topic.wblist.candidate}",
             containerFactory = "kafkaFraudCandidateListenerContainerFactory")
     public void listen(FraudDataCandidate candidate) {
-        log.info("WbListCandidateListener receive candidate: {}", candidate);
+        log.info("WbListCandidateListener received candidate of type: {}, batchId: {}",
+                candidate.getType(), candidate.getBatchId());
         wbListCandidateBatchService.save(candidate.getBatchId(), candidate.getSource());
         WbListCandidate wbListCandidate = candidateConverter.convert(candidate);
         wbListCandidateService.save(wbListCandidate);

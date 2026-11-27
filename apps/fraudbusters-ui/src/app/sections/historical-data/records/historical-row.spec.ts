@@ -52,6 +52,15 @@ describe('historical rows', () => {
         expect(row.details.map((item) => item.label)).toEqual(['Payment ID', 'Terminal']);
     });
 
+    it('shows the chargeback card token when present', () => {
+        const row = chargebackRow({ id: 'cb1', cardToken: 'token-1' }, 0);
+        expect(row.details.find((item) => item.label === 'Card token')).toEqual({
+            label: 'Card token',
+            value: 'token-1',
+            mono: true,
+        });
+    });
+
     it('describes payout destinations and cards', () => {
         const row = payoutRow(
             {

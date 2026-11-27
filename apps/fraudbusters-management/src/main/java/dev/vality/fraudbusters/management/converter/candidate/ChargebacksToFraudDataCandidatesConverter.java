@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -23,6 +24,7 @@ public class ChargebacksToFraudDataCandidatesConverter {
     private List<FraudDataCandidate> toCandidates(Chargeback chargeback, String batchId) {
         return chargebackToFraudCandidateConverters.stream()
                 .map(converter -> converter.toCandidate(chargeback, batchId))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
